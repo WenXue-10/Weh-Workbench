@@ -879,7 +879,7 @@ def build():
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Weh Atelier</title>
 <meta name="theme-color" content="#ffd0e2">
-<link rel="manifest" href="manifest.json">
+<link rel="manifest" href="manifest.json"><link rel="icon" type="image/png" href="assets/icon-192.png">
 <link rel="apple-touch-icon" href="assets/icon-192.png">
 <style>
 """ + css + """
