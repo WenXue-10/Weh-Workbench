@@ -406,7 +406,8 @@ document.querySelectorAll(".chip").forEach(function(c){
     renderJobs();
   });
 });
-document.getElementById("search").addEventListener("input", function(e){ curQuery=e.target.value; renderJobs(); });
+var _searchInp=document.getElementById("search");
+if(_searchInp){ _searchInp.addEventListener("input", function(e){ curQuery=e.target.value; renderJobs(); }); }
 document.addEventListener("keydown", function(e){ if(e.key==="Escape") closeModal(); });
 
 /* ---------- 漂浮小元素 ---------- */
