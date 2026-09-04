@@ -829,9 +829,27 @@ def build():
                 av[stem.replace("_avatar", "")] = url
     # PWA：图标 + manifest + service worker
     icon_src = os.path.join(ASSETS, "icons")
+    app_icons = []
+    ICON_META = [("star","✨","星耀"),("cat","🐱","奶猫"),("fly","🦋","蝶舞"),
+                 ("moon","🌙","月眠"),("bloom","🌸","花见"),("bow","🎀","蝴蝶结")]
     if os.path.isdir(icon_src):
         for fn in os.listdir(icon_src):
-            shutil.copy2(os.path.join(icon_src, fn), os.path.join(img_out, fn))
+            fp = os.path.join(icon_src, fn)
+            if os.path.isfile(fp):
+                shutil.copy2(fp, os.path.join(img_out, fn))
+        # 应用图标候选子目录
+        app_dir = os.path.join(icon_src, "app")
+        app_out = os.path.join(img_out, "app-icons")
+        if os.path.isdir(app_dir):
+            os.makedirs(app_out, exist_ok=True)
+            for fn in os.listdir(app_dir):
+                shutil.copy2(os.path.join(app_dir, fn), os.path.join(app_out, fn))
+            for key, emo, nm in ICON_META:
+                f192 = f"assets/app-icons/icon-{key}-192.png"
+                f512 = f"assets/app-icons/icon-{key}-512.png"
+                if os.path.exists(os.path.join(app_out, f"icon-{key}-192.png")):
+                    app_icons.append({"key": key, "emoji": emo, "name": nm,
+                                      "i192": f192, "i512": f512})
     for fname in ("manifest.json", "sw.js"):
         sp = os.path.join(ASSETS, fname)
         if os.path.exists(sp):
@@ -856,6 +874,7 @@ def build():
         "resumes": resumes,
         "kb": kb,
         "images": {"bg": bg, "av": av, "theme": theme, "bgMobile": bgm},
+    "appIcons": app_icons,
     }
 
     css = read(os.path.join(ASSETS, "style.css"))

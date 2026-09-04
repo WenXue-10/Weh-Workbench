@@ -397,7 +397,7 @@ a{color:var(--pink-deep);text-decoration:none}
   <!-- 第一级：最左侧大模块导航 -->
   <aside class="sidebar">
     <div class="logo">
-      <div class="icon">✨</div>
+      <div class="icon" id="logoIcon">✨</div>
       <div><div class="name">Weh Atelier</div><div class="sub">🐾 AI 工作室</div></div>
     </div>
     <div class="nav-item active" data-module="home">🏠 首页总览</div>
@@ -583,7 +583,7 @@ a{color:var(--pink-deep);text-decoration:none}
 
 <script>
 window.SITE_DATA = {
- "updated": "2026-09-05 02:19",
+ "updated": "2026-09-05 02:26",
  "stats": {
   "jobs": 0,
   "rec": 0,
@@ -641,7 +641,51 @@ window.SITE_DATA = {
    }
   },
   "bgMobile": {}
- }
+ },
+ "appIcons": [
+  {
+   "key": "star",
+   "emoji": "✨",
+   "name": "星耀",
+   "i192": "assets/app-icons/icon-star-192.png",
+   "i512": "assets/app-icons/icon-star-512.png"
+  },
+  {
+   "key": "cat",
+   "emoji": "🐱",
+   "name": "奶猫",
+   "i192": "assets/app-icons/icon-cat-192.png",
+   "i512": "assets/app-icons/icon-cat-512.png"
+  },
+  {
+   "key": "fly",
+   "emoji": "🦋",
+   "name": "蝶舞",
+   "i192": "assets/app-icons/icon-fly-192.png",
+   "i512": "assets/app-icons/icon-fly-512.png"
+  },
+  {
+   "key": "moon",
+   "emoji": "🌙",
+   "name": "月眠",
+   "i192": "assets/app-icons/icon-moon-192.png",
+   "i512": "assets/app-icons/icon-moon-512.png"
+  },
+  {
+   "key": "bloom",
+   "emoji": "🌸",
+   "name": "花见",
+   "i192": "assets/app-icons/icon-bloom-192.png",
+   "i512": "assets/app-icons/icon-bloom-512.png"
+  },
+  {
+   "key": "bow",
+   "emoji": "🎀",
+   "name": "蝴蝶结",
+   "i192": "assets/app-icons/icon-bow-192.png",
+   "i512": "assets/app-icons/icon-bow-512.png"
+  }
+ ]
 };
 </script>
 <script>
@@ -1008,12 +1052,54 @@ function pickHtml(type, imgs, cur){
   return h + '</div>';
 }
 function openPersonalize(){
-  setModal('<h2>🐱 换个风格</h2><div class="m-sub">点下面的图片，实时换背景和头像，你的选择会被记住</div>'
-    + '<div class="pick-sec"><div class="m-sec">🖼️ 背景图</div><div class="pick-hint">选一张做整站背景（会自动加柔光保证文字清晰）</div>'+pickHtml("Bg", BG_IMGS, savedBg)+'</div>'
-    + '<div class="pick-sec"><div class="m-sec">😺 小头像</div><div class="pick-hint">右上角头像，点它随时能换</div>'+pickHtml("Av", AV_IMGS, savedAv)+'</div>');
+  var iconSec = APP_ICONS.length ? ('<div class="pick-sec"><div class="m-sec">📱 应用图标</div><div class="pick-hint">换浏览器标签和手机桌面图标（换后需重新"添加到主屏幕"生效）</div>'+iconPickHtml(savedIcon)+'</div>') : '';
+  setModal('<h2>🐱 换个风格</h2><div class="m-sub">点下面的图片，实时换背景、头像和图标，你的选择会被记住</div>'
+    + '<div class="pick-sec"><div class="m-sec">🖼️ 背景图</div><div class="pick-hint">选一张做整站背景（会自动提取主色调）</div>'+pickHtml("Bg", BG_IMGS, savedBg)+'</div>'
+    + '<div class="pick-sec"><div class="m-sec">😺 小头像</div><div class="pick-hint">右上角头像，点它随时能换</div>'+pickHtml("Av", AV_IMGS, savedAv)+'</div>'
+    + iconSec);
 }
 function setBg(k){ savedBg=k; try{localStorage.setItem("atelier_bg",k);}catch(e){} applyBg(); openPersonalize(); }
 function setAv(k){ savedAv=k; try{localStorage.setItem("atelier_av",k);}catch(e){} applyAv(); openPersonalize(); }
+
+/* ---------- 应用图标可选 ---------- */
+var APP_ICONS = (SITE_DATA && SITE_DATA.appIcons) || [];
+var savedIcon = "star";
+try{ savedIcon = localStorage.getItem("atelier_icon") || "star"; }catch(e){}
+function findIcon(k){ for(var i=0;i<APP_ICONS.length;i++){ if(APP_ICONS[i].key===k) return APP_ICONS[i]; } return APP_ICONS[0]; }
+function iconPickHtml(cur){
+  var h='<div class="pick-grid">';
+  APP_ICONS.forEach(function(it){
+    h+='<div class="pick-item '+(it.key===cur?" active":"")+'" onclick="setIcon(\''+it.key+'\')">'
+      +'<img src="'+it.i192+'" alt=""><div class="pn">'+it.name+'</div></div>';
+  });
+  return h+'</div>';
+}
+function applyManifest(icon){
+  try{
+    var mani={name:"Weh Atelier",short_name:"Atelier",description:"Weh Atelier · 文雪的AI个人工作室",
+      start_url:"./",scope:"./",display:"standalone",orientation:"portrait",
+      background_color:"#fff7fa",theme_color:"#ffd0e2",
+      icons:[{src:icon.i192,sizes:"192x192",type:"image/png"},{src:icon.i512,sizes:"512x512",type:"image/png"}]};
+    var url=URL.createObjectURL(new Blob([JSON.stringify(mani)],{type:"application/manifest+json"}));
+    var link=document.querySelector('link[rel="manifest"]');
+    if(link) link.href=url;
+  }catch(e){ console.log("manifest切换失败:",e.message); }
+}
+function applyIcon(){
+  var it=findIcon(savedIcon); if(!it) return;
+  var fav=document.querySelector('link[rel="icon"]');
+  if(fav) fav.href=it.i192;
+  var at=document.querySelector('link[rel="apple-touch-icon"]');
+  if(!at){ at=document.createElement("link"); at.rel="apple-touch-icon"; document.head.appendChild(at); }
+  at.href=it.i192;
+  var lg=document.getElementById("logoIcon"); if(lg) lg.textContent=it.emoji;
+  applyManifest(it);
+}
+function setIcon(k){
+  savedIcon=k;
+  try{ localStorage.setItem("atelier_icon",k); }catch(e){}
+  applyIcon(); openPersonalize();
+}
 
 /* ---------- 页面切换 ---------- */
 var TITLES = {
@@ -1087,7 +1173,7 @@ document.addEventListener("keydown", function(e){ if(e.key==="Escape") closeModa
       renderTimeline(); renderResumes(); renderKb();
     }
   }catch(e){ console.log("求职模块渲染跳过:", e.message); }
-  applyBg(); applyAv();
+  applyBg(); applyAv(); applyIcon();
 })();
 </script>
 <script>

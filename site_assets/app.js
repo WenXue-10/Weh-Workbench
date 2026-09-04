@@ -361,12 +361,54 @@ function pickHtml(type, imgs, cur){
   return h + '</div>';
 }
 function openPersonalize(){
-  setModal('<h2>🐱 换个风格</h2><div class="m-sub">点下面的图片，实时换背景和头像，你的选择会被记住</div>'
-    + '<div class="pick-sec"><div class="m-sec">🖼️ 背景图</div><div class="pick-hint">选一张做整站背景（会自动加柔光保证文字清晰）</div>'+pickHtml("Bg", BG_IMGS, savedBg)+'</div>'
-    + '<div class="pick-sec"><div class="m-sec">😺 小头像</div><div class="pick-hint">右上角头像，点它随时能换</div>'+pickHtml("Av", AV_IMGS, savedAv)+'</div>');
+  var iconSec = APP_ICONS.length ? ('<div class="pick-sec"><div class="m-sec">📱 应用图标</div><div class="pick-hint">换浏览器标签和手机桌面图标（换后需重新"添加到主屏幕"生效）</div>'+iconPickHtml(savedIcon)+'</div>') : '';
+  setModal('<h2>🐱 换个风格</h2><div class="m-sub">点下面的图片，实时换背景、头像和图标，你的选择会被记住</div>'
+    + '<div class="pick-sec"><div class="m-sec">🖼️ 背景图</div><div class="pick-hint">选一张做整站背景（会自动提取主色调）</div>'+pickHtml("Bg", BG_IMGS, savedBg)+'</div>'
+    + '<div class="pick-sec"><div class="m-sec">😺 小头像</div><div class="pick-hint">右上角头像，点它随时能换</div>'+pickHtml("Av", AV_IMGS, savedAv)+'</div>'
+    + iconSec);
 }
 function setBg(k){ savedBg=k; try{localStorage.setItem("atelier_bg",k);}catch(e){} applyBg(); openPersonalize(); }
 function setAv(k){ savedAv=k; try{localStorage.setItem("atelier_av",k);}catch(e){} applyAv(); openPersonalize(); }
+
+/* ---------- 应用图标可选 ---------- */
+var APP_ICONS = (SITE_DATA && SITE_DATA.appIcons) || [];
+var savedIcon = "star";
+try{ savedIcon = localStorage.getItem("atelier_icon") || "star"; }catch(e){}
+function findIcon(k){ for(var i=0;i<APP_ICONS.length;i++){ if(APP_ICONS[i].key===k) return APP_ICONS[i]; } return APP_ICONS[0]; }
+function iconPickHtml(cur){
+  var h='<div class="pick-grid">';
+  APP_ICONS.forEach(function(it){
+    h+='<div class="pick-item '+(it.key===cur?" active":"")+'" onclick="setIcon(\''+it.key+'\')">'
+      +'<img src="'+it.i192+'" alt=""><div class="pn">'+it.name+'</div></div>';
+  });
+  return h+'</div>';
+}
+function applyManifest(icon){
+  try{
+    var mani={name:"Weh Atelier",short_name:"Atelier",description:"Weh Atelier · 文雪的AI个人工作室",
+      start_url:"./",scope:"./",display:"standalone",orientation:"portrait",
+      background_color:"#fff7fa",theme_color:"#ffd0e2",
+      icons:[{src:icon.i192,sizes:"192x192",type:"image/png"},{src:icon.i512,sizes:"512x512",type:"image/png"}]};
+    var url=URL.createObjectURL(new Blob([JSON.stringify(mani)],{type:"application/manifest+json"}));
+    var link=document.querySelector('link[rel="manifest"]');
+    if(link) link.href=url;
+  }catch(e){ console.log("manifest切换失败:",e.message); }
+}
+function applyIcon(){
+  var it=findIcon(savedIcon); if(!it) return;
+  var fav=document.querySelector('link[rel="icon"]');
+  if(fav) fav.href=it.i192;
+  var at=document.querySelector('link[rel="apple-touch-icon"]');
+  if(!at){ at=document.createElement("link"); at.rel="apple-touch-icon"; document.head.appendChild(at); }
+  at.href=it.i192;
+  var lg=document.getElementById("logoIcon"); if(lg) lg.textContent=it.emoji;
+  applyManifest(it);
+}
+function setIcon(k){
+  savedIcon=k;
+  try{ localStorage.setItem("atelier_icon",k); }catch(e){}
+  applyIcon(); openPersonalize();
+}
 
 /* ---------- 页面切换 ---------- */
 var TITLES = {
@@ -440,5 +482,5 @@ document.addEventListener("keydown", function(e){ if(e.key==="Escape") closeModa
       renderTimeline(); renderResumes(); renderKb();
     }
   }catch(e){ console.log("求职模块渲染跳过:", e.message); }
-  applyBg(); applyAv();
+  applyBg(); applyAv(); applyIcon();
 })();
