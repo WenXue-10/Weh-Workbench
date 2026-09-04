@@ -339,6 +339,19 @@ function applyThemeByHue(H,H2){
   root.setProperty("--shadow-sm","0 4px 14px "+hsla(H,0.65,0.55,0.1));
   root.setProperty("--text",hsl(H,0.28,0.34));
   root.setProperty("--muted",hsl(H,0.18,0.58));
+  // 卡片/侧栏：白里透一点点主题色（毛玻璃）
+  root.setProperty("--card-bg",hsla(H,0.45,0.99,0.82));
+  root.setProperty("--topbar-bg",hsla(H,0.5,0.98,0.72));
+  root.setProperty("--nav-bg",hsla(H,0.5,0.99,0.9));
+  // 整体柔光层（极淡主题色）
+  root.setProperty("--veil-top",hsla(H,0.55,0.97,0.66));
+  root.setProperty("--veil-bot",hsla(H,0.55,0.97,0.8));
+  // 4个统计卡：主色/辅助/互补/邻近，自动配成一套
+  var H3=(H+180)%360, H4=(H+30)%360;
+  root.setProperty("--stat1a",hsla(H,0.7,0.92,0.72));  root.setProperty("--stat1b",hsla(H,0.7,0.86,0.72));
+  root.setProperty("--stat2a",hsla(H2,0.65,0.92,0.72)); root.setProperty("--stat2b",hsla(H2,0.65,0.86,0.72));
+  root.setProperty("--stat3a",hsla(H3,0.55,0.93,0.72)); root.setProperty("--stat3b",hsla(H3,0.55,0.87,0.72));
+  root.setProperty("--stat4a",hsla(H4,0.7,0.92,0.72));  root.setProperty("--stat4b",hsla(H4,0.7,0.86,0.72));
   console.log("🎨 主题已跟随背景图，主色相:",Math.round(H),"辅助:",Math.round(H2));
 }
 function applyBg(){
