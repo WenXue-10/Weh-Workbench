@@ -317,8 +317,90 @@ function gsOpen(i){
 /* ---------- 头像 & 背景 ---------- */
 var BG_IMGS = IMGS.bg||{}, AV_IMGS = IMGS.av||{};
 var savedBg = Object.keys(BG_IMGS)[0]||"img4", savedAv = Object.keys(AV_IMGS)[0]||"img1";
-try{ savedBg = localStorage.getItem("scm_bg") || Object.keys(BG_IMGS)[0] || "img4"; savedAv = localStorage.getItem("scm_av") || Object.keys(AV_IMGS)[0] || "img1"; }catch(e){}
-function applyBg(){ document.documentElement.style.setProperty("--bg-img", "url('"+BG_IMGS[savedBg]+"')"); }
+try{ savedBg = localStorage.getItem("atelier_bg")||localStorage.getItem("scm_bg") || Object.keys(BG_IMGS)[0] || "img4"; savedAv = localStorage.getItem("atelier_av")||localStorage.getItem("scm_av") || Object.keys(AV_IMGS)[0] || "img1"; }catch(e){}
+/* ===== 🎨 从背景图自动提取主题色 ===== */
+function rgbToHsl(r,g,b){
+  r/=255; g/=255; b/=255;
+  var max=Math.max(r,g,b), min=Math.min(r,g,b);
+  var h=0,s=0,l=(max+min)/2;
+  if(max!==min){
+    var d=max-min;
+    s=l>0.5?d/(2-max-min):d/(max+min);
+    switch(max){
+      case r:h=(g-b)/d+(g<b?6:0);break;
+      case g:h=(b-r)/d+2;break;
+      case b:h=(r-g)/d+4;break;
+    }
+    h/=6;
+  }
+  return [h*360,s,l];
+}
+function hsl(h,s,l){return "hsl("+Math.round(h)+","+Math.round(s*100)+"%,"+Math.round(l*100)+"%)";}
+function hsla(h,s,l,a){return "hsla("+Math.round(h)+","+Math.round(s*100)+"%,"+Math.round(l*100)+"%,"+a+")";}
+
+/* 从图片提取主色调并应用整套主题 */
+function extractAndApplyTheme(imgUrl){
+  if(!imgUrl) return;
+  var img=new Image();
+  img.crossOrigin="anonymous";
+  img.onload=function(){
+    try{
+      var size=40;
+      var canvas=document.createElement("canvas");
+      canvas.width=size; canvas.height=size;
+      var ctx=canvas.getContext("2d");
+      ctx.drawImage(img,0,0,size,size);
+      var data=ctx.getImageData(0,0,size,size).data;
+      // 按色相分12个桶，过滤掉接近白/黑/灰的像素
+      var buckets={};
+      for(var i=0;i<data.length;i+=4){
+        var r=data[i],g=data[i+1],b=data[i+2];
+        var hslv=rgbToHsl(r,g,b);
+        var hue=hslv[0],sat=hslv[1],lig=hslv[2];
+        if(lig>0.93||lig<0.07||sat<0.14) continue; // 跳过白/黑/灰
+        var bk=Math.floor(hue/30);
+        if(!buckets[bk])buckets[bk]={n:0,h:0,s:0,l:0};
+        buckets[bk].n++; buckets[bk].h+=hue; buckets[bk].s+=sat; buckets[bk].l+=lig;
+      }
+      var keys=Object.keys(buckets);
+      if(!keys.length){console.log("🎨 未提取到主色调，用默认粉紫");return;}
+      // 找像素最多的桶
+      var best=keys[0];
+      keys.forEach(function(k){if(buckets[k].n>buckets[best].n)best=k;});
+      var bk=buckets[best];
+      var H=bk.h/bk.n, S=Math.min(0.72,Math.max(0.45,bk.s/bk.n)), L=bk.l/bk.n;
+      var H2=(H+38)%360; // 辅助色：色相偏移38度，形成和谐渐变
+      var root=document.documentElement.style;
+      // 主色（粉/主色调）
+      root.setProperty("--pink",hsl(H,S,0.66));
+      root.setProperty("--pink-deep",hsl(H,0.62,0.55));
+      root.setProperty("--pink-soft",hsl(H,0.62,0.93));
+      // 辅助色（原薰衣草紫的位置）
+      root.setProperty("--lav",hsl(H2,0.6,0.7));
+      root.setProperty("--lav-soft",hsl(H2,0.55,0.94));
+      // 渐变（导航激活、logo、头像边框）
+      root.setProperty("--grad-from",hsl(H,0.72,0.7));
+      root.setProperty("--grad-to",hsl(H2,0.68,0.72));
+      root.setProperty("--grad-shadow",hsla(H,0.7,0.6,0.35));
+      root.setProperty("--grad-ring",hsl(H,0.6,0.88));
+      // 边框 / 阴影 / 文字
+      root.setProperty("--line",hsl(H,0.5,0.88));
+      root.setProperty("--shadow","0 8px 24px "+hsla(H,0.65,0.55,0.14));
+      root.setProperty("--shadow-sm","0 4px 14px "+hsla(H,0.65,0.55,0.1));
+      root.setProperty("--text",hsl(H,0.28,0.34));
+      root.setProperty("--muted",hsl(H,0.18,0.58));
+      console.log("🎨 主题已跟随背景图，主色相:",Math.round(H),"辅助色相:",Math.round(H2));
+    }catch(e){console.log("🎨 主题提取失败:",e.message);}
+  };
+  img.onerror=function(){console.log("🎨 背景图加载失败");};
+  img.src=imgUrl;
+}
+
+function applyBg(){
+  var url=BG_IMGS[savedBg];
+  document.documentElement.style.setProperty("--bg-img", "url('"+url+"')");
+  extractAndApplyTheme(url);
+}
 function applyAv(){ var a=document.getElementById("avatarImg"); if(a) a.src = AV_IMGS[savedAv]; }
 function pickHtml(type, imgs, cur){
   var h = '<div class="pick-grid">';
@@ -333,8 +415,8 @@ function openPersonalize(){
     + '<div class="pick-sec"><div class="m-sec">🖼️ 背景图</div><div class="pick-hint">选一张做整站背景（会自动加柔光保证文字清晰）</div>'+pickHtml("Bg", BG_IMGS, savedBg)+'</div>'
     + '<div class="pick-sec"><div class="m-sec">😺 小头像</div><div class="pick-hint">右上角头像，点它随时能换</div>'+pickHtml("Av", AV_IMGS, savedAv)+'</div>');
 }
-function setBg(k){ savedBg=k; try{localStorage.setItem("scm_bg",k);}catch(e){} applyBg(); openPersonalize(); }
-function setAv(k){ savedAv=k; try{localStorage.setItem("scm_av",k);}catch(e){} applyAv(); openPersonalize(); }
+function setBg(k){ savedBg=k; try{localStorage.setItem("atelier_bg",k);}catch(e){} applyBg(); openPersonalize(); }
+function setAv(k){ savedAv=k; try{localStorage.setItem("atelier_av",k);}catch(e){} applyAv(); openPersonalize(); }
 
 /* ---------- 页面切换 ---------- */
 var TITLES = {
