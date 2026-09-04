@@ -845,7 +845,7 @@ def build():
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>文雪的工作台</title>
+<title>Weh Atelier</title>
 <meta name="theme-color" content="#ffd0e2">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="assets/icon-192.png">
@@ -875,7 +875,7 @@ if('serviceWorker' in navigator){ window.addEventListener('load', function(){ na
             for n in g.get("notes", []):
                 kb_count += len(n.get("children", [])) if "children" in n else 1
     print("✅ 网站已生成：", idx)
-    print("   文雪的工作台 · 阶段1框架版")
+    print("   Weh Atelier · 个人AI工作室")
     print("   files/ 文件数:", len(os.listdir(FILES_DIR)))
 
 if __name__ == "__main__":

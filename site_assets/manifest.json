@@ -1,7 +1,7 @@
 {
-  "name": "文雪的工作台",
-  "short_name": "工作台",
-  "description": "文雪的AI个人工作台：存钱、吃饭、灵感、决策、知识库、求职、学习，一站式管理",
+  "name": "Weh Atelier",
+  "short_name": "Atelier",
+  "description": "Weh Atelier · 文雪的AI个人工作室",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
