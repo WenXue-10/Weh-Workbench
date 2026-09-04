@@ -344,6 +344,9 @@ function applyThemeByHue(H,H2){
 function applyBg(){
   var url=BG_IMGS[savedBg];
   document.documentElement.style.setProperty("--bg-img", "url('"+url+"')");
+  var mobiles=(IMGS&&IMGS.bgMobile)||{};
+  var m=mobiles[savedBg]||url;  // 没配竖屏图就用横屏图cover自适应
+  document.documentElement.style.setProperty("--bg-img-mobile", "url('"+m+"')");
   var themes=(IMGS&&IMGS.theme)||{};
   var th=themes[savedBg];
   if(th) applyThemeByHue(th.h, th.h2);

@@ -804,7 +804,7 @@ def build():
     img_out = os.path.join(OUT, "assets")
     os.makedirs(img_out, exist_ok=True)
     img_src = os.path.join(ASSETS, "img")
-    bg, av, theme = {}, {}, {}
+    bg, av, theme, bgm = {}, {}, {}, {}
     if os.path.isdir(img_src):
         for fn in sorted(os.listdir(img_src)):
             full = os.path.join(img_src, fn)
@@ -814,6 +814,7 @@ def build():
             url = "assets/" + fn
             is_bg = low.endswith(("_bg.jpg", "_bg.jpeg", "_bg.png", "_bg.webp"))
             is_av = low.endswith(("_avatar.jpg", "_avatar.jpeg", "_avatar.png", "_avatar.webp"))
+            is_mobile = low.endswith(("_mobile.jpg", "_mobile.jpeg", "_mobile.png", "_mobile.webp"))
             if is_bg:
                 k = stem.replace("_bg", "")
                 bg[k] = url
@@ -821,6 +822,9 @@ def build():
                 if th:
                     theme[k] = {"h": th[0], "h2": th[1]}
                     print("   🎨", fn, "主色相", th[0], "辅助", th[1])
+            elif is_mobile:
+                bgm[stem.replace("_mobile", "")] = url
+                print("   📱 竖屏图:", fn)
             elif is_av:
                 av[stem.replace("_avatar", "")] = url
     # PWA：图标 + manifest + service worker
@@ -851,7 +855,7 @@ def build():
         "timeline": timeline,
         "resumes": resumes,
         "kb": kb,
-        "images": {"bg": bg, "av": av, "theme": theme},
+        "images": {"bg": bg, "av": av, "theme": theme, "bgMobile": bgm},
     }
 
     css = read(os.path.join(ASSETS, "style.css"))
