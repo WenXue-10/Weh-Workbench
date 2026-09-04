@@ -353,7 +353,7 @@ function pickHtml(type, imgs, cur){
   var h = '<div class="pick-grid">';
   Object.keys(imgs).forEach(function(k){
     h += '<div class="pick-item '+(type==="Av"?"av":"")+(k===cur?" active":"")+'" onclick="set'+type+'(\''+k+'\')">'
-       + '<img src="'+imgs[k]+'" alt=""><div class="pn">'+(k==="img1"?"图1":k==="img2"?"图2":k==="img3"?"图3":"图4")+'</div></div>';
+       + '<img src="'+imgs[k]+'" alt=""><div class="pn">图'+(String(k).replace(/\D/g,"")||"")+'</div></div>';
   });
   return h + '</div>';
 }
