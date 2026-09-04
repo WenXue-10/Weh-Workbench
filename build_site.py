@@ -830,8 +830,7 @@ def build():
     # PWA：图标 + manifest + service worker
     icon_src = os.path.join(ASSETS, "icons")
     app_icons = []
-    ICON_META = [("star","✨","星耀"),("cat","🐱","奶猫"),("fly","🦋","蝶舞"),
-                 ("moon","🌙","月眠"),("bloom","🌸","花见"),("bow","🎀","蝴蝶结")]
+    ICON_META = [("star","✨","星耀"),("cat","🐱","奶猫")]
     if os.path.isdir(icon_src):
         for fn in os.listdir(icon_src):
             fp = os.path.join(icon_src, fn)
