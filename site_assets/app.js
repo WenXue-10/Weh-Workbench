@@ -361,11 +361,9 @@ function pickHtml(type, imgs, cur){
   return h + '</div>';
 }
 function openPersonalize(){
-  var iconSec = APP_ICONS.length ? ('<div class="pick-sec"><div class="m-sec">📱 应用图标</div><div class="pick-hint">换浏览器标签和手机桌面图标（换后需重新"添加到主屏幕"生效）</div>'+iconPickHtml(savedIcon)+'</div>') : '';
-  setModal('<h2>🐱 换个风格</h2><div class="m-sub">点下面的图片，实时换背景、头像和图标，你的选择会被记住</div>'
+  setModal('<h2>🐱 换个风格</h2><div class="m-sub">点下面的图片，实时换背景和头像，你的选择会被记住；换左上角Logo请直接点它</div>'
     + '<div class="pick-sec"><div class="m-sec">🖼️ 背景图</div><div class="pick-hint">选一张做整站背景（会自动提取主色调）</div>'+pickHtml("Bg", BG_IMGS, savedBg)+'</div>'
-    + '<div class="pick-sec"><div class="m-sec">😺 小头像</div><div class="pick-hint">右上角头像，点它随时能换</div>'+pickHtml("Av", AV_IMGS, savedAv)+'</div>'
-    + iconSec);
+    + '<div class="pick-sec"><div class="m-sec">😺 小头像</div><div class="pick-hint">右上角头像，点它随时能换</div>'+pickHtml("Av", AV_IMGS, savedAv)+'</div>');
 }
 function setBg(k){ savedBg=k; try{localStorage.setItem("atelier_bg",k);}catch(e){} applyBg(); openPersonalize(); }
 function setAv(k){ savedAv=k; try{localStorage.setItem("atelier_av",k);}catch(e){} applyAv(); openPersonalize(); }
@@ -375,13 +373,21 @@ var APP_ICONS = (SITE_DATA && SITE_DATA.appIcons) || [];
 var savedIcon = "star";
 try{ savedIcon = localStorage.getItem("atelier_icon") || "star"; }catch(e){}
 function findIcon(k){ for(var i=0;i<APP_ICONS.length;i++){ if(APP_ICONS[i].key===k) return APP_ICONS[i]; } return APP_ICONS[0]; }
-function iconPickHtml(cur){
+function iconPickHtml(cur, type){
   var h='<div class="pick-grid">';
   APP_ICONS.forEach(function(it){
+    var isPhoto=!it.emoji;
+    if(type==="symbol"&&isPhoto) return;
+    if(type==="photo"&&!isPhoto) return;
     h+='<div class="pick-item '+(it.key===cur?" active":"")+'" onclick="setIcon(\''+it.key+'\')">'
       +'<img src="'+it.i192+'" alt=""><div class="pn">'+it.name+'</div></div>';
   });
   return h+'</div>';
+}
+function openIconPicker(){
+  setModal('<h2>🎨 选择应用图标</h2><div class="m-sub">点选即可更换左上角Logo、浏览器标签图标；手机桌面需重新"添加到主屏幕"</div>'
+    +'<div class="pick-sec"><div class="m-sec">✨ 符号图标</div>'+iconPickHtml(savedIcon,"symbol")+'</div>'
+    +'<div class="pick-sec"><div class="m-sec">📷 照片图标</div>'+iconPickHtml(savedIcon,"photo")+'</div>');
 }
 function applyManifest(icon){
   try{
@@ -401,13 +407,17 @@ function applyIcon(){
   var at=document.querySelector('link[rel="apple-touch-icon"]');
   if(!at){ at=document.createElement("link"); at.rel="apple-touch-icon"; document.head.appendChild(at); }
   at.href=it.i192;
-  var lg=document.getElementById("logoIcon"); if(lg) lg.textContent=it.emoji;
+  var lg=document.getElementById("logoIcon");
+  if(lg){
+    if(it.emoji){ lg.innerHTML=it.emoji; lg.classList.remove("photo"); }
+    else { lg.innerHTML='<img src="'+it.i192+'" alt="">'; lg.classList.add("photo"); }
+  }
   applyManifest(it);
 }
 function setIcon(k){
   savedIcon=k;
   try{ localStorage.setItem("atelier_icon",k); }catch(e){}
-  applyIcon(); openPersonalize();
+  applyIcon(); openIconPicker();
 }
 
 /* ---------- 页面切换 ---------- */

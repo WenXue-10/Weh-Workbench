@@ -844,12 +844,23 @@ def build():
             os.makedirs(app_out, exist_ok=True)
             for fn in os.listdir(app_dir):
                 shutil.copy2(os.path.join(app_dir, fn), os.path.join(app_out, fn))
-            for key, emo, nm in ICON_META:
+            meta_map = {k: (e, n) for k, e, n in ICON_META}
+            for fn in sorted(os.listdir(app_out)):
+                # 只看192，key取 icon- 与 -192 之间
+                if not fn.endswith("-192.png") or not fn.startswith("icon-"):
+                    continue
+                key = fn[len("icon-"):-len("-192.png")]
                 f192 = f"assets/app-icons/icon-{key}-192.png"
                 f512 = f"assets/app-icons/icon-{key}-512.png"
-                if os.path.exists(os.path.join(app_out, f"icon-{key}-192.png")):
-                    app_icons.append({"key": key, "emoji": emo, "name": nm,
-                                      "i192": f192, "i512": f512})
+                if key in meta_map:
+                    emo, nm = meta_map[key]
+                elif key.startswith("photo-"):
+                    emo, nm = None, "照片" + key.replace("photo-img", "")
+                else:
+                    emo, nm = None, key
+                app_icons.append({"key": key, "emoji": emo, "name": nm,
+                                  "i192": f192, "i512": f512})
+            print("   📱 应用图标候选:", len(app_icons), "个")
     for fname in ("manifest.json", "sw.js"):
         sp = os.path.join(ASSETS, fname)
         if os.path.exists(sp):
