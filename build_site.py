@@ -809,17 +809,20 @@ def build():
         for fn in sorted(os.listdir(img_src)):
             full = os.path.join(img_src, fn)
             shutil.copy2(full, os.path.join(img_out, fn))
-            key = os.path.splitext(fn)[0]  # img1_bg / img1_avatar
+            low = fn.lower()
+            stem = os.path.splitext(fn)[0]  # img1_bg / img1_avatar
             url = "assets/" + fn
-            if fn.endswith("_bg.jpg"):
-                k = key.replace("_bg", "")
+            is_bg = low.endswith(("_bg.jpg", "_bg.jpeg", "_bg.png", "_bg.webp"))
+            is_av = low.endswith(("_avatar.jpg", "_avatar.jpeg", "_avatar.png", "_avatar.webp"))
+            if is_bg:
+                k = stem.replace("_bg", "")
                 bg[k] = url
                 th = extract_theme_hue(full)
                 if th:
                     theme[k] = {"h": th[0], "h2": th[1]}
                     print("   🎨", fn, "主色相", th[0], "辅助", th[1])
-            elif fn.endswith("_avatar.jpg"):
-                av[key.replace("_avatar", "")] = url
+            elif is_av:
+                av[stem.replace("_avatar", "")] = url
     # PWA：图标 + manifest + service worker
     icon_src = os.path.join(ASSETS, "icons")
     if os.path.isdir(icon_src):
