@@ -1,5 +1,5 @@
-/* 文雪求职小窝 · Service Worker */
-const CACHE = "scm-site-v1";
+/* Weh Atelier · Service Worker */
+const CACHE = "atelier-v2";
 self.addEventListener("install", (e) => { self.skipWaiting(); });
 self.addEventListener("activate", (e) => {
   e.waitUntil(
