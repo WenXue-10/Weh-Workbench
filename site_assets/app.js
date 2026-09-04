@@ -337,17 +337,37 @@ function setBg(k){ savedBg=k; try{localStorage.setItem("scm_bg",k);}catch(e){} a
 function setAv(k){ savedAv=k; try{localStorage.setItem("scm_av",k);}catch(e){} applyAv(); openPersonalize(); }
 
 /* ---------- 页面切换 ---------- */
-var TITLES = {home:"🐱 作战看板", jobs:"🐾 岗位看板", companies:"🐈 目标公司池", timeline:"😺 每日日报", resume:"📄 简历库", knowledge:"📚 知识库"};
+var TITLES = {
+  home:"🏠 首页总览", money:"💰 存钱记账", health:"🍱 吃饭健康",
+  inspiration:"💡 灵感捕捉", decision:"🎯 决策顾问", baichuan:"📚 百川智库",
+  career:"💼 求职小窝", cet6:"📖 六级学习", sop:"🛠️ 工作SOP",
+  todo:"✅ 待办清单", settings:"⚙️ 设置",
+  jobs:"🐾 岗位看板", companies:"🐈 目标公司池", timeline:"😺 每日日报",
+  resume:"📄 简历库", knowledge:"📚 知识库"
+};
 function go(view){
-  document.querySelectorAll(".view").forEach(function(v){ v.classList.remove("active"); });
-  document.getElementById("view-"+view).classList.add("active");
-  document.querySelectorAll(".nav-item,.bn-item").forEach(function(n){ n.classList.toggle("active", n.getAttribute("data-go")===view); });
-  document.getElementById("pageTitle").textContent = TITLES[view];
+  var newModule = document.getElementById("module-"+view);
+  var oldView = document.getElementById("view-"+view);
+  if(newModule || oldView){
+    document.querySelectorAll(".view").forEach(function(v){ v.classList.remove("active"); });
+    if(newModule) newModule.classList.add("active");
+    else if(oldView) oldView.classList.add("active");
+  }
+  document.querySelectorAll(".nav-item,.bn-item").forEach(function(n){
+    var attr = n.getAttribute("data-module") || n.getAttribute("data-go");
+    n.classList.toggle("active", attr===view);
+  });
+  var titleEl = document.getElementById("pageTitle");
+  if(titleEl) titleEl.textContent = TITLES[view] || view;
   window.scrollTo({top:0});
 }
 document.addEventListener("click", function(e){
-  var t = e.target.closest("[data-go]");
-  if(t){ go(t.getAttribute("data-go")); }
+  var t = e.target.closest("[data-module],[data-go]");
+  if(t){
+    var module = t.getAttribute("data-module");
+    var page = t.getAttribute("data-go");
+    go(module || page);
+  }
 });
 document.querySelectorAll(".chip").forEach(function(c){
   c.addEventListener("click", function(){
@@ -380,6 +400,12 @@ document.addEventListener("keydown", function(e){ if(e.key==="Escape") closeModa
 (function(){
   var upd = document.getElementById("syncText");
   if(upd && D.updated) upd.textContent = "自动同步 · " + D.updated;
-  flattenKb(); renderHome(); renderJobs(); renderCompanies(); renderTimeline(); renderResumes(); renderKb();
+  // 求职相关渲染（只有页面上有对应元素时才执行）
+  try{
+    if(document.getElementById("statJobs")){
+      flattenKb(); renderHome(); renderJobs(); renderCompanies();
+      renderTimeline(); renderResumes(); renderKb();
+    }
+  }catch(e){ console.log("求职模块渲染跳过:", e.message); }
   applyBg(); applyAv();
 })();

@@ -8,16 +8,24 @@ try:
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 except Exception:
     pass
-import markdown
+try:
+    import markdown
+except ImportError:
+    markdown = None
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 ASSETS = os.path.join(BASE, "site_assets")
 OUT = os.path.join(BASE, "docs")
 FILES_DIR = os.path.join(OUT, "files")
 
-_md = markdown.Markdown(extensions=["tables", "fenced_code", "sane_lists"])
+try:
+    _md = markdown.Markdown(extensions=["tables", "fenced_code", "sane_lists"]) if markdown else None
+except Exception:
+    _md = None
 
 def md_to_html(text):
+    if _md is None:
+        return text
     _md.reset()
     html = _md.convert(text)
     html = re.sub(r"\[\[([^\]|]+)(\|[^\]]+)?\]\]", r"\1", html)
@@ -58,12 +66,18 @@ def copy_file(src, prefix="f"):
     return url
 
 # ---------- 生成 PDF（reportlab + 微软雅黑） ----------
-from reportlab.lib.pagesizes import A4
-from reportlab.lib.units import mm
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, HRFlowable
-from reportlab.lib.styles import ParagraphStyle
-from reportlab.pdfbase import pdfmetrics
-from reportlab.pdfbase.ttfonts import TTFont
+try:
+    from reportlab.lib.pagesizes import A4
+    from reportlab.lib.units import mm
+    from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, HRFlowable
+    from reportlab.lib.styles import ParagraphStyle
+    from reportlab.pdfbase import pdfmetrics
+    from reportlab.pdfbase.ttfonts import TTFont
+    _reportlab_ok = True
+except ImportError:
+    _reportlab_ok = False
+    A4 = None
+    mm = None
 
 _font_ok = None
 def _reg_font():
@@ -784,23 +798,17 @@ def build():
         if os.path.exists(sp):
             shutil.copy2(sp, os.path.join(OUT, fname))
 
-    jobs = scan_jobs()
-    companies = scan_companies()
-    timeline, todo = scan_timeline()
-    resumes = scan_resumes()
-    kb = scan_kb(jobs, resumes)
-
-    stats = {"jobs": len(jobs), "rec": 0, "interview": 0, "offer": 0}
-    for j in jobs:
-        if isinstance(j["score"], (int, float)) and j["score"] >= 70:
-            stats["rec"] += 1
-        if j["status"] == "interview":
-            stats["interview"] += 1
-        if "offer" in j["statusTxt"].lower():
-            stats["offer"] += 1
+    # 阶段1：不扫描Obsidian，用空数据占位
+    jobs = []
+    companies = []
+    timeline = []
+    todo = []
+    resumes = {"general": [], "custom": []}
+    kb = []
+    stats = {"jobs": 0, "rec": 0, "interview": 0, "offer": 0}
 
     data = {
-        "updated": latest_mtime().strftime("%Y-%m-%d %H:%M"),
+        "updated": __import__("datetime").datetime.now().strftime("%Y-%m-%d %H:%M"),
         "stats": stats,
         "todo": todo,
         "jobs": jobs,
@@ -837,7 +845,7 @@ def build():
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>文雪求职小窝</title>
+<title>文雪的工作台</title>
 <meta name="theme-color" content="#ffd0e2">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="assets/icon-192.png">
@@ -867,9 +875,7 @@ if('serviceWorker' in navigator){ window.addEventListener('load', function(){ na
             for n in g.get("notes", []):
                 kb_count += len(n.get("children", [])) if "children" in n else 1
     print("✅ 网站已生成：", idx)
-    print("   岗位:", stats["jobs"], "| 公司池分组:", len(companies), "| 日报:", len(timeline),
-          "| 简历: 通用", len(resumes["general"]), "/ 定制", sum(len(c["items"]) for c in resumes["custom"]),
-          "| 知识库条目:", kb_count)
+    print("   文雪的工作台 · 阶段1框架版")
     print("   files/ 文件数:", len(os.listdir(FILES_DIR)))
 
 if __name__ == "__main__":

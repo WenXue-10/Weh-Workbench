@@ -330,3 +330,46 @@ a{color:var(--pink-deep);text-decoration:none}
 .site-footer .sync-time{
   display:inline-block;
 }
+
+/* ===== 空状态（模块占位） ===== */
+.empty-state{
+  text-align:center;
+  padding:80px 20px;
+  max-width:500px;
+  margin:0 auto;
+}
+.empty-state .empty-icon{
+  font-size:64px;
+  margin-bottom:16px;
+  animation:float 3s ease-in-out infinite;
+}
+@keyframes float{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-8px)}
+}
+.empty-state .empty-title{
+  font-size:22px;
+  font-weight:800;
+  color:var(--text);
+  margin-bottom:10px;
+}
+.empty-state .empty-desc{
+  font-size:14px;
+  color:var(--muted);
+  line-height:1.8;
+  margin-bottom:20px;
+}
+.empty-state .empty-tag{
+  display:inline-block;
+  padding:6px 16px;
+  border-radius:20px;
+  background:linear-gradient(135deg,rgba(255,200,220,.6),rgba(220,200,255,.6));
+  font-size:13px;
+  font-weight:600;
+  color:var(--text);
+}
+@media(max-width:820px){
+  .empty-state{padding:50px 16px}
+  .empty-state .empty-icon{font-size:48px}
+  .empty-state .empty-title{font-size:18px}
+}
