@@ -1,0 +1,876 @@
+# -*- coding: utf-8 -*-
+"""文雪求职小窝 · 站点生成器
+从 Obsidian 知识库自动生成静态网站到 docs/（GitHub Pages 发布目录）。
+运行：python build_site.py
+"""
+import os, re, json, shutil, datetime, sys
+try:
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+except Exception:
+    pass
+import markdown
+
+BASE = os.path.dirname(os.path.abspath(__file__))
+ASSETS = os.path.join(BASE, "site_assets")
+OUT = os.path.join(BASE, "docs")
+FILES_DIR = os.path.join(OUT, "files")
+
+_md = markdown.Markdown(extensions=["tables", "fenced_code", "sane_lists"])
+
+def md_to_html(text):
+    _md.reset()
+    html = _md.convert(text)
+    html = re.sub(r"\[\[([^\]|]+)(\|[^\]]+)?\]\]", r"\1", html)
+    return html
+
+def strip_fm(text):
+    m = re.match(r"^---\s*\n.*?\n---\s*\n?", text, re.DOTALL)
+    return text[m.end():] if m else text
+
+def parse_fm(text):
+    m = re.match(r"^---\s*\n(.*?)\n---", text, re.DOTALL)
+    fm = {}
+    if m:
+        for line in m.group(1).splitlines():
+            if ":" in line:
+                k, v = line.split(":", 1)
+                fm[k.strip()] = v.strip().strip('"').strip("'")
+    return fm
+
+def read(path):
+    with open(path, encoding="utf-8") as f:
+        return f.read()
+
+# ---------- 文件复制（中文名 → 安全英文名） ----------
+_file_counter = 0
+_file_map = {}
+def copy_file(src, prefix="f"):
+    global _file_counter
+    if src in _file_map:
+        return _file_map[src]
+    _file_counter += 1
+    ext = os.path.splitext(src)[1].lower()
+    base = os.path.basename(src)
+    dst = os.path.join(FILES_DIR, f"{prefix}{_file_counter}_{base}")
+    shutil.copy2(src, dst)
+    url = "files/" + os.path.basename(dst)
+    _file_map[src] = url
+    return url
+
+# ---------- 生成 PDF（reportlab + 微软雅黑） ----------
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.units import mm
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, HRFlowable
+from reportlab.lib.styles import ParagraphStyle
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+
+_font_ok = None
+def _reg_font():
+    global _font_ok
+    if _font_ok is not None:
+        return _font_ok
+    for cand in [("MSYH", "C:/Windows/Fonts/msyh.ttc", 0), ("MSYH", "C:/Windows/Fonts/simhei.ttf", None)]:
+        try:
+            if cand[2] is None:
+                pdfmetrics.registerFont(TTFont(cand[0], cand[1]))
+            else:
+                pdfmetrics.registerFont(TTFont(cand[0], cand[1], subfontIndex=cand[2]))
+            _font_ok = True
+            return True
+        except Exception:
+            continue
+    _font_ok = False
+    return False
+
+def _esc_pdf(s):
+    return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+
+def md_to_pdf(md_text, out_path, title=""):
+    if not _reg_font():
+        return False
+    doc = SimpleDocTemplate(out_path, pagesize=A4, leftMargin=18*mm, rightMargin=18*mm,
+                            topMargin=16*mm, bottomMargin=16*mm)
+    st = {
+        "h1": ParagraphStyle("h1", fontName="MSYH", fontSize=16, leading=23, spaceAfter=10),
+        "h2": ParagraphStyle("h2", fontName="MSYH", fontSize=13, leading=19, spaceBefore=8, spaceAfter=4, textColor="#334155"),
+        "body": ParagraphStyle("body", fontName="MSYH", fontSize=10.5, leading=16, spaceAfter=4),
+        "quote": ParagraphStyle("quote", fontName="MSYH", fontSize=10, leading=15, leftIndent=12, textColor="#64748b"),
+        "cell": ParagraphStyle("cell", fontName="MSYH", fontSize=9, leading=13),
+    }
+    flow = []
+    if title:
+        flow.append(Paragraph(_esc_pdf(title), st["h1"]))
+    lines = md_text.splitlines()
+    i = 0
+    while i < len(lines):
+        line = lines[i].rstrip()
+        if not line.strip():
+            flow.append(Spacer(1, 4)); i += 1; continue
+        if line.startswith("|"):
+            rows, j = [], i
+            while j < len(lines) and lines[j].strip().startswith("|"):
+                cells = [c.strip() for c in lines[j].strip().strip("|").split("|")]
+                if not all(re.fullmatch(r":?-{2,}:?", c) for c in cells):
+                    rows.append([Paragraph(_esc_pdf(c), st["cell"]) for c in cells])
+                j += 1
+            if rows:
+                t = Table(rows)
+                t.setStyle(TableStyle([
+                    ("GRID", (0,0), (-1,-1), 0.4, "#e2e8f0"),
+                    ("BACKGROUND", (0,0), (-1,0), "#fdf2f8"),
+                    ("VALIGN", (0,0), (-1,-1), "TOP"),
+                    ("TOPPADDING", (0,0), (-1,-1), 3),
+                    ("BOTTOMPADDING", (0,0), (-1,-1), 3),
+                    ("LEFTPADDING", (0,0), (-1,-1), 5),
+                    ("RIGHTPADDING", (0,0), (-1,-1), 5),
+                ]))
+                flow.append(t); flow.append(Spacer(1, 6))
+            i = j; continue
+        if line.startswith("# "):
+            flow.append(Paragraph(_esc_pdf(line[2:]), st["h1"]))
+        elif line.startswith("## "):
+            flow.append(Paragraph(_esc_pdf(line[3:]), st["h2"]))
+        elif line.startswith("### "):
+            flow.append(Paragraph(_esc_pdf(line[4:]), st["h2"]))
+        elif line.startswith("> "):
+            flow.append(Paragraph(_esc_pdf(line[2:]), st["quote"]))
+        elif line.startswith("- ") or line.startswith("* "):
+            flow.append(Paragraph("• " + _esc_pdf(line[2:]), st["body"]))
+        elif re.match(r"^\d+\.\s", line):
+            flow.append(Paragraph(_esc_pdf(line), st["body"]))
+        elif line.strip() in ("---", "***", "___"):
+            flow.append(HRFlowable(width="100%", thickness=0.7, color="#f1c7d8", spaceBefore=4, spaceAfter=4))
+        else:
+            flow.append(Paragraph(_esc_pdf(line), st["body"]))
+        i += 1
+    doc.build(flow)
+    return True
+
+_pdf_cache = {}
+def gen_pdf_from_md(md_path, title):
+    if md_path in _pdf_cache:
+        return _pdf_cache[md_path]
+    text = strip_fm(read(md_path))
+    base = re.sub(r"[^A-Za-z0-9\u4e00-\u9fff]+", "_", os.path.splitext(os.path.basename(md_path))[0]).strip("_")[:36]
+    out = os.path.join(FILES_DIR, f"g_{base}.pdf")
+    ok = md_to_pdf(text, out, title=title)
+    url = "files/" + os.path.basename(out) if ok else None
+    _pdf_cache[md_path] = url
+    return url
+
+# ---------- 岗位数据 ----------
+def status_key(t):
+    t = t or ""
+    low = t.lower()
+    if "已背调" in t: return "done"
+    if "offer" in low: return "offer"
+    if "待投递" in t or "已写简历" in t or "定制简历" in t: return "ready"
+    if "已投递" in t: return "sent"
+    if "面试" in t: return "interview"
+    if "已挂" in t or "放弃" in t or "红线" in t: return "dead"
+    if "待确认" in t or "待补充" in t or "待核实" in t or "待背调" in t: return "warn"
+    if "备选" in t: return "backup"
+    if "新收录" in t: return "new"
+    return "backup"
+
+def parse_detail_table(text):
+    m = re.search(r"##\s*匹配度评分明细\s*\n(.*?)(?=\n##|\Z)", text, re.DOTALL)
+    rows = []
+    if m:
+        for line in m.group(1).splitlines():
+            line = line.strip()
+            if line.startswith("|"):
+                cells = [c.strip() for c in line.strip("|").split("|")]
+                if len(cells) >= 3 and cells[0] not in ("维度", "---", "") and "总分" not in cells[0]:
+                    rows.append([re.sub(r"[*`]", "", cells[0]), cells[1], cells[2]])
+    return rows
+
+def parse_summary(text):
+    m = re.search(r"##\s*岗位 JD 摘要\s*\n(.*?)(?=\n##|\Z)", text, re.DOTALL)
+    if not m:
+        return ""
+    lines = [l.strip() for l in m.group(1).splitlines() if l.strip() and not l.startswith("|")]
+    return " ".join(lines)[:300]
+
+def parse_note(text):
+    m = re.search(r"##\s*备注\s*\n(.*?)(?=\n##|\Z)", text, re.DOTALL)
+    return " ".join(l.strip() for l in m.group(1).splitlines() if l.strip())[:200] if m else ""
+
+def find_files(folder, prefixes):
+    """在 folder 下找指定前缀的文件，返回 {kind: abs_path}"""
+    found = {}
+    if not os.path.isdir(folder):
+        return found
+    for fn in sorted(os.listdir(folder)):
+        low = fn.lower()
+        for pfx in prefixes:
+            if low.startswith(pfx) and (low.endswith(".pdf") or low.endswith(".docx") or low.endswith(".doc")):
+                found[pfx] = os.path.join(folder, fn)
+    return found
+
+def scan_jobs():
+    jobs = []
+    research = os.path.join(BASE, "01_岗位搜集与背调", "公司调研")
+    if not os.path.isdir(research):
+        return jobs
+    for company in sorted(os.listdir(research)):
+        cp = os.path.join(research, company)
+        if not os.path.isdir(cp):
+            continue
+        for posdir in sorted(os.listdir(cp)):
+            pp = os.path.join(cp, posdir)
+            if not os.path.isdir(pp):
+                continue
+            score_file = None
+            for fn in os.listdir(pp):
+                if fn.startswith("评分-") and fn.endswith(".md"):
+                    score_file = os.path.join(pp, fn)
+                    break
+            if not score_file:
+                continue
+            text = read(score_file)
+            fm = parse_fm(text)
+            score_raw = fm.get("匹配度总分", "—")
+            try:
+                score = int(float(score_raw))
+            except Exception:
+                score = "—"
+            job = {
+                "file": os.path.relpath(score_file, BASE).replace("\\", "/"),
+                "company": fm.get("公司名称", company),
+                "pos": fm.get("岗位方向", posdir),
+                "city": fm.get("城市", "未标注"),
+                "salary": fm.get("薪资", "未披露"),
+                "deadline": fm.get("投递截止", "未披露"),
+                "score": score,
+                "level": fm.get("匹配等级", "—"),
+                "status": status_key(fm.get("当前状态", "")),
+                "statusTxt": fm.get("当前状态", "🆕 新收录"),
+                "link": fm.get("岗位链接", ""),
+                "summary": parse_summary(text),
+                "detail": parse_detail_table(text),
+                "note": (parse_note(text) or fm.get("来源", "")),
+            }
+            # 背调报告
+            for fn in os.listdir(pp):
+                if fn.startswith("背调报告-") and fn.endswith(".md"):
+                    rt_path = os.path.join(pp, fn)
+                    job["report"] = {"html": md_to_html(strip_fm(read(rt_path)))}
+                    for f2 in sorted(os.listdir(pp)):
+                        low = f2.lower()
+                        if f2.startswith("背调报告-") and low.endswith(".pdf"):
+                            job["report"]["pdf"] = copy_file(os.path.join(pp, f2))
+                        elif f2.startswith("背调报告-") and low.endswith((".docx", ".doc")):
+                            job["report"]["doc"] = copy_file(os.path.join(pp, f2))
+                    if "pdf" not in job["report"]:
+                        job["report"]["pdf"] = gen_pdf_from_md(rt_path, "背调报告：" + fm.get("岗位名称", fn[:-3]))
+                    break
+            # 定制简历
+            rp = os.path.join(BASE, "02_定制简历库", company, posdir)
+            if os.path.isdir(rp):
+                res = {}
+                for fn in sorted(os.listdir(rp)):
+                    low = fn.lower()
+                    if low.endswith(".pdf") and ("文雪" in fn or "简历" in fn):
+                        res["pdf"] = copy_file(os.path.join(rp, fn))
+                    elif low.endswith((".docx", ".doc")) and ("文雪" in fn or "简历" in fn):
+                        res["doc"] = copy_file(os.path.join(rp, fn))
+                if res:
+                    job["resume"] = res
+            # JD 原文
+            jp = os.path.join(BASE, "07_原始材料库", company, posdir)
+            if os.path.isdir(jp):
+                jd = {}
+                pdfs = [os.path.join(jp, fn) for fn in os.listdir(jp) if fn.lower().endswith(".pdf")]
+                if pdfs:
+                    jd["pdf"] = copy_file(pdfs[0]) if len(pdfs) == 1 else None
+                    if len(pdfs) > 1:
+                        jd["pdfs"] = [copy_file(p) for p in pdfs]
+                mds = [os.path.join(jp, fn) for fn in os.listdir(jp) if fn.startswith("JD-") and fn.endswith(".md")]
+                if mds:
+                    jd["html"] = md_to_html(strip_fm(read(mds[0])))
+                if jd:
+                    job["jd"] = jd
+            jobs.append(job)
+    return jobs
+
+# ---------- 公司池 ----------
+# 源文件 2026-08-25 由「目标公司池」改版为「候选线索池」，结构变为
+# 「初始候选 / 已考察记录 / 已排除」三段，此处适配新结构解析。
+def _classify_result(res):
+    r = res or ""
+    if "已收录" in r:
+        return "✅ 已收录"
+    if "不匹配" in r:
+        return "⛔ 不匹配"
+    if "未启动" in r or "未明确" in r or "未发布" in r:
+        return "⏳ 未启动"
+    if "待" in r or "列下轮" in r or "待回核" in r:
+        return "📝 待核实"
+    return "📋 其他"
+
+def scan_companies():
+    p = os.path.join(BASE, "01_岗位搜集与背调", "🗂️ 候选线索池.md")
+    if not os.path.exists(p):
+        return []
+    text = read(p)
+    sections = []          # 每个元素 {"title":..., "mode":..., "groups":[]}
+    cur = None
+    for line in text.splitlines():
+        if line.startswith("## "):
+            h = line[3:].strip()
+            if "初始候选" in h:
+                cur = {"title": "🔍 初始候选（参考线索）", "mode": "init", "groups": []}
+            elif "已考察" in h:
+                cur = {"title": "📋 已考察记录（已收录 / 未收录）", "mode": "record", "groups": []}
+            elif "已排除" in h or "剔除" in h:
+                cur = {"title": "🚫 已排除（一票否决）", "mode": "exclude", "groups": []}
+            else:
+                cur = None
+            if cur:
+                sections.append(cur)
+            continue
+        if not cur:
+            continue
+        mode = cur["mode"]
+        if line.startswith("|"):
+            cells = [c.strip() for c in line.strip("|").split("|")]
+            if len(cells) < 2 or cells[0] in ("类别", "日期", "企业", "") or "---" in cells[0]:
+                continue
+            if mode == "init":
+                cur["groups"].append({"cat": cells[0], "name": cells[1], "why": ""})
+            elif mode == "record":
+                why = cells[2] if len(cells) >= 3 else ""
+                cur["groups"].append({"cat": _classify_result(why), "name": cells[1], "why": why})
+        elif line.startswith("- ") and mode == "exclude":
+            body = line[2:].strip()
+            m = re.match(r"\*{0,2}(.+?)\*\*\s*(.*)", body)
+            if m:
+                name = m.group(1).strip()
+                rest = m.group(2).strip()
+                lm = re.match(r"[（(]([^）)]*)[）)]\s*[：:]?\s*(.*)", rest)
+                if lm:
+                    loc = lm.group(1).strip()
+                    reason = lm.group(2).strip()
+                else:
+                    rm = re.match(r"[：:]\s*(.*)", rest)
+                    loc, reason = "", (rm.group(1).strip() if rm else rest)
+                why = (("（" + loc + "）") if loc else "") + reason
+                cur["groups"].append({"cat": "已排除", "name": name, "why": why})
+            else:
+                cur["groups"].append({"cat": "已排除", "name": body, "why": ""})
+    # 去掉空分组
+    return [s for s in sections if s["groups"]]
+
+# ---------- 日报 / 待办 ----------
+def scan_timeline():
+    p = os.path.join(BASE, "01_岗位搜集与背调", "📅 岗位日报归档.md")
+    if not os.path.exists(p):
+        return [], []
+    text = read(p)
+    entries, cur = [], None
+    for line in text.splitlines():
+        m = re.match(r"^###\s*(\d{4}-\d{2}-\d{2})\s*[（(]?(.*?)[）)]?\s*$", line)
+        if m:
+            cur = {"date": m.group(1), "title": m.group(2) or "日报", "items": []}
+            entries.append(cur)
+        elif line.startswith("- ") and cur:
+            cur["items"].append(line[2:].strip())
+    def _extract_todo(items):
+        out = []
+        for it in items:
+            # 兼容「待办：」「关键待办：」「**待办**：」「**关键待办**：」等写法
+            m = re.match(r"^\*{0,2}(?:关键)?待办\*{0,2}\s*[:：]\s*(.*)$", it)
+            if m:
+                out += [x.strip() for x in re.split(r"[；;]", m.group(1)) if x.strip()]
+        return out
+
+    todo = []
+    candidates = []
+    for ent in entries:
+        t = _extract_todo(ent["items"])
+        if t:
+            candidates.append((ent["date"], t))
+    if candidates:
+        # 取「日期最新」且含待办（含关键待办）的日报，避免合规整改等非任务型条目清空待办
+        candidates.sort(key=lambda x: x[0], reverse=True)
+        todo = candidates[0][1]
+    return entries, todo
+
+# ---------- 简历库 ----------
+_DOC_KEY = {
+    "供应链数据": ["供应链优化", "A版"],
+    "管培通用": ["管培", "D版"],
+    "项目采购": ["项目采购", "C版"],
+    "运营管理": ["运营管理", "B版"],
+}
+def scan_resumes():
+    general = []
+    gdir = os.path.join(BASE, "02_定制简历库", "通用简历")
+    if os.path.isdir(gdir):
+        all_files = sorted(os.listdir(gdir))
+        for fn in all_files:
+            if fn.startswith("简历-") and fn.endswith(".md"):
+                base = fn[:-3]
+                direction = base.split("-", 1)[1] if "-" in base else base
+                name = "简历 · " + direction
+                # 优先使用文件夹中已有的Word导出PDF（带人像排版）
+                pdf = None
+                for d in all_files:
+                    if d.lower().endswith(".pdf") and direction in d and "文雪" in d:
+                        pdf = copy_file(os.path.join(gdir, d))
+                        break
+                if pdf is None:
+                    pdf = gen_pdf_from_md(os.path.join(gdir, fn), name)
+                # 查找对应的docx文件
+                doc = None
+                for d in all_files:
+                    if d.lower().endswith(".docx") and direction in d and "文雪" in d:
+                        doc = copy_file(os.path.join(gdir, d))
+                        break
+                general.append({"name": name, "desc": "通用底版 · 适配" + direction, "pdf": pdf, "doc": doc})
+    custom = []
+    cdir = os.path.join(BASE, "02_定制简历库")
+    if os.path.isdir(cdir):
+        for company in sorted(os.listdir(cdir)):
+            if company == "通用简历":
+                continue
+            cp = os.path.join(cdir, company)
+            if not os.path.isdir(cp):
+                continue
+            items = []
+            for posdir in sorted(os.listdir(cp)):
+                pp = os.path.join(cp, posdir)
+                if not os.path.isdir(pp):
+                    continue
+                pp_files = sorted(os.listdir(pp))
+                for fn in pp_files:
+                    if fn.endswith(".md") and ("文雪" in fn or "简历" in fn):
+                        base_name = os.path.splitext(fn)[0]
+                        # 优先使用同目录下已有的Word导出PDF（带人像排版）
+                        pdf = None
+                        for d in pp_files:
+                            if d.lower().endswith(".pdf") and base_name in d:
+                                pdf = copy_file(os.path.join(pp, d))
+                                break
+                        if pdf is None:
+                            pdf = gen_pdf_from_md(os.path.join(pp, fn), base_name)
+                        # 查找对应的docx文件
+                        doc = None
+                        for d in pp_files:
+                            if d.lower().endswith((".docx", ".doc")) and ("文雪" in d or "简历" in d):
+                                doc = copy_file(os.path.join(pp, d))
+                                break
+                        items.append({"name": base_name, "desc": posdir, "pdf": pdf, "doc": doc})
+            if items:
+                custom.append({"company": company, "items": items})
+    return {"general": general, "custom": custom}
+
+# ---------- 知识库 ----------
+import html as htmlmod
+
+_KB_META = [
+    ("00_战略与定位", "🐱", "战略总览、求职画像、目标与红线", "c1", "gen"),
+    ("01_岗位搜集与背调", "🐾", "岗位汇总（自动表格）、公司池、日报、公司调研", "c2", "kb01"),
+    ("02_定制简历库", "🧾", "通用底版 + 各企业定制（仅文件）", "c3", "kb02"),
+    ("03_笔面试题库", "✍️", "技术题、行为题、错题本", "c4", "kb03"),
+    ("04_实战复盘", "🪞", "面试复盘与原始记录（按企业/岗位分组）", "c5", "kb04"),
+    ("05_供应链知识库", "📖", "专业知识卡片、英语术语卡", "c1", "gen"),
+    ("06_证书与附件", "🎓", "成绩单、获奖证书等文件", "c2", "gen"),
+    ("07_原始材料库", "🗃️", "JD 原文与登记索引", "c3", "kb07"),
+    ("08_个人资料库", "👤", "个人档案：学业课程、经历素材、报告论文", "c5", "kb08"),
+    ("99_系统与规则", "⚙️", "Skill 规则、问题日志", "c4", "gen"),
+]
+
+def _md_note(path):
+    fn = os.path.basename(path)
+    return {"title": os.path.splitext(fn)[0], "icon": "📄", "html": md_to_html(strip_fm(read(path)))}
+
+def _file_note(path):
+    fn = os.path.basename(path)
+    url = copy_file(path)
+    return {"title": fn, "icon": "📎", "html": f'<p><a href="{url}" target="_blank">📥 查看 / 下载：{fn}</a></p>'}
+
+def _walk_notes(root):
+    notes = []
+    if not os.path.isdir(root):
+        return notes
+    for r, dirs, files in os.walk(root):
+        dirs[:] = [d for d in dirs if d not in (".trash",)]
+        for fn in sorted(files):
+            p = os.path.join(r, fn)
+            if fn.endswith(".md"):
+                if fn.startswith("评分-") or fn.startswith("背调报告-"):
+                    continue
+                notes.append(_md_note(p))
+            elif fn.lower().endswith((".pdf", ".doc", ".docx", ".png", ".jpg", ".jpeg")):
+                notes.append(_file_note(p))
+    return notes
+
+def jobs_table_html(jobs):
+    head = "<tr><th>公司</th><th>方向</th><th>城市</th><th>总分</th><th>等级</th><th>状态</th><th>薪资</th></tr>"
+    rows = []
+    for j in jobs:
+        rows.append("<tr><td>{}</td><td>{}</td><td>{}</td><td><b>{}</b></td><td>{}</td><td>{}</td><td>{}</td></tr>".format(
+            htmlmod.escape(str(j["company"])), htmlmod.escape(str(j["pos"])), htmlmod.escape(str(j["city"])),
+            j["score"], htmlmod.escape(str(j["level"])), htmlmod.escape(str(j["statusTxt"])), htmlmod.escape(str(j["salary"]))))
+    return '<p>自动汇总自全部评分笔记，共 {} 个岗位：</p><table><thead>{}</thead><tbody>{}</tbody></table>'.format(
+        len(jobs), head, "".join(rows))
+
+def _kb_01(jobs):
+    groups = []
+    groups.append({"title": "📊 岗位汇总表（自动生成）",
+                   "notes": [{"title": "全部岗位汇总", "icon": "📊", "html": jobs_table_html(jobs)}]})
+    for fn, title, icon in [("🗂️ 目标公司池.md", "目标公司池完整清单", "🏢"), ("📅 岗位日报归档.md", "岗位日报归档", "📅")]:
+        p = os.path.join(BASE, "01_岗位搜集与背调", fn)
+        if os.path.exists(p):
+            groups.append({"title": icon + " " + title[:4], "notes": [{"title": title, "icon": icon, "html": md_to_html(strip_fm(read(p)))}]})
+    research = os.path.join(BASE, "01_岗位搜集与背调", "公司调研")
+    companies = []
+    if os.path.isdir(research):
+        for company in sorted(os.listdir(research)):
+            cp = os.path.join(research, company)
+            if not os.path.isdir(cp):
+                continue
+            # 每个岗位方向一个子分组：公司 > 岗位方向 > 评分/背调报告文件
+            pos_groups = []
+            for posdir in sorted(os.listdir(cp)):
+                pp = os.path.join(cp, posdir)
+                if not os.path.isdir(pp):
+                    continue
+                leafs = []
+                for fn in sorted(os.listdir(pp)):
+                    p = os.path.join(pp, fn)
+                    if fn.startswith("评分-") or fn.startswith("背调报告-"):
+                        if fn.endswith(".md"):
+                            leafs.append(_md_note(p))
+                        elif fn.lower().endswith((".pdf", ".doc", ".docx")):
+                            leafs.append(_file_note(p))
+                if leafs:
+                    pos_groups.append({"title": posdir, "icon": "📂", "children": leafs})
+            if pos_groups:
+                companies.append({"title": company, "icon": "🐈", "children": pos_groups})
+    groups.append({"title": "🏢 公司调研（评分 / 背调报告）", "notes": companies})
+    return groups
+
+def _resume_note(r):
+    links = []
+    if r.get("pdf"):
+        links.append(f'<a href="{r["pdf"]}" target="_blank">📥 下载 PDF</a>')
+    if r.get("doc"):
+        links.append(f'<a href="{r["doc"]}" target="_blank">📥 下载 Word</a>')
+    return {"title": r["name"], "icon": "📄", "html": "<p>" + " &nbsp; ".join(links) + "</p>"}
+
+def _kb_02(resumes):
+    groups = []
+    general = [_resume_note(r) for r in resumes.get("general", [])]
+    groups.append({"title": "📁 通用简历", "notes": general})
+    custom = []
+    for cg in resumes.get("custom", []):
+        children = [_resume_note(r) for r in cg["items"]]
+        if children:
+            custom.append({"title": cg["company"], "icon": "💙", "children": children})
+    groups.append({"title": "📁 各企业定制", "notes": custom})
+    return groups
+
+
+def _kb_03():
+    root = os.path.join(BASE, "03_笔面试题库")
+    groups = []
+    if not os.path.isdir(root):
+        return groups
+    idx = os.path.join(root, "📋 面试资料索引.md")
+    if os.path.exists(idx):
+        groups.append({"title": "📋 面试资料索引",
+                       "notes": [{"title": "面试资料索引", "icon": "📋", "html": md_to_html(strip_fm(read(idx)))}]})
+    for sub in sorted(os.listdir(root)):
+        sp = os.path.join(root, sub)
+        if not os.path.isdir(sp):
+            continue
+        direct = []
+        nested = []
+        for name in sorted(os.listdir(sp)):
+            p = os.path.join(sp, name)
+            if os.path.isdir(p):
+                children = []
+                for fn in sorted(os.listdir(p)):
+                    fp = os.path.join(p, fn)
+                    if fn.endswith(".md") and not (fn.startswith("评分-") or fn.startswith("背调报告-")):
+                        children.append(_md_note(fp))
+                    elif fn.lower().endswith((".pdf", ".doc", ".docx", ".png", ".jpg", ".jpeg")):
+                        children.append(_file_note(fp))
+                if children:
+                    nested.append({"title": "📂 " + name, "icon": "📂", "children": children})
+            else:
+                if name.endswith(".md") and not (name.startswith("评分-") or name.startswith("背调报告-")):
+                    direct.append(_md_note(p))
+                elif name.lower().endswith((".pdf", ".doc", ".docx", ".png", ".jpg", ".jpeg")):
+                    direct.append(_file_note(p))
+        notes = direct + nested
+        if notes:
+            groups.append({"title": "📁 " + sub, "notes": notes})
+    return groups
+
+def _kb_07():
+    """07_原始材料库：公司 > 岗位方向 > 材料文件，顶部保留材料索引"""
+    root = os.path.join(BASE, "07_原始材料库")
+    groups = []
+    idx = os.path.join(root, "📋 材料索引.md")
+    if os.path.exists(idx):
+        groups.append({"title": "📋 材料索引",
+                       "notes": [{"title": "材料索引", "icon": "📋", "html": md_to_html(strip_fm(read(idx)))}]})
+    companies = []
+    if os.path.isdir(root):
+        for company in sorted(os.listdir(root)):
+            cp = os.path.join(root, company)
+            if not os.path.isdir(cp):
+                continue
+            pos_groups = []
+            for posdir in sorted(os.listdir(cp)):
+                pp = os.path.join(cp, posdir)
+                if not os.path.isdir(pp):
+                    continue
+                leafs = []
+                for fn in sorted(os.listdir(pp)):
+                    p = os.path.join(pp, fn)
+                    if fn.endswith(".md"):
+                        leafs.append(_md_note(p))
+                    elif fn.lower().endswith((".pdf", ".doc", ".docx")):
+                        leafs.append(_file_note(p))
+                if leafs:
+                    pos_groups.append({"title": posdir, "icon": "📂", "children": leafs})
+            if pos_groups:
+                companies.append({"title": company, "icon": "🏢", "children": pos_groups})
+    groups.append({"title": "🏢 各企业原始材料（JD / 公告）", "notes": companies})
+    return groups
+
+def _kb_08():
+    """08_个人资料库：核心档案（根目录 md）+ 各子目录（如报告论文与作品）"""
+    root = os.path.join(BASE, "08_个人资料库")
+    groups = []
+    core = []
+    if os.path.isdir(root):
+        for fn in sorted(os.listdir(root)):
+            p = os.path.join(root, fn)
+            if os.path.isfile(p) and fn.endswith(".md"):
+                core.append(_md_note(p))
+    if core:
+        groups.append({"title": "👤 核心档案", "notes": core})
+    if os.path.isdir(root):
+        for sub in sorted(os.listdir(root)):
+            sp = os.path.join(root, sub)
+            if not os.path.isdir(sp):
+                continue
+            leafs = []
+            for fn in sorted(os.listdir(sp)):
+                p = os.path.join(sp, fn)
+                if fn.endswith(".md"):
+                    leafs.append(_md_note(p))
+                elif fn.lower().endswith((".pdf", ".doc", ".docx")):
+                    leafs.append(_file_note(p))
+            if leafs:
+                groups.append({"title": "📂 " + sub, "notes": leafs})
+    return groups
+
+def _kb_04():
+    """04_实战复盘：根目录文件（错题本等）+ 按企业/岗位分组的面试复盘"""
+    root = os.path.join(BASE, "04_实战复盘")
+    groups = []
+    # 根目录下的文件（如错题本.md）
+    root_files = []
+    if os.path.isdir(root):
+        for fn in sorted(os.listdir(root)):
+            p = os.path.join(root, fn)
+            if os.path.isfile(p):
+                if fn.endswith(".md"):
+                    root_files.append(_md_note(p))
+                elif fn.lower().endswith((".pdf", ".doc", ".docx", ".m4a", ".mp3", ".wav")):
+                    root_files.append(_file_note(p))
+    if root_files:
+        groups.append({"title": "📚 通用资料", "notes": root_files})
+    # 按企业/岗位分组
+    companies = []
+    if os.path.isdir(root):
+        for company in sorted(os.listdir(root)):
+            cp = os.path.join(root, company)
+            if not os.path.isdir(cp):
+                continue
+            pos_groups = []
+            for posdir in sorted(os.listdir(cp)):
+                pp = os.path.join(cp, posdir)
+                if not os.path.isdir(pp):
+                    continue
+                leafs = []
+                # 递归扫描岗位目录下的所有文件
+                for r, dirs, files in os.walk(pp):
+                    for fn in sorted(files):
+                        p = os.path.join(r, fn)
+                        if fn.endswith(".md"):
+                            leafs.append(_md_note(p))
+                        elif fn.lower().endswith((".pdf", ".doc", ".docx", ".m4a", ".mp3", ".wav", ".png", ".jpg", ".jpeg")):
+                            leafs.append(_file_note(p))
+                if leafs:
+                    pos_groups.append({"title": posdir, "icon": "📂", "children": leafs})
+            if pos_groups:
+                companies.append({"title": company, "icon": "🏢", "children": pos_groups})
+    if companies:
+        groups.append({"title": "🎯 企业岗位复盘", "notes": companies})
+    return groups
+
+def scan_kb(jobs, resumes):
+    kb = []
+    for folder, icon, desc, cls, handler in _KB_META:
+        if handler == "kb01":
+            groups = _kb_01(jobs)
+        elif handler == "kb02":
+            groups = _kb_02(resumes)
+        elif handler == "kb03":
+            groups = _kb_03()
+        elif handler == "kb04":
+            groups = _kb_04()
+        elif handler == "kb07":
+            groups = _kb_07()
+        elif handler == "kb08":
+            groups = _kb_08()
+        else:
+            groups = [{"title": "", "notes": _walk_notes(os.path.join(BASE, folder))}]
+        kb.append({"icon": icon, "name": folder, "desc": desc, "cls": cls, "groups": groups})
+    return kb
+
+# 取知识库最近一次改动时间（保证只有真的改过才更新时间，避免自动提交刷屏）
+_SKIP_DIRS = {".git", ".obsidian", ".trash", "Templates", ".agents", ".codex", "docs"}
+def latest_mtime():
+    latest = 0.0
+    for root, dirs, files in os.walk(BASE):
+        rel = os.path.relpath(root, BASE)
+        if rel == "." or any(part in _SKIP_DIRS for part in rel.split(os.sep)):
+            dirs[:] = [d for d in dirs if d not in _SKIP_DIRS]
+            continue
+        for fn in files:
+            try:
+                latest = max(latest, os.path.getmtime(os.path.join(root, fn)))
+            except Exception:
+                pass
+    return datetime.datetime.fromtimestamp(latest) if latest else datetime.datetime.now()
+
+# ---------- 组装 ----------
+def build():
+    # 先清空旧的生成目录，避免残留文件
+    if os.path.isdir(OUT):
+        shutil.rmtree(OUT)
+    os.makedirs(FILES_DIR, exist_ok=True)
+    # 图片素材
+    img_out = os.path.join(OUT, "assets")
+    os.makedirs(img_out, exist_ok=True)
+    img_src = os.path.join(ASSETS, "img")
+    bg, av = {}, {}
+    if os.path.isdir(img_src):
+        for fn in sorted(os.listdir(img_src)):
+            shutil.copy2(os.path.join(img_src, fn), os.path.join(img_out, fn))
+            key = os.path.splitext(fn)[0]  # img1_bg / img1_avatar
+            url = "assets/" + fn
+            if fn.endswith("_bg.jpg"):
+                bg[key.replace("_bg", "")] = url
+            elif fn.endswith("_avatar.jpg"):
+                av[key.replace("_avatar", "")] = url
+    # PWA：图标 + manifest + service worker
+    icon_src = os.path.join(ASSETS, "icons")
+    if os.path.isdir(icon_src):
+        for fn in os.listdir(icon_src):
+            shutil.copy2(os.path.join(icon_src, fn), os.path.join(img_out, fn))
+    for fname in ("manifest.json", "sw.js"):
+        sp = os.path.join(ASSETS, fname)
+        if os.path.exists(sp):
+            shutil.copy2(sp, os.path.join(OUT, fname))
+
+    jobs = scan_jobs()
+    companies = scan_companies()
+    timeline, todo = scan_timeline()
+    resumes = scan_resumes()
+    kb = scan_kb(jobs, resumes)
+
+    stats = {"jobs": len(jobs), "rec": 0, "interview": 0, "offer": 0}
+    for j in jobs:
+        if isinstance(j["score"], (int, float)) and j["score"] >= 70:
+            stats["rec"] += 1
+        if j["status"] == "interview":
+            stats["interview"] += 1
+        if "offer" in j["statusTxt"].lower():
+            stats["offer"] += 1
+
+    data = {
+        "updated": latest_mtime().strftime("%Y-%m-%d %H:%M"),
+        "stats": stats,
+        "todo": todo,
+        "jobs": jobs,
+        "companies": companies,
+        "timeline": timeline,
+        "resumes": resumes,
+        "kb": kb,
+        "images": {"bg": bg, "av": av},
+    }
+
+    css = read(os.path.join(ASSETS, "style.css"))
+    body = read(os.path.join(ASSETS, "body.html"))
+    js = read(os.path.join(ASSETS, "app.js"))
+    data_json = json.dumps(data, ensure_ascii=False, indent=1)
+
+    # 读取同步状态并注入页脚
+    sync_status = "⏳ 等待首次同步"
+    status_file = os.path.join(BASE, "LAST_SYNC_STATUS.txt")
+    if os.path.exists(status_file):
+        try:
+            with open(status_file, encoding="utf-8") as f:
+                for line in f:
+                    if line.startswith("状态:"):
+                        sync_status = line.split(":", 1)[1].strip()
+                        break
+        except Exception:
+            pass
+    updated_time = data["updated"]
+    body = body.replace("{{SYNC_STATUS}}", sync_status)
+    body = body.replace("{{UPDATED_TIME}}", updated_time)
+
+    html_out = """<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>文雪求职小窝</title>
+<meta name="theme-color" content="#ffd0e2">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="assets/icon-192.png">
+<style>
+""" + css + """
+</style>
+</head>
+""" + body + """
+<script>
+window.SITE_DATA = """ + data_json + """;
+</script>
+<script>
+""" + js + """
+</script>
+<script>
+if('serviceWorker' in navigator){ window.addEventListener('load', function(){ navigator.serviceWorker.register('sw.js'); }); }
+</script>
+</body>
+</html>"""
+
+    idx = os.path.join(OUT, "index.html")
+    with open(idx, "w", encoding="utf-8") as f:
+        f.write(html_out)
+    kb_count = 0
+    for k in kb:
+        for g in k.get("groups", []):
+            for n in g.get("notes", []):
+                kb_count += len(n.get("children", [])) if "children" in n else 1
+    print("✅ 网站已生成：", idx)
+    print("   岗位:", stats["jobs"], "| 公司池分组:", len(companies), "| 日报:", len(timeline),
+          "| 简历: 通用", len(resumes["general"]), "/ 定制", sum(len(c["items"]) for c in resumes["custom"]),
+          "| 知识库条目:", kb_count)
+    print("   files/ 文件数:", len(os.listdir(FILES_DIR)))
+
+if __name__ == "__main__":
+    build()
