@@ -768,6 +768,32 @@ def latest_mtime():
                 pass
     return datetime.datetime.fromtimestamp(latest) if latest else datetime.datetime.now()
 
+# ---------- 提取背景图主色调（构建时算好，前端直接用，避免CORS问题） ----------
+def extract_theme_hue(img_path):
+    """返回 (主色相H 0-360, 辅助色相H2)。失败返回None。"""
+    try:
+        import colorsys
+        from PIL import Image
+        im = Image.open(img_path).convert("RGB").resize((40, 40))
+        px = list(im.getdata())
+        buckets = {}
+        for (r, g, b) in px:
+            h, l, s = colorsys.rgb_to_hls(r/255.0, g/255.0, b/255.0)
+            if l > 0.93 or l < 0.07 or s < 0.14:
+                continue  # 跳过白/黑/灰
+            hdeg = h * 360
+            bk = int(hdeg // 30)
+            buckets.setdefault(bk, []).append((hdeg, s, l))
+        if not buckets:
+            return None
+        best = max(buckets.values(), key=len)
+        H = sum(p[0] for p in best) / len(best)
+        H2 = (H + 38) % 360
+        return round(H, 1), round(H2, 1)
+    except Exception as e:
+        print("   ⚠️ 主色调提取失败", os.path.basename(img_path), e)
+        return None
+
 # ---------- 组装 ----------
 def build():
     # 先清空旧的生成目录，避免残留文件
@@ -778,14 +804,20 @@ def build():
     img_out = os.path.join(OUT, "assets")
     os.makedirs(img_out, exist_ok=True)
     img_src = os.path.join(ASSETS, "img")
-    bg, av = {}, {}
+    bg, av, theme = {}, {}, {}
     if os.path.isdir(img_src):
         for fn in sorted(os.listdir(img_src)):
-            shutil.copy2(os.path.join(img_src, fn), os.path.join(img_out, fn))
+            full = os.path.join(img_src, fn)
+            shutil.copy2(full, os.path.join(img_out, fn))
             key = os.path.splitext(fn)[0]  # img1_bg / img1_avatar
             url = "assets/" + fn
             if fn.endswith("_bg.jpg"):
-                bg[key.replace("_bg", "")] = url
+                k = key.replace("_bg", "")
+                bg[k] = url
+                th = extract_theme_hue(full)
+                if th:
+                    theme[k] = {"h": th[0], "h2": th[1]}
+                    print("   🎨", fn, "主色相", th[0], "辅助", th[1])
             elif fn.endswith("_avatar.jpg"):
                 av[key.replace("_avatar", "")] = url
     # PWA：图标 + manifest + service worker
@@ -816,7 +848,7 @@ def build():
         "timeline": timeline,
         "resumes": resumes,
         "kb": kb,
-        "images": {"bg": bg, "av": av},
+        "images": {"bg": bg, "av": av, "theme": theme},
     }
 
     css = read(os.path.join(ASSETS, "style.css"))
@@ -861,7 +893,7 @@ window.SITE_DATA = """ + data_json + """;
 """ + js + """
 </script>
 <script>
-if('serviceWorker' in navigator){ window.addEventListener('load', function(){ navigator.serviceWorker.register('sw.js'); }); }
+if('serviceWorker' in navigator && location.protocol.indexOf('http')===0){ window.addEventListener('load', function(){ navigator.serviceWorker.register('sw.js'); }); }
 </script>
 </body>
 </html>"""
