@@ -1,7 +1,7 @@
 /* ===== 文雪求职小窝 · 前端逻辑（数据由生成器自动注入） ===== */
 var D = window.SITE_DATA || {};
 var JOBS = D.jobs || [], COMPS = D.companies || [], TL = D.timeline || [];
-var RESUMES = D.resumes || {general:[], custom:[]}, KBS = D.kb || [], BCKBS = D.baichuanKb || [];
+var RESUMES = D.resumes || {general:[], custom:[]}, KBS = D.kb || [], BCKBS = D.baichuanKb || [], CET6KBS = D.cet6Kb || [], SOPKBS = D.sopKb || [];
 var IMGS = D.images || {bg:{}, av:{}};
 /* 快捷操作中转站（Cloudflare Worker），接入后由助手填写 */
 var BRIDGE = { url: "https://1473705102-gh71l7a70a.ap-shanghai.tencentscf.com", key: "XNTbRx7spQJHDGWfKjchz8iSL2OIwoFY" };
@@ -286,6 +286,46 @@ function openBcKb(i){
   setModal('<h2>'+k.icon+' '+esc(k.name)+'</h2><div class="m-sub">'+esc(k.desc)+' · 点击查看</div>'+(html||'<div class="m-sub">这个文件夹还没有内容 🐾</div>'));
 }
 
+function renderGenericKb(gridId, data, countIds){
+  var grid = document.getElementById(gridId);
+  if(!grid || !data) return;
+  grid.innerHTML = data.map(function(k,i){
+    var cnt = 0;
+    (k.groups||[{title:"", notes:k.notes||[]}]).forEach(function(g){ cnt += countNotes(g.notes); });
+    return '<div class="kb-card" onclick="openGenericKb(\''+gridId+'\','+i+')"><div class="ic">'+k.icon+'</div><div class="kb-info"><div class="kn">'+esc(k.name)+'</div><div class="kd">'+esc(k.desc)+'</div></div><span class="ncount">'+cnt+' 项</span></div>';
+  }).join("");
+  // 更新统计
+  if(countIds){
+    var total = 0;
+    data.forEach(function(k){
+      var cnt = 0;
+      (k.groups||[{notes:k.notes||[]}]).forEach(function(g){ cnt += countNotes(g.notes); });
+      total += cnt;
+      for(var key in countIds){
+        if(k.name.indexOf(key) >= 0 && countIds[key]){
+          var el = document.getElementById(countIds[key]);
+          if(el) el.textContent = cnt;
+        }
+      }
+    });
+    if(countIds._total){
+      var tel = document.getElementById(countIds._total);
+      if(tel) tel.textContent = total;
+    }
+  }
+}
+function openGenericKb(gridId, i){
+  var data = gridId === "cet6KbGrid" ? CET6KBS : (gridId === "sopKbGrid" ? SOPKBS : BCKBS);
+  var k = data[i];
+  var html = "";
+  (k.groups||[{title:"", notes:k.notes||[]}]).forEach(function(g){
+    if(g.title) html += '<div class="kb-section">'+esc(g.title)+'</div>';
+    var items = renderNotes(g.notes);
+    html += items || '<div style="color:var(--muted);font-size:13px;margin:4px 0">（空）🐾</div>';
+  });
+  setModal('<h2>'+k.icon+' '+esc(k.name)+'</h2><div class="m-sub">'+esc(k.desc)+' · 点击查看</div>'+(html||'<div class="m-sub">这个文件夹还没有内容 🐾</div>'));
+}
+
 /* ---------- 全局搜索 ---------- */
 function plainText(html){
   var d = document.createElement("div"); d.innerHTML = html || ""; return (d.textContent||"").replace(/\s+/g," ").trim();
@@ -539,6 +579,12 @@ document.addEventListener("keydown", function(e){ if(e.key==="Escape") closeModa
     }
     if(document.getElementById("bcKbGrid")){
       flattenKb(); renderBcKb();
+    }
+    if(document.getElementById("cet6KbGrid")){
+      flattenKb(); renderGenericKb("cet6KbGrid", CET6KBS, {_total:"cet6KbCount","词汇":"cet6WordCount","错题":"cet6ErrorCount","学习资料":"cet6MatCount"});
+    }
+    if(document.getElementById("sopKbGrid")){
+      flattenKb(); renderGenericKb("sopKbGrid", SOPKBS, {_total:"sopKbCount","工作流程":"sopFlowCount","岗位知识":"sopKnowCount","错题":"sopErrorCount"});
       // 更新统计数字
       var kbTotal = 0;
       KBS.forEach(function(k){ (k.groups||[{notes:k.notes||[]}]).forEach(function(g){ (function walk(ns){ ns.forEach(function(n){ kbTotal += n.children ? (function(){var c=0;(function w2(x){x.forEach(function(z){c+=z.children?w2(z.children):1});return c;})(n.children)})() : 1; }); })(g.notes||[]); }); });

@@ -778,6 +778,51 @@ def scan_kb(jobs, resumes):
         kb.append({"icon": icon, "name": folder, "desc": desc, "cls": cls, "groups": groups})
     return kb
 
+
+# ========== CET-6 六级学习 ==========
+CET6_ROOT = r"D:\Obsidian\Weh-Brain\01-Projects\CET-6"
+_CET6_META = [
+    ("00-备考总览", "📋", "备考计划、进度跟踪、总览"),
+    ("01-词汇", "📝", "单词书、词汇笔记、高频词"),
+    ("02-听力", "🎧", "听力技巧、真题练习、错题"),
+    ("03-阅读", "📖", "阅读技巧、真题练习、错题"),
+    ("04-写作", "✍️", "作文模板、范文、写作技巧"),
+    ("05-翻译", "🌐", "翻译技巧、真题练习、错题"),
+    ("06-错题本", "❌", "历次错题汇总与分析"),
+    ("07-学习资料", "📚", "网课、PDF、参考资料"),
+    ("99-系统与规则", "⚙️", "学习系统规则与笔记"),
+]
+
+def scan_cet6():
+    cet6 = []
+    for folder, icon, desc in _CET6_META:
+        notes = _walk_notes(os.path.join(CET6_ROOT, folder))
+        cet6.append({"icon": icon, "name": folder, "desc": desc, "cls": "", "groups": [{"title": "", "notes": notes}]})
+    return cet6
+
+# ========== 工作SOP ==========
+SOP_ROOT = r"D:\Obsidian\Weh-Brain\05-Skills\工作SOP"
+_SOP_META = [
+    ("01_交接文件", "📦", "岗位交接文档与清单"),
+    ("02_网栈工具", "🔧", "日常使用的网络工具与栈"),
+    ("03_日常工作流程", "📋", "标准化日常工作流程"),
+    ("04_行业术语", "📖", "行业专业术语与解释"),
+    ("05_错题本", "❌", "工作中踩过的坑与复盘"),
+    ("06_项目成果", "🏆", "项目成果与交付物"),
+    ("07_岗位知识", "💡", "岗位专业知识沉淀"),
+    ("08_素材库", "🎨", "汇报素材、模板、参考"),
+    ("09_系统与规则", "⚙️", "SOP系统规则与约定"),
+    ("10_找人地图", "🗺️", "组织架构与联系人地图"),
+    ("11_团队目标", "🎯", "团队目标与OKR跟踪"),
+]
+
+def scan_sop():
+    sop = []
+    for folder, icon, desc in _SOP_META:
+        notes = _walk_notes(os.path.join(SOP_ROOT, folder))
+        sop.append({"icon": icon, "name": folder, "desc": desc, "cls": "", "groups": [{"title": "", "notes": notes}]})
+    return sop
+
 # 取知识库最近一次改动时间（保证只有真的改过才更新时间，避免自动提交刷屏）
 _SKIP_DIRS = {".git", ".obsidian", ".trash", "Templates", ".agents", ".codex", "docs"}
 def latest_mtime():
@@ -899,6 +944,8 @@ def build():
     resumes = scan_resumes()
     kb = scan_kb(jobs, resumes)
     baichuanKb = scan_baichuan()
+    cet6Kb = scan_cet6()
+    sopKb = scan_sop()
     stats = {
         "jobs": len(jobs),
         "rec": sum(1 for j in jobs if j.get("status") == "rec"),
@@ -916,6 +963,8 @@ def build():
         "resumes": resumes,
         "kb": kb,
         "baichuanKb": baichuanKb,
+        "cet6Kb": cet6Kb,
+        "sopKb": sopKb,
         "images": {"bg": bg, "av": av, "theme": theme, "bgMobile": bgm},
     "appIcons": app_icons,
     }
