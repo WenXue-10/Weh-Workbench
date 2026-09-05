@@ -452,13 +452,13 @@ function renderMoney(){
   if(cycleRecords.length === 0){
     el.innerHTML = '<div style="text-align:center;color:var(--muted);padding:24px;font-size:13px">还没有消费记录，点上方快捷按钮开始记账～</div>';
   } else {
-    el.innerHTML = cycleRecords.slice().reverse().map(function(r){
+    el.innerHTML = cycleRecords.slice().sort(sortByDateTime).map(function(r){
       var cat = QUICK_CATEGORIES.find(function(c){ return c.name===r.category; }) || {icon:"💰"};
       var impCls = r.impulse ? "" : " off";
       var impTxt = r.impulse ? "⚠️冲动" : "普通";
       return '<div class="exp-item">'
         +'<div class="exp-icon">'+cat.icon+'</div>'
-        +'<div class="exp-info"><div class="exp-cat">'+esc(r.category)+(r.note?' · '+esc(r.note):'')+'</div><div class="exp-date">'+r.date+'</div></div>'
+        +'<div class="exp-info"><div class="exp-cat">'+esc(r.category)+(r.note?' · '+esc(r.note):'')+'</div><div class="exp-date">'+r.date+' '+(r.time||"")+'</div></div>'
         +'<div class="exp-amount" onclick="editExpAmount('+r.id+')">¥'+r.amount+'</div>'
         +'<div class="exp-impulse'+impCls+'" onclick="toggleImpulse('+r.id+')">'+impTxt+'</div>'
         +'<div class="exp-del" onclick="delExpense('+r.id+')">✕</div>'
@@ -489,17 +489,18 @@ function renderMoney(){
 
 function quickExpense(cat, amount){
   var data = loadMoney();
-  var today = new Date().toISOString().slice(0,10);
   var id = Date.now();
+  var dtInput = prompt(cat+" 日期时间（默认 "+nowDateTime()+"，可改，格式 YYYY-MM-DD HH:MM）：", nowDateTime()) || nowDateTime();
+  var dt = parseDateTime(dtInput);
   var note = prompt(cat+" 备注（可选，如：午餐/公司楼下/和朋友，不填直接点确定）：") || "";
-  data.records.push({id:id, category:cat, amount:amount, date:today, impulse:!!IMPULSE_CATS[cat], note:note});
+  data.records.push({id:id, category:cat, amount:amount, date:dt.date, time:dt.time, impulse:!!IMPULSE_CATS[cat], note:note});
   saveMoney(data);
   renderMoney();
   if(isHealthCategory(cat)){
     try{
       var health = loadHealth();
       if(!health.records.find(function(r){ return r.id===id; })){
-        health.records.push({id:id, type:getHealthType(cat), category:cat, amount:amount, date:today, note:note});
+        health.records.push({id:id, type:getHealthType(cat), category:cat, amount:amount, date:dt.date, time:dt.time, note:note});
         saveHealth(health);
       }
     }catch(e){ console.log("同步到饮食台失败:", e.message); }
@@ -510,11 +511,12 @@ function addCustomExpense(){
   if(!cat) return;
   var amount = prompt("金额：");
   if(!amount || isNaN(amount)) return;
+  var dtInput = prompt("日期时间（默认 "+nowDateTime()+"，可改，格式 YYYY-MM-DD HH:MM）：", nowDateTime()) || nowDateTime();
+  var dt = parseDateTime(dtInput);
   var note = prompt("备注（可选）：") || "";
   var data = loadMoney();
-  var today = new Date().toISOString().slice(0,10);
   var id = Date.now();
-  data.records.push({id:id, category:cat, amount:Number(amount), date:today, impulse:false, note:note});
+  data.records.push({id:id, category:cat, amount:Number(amount), date:dt.date, time:dt.time, impulse:false, note:note});
   saveMoney(data);
   renderMoney();
   if(isHealthCategory(cat)){
@@ -715,6 +717,39 @@ var MEALS = [
   {name:"自己做", icon:"👩‍🍳", amount:15},
 ];
 
+function nowTimeStr(){
+  var d = new Date();
+  var h = String(d.getHours()).padStart(2,"0");
+  var m = String(d.getMinutes()).padStart(2,"0");
+  return h+":"+m;
+}
+function sortByDateTime(a, b){
+  var ta = (a.date || "") + " " + (a.time || "00:00");
+  var tb = (b.date || "") + " " + (b.time || "00:00");
+  return tb.localeCompare(ta);
+}
+
+function nowDateTime(){
+  var d = new Date();
+  return d.toISOString().slice(0,10) + " " + nowTimeStr();
+}
+function parseDateTime(input){
+  // 解析 "YYYY-MM-DD HH:MM" 或 "YYYY-MM-DD"
+  input = (input||"").trim();
+  var parts = input.split(/\s+/);
+  var date = parts[0] || new Date().toISOString().slice(0,10);
+  var time = parts[1] || nowTimeStr();
+  // 验证日期格式
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(date)){
+    date = new Date().toISOString().slice(0,10);
+  }
+  // 验证时间格式
+  if(!/^\d{2}:\d{2}$/.test(time)){
+    time = nowTimeStr();
+  }
+  return {date:date, time:time};
+}
+
 function loadHealth(){
   try{
     var d = JSON.parse(localStorage.getItem(HEALTH_KEY));
@@ -792,12 +827,12 @@ function renderHealth(){
   if(weekRecords.length === 0){
     el.innerHTML = '<div style="text-align:center;color:var(--muted);padding:24px;font-size:13px">还没有记录，点上方按钮开始～</div>';
   } else {
-    el.innerHTML = weekRecords.slice().reverse().map(function(r){
+    el.innerHTML = weekRecords.slice().sort(sortByDateTime).map(function(r){
       var cat = (r.type==="drink"?DRINKS:MEALS).find(function(c){ return c.name===r.category; }) || {icon:"🍽️"};
       var amt = "¥"+r.amount;
       return '<div class="exp-item">'
         +'<div class="exp-icon">'+cat.icon+'</div>'
-        +'<div class="exp-info"><div class="exp-cat">'+esc(r.category)+(r.note?' · '+esc(r.note):'')+'</div><div class="exp-date">'+r.date+' · '+(r.type==="drink"?"饮品":"吃法")+'</div></div>'
+        +'<div class="exp-info"><div class="exp-cat">'+esc(r.category)+(r.note?' · '+esc(r.note):'')+'</div><div class="exp-date">'+r.date+' '+(r.time||"")+' · '+(r.type==="drink"?"饮品":"吃法")+'</div></div>'
         +'<div class="exp-amount" onclick="editHealthAmount('+r.id+')">'+amt+'</div>'
         +'<div class="exp-del" onclick="delHealthRecord('+r.id+')">✕</div>'
         +'</div>';
@@ -825,15 +860,16 @@ function renderHealth(){
 
 function quickDrink(cat, amount){
   var data = loadHealth();
-  var today = new Date().toISOString().slice(0,10);
   var recId = Date.now();
+  var dtInput = prompt(cat+" 日期时间（默认 "+nowDateTime()+"，可改，格式 YYYY-MM-DD HH:MM）：", nowDateTime()) || nowDateTime();
+  var dt = parseDateTime(dtInput);
   var note = prompt(cat+" 备注（可选，如：便利店/美式/大杯，不填直接点确定）：") || "";
-  data.records.push({id:recId, type:"drink", category:cat, amount:amount, date:today, note:note});
+  data.records.push({id:recId, type:"drink", category:cat, amount:amount, date:dt.date, time:dt.time, note:note});
   saveHealth(data); renderHealth();
   // 同步到存钱记账
   try{
     var money = loadMoney();
-    money.records.push({id:recId, category:cat, amount:amount, date:today, impulse:!!IMPULSE_CATS[cat], note:note});
+    money.records.push({id:recId, category:cat, amount:amount, date:dt.date, impulse:!!IMPULSE_CATS[cat], note:note});
     saveMoney(money);
   }catch(e){ console.log("同步到记账失败:", e.message); }
 }
@@ -842,11 +878,12 @@ function quickMeal(cat){
   var amount = prompt(cat+" 金额（默认 ¥"+mealDef.amount+"，可修改）：", String(mealDef.amount));
   if(amount===null) return;
   if(isNaN(amount) || Number(amount)<=0) amount = mealDef.amount;
+  var dtInput = prompt(cat+" 日期时间（默认 "+nowDateTime()+"，可改，格式 YYYY-MM-DD HH:MM）：", nowDateTime()) || nowDateTime();
+  var dt = parseDateTime(dtInput);
   var note = prompt(cat+" 备注（可选，如：三明治/黄焖鸡/公司楼下，不填直接点确定）：") || "";
   var data = loadHealth();
-  var today = new Date().toISOString().slice(0,10);
   var recId = Date.now();
-  data.records.push({id:recId, type:"meal", category:cat, amount:Number(amount), date:today, note:note});
+  data.records.push({id:recId, type:"meal", category:cat, amount:Number(amount), date:dt.date, time:dt.time, note:note});
   saveHealth(data); renderHealth();
   try{
     var money = loadMoney();
@@ -864,11 +901,12 @@ function addCustomMeal(){
     amount = prompt("金额：");
     if(!amount || isNaN(amount)) return;
   }
+  var dtInput = prompt("日期时间（默认 "+nowDateTime()+"，可改，格式 YYYY-MM-DD HH:MM）：", nowDateTime()) || nowDateTime();
+  var dt = parseDateTime(dtInput);
   var note = prompt("备注（可选）：") || "";
   var data = loadHealth();
-  var today = new Date().toISOString().slice(0,10);
   var recId = Date.now();
-  data.records.push({id:recId, type:type, category:cat, amount:Number(amount), date:today, note:note});
+  data.records.push({id:recId, type:type, category:cat, amount:Number(amount), date:dt.date, time:dt.time, note:note});
   saveHealth(data); renderHealth();
   // 只要是饮食记录（drink或meal），都同步到记账台
   if(type==="drink" || type==="meal"){
