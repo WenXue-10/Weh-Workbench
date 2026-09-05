@@ -627,8 +627,22 @@
                 <div class="setting-row">
                   <div class="setting-label">毛玻璃透明度</div>
                   <div class="setting-control">
-                    <input type="range" id="glassOpacity" min="50" max="95" value="75" onchange="setGlassOpacity(this.value)">
+                    <input type="range" id="glassOpacity" min="0" max="100" value="75" onchange="setGlassOpacity(this.value)">
                     <span id="glassOpacityValue">75%</span>
+                  </div>
+                </div>
+                <div class="setting-row">
+                  <div class="setting-label">背景遮罩透明度</div>
+                  <div class="setting-control">
+                    <input type="range" id="veilOpacity" min="0" max="100" value="50" onchange="setVeilOpacity(this.value)">
+                    <span id="veilOpacityValue">50%</span>
+                  </div>
+                </div>
+                <div class="setting-row">
+                  <div class="setting-label">毛玻璃模糊度</div>
+                  <div class="setting-control">
+                    <input type="range" id="blurRadius" min="0" max="40" value="18" onchange="setBlurRadius(this.value)">
+                    <span id="blurRadiusValue">18px</span>
                   </div>
                 </div>
                 <div class="setting-row">

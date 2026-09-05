@@ -392,8 +392,8 @@ function renderMoney(){
   document.getElementById("moneyCycleStart").textContent = "每月" + data.cycleStart + "号";
   // 本期记录
   var cycleRecords = data.records.filter(function(r){ return inCycle(r.date, data.cycleStart); });
-  var spent = cycleRecords.reduce(function(s,r){ return s + Number(r.amount); }, 0);
-  var impulse = cycleRecords.filter(function(r){ return r.impulse; }).reduce(function(s,r){ return s + Number(r.amount); }, 0);
+  var spent = cycleRecords.reduce(function(s,r){ return s + (Number(r.amount) || 0); }, 0);
+  var impulse = cycleRecords.filter(function(r){ return r.impulse; }).reduce(function(s,r){ return s + (Number(r.amount) || 0); }, 0);
   var remain = data.budget - data.fixedSave - spent;
   var daysLeft = daysLeftInCycle(data.cycleStart);
   var perDay = Math.max(remain / daysLeft, 0);
@@ -428,7 +428,7 @@ function renderMoney(){
     for(var wi=6; wi>=0; wi--){
       var d = new Date(today); d.setDate(d.getDate()-wi);
       var ds = d.toISOString().slice(0,10);
-      var daySpent = data.records.filter(function(r){ return r.date===ds; }).reduce(function(s,r){ return s+Number(r.amount); },0);
+      var daySpent = data.records.filter(function(r){ return r.date===ds; }).reduce(function(s,r){ return s+(Number(r.amount) || 0); },0);
       var hasImpulse = data.records.some(function(r){ return r.date===ds && r.impulse; });
       maxDay = Math.max(maxDay, daySpent);
       weekBars.push({date:ds, day:["日","一","二","三","四","五","六"][d.getDay()], spent:daySpent, impulse:hasImpulse, isToday:wi===0});
@@ -467,7 +467,7 @@ function renderMoney(){
   }
   // 类别占比
   var catTotals = {};
-  cycleRecords.forEach(function(r){ catTotals[r.category] = (catTotals[r.category]||0) + Number(r.amount); });
+  cycleRecords.forEach(function(r){ catTotals[r.category] = (catTotals[r.category]||0) + (Number(r.amount) || 0); });
   var catArr = Object.keys(catTotals).map(function(k){ return {name:k, amount:catTotals[k]}; }).sort(function(a,b){ return b.amount-a.amount; });
   var cb = document.getElementById("categoryBars");
   if(catArr.length === 0){
@@ -595,9 +595,9 @@ function editMoneyCycleStart(){
 function runMoneyTruth(){
   var data = loadMoney();
   var cycleRecords = data.records.filter(function(r){ return inCycle(r.date, data.cycleStart); });
-  var spent = cycleRecords.reduce(function(s,r){ return s+Number(r.amount); },0);
+  var spent = cycleRecords.reduce(function(s,r){ return s+(Number(r.amount) || 0); },0);
   var impulse = cycleRecords.filter(function(r){ return r.impulse; });
-  var impulseAmt = impulse.reduce(function(s,r){ return s+Number(r.amount); },0);
+  var impulseAmt = impulse.reduce(function(s,r){ return s+(Number(r.amount) || 0); },0);
   var box = document.getElementById("aiTruth");
   if(cycleRecords.length === 0){
     box.textContent = "还没有消费记录，先记几笔我再帮你分析～";
@@ -643,11 +643,11 @@ function renderMoneyChat(){
 function getMoneyContext(){
   var data = loadMoney();
   var cycleRecords = data.records.filter(function(r){ return inCycle(r.date, data.cycleStart); });
-  var spent = cycleRecords.reduce(function(s,r){ return s+Number(r.amount); },0);
+  var spent = cycleRecords.reduce(function(s,r){ return s+(Number(r.amount) || 0); },0);
   var remain = data.budget - data.fixedSave - spent;
   var daysLeft = daysLeftInCycle(data.cycleStart);
   var catTotals = {};
-  cycleRecords.forEach(function(r){ catTotals[r.category]=(catTotals[r.category]||0)+Number(r.amount); });
+  cycleRecords.forEach(function(r){ catTotals[r.category]=(catTotals[r.category]||0)+(Number(r.amount) || 0); });
   var topCats = Object.keys(catTotals).map(function(k){return{k:k,v:catTotals[k]};}).sort(function(a,b){return b.v-a.v;}).slice(0,3);
   return "【本期消费概览】预算¥"+data.budget+"，固定存款¥"+data.fixedSave+"，已花¥"+spent.toFixed(0)+"，还能花¥"+remain.toFixed(0)+"，还剩"+daysLeft+"天，每天¥"+(remain/daysLeft).toFixed(0)+"。花最多的："+topCats.map(function(c){return c.k+"¥"+c.v.toFixed(0);}).join("、")+"。";
 }
@@ -674,7 +674,7 @@ function generateMoneyReply(msg, data){
   var lower = msg.toLowerCase();
   if(lower.indexOf("超支")>=0 || lower.indexOf("花超")>=0){
     var cycleRecords = data.records.filter(function(r){ return inCycle(r.date, data.cycleStart); });
-    var spent = cycleRecords.reduce(function(s,r){ return s+Number(r.amount); },0);
+    var spent = cycleRecords.reduce(function(s,r){ return s+(Number(r.amount) || 0); },0);
     var remain = data.budget - data.fixedSave - spent;
     if(remain < 0) return "是的，已经超支¥"+Math.abs(remain).toFixed(0)+"。建议：1. 后面非必要消费全停；2. 看看冲动消费里哪笔能退；3. 下个月预算调高或固定存款调低。";
     return "还没超支，还能花¥"+remain.toFixed(0)+"。但要注意节奏，别最后几天紧巴巴。";
@@ -684,7 +684,7 @@ function generateMoneyReply(msg, data){
   }
   if(lower.indexOf("冲动")>=0){
     var imp = data.records.filter(function(r){ return inCycle(r.date, data.cycleStart) && r.impulse; });
-    var impAmt = imp.reduce(function(s,r){ return s+Number(r.amount); },0);
+    var impAmt = imp.reduce(function(s,r){ return s+(Number(r.amount) || 0); },0);
     if(imp.length===0) return "本期还没有冲动消费记录，很棒！继续保持。";
     return "本期冲动消费"+imp.length+"笔，共¥"+impAmt.toFixed(0)+"。最多的是「"+imp.reduce(function(a,b){return Number(a.amount)>Number(b.amount)?a:b;}).category+"」。下次买之前问自己：不买会怎样？72小时后还想要吗？";
   }
@@ -788,7 +788,7 @@ function renderHealth(){
   var drinks = weekRecords.filter(function(r){ return r.type==="drink"; });
   var meals = weekRecords.filter(function(r){ return r.type==="meal"; });
   var drinkCups = drinks.length;
-  var drinkSpent = drinks.reduce(function(s,r){ return s+Number(r.amount); },0);
+  var drinkSpent = drinks.reduce(function(s,r){ return s+(Number(r.amount) || 0); },0);
   var remain = data.drinkBudget - drinkSpent;
   var over = Math.max(-remain, 0);
   document.getElementById("healthSpent").textContent = "¥" + drinkSpent.toFixed(0);
@@ -840,13 +840,13 @@ function renderHealth(){
   }
   // 吃法占比
   var mealTotals = {};
-  meals.forEach(function(r){ mealTotals[r.category]=(mealTotals[r.category]||0)+Number(r.amount); });
+  meals.forEach(function(r){ mealTotals[r.category]=(mealTotals[r.category]||0)+(Number(r.amount) || 0); });
   var mealArr = Object.keys(mealTotals).map(function(k){ return {name:k, amount:mealTotals[k]}; }).sort(function(a,b){ return b.amount-a.amount; });
   var mb = document.getElementById("mealBars");
   if(mealArr.length === 0){
     mb.innerHTML = '<div style="text-align:center;color:var(--muted);padding:16px;font-size:12px">暂无数据</div>';
   } else {
-    var totalMealAmt = meals.reduce(function(s,r){ return s+Number(r.amount); },0);
+    var totalMealAmt = meals.reduce(function(s,r){ return s+(Number(r.amount) || 0); },0);
     mb.innerHTML = mealArr.map(function(c){
       var pct = totalMealAmt>0 ? (c.amount/totalMealAmt*100) : 0;
       var cat = MEALS.find(function(m){ return m.name===c.name; }) || {icon:"🍽️"};
@@ -965,7 +965,7 @@ function runHealthTruth(){
   var weekRecords = data.records.filter(function(r){ return inThisWeek(r.date); });
   var drinks = weekRecords.filter(function(r){ return r.type==="drink"; });
   var drinkCups = drinks.length;
-  var drinkSpent = drinks.reduce(function(s,r){ return s+Number(r.amount); },0);
+  var drinkSpent = drinks.reduce(function(s,r){ return s+(Number(r.amount) || 0); },0);
   var box = document.getElementById("healthTruth");
   if(weekRecords.length === 0){
     box.textContent = "还没有记录，先记几笔我再帮你分析～";
@@ -1017,7 +1017,7 @@ function getHealthContext(){
   var weekRecords = data.records.filter(function(r){ return inThisWeek(r.date); });
   var drinks = weekRecords.filter(function(r){ return r.type==="drink"; });
   var meals = weekRecords.filter(function(r){ return r.type==="meal"; });
-  var drinkSpent = drinks.reduce(function(s,r){ return s+Number(r.amount); },0);
+  var drinkSpent = drinks.reduce(function(s,r){ return s+(Number(r.amount) || 0); },0);
   return "【本周饮食概览】饮品"+drinks.length+"杯，花了¥"+drinkSpent.toFixed(0)+"/预算¥"+data.drinkBudget+"，目标"+data.drinkGoal+"杯；吃饭"+meals.length+"次。";
 }
 function sendHealthChat(){
@@ -2141,7 +2141,7 @@ function initReport(){
 
 /* ========== 设置页 ========== */
 var SETTINGS_KEY = "weh_settings_v1";
-var SETTINGS_DEFAULTS = {theme:"pink", glassOpacity:75, fontSize:"medium", preferences:{}};
+var SETTINGS_DEFAULTS = {theme:"pink", glassOpacity:75, veilOpacity:50, blurRadius:18, fontSize:"medium", preferences:{}};
 var DATA_KEYS = {
   money: "weh_money_data_v1",
   health: "weh_health_data_v1",
@@ -2188,6 +2188,17 @@ function setTheme(theme){
   var c = colors[theme] || colors.pink;
   document.documentElement.style.setProperty("--pink-deep", c.primary);
   document.documentElement.style.setProperty("--purple", c.secondary);
+  // 同时设置渐变相关变量，让左侧栏、按钮等也跟着主题色变化
+  document.documentElement.style.setProperty("--grad-from", c.primary);
+  document.documentElement.style.setProperty("--grad-to", c.secondary);
+  // hex转rgb，设置阴影
+  var r = parseInt(c.primary.slice(1,3),16);
+  var g = parseInt(c.primary.slice(3,5),16);
+  var b = parseInt(c.primary.slice(5,7),16);
+  document.documentElement.style.setProperty("--grad-shadow", "rgba("+r+","+g+","+b+",0.3)");
+  // 同时设置pink/lav系列变量，让hover等效果也跟着变
+  document.documentElement.style.setProperty("--pink", c.primary);
+  document.documentElement.style.setProperty("--lav", c.secondary);
 }
 
 function setGlassOpacity(value){
@@ -2197,6 +2208,29 @@ function setGlassOpacity(value){
   document.getElementById("glassOpacityValue").textContent = value + "%";
   // 应用透明度
   document.documentElement.style.setProperty("--glass-opacity", value/100);
+}
+
+function setVeilOpacity(value){
+  var s = loadSettings();
+  s.veilOpacity = parseInt(value);
+  saveSettings(s);
+  document.getElementById("veilOpacityValue").textContent = value + "%";
+  var base = value / 100;
+  document.documentElement.style.setProperty("--veil-alpha", base);
+  // 直接用全局色相变量重新设置遮罩，不需要重新加载背景图
+  var H = currentHueH || 0;
+  var topAlpha = (base * 0.7).toFixed(2);
+  var botAlpha = base.toFixed(2);
+  document.documentElement.style.setProperty("--veil-top", "hsla("+Math.round(H)+",50%,97%,"+topAlpha+")");
+  document.documentElement.style.setProperty("--veil-bot", "hsla("+Math.round(H)+",50%,97%,"+botAlpha+")");
+}
+
+function setBlurRadius(value){
+  var s = loadSettings();
+  s.blurRadius = parseInt(value);
+  saveSettings(s);
+  document.getElementById("blurRadiusValue").textContent = value + "px";
+  document.documentElement.style.setProperty("--blur-radius", value + "px");
 }
 
 function setFontSize(size){
@@ -2301,6 +2335,18 @@ function loadPreference(){
   if(document.getElementById("prefDailyStart")) document.getElementById("prefDailyStart").value = p.dailyStart || 9;
   if(document.getElementById("glassOpacity")) document.getElementById("glassOpacity").value = s.glassOpacity || 75;
   if(document.getElementById("glassOpacityValue")) document.getElementById("glassOpacityValue").textContent = (s.glassOpacity || 75) + "%";
+  if(document.getElementById("blurRadius")) document.getElementById("blurRadius").value = s.blurRadius || 18;
+  if(document.getElementById("blurRadiusValue")) document.getElementById("blurRadiusValue").textContent = (s.blurRadius || 18) + "px";
+  document.documentElement.style.setProperty("--blur-radius", (s.blurRadius || 18) + "px");
+  if(document.getElementById("veilOpacity")) document.getElementById("veilOpacity").value = s.veilOpacity || 50;
+  if(document.getElementById("veilOpacityValue")) document.getElementById("veilOpacityValue").textContent = (s.veilOpacity || 50) + "%";
+  var veilBase = (s.veilOpacity || 50) / 100;
+  document.documentElement.style.setProperty("--veil-alpha", veilBase);
+  // 如果applyThemeByHue已经运行过（currentHueH有值），直接设置遮罩
+  if(currentHueH > 0){
+    document.documentElement.style.setProperty("--veil-top", "hsla("+Math.round(currentHueH)+",50%,97%,"+(veilBase*0.7).toFixed(2)+")");
+    document.documentElement.style.setProperty("--veil-bot", "hsla("+Math.round(currentHueH)+",50%,97%,"+veilBase.toFixed(2)+")");
+  }
   if(document.getElementById("fontSize")) document.getElementById("fontSize").value = s.fontSize || "medium";
   // 应用已保存的设置
   if(s.theme && s.theme !== "pink") setTheme(s.theme);
@@ -2384,9 +2430,11 @@ try{ savedBg = localStorage.getItem("atelier_bg")||localStorage.getItem("scm_bg"
 /* ===== 🎨 根据预计算主色相应用主题（颜色在 build_site.py 构建时提取，无CORS问题） ===== */
 function hsl(h,s,l){return "hsl("+Math.round(h)+","+Math.round(s*100)+"%,"+Math.round(l*100)+"%)";}
 function hsla(h,s,l,a){return "hsla("+Math.round(h)+","+Math.round(s*100)+"%,"+Math.round(l*100)+"%,"+a+")";}
+var currentHueH = 0, currentHueH2 = 38;
 function applyThemeByHue(H,H2){
   if(H==null) return;
   if(H2==null) H2=(H+38)%360;
+  currentHueH = H; currentHueH2 = H2;
   var root=document.documentElement.style;
   root.setProperty("--pink",hsl(H,0.66,0.66));
   root.setProperty("--pink-deep",hsl(H,0.62,0.55));
@@ -2406,9 +2454,10 @@ function applyThemeByHue(H,H2){
   root.setProperty("--card-bg","hsla("+Math.round(H)+",40%,99%,var(--glass-opacity))");
   root.setProperty("--topbar-bg","hsla("+Math.round(H)+",45%,98%,var(--glass-opacity))");
   root.setProperty("--nav-bg","hsla("+Math.round(H)+",45%,99%,var(--glass-opacity))");
-  // 整体柔光层（很淡，让背景图透出来）
-  root.setProperty("--veil-top",hsla(H,0.5,0.97,0.28));
-  root.setProperty("--veil-bot",hsla(H,0.5,0.97,0.38));
+  // 整体柔光层（很淡，让背景图透出来），透明度由--veil-alpha控制
+  var veilAlpha = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--veil-alpha")) || 0.5;
+  root.setProperty("--veil-top","hsla("+Math.round(H)+",50%,97%,"+(veilAlpha*0.7).toFixed(2)+")");
+  root.setProperty("--veil-bot","hsla("+Math.round(H)+",50%,97%,"+veilAlpha.toFixed(2)+")");
   // 4个统计卡：全部基于主色/辅助色的深浅，最和谐不跳色
   root.setProperty("--stat1a",hsla(H,0.68,0.91,0.6));   root.setProperty("--stat1b",hsla(H,0.68,0.84,0.6));
   root.setProperty("--stat2a",hsla(H,0.5,0.94,0.6));    root.setProperty("--stat2b",hsla(H,0.5,0.88,0.6));
@@ -2601,9 +2650,20 @@ document.addEventListener("keydown", function(e){ if(e.key==="Escape") closeModa
       initSettings();
     }
     // 更新统计数字
+    function countAllNotes(notes){
+      var count = 0;
+      (notes||[]).forEach(function(n){
+        count += n.children ? countAllNotes(n.children) : 1;
+      });
+      return count;
+    }
     var kbTotal = 0;
-      KBS.forEach(function(k){ (k.groups||[{notes:k.notes||[]}]).forEach(function(g){ (function walk(ns){ ns.forEach(function(n){ kbTotal += n.children ? (function(){var c=0;(function w2(x){x.forEach(function(z){c+=z.children?w2(z.children):1});return c;})(n.children)})() : 1; }); })(g.notes||[]); }); });
-      if(document.getElementById("kbCount")) document.getElementById("kbCount").textContent = kbTotal;
+    KBS.forEach(function(k){
+      (k.groups||[{notes:k.notes||[]}]).forEach(function(g){
+        kbTotal += countAllNotes(g.notes);
+      });
+    });
+    if(document.getElementById("kbCount")) document.getElementById("kbCount").textContent = kbTotal;
       if(document.getElementById("jobCount")) document.getElementById("jobCount").textContent = (JOBS||[]).length;
       var resTotal = (RESUMES.general||[]).length;
       (RESUMES.custom||[]).forEach(function(c){ resTotal += (c.items||[]).length; });
