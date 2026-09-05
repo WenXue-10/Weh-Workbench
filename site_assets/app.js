@@ -326,6 +326,328 @@ function openGenericKb(gridId, i){
   setModal('<h2>'+k.icon+' '+esc(k.name)+'</h2><div class="m-sub">'+esc(k.desc)+' · 点击查看</div>'+(html||'<div class="m-sub">这个文件夹还没有内容 🐾</div>'));
 }
 
+
+/* ========== 存钱记账模块 ========== */
+var MONEY_KEY = "weh_money_data_v1";
+var MONEY_DEFAULTS = {budget:3000, fixedSave:600, cycleStart:20, records:[], chatHistory:[]};
+var QUICK_CATEGORIES = [
+  {name:"打车", icon:"🚕", amount:15},
+  {name:"地铁", icon:"🚇", amount:6},
+  {name:"外卖", icon:"🍱", amount:25},
+  {name:"买菜", icon:"🥬", amount:30},
+  {name:"奶茶", icon:"🧋", amount:15},
+  {name:"聚餐", icon:"🍲", amount:80},
+  {name:"直播间", icon:"📱", amount:50},
+  {name:"会员", icon:"💳", amount:20},
+];
+var IMPULSE_CATS = {"奶茶":true, "聚餐":true, "直播间":true};
+
+function loadMoney(){
+  try{
+    var d = JSON.parse(localStorage.getItem(MONEY_KEY));
+    if(!d) return JSON.parse(JSON.stringify(MONEY_DEFAULTS));
+    for(var k in MONEY_DEFAULTS){ if(d[k]===undefined) d[k]=MONEY_DEFAULTS[k]; }
+    return d;
+  }catch(e){ return JSON.parse(JSON.stringify(MONEY_DEFAULTS)); }
+}
+function saveMoney(data){ localStorage.setItem(MONEY_KEY, JSON.stringify(data)); }
+
+function getCycleRange(cycleStart){
+  var now = new Date();
+  var y = now.getFullYear(), m = now.getMonth();
+  var start = new Date(y, m, cycleStart);
+  if(now.getDate() < cycleStart) start = new Date(y, m-1, cycleStart);
+  var end = new Date(start); end.setMonth(end.getMonth()+1);
+  return {start:start, end:end};
+}
+function inCycle(dateStr, cycleStart){
+  var d = new Date(dateStr);
+  var r = getCycleRange(cycleStart);
+  return d >= r.start && d < r.end;
+}
+function daysLeftInCycle(cycleStart){
+  var r = getCycleRange(cycleStart);
+  var now = new Date();
+  var diff = Math.ceil((r.end - now) / (1000*60*60*24));
+  return Math.max(diff, 1);
+}
+
+function renderMoney(){
+  var data = loadMoney();
+  // 顶部设置
+  document.getElementById("moneyBudget").textContent = "¥" + data.budget;
+  document.getElementById("moneyFixedSave").textContent = "¥" + data.fixedSave;
+  document.getElementById("moneyCycleStart").textContent = "每月" + data.cycleStart + "号";
+  // 本期记录
+  var cycleRecords = data.records.filter(function(r){ return inCycle(r.date, data.cycleStart); });
+  var spent = cycleRecords.reduce(function(s,r){ return s + Number(r.amount); }, 0);
+  var impulse = cycleRecords.filter(function(r){ return r.impulse; }).reduce(function(s,r){ return s + Number(r.amount); }, 0);
+  var remain = data.budget - data.fixedSave - spent;
+  var daysLeft = daysLeftInCycle(data.cycleStart);
+  var perDay = Math.max(remain / daysLeft, 0);
+  document.getElementById("moneyRemain").textContent = "¥" + remain.toFixed(0);
+  document.getElementById("moneyPerDay").textContent = "¥" + perDay.toFixed(0);
+  document.getElementById("moneySpent").textContent = "¥" + spent.toFixed(0);
+  document.getElementById("moneyImpulse").textContent = "¥" + impulse.toFixed(0);
+  document.getElementById("recordCount").textContent = cycleRecords.length + " 笔";
+  // 环形进度条（已花/可用预算）
+  var usable = data.budget - data.fixedSave;
+  var spendPct = usable > 0 ? Math.min(spent / usable * 100, 100) : 0;
+  var ring = document.getElementById("moneyRing");
+  if(ring){
+    var ringColor = spendPct > 90 ? "#ff6b6b" : (spendPct > 70 ? "#ffa94d" : "var(--pink-deep)");
+    ring.style.background = "conic-gradient("+ringColor+" "+spendPct.toFixed(1)+"%, rgba(255,255,255,.5) "+spendPct.toFixed(1)+"%)";
+  }
+  var ringPct = document.getElementById("moneyRingPct");
+  if(ringPct) ringPct.textContent = spendPct.toFixed(0) + "%";
+  // 账单日倒计时
+  var cdEl = document.getElementById("moneyCountdown");
+  if(cdEl){
+    var cycleR = getCycleRange(data.cycleStart);
+    var cdDays = Math.ceil((cycleR.end - new Date()) / (1000*60*60*24));
+    cdEl.textContent = cdDays > 0 ? "距账单日 "+cdDays+"天" : "今天账单日";
+  }
+  // 最近7天消费柱状图
+  var weekChart = document.getElementById("moneyWeekChart");
+  if(weekChart){
+    var today = new Date();
+    var weekBars = [];
+    var maxDay = 1;
+    for(var wi=6; wi>=0; wi--){
+      var d = new Date(today); d.setDate(d.getDate()-wi);
+      var ds = d.toISOString().slice(0,10);
+      var daySpent = data.records.filter(function(r){ return r.date===ds; }).reduce(function(s,r){ return s+Number(r.amount); },0);
+      var hasImpulse = data.records.some(function(r){ return r.date===ds && r.impulse; });
+      maxDay = Math.max(maxDay, daySpent);
+      weekBars.push({date:ds, day:["日","一","二","三","四","五","六"][d.getDay()], spent:daySpent, impulse:hasImpulse, isToday:wi===0});
+    }
+    weekChart.innerHTML = weekBars.map(function(b){
+      var h = b.spent > 0 ? Math.max(b.spent/maxDay*100, 8) : 2;
+      var impCls = b.impulse ? " impulse-day" : "";
+      var todayCls = b.isToday ? " today" : "";
+      return '<div class="m-week-bar'+todayCls+'"><div class="m-week-bar-amt">'+(b.spent>0?"¥"+b.spent.toFixed(0):"")+'</div>'
+        +'<div class="m-week-bar-fill'+impCls+'" style="height:'+h+'%"></div>'
+        +'<div class="m-week-bar-day">'+b.day+'</div></div>';
+    }).join("");
+  }
+  // 快捷按钮
+  var qg = document.getElementById("quickExpenseGrid");
+  qg.innerHTML = QUICK_CATEGORIES.map(function(c){
+    return '<div class="qe-btn" onclick="quickExpense(\''+c.name+'\','+c.amount+')"><div class="qe-icon">'+c.icon+'</div><div class="qe-name">'+c.name+'</div><div class="qe-amount">¥'+c.amount+'</div></div>';
+  }).join("");
+  // 消费记录（倒序）
+  var el = document.getElementById("expenseList");
+  if(cycleRecords.length === 0){
+    el.innerHTML = '<div style="text-align:center;color:var(--muted);padding:24px;font-size:13px">还没有消费记录，点上方快捷按钮开始记账～</div>';
+  } else {
+    el.innerHTML = cycleRecords.slice().reverse().map(function(r){
+      var cat = QUICK_CATEGORIES.find(function(c){ return c.name===r.category; }) || {icon:"💰"};
+      var impCls = r.impulse ? "" : " off";
+      var impTxt = r.impulse ? "⚠️冲动" : "普通";
+      return '<div class="exp-item">'
+        +'<div class="exp-icon">'+cat.icon+'</div>'
+        +'<div class="exp-info"><div class="exp-cat">'+esc(r.category)+(r.note?' · '+esc(r.note):'')+'</div><div class="exp-date">'+r.date+'</div></div>'
+        +'<div class="exp-amount" onclick="editExpAmount('+r.id+')">¥'+r.amount+'</div>'
+        +'<div class="exp-impulse'+impCls+'" onclick="toggleImpulse('+r.id+')">'+impTxt+'</div>'
+        +'<div class="exp-del" onclick="delExpense('+r.id+')">✕</div>'
+        +'</div>';
+    }).join("");
+  }
+  // 类别占比
+  var catTotals = {};
+  cycleRecords.forEach(function(r){ catTotals[r.category] = (catTotals[r.category]||0) + Number(r.amount); });
+  var catArr = Object.keys(catTotals).map(function(k){ return {name:k, amount:catTotals[k]}; }).sort(function(a,b){ return b.amount-a.amount; });
+  var cb = document.getElementById("categoryBars");
+  if(catArr.length === 0){
+    cb.innerHTML = '<div style="text-align:center;color:var(--muted);padding:16px;font-size:12px">暂无数据</div>';
+  } else {
+    cb.innerHTML = catArr.map(function(c){
+      var pct = spent > 0 ? (c.amount/spent*100) : 0;
+      var cat = QUICK_CATEGORIES.find(function(q){ return q.name===c.name; }) || {icon:"💰"};
+      var isImpCat = !!IMPULSE_CATS[c.name];
+      var impCls2 = isImpCat ? " impulse-cat" : "";
+      return '<div class="cat-bar-row"><div class="cat-bar-name">'+cat.icon+' '+c.name+(isImpCat?' ⚠️':'')+'</div>'
+        +'<div class="cat-bar-track"><div class="cat-bar-fill'+impCls2+'" style="width:'+pct.toFixed(1)+'%"></div></div>'
+        +'<div class="cat-bar-amt">¥'+c.amount.toFixed(0)+' ('+pct.toFixed(0)+'%)</div></div>';
+    }).join("");
+  }
+  // 渲染AI对话
+  renderMoneyChat();
+}
+
+function quickExpense(cat, amount){
+  var data = loadMoney();
+  var today = new Date().toISOString().slice(0,10);
+  var id = Date.now();
+  data.records.push({id:id, category:cat, amount:amount, date:today, impulse:!!IMPULSE_CATS[cat], note:""});
+  saveMoney(data);
+  renderMoney();
+}
+function addCustomExpense(){
+  var cat = prompt("消费类别（如：打车/奶茶/其他）：");
+  if(!cat) return;
+  var amount = prompt("金额：");
+  if(!amount || isNaN(amount)) return;
+  var note = prompt("备注（可选）：") || "";
+  var data = loadMoney();
+  var today = new Date().toISOString().slice(0,10);
+  data.records.push({id:Date.now(), category:cat, amount:Number(amount), date:today, impulse:false, note:note});
+  saveMoney(data);
+  renderMoney();
+}
+function editExpAmount(id){
+  var data = loadMoney();
+  var r = data.records.find(function(x){ return x.id===id; });
+  if(!r) return;
+  var newAmt = prompt("修改金额（当前 ¥"+r.amount+"）：");
+  if(!newAmt || isNaN(newAmt)) return;
+  r.amount = Number(newAmt);
+  saveMoney(data);
+  renderMoney();
+}
+function toggleImpulse(id){
+  var data = loadMoney();
+  var r = data.records.find(function(x){ return x.id===id; });
+  if(!r) return;
+  r.impulse = !r.impulse;
+  saveMoney(data);
+  renderMoney();
+}
+function delExpense(id){
+  if(!confirm("确定删除这笔记录？")) return;
+  var data = loadMoney();
+  data.records = data.records.filter(function(x){ return x.id!==id; });
+  saveMoney(data);
+  renderMoney();
+}
+function editMoneyBudget(){
+  var data = loadMoney();
+  var v = prompt("本月预算（当前 ¥"+data.budget+"）：");
+  if(!v || isNaN(v)) return;
+  data.budget = Number(v);
+  saveMoney(data); renderMoney();
+}
+function editMoneyFixedSave(){
+  var data = loadMoney();
+  var v = prompt("固定存款（当前 ¥"+data.fixedSave+"）：");
+  if(!v || isNaN(v)) return;
+  data.fixedSave = Number(v);
+  saveMoney(data); renderMoney();
+}
+function editMoneyCycleStart(){
+  var data = loadMoney();
+  var v = prompt("账单日（每月几号，当前 "+data.cycleStart+" 号）：");
+  if(!v || isNaN(v) || v<1 || v>28) return;
+  data.cycleStart = Number(v);
+  saveMoney(data); renderMoney();
+}
+
+/* AI说真话（基于数据生成） */
+function runMoneyTruth(){
+  var data = loadMoney();
+  var cycleRecords = data.records.filter(function(r){ return inCycle(r.date, data.cycleStart); });
+  var spent = cycleRecords.reduce(function(s,r){ return s+Number(r.amount); },0);
+  var impulse = cycleRecords.filter(function(r){ return r.impulse; });
+  var impulseAmt = impulse.reduce(function(s,r){ return s+Number(r.amount); },0);
+  var box = document.getElementById("aiTruth");
+  if(cycleRecords.length === 0){
+    box.textContent = "还没有消费记录，先记几笔我再帮你分析～";
+    return;
+  }
+  var truths = [];
+  var impPct = spent > 0 ? (impulseAmt/spent*100) : 0;
+  if(impPct > 30){
+    truths.push("⚠️ 本期"+impPct.toFixed(0)+"%的钱是冲动消费花掉的（¥"+impulseAmt.toFixed(0)+"），手指动一动就没了。");
+  } else if(impPct > 0){
+    truths.push("冲动消费占比"+impPct.toFixed(0)+"%（¥"+impulseAmt.toFixed(0)+"），还算克制，继续保持。");
+  }
+  var remain = data.budget - data.fixedSave - spent;
+  var daysLeft = daysLeftInCycle(data.cycleStart);
+  var perDay = remain / daysLeft;
+  if(remain < 0){
+    truths.push("🚨 已经超支 ¥"+Math.abs(remain).toFixed(0)+"了！后面"+daysLeft+"天每天只能花0元，想想哪笔最不该花？");
+  } else if(perDay < 20){
+    truths.push("⏰ 还剩"+daysLeft+"天，每天只能花¥"+perDay.toFixed(0)+"，紧巴巴的，非必要别花了。");
+  } else {
+    truths.push("还剩"+daysLeft+"天，每天可花¥"+perDay.toFixed(0)+"，节奏不错，别突然大手大脚。");
+  }
+  // 找最不该花的一笔
+  if(impulse.length > 0){
+    var worst = impulse.reduce(function(a,b){ return Number(a.amount)>Number(b.amount)?a:b; });
+    var yearly = worst.amount * 12;
+    truths.push("💡 最不该花的是「"+worst.category+" ¥"+worst.amount+"」，每月少一笔，一年省¥"+yearly.toFixed(0)+"，差不多一趟短途机票了。");
+  }
+  box.innerHTML = truths.map(function(t){ return '<div style="margin-bottom:8px">'+t+'</div>'; }).join("");
+}
+
+/* AI财务顾问对话 */
+function renderMoneyChat(){
+  var data = loadMoney();
+  var box = document.getElementById("moneyChatMessages");
+  if(!box) return;
+  box.innerHTML = (data.chatHistory||[]).map(function(m){
+    return '<div class="m-chat-msg '+m.role+'">'+esc(m.content).replace(/\n/g,"<br>")+'</div>';
+  }).join("");
+  // 自动滚到底
+  setTimeout(function(){ box.scrollTop = box.scrollHeight; }, 50);
+}
+function getMoneyContext(){
+  var data = loadMoney();
+  var cycleRecords = data.records.filter(function(r){ return inCycle(r.date, data.cycleStart); });
+  var spent = cycleRecords.reduce(function(s,r){ return s+Number(r.amount); },0);
+  var remain = data.budget - data.fixedSave - spent;
+  var daysLeft = daysLeftInCycle(data.cycleStart);
+  var catTotals = {};
+  cycleRecords.forEach(function(r){ catTotals[r.category]=(catTotals[r.category]||0)+Number(r.amount); });
+  var topCats = Object.keys(catTotals).map(function(k){return{k:k,v:catTotals[k]};}).sort(function(a,b){return b.v-a.v;}).slice(0,3);
+  return "【本期消费概览】预算¥"+data.budget+"，固定存款¥"+data.fixedSave+"，已花¥"+spent.toFixed(0)+"，还能花¥"+remain.toFixed(0)+"，还剩"+daysLeft+"天，每天¥"+(remain/daysLeft).toFixed(0)+"。花最多的："+topCats.map(function(c){return c.k+"¥"+c.v.toFixed(0);}).join("、")+"。";
+}
+function sendMoneyChat(){
+  var input = document.getElementById("moneyChatInput");
+  var msg = input.value.trim();
+  if(!msg) return;
+  var data = loadMoney();
+  data.chatHistory = data.chatHistory || [];
+  data.chatHistory.push({role:"user", content:msg});
+  input.value = "";
+  saveMoney(data);
+  renderMoneyChat();
+  // 模拟AI回复（基于消费数据）
+  setTimeout(function(){
+    var reply = generateMoneyReply(msg, data);
+    data.chatHistory.push({role:"ai", content:reply});
+    saveMoney(data);
+    renderMoneyChat();
+  }, 600);
+}
+function generateMoneyReply(msg, data){
+  var ctx = getMoneyContext();
+  var lower = msg.toLowerCase();
+  if(lower.indexOf("超支")>=0 || lower.indexOf("花超")>=0){
+    var cycleRecords = data.records.filter(function(r){ return inCycle(r.date, data.cycleStart); });
+    var spent = cycleRecords.reduce(function(s,r){ return s+Number(r.amount); },0);
+    var remain = data.budget - data.fixedSave - spent;
+    if(remain < 0) return "是的，已经超支¥"+Math.abs(remain).toFixed(0)+"。建议：1. 后面非必要消费全停；2. 看看冲动消费里哪笔能退；3. 下个月预算调高或固定存款调低。";
+    return "还没超支，还能花¥"+remain.toFixed(0)+"。但要注意节奏，别最后几天紧巴巴。";
+  }
+  if(lower.indexOf("省")>=0 || lower.indexOf("省钱")>=0){
+    return "省钱建议：1. 奶茶/咖啡从每天一杯减到每周3杯，一年省¥2000+；2. 直播间下单前等24小时，80%会不想买；3. 外卖改自己做，每月省¥500+。先从最容易的一项开始。";
+  }
+  if(lower.indexOf("冲动")>=0){
+    var imp = data.records.filter(function(r){ return inCycle(r.date, data.cycleStart) && r.impulse; });
+    var impAmt = imp.reduce(function(s,r){ return s+Number(r.amount); },0);
+    if(imp.length===0) return "本期还没有冲动消费记录，很棒！继续保持。";
+    return "本期冲动消费"+imp.length+"笔，共¥"+impAmt.toFixed(0)+"。最多的是「"+imp.reduce(function(a,b){return Number(a.amount)>Number(b.amount)?a:b;}).category+"」。下次买之前问自己：不买会怎样？72小时后还想要吗？";
+  }
+  if(lower.indexOf("预算")>=0 || lower.indexOf("多少钱")>=0){
+    return ctx + " 点顶部「本月预算」可以修改，「固定存款」是发工资先划走的钱，「账单日」决定本期从哪天算起。";
+  }
+  // 默认回复
+  var cycleRecords = data.records.filter(function(r){ return inCycle(r.date, data.cycleStart); });
+  if(cycleRecords.length===0) return "还没有消费记录，先点上方快捷按钮记几笔，我再帮你分析。记账的关键不是记多细，而是让你看清钱去哪了。";
+  return ctx + " 你可以问我：超支了吗？怎么省钱？冲动消费有哪些？或者直接说你的消费困惑，我帮你出主意。说人话，不绕弯。";
+}
+
 /* ---------- 全局搜索 ---------- */
 function plainText(html){
   var d = document.createElement("div"); d.innerHTML = html || ""; return (d.textContent||"").replace(/\s+/g," ").trim();
@@ -585,6 +907,9 @@ document.addEventListener("keydown", function(e){ if(e.key==="Escape") closeModa
     }
     if(document.getElementById("sopKbGrid")){
       flattenKb(); renderGenericKb("sopKbGrid", SOPKBS, {_total:"sopKbCount","工作流程":"sopFlowCount","岗位知识":"sopKnowCount","错题":"sopErrorCount"});
+    }
+    if(document.getElementById("moneyRemain")){
+      renderMoney();
       // 更新统计数字
       var kbTotal = 0;
       KBS.forEach(function(k){ (k.groups||[{notes:k.notes||[]}]).forEach(function(g){ (function walk(ns){ ns.forEach(function(n){ kbTotal += n.children ? (function(){var c=0;(function w2(x){x.forEach(function(z){c+=z.children?w2(z.children):1});return c;})(n.children)})() : 1; }); })(g.notes||[]); }); });

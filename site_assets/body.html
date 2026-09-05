@@ -75,11 +75,80 @@
 
       <!-- 💰 存钱记账 -->
       <section id="module-money" class="view">
-        <div class="empty-state">
-          <div class="empty-icon">💰</div>
-          <div class="empty-title">存钱记账</div>
-          <div class="empty-desc">记账看板、快捷记账、消费分析、AI财务顾问<br>帮你管好钱，少花冤枉钱～</div>
-          <div class="empty-tag">🚧 正在搭建中</div>
+        <div class="money-settings">
+          <div class="m-set-item" onclick="editMoneyBudget()">
+            <span class="m-set-label">本月预算</span>
+            <span class="m-set-value" id="moneyBudget">¥3000</span>
+          </div>
+          <div class="m-set-item" onclick="editMoneyFixedSave()">
+            <span class="m-set-label">固定存款</span>
+            <span class="m-set-value" id="moneyFixedSave">¥600</span>
+          </div>
+          <div class="m-set-item" onclick="editMoneyCycleStart()">
+            <span class="m-set-label">账单日</span>
+            <span class="m-set-value" id="moneyCycleStart">每月20号</span>
+          </div>
+          <div class="m-set-item m-add-btn" onclick="addCustomExpense()">
+            <span class="m-set-label">➕</span>
+            <span class="m-set-value">自定义记账</span>
+          </div>
+        </div>
+        <div class="money-layout">
+          <div class="money-left">
+            <div class="card">
+              <div class="card-head">💸 快捷记账 <small>点一下就记，金额可改</small></div>
+              <div class="quick-expense-grid" id="quickExpenseGrid"></div>
+            </div>
+            <div class="card">
+              <div class="card-head">📝 本期消费记录 <span class="m-count" id="recordCount"></span></div>
+              <div class="expense-list" id="expenseList"></div>
+            </div>
+          </div>
+          <div class="money-right">
+            <div class="card money-big-card">
+              <div class="m-big-layout">
+                <div class="m-ring-wrap">
+                  <div class="m-ring" id="moneyRing">
+                    <div class="m-ring-inner">
+                      <div class="m-ring-pct" id="moneyRingPct">0%</div>
+                      <div class="m-ring-label">已花</div>
+                    </div>
+                  </div>
+                  <div class="m-countdown" id="moneyCountdown">距账单日 --天</div>
+                </div>
+                <div class="m-big-info">
+                  <div class="m-big-label">本月还能花</div>
+                  <div class="m-big-number" id="moneyRemain">¥0</div>
+                  <div class="m-sub-row">
+                    <span>每天 <b id="moneyPerDay">¥0</b></span>
+                    <span>已花 <b id="moneySpent">¥0</b></span>
+                    <span>冲动 <b id="moneyImpulse">¥0</b></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-head">📊 钱去哪了</div>
+              <div class="category-bars" id="categoryBars"></div>
+            </div>
+            <div class="card">
+              <div class="card-head">📈 最近7天消费</div>
+              <div class="m-week-chart" id="moneyWeekChart"></div>
+            </div>
+            <div class="card">
+              <div class="card-head">💬 它跟你说的实话</div>
+              <div class="ai-truth-box" id="aiTruth">点下方按钮，让AI帮你看看消费～</div>
+              <button class="ai-truth-btn" onclick="runMoneyTruth()">🔍 给我一句实话</button>
+            </div>
+            <div class="card">
+              <div class="card-head">🤖 AI财务顾问 <small>历史自动保存</small></div>
+              <div class="m-chat-messages" id="moneyChatMessages"></div>
+              <div class="m-chat-input">
+                <input type="text" id="moneyChatInput" placeholder="问AI关于消费的问题，比如：我这个月花超了吗？" onkeydown="if(event.key==='Enter')sendMoneyChat()">
+                <button onclick="sendMoneyChat()">发送</button>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
