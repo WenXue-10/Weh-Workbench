@@ -325,8 +325,8 @@ a{color:var(--pink-deep);text-decoration:none}
   .resume-actions .pill{flex:1 1 46%}
 }
 /* 顶栏全局搜索按钮 */
-.gsearch{width:38px;height:38px;border-radius:50%;background:#fff;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;box-shadow:var(--shadow-sm);flex-shrink:0;transition:.15s}
-.gsearch:hover{transform:scale(1.08)}
+.gsearch{width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.4);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.5);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;box-shadow:var(--shadow-sm);flex-shrink:0;transition:.2s}
+.gsearch:hover{background:color-mix(in srgb, var(--pink-deep) 15%, rgba(255,255,255,.5));transform:scale(1.08);border-color:color-mix(in srgb, var(--pink-deep) 30%, transparent)}
 @media(max-width:820px){ .gsearch{width:34px;height:34px;font-size:15px} }
 
 /* ===== 页脚同步状态 ===== */
@@ -1536,7 +1536,7 @@ a{color:var(--pink-deep);text-decoration:none}
 
 <script>
 window.SITE_DATA = {
- "updated": "2026-09-05 21:55",
+ "updated": "2026-09-05 22:08",
  "stats": {
   "jobs": 32,
   "rec": 0,
@@ -7372,7 +7372,7 @@ function addCustomExpense(){
     try{
       var health = loadHealth();
       if(!health.records.find(function(r){ return r.id===id; })){
-        health.records.push({id:id, type:getHealthType(cat), category:cat, amount:Number(amount), date:today, note:note});
+        health.records.push({id:id, type:getHealthType(cat), category:cat, amount:Number(amount), date:dt.date, time:dt.time, note:note});
         saveHealth(health);
       }
     }catch(e){ console.log("同步到饮食台失败:", e.message); }
@@ -7718,7 +7718,7 @@ function quickDrink(cat, amount){
   // 同步到存钱记账
   try{
     var money = loadMoney();
-    money.records.push({id:recId, category:cat, amount:amount, date:dt.date, impulse:!!IMPULSE_CATS[cat], note:note});
+    money.records.push({id:recId, category:cat, amount:amount, date:dt.date, time:dt.time, impulse:!!IMPULSE_CATS[cat], note:note});
     saveMoney(money);
   }catch(e){ console.log("同步到记账失败:", e.message); }
 }
@@ -7736,7 +7736,7 @@ function quickMeal(cat){
   saveHealth(data); renderHealth();
   try{
     var money = loadMoney();
-    money.records.push({id:recId, category:cat, amount:Number(amount), date:today, impulse:false, note:note});
+    money.records.push({id:recId, category:cat, amount:Number(amount), date:dt.date, time:dt.time, impulse:false, note:note});
     saveMoney(money);
   }catch(e){ console.log("同步到记账失败:", e.message); }
 }
@@ -7761,7 +7761,7 @@ function addCustomMeal(){
   if(type==="drink" || type==="meal"){
     try{
       var money = loadMoney();
-      money.records.push({id:recId, category:cat, amount:Number(amount), date:today, impulse:false, note:note});
+      money.records.push({id:recId, category:cat, amount:Number(amount), date:dt.date, time:dt.time, impulse:false, note:note});
       saveMoney(money);
     }catch(e){ console.log("同步到记账失败:", e.message); }
   }
@@ -9217,41 +9217,113 @@ function plainText(html){
 var GSEARCH_IDX = null, gsList = [];
 function buildSearchIndex(){
   var idx = [];
+  // 求职岗位
   JOBS.forEach(function(j){
-    idx.push({type:"岗位", icon:"🐾", title: j.company+" · "+j.pos, sub: (j.city+" ｜ "+j.statusTxt+" ｜ 分"+j.score),
+    idx.push({type:"求职", icon:"🐾", title: j.company+" · "+j.pos, sub: (j.city+" ｜ "+j.statusTxt+" ｜ 评分"+j.score),
       keys: (j.company+j.pos+j.city).toLowerCase(),
       open: function(){ closeModal(); go("jobs"); openJob(JOBS.indexOf(j)); }});
   });
+  // 简历
   var allRes = (RESUMES.general||[]).slice();
   (RESUMES.custom||[]).forEach(function(cg){ allRes = allRes.concat(cg.items); });
   allRes.forEach(function(r){
     idx.push({type:"简历", icon:"📄", title: r.name, sub: r.desc||"", keys: (r.name+(r.desc||"")).toLowerCase(),
       open: function(){ closeModal(); go("resume"); }});
   });
+  // 公司池
   COMPS.forEach(function(g){ g.groups.forEach(function(c){
     (c.name||"").split(/[、，,]/).forEach(function(nm){ nm=nm.trim(); if(!nm) return;
       idx.push({type:"公司", icon:"🐈", title: nm, sub: g.title+" ｜ "+c.cat, keys: (nm+g.title+c.cat).toLowerCase(),
         open: function(){ closeModal(); go("companies"); }});
     });
   });});
+  // 知识库笔记
   KBS.forEach(function(k){
     (k.groups||[{title:"", notes:k.notes||[]}]).forEach(function(g){
       (function walk(ns){ ns.forEach(function(n){
         if(n.children){ walk(n.children); }
         else {
           var txt = plainText(n.html);
-          idx.push({type:"笔记", icon:n.icon||"📄", title:n.title, sub: txt.slice(0,60), keys: (n.title+" "+txt).toLowerCase(),
+          idx.push({type:"知识库", icon:n.icon||"📚", title:n.title, sub: txt.slice(0,60), keys: (n.title+" "+txt).toLowerCase(),
             open: function(){ closeModal(); go("knowledge"); }});
         }
       }); })(g.notes||[]);
     });
   });
+  // 记账记录
+  try{
+    var moneyData = JSON.parse(localStorage.getItem("weh_money_data_v1"));
+    if(moneyData && moneyData.records){
+      moneyData.records.forEach(function(r){
+        idx.push({type:"记账", icon:"💰", title: r.category+" ¥"+r.amount, sub: (r.date+(r.time?" "+r.time:"")+(r.note?" · "+r.note:"")),
+          keys: (r.category+(r.note||"")).toLowerCase(),
+          open: function(){ closeModal(); go("money"); }});
+      });
+    }
+  }catch(e){}
+  // 饮食记录
+  try{
+    var healthData = JSON.parse(localStorage.getItem("weh_health_data_v1"));
+    if(healthData && healthData.records){
+      healthData.records.forEach(function(r){
+        var typeName = r.type==="drink" ? "饮品" : "饮食";
+        idx.push({type:"饮食", icon:"🍱", title: r.category+" ¥"+r.amount, sub: (typeName+" ｜ "+r.date+(r.time?" "+r.time:"")+(r.note?" · "+r.note:"")),
+          keys: (r.category+(r.note||"")).toLowerCase(),
+          open: function(){ closeModal(); go("health"); }});
+      });
+    }
+  }catch(e){}
+  // 灵感记录
+  try{
+    var inspireData = JSON.parse(localStorage.getItem("weh_inspire_data_v1"));
+    if(inspireData && inspireData.records){
+      inspireData.records.forEach(function(r){
+        idx.push({type:"灵感", icon:"💡", title: (r.content||"").slice(0,30), sub: (r.date||"")+(r.tag?" · "+r.tag:""),
+          keys: (r.content||"").toLowerCase(),
+          open: function(){ closeModal(); go("inspiration"); }});
+      });
+    }
+  }catch(e){}
+  // 待办任务
+  try{
+    var todoData = JSON.parse(localStorage.getItem("weh_todo_data_v1"));
+    if(todoData && todoData.items){
+      todoData.items.forEach(function(r){
+        idx.push({type:"任务", icon:"✅", title: r.title, sub: (r.done?"已完成":"待完成")+(r.dueDate?" · 截止"+r.dueDate:"")+(r.category?" · "+r.category:""),
+          keys: (r.title+(r.category||"")).toLowerCase(),
+          open: function(){ closeModal(); go("todo"); }});
+      });
+    }
+  }catch(e){}
+  // 日计划
+  try{
+    var dailyData = JSON.parse(localStorage.getItem("weh_daily_data_v1"));
+    if(dailyData && dailyData.tasks){
+      dailyData.tasks.forEach(function(r){
+        var pText = {high:"🔴高", medium:"🟡中", low:"🟢低"}[r.priority] || r.priority;
+        idx.push({type:"计划", icon:"📅", title: r.title, sub: (pText+" ｜ "+r.duration+"分钟"+(r.done?" ｜ 已完成":"")),
+          keys: r.title.toLowerCase(),
+          open: function(){ closeModal(); go("daily"); }});
+      });
+    }
+  }catch(e){}
+  // 工作汇报
+  try{
+    var reportData = JSON.parse(localStorage.getItem("weh_report_data_v1"));
+    if(reportData && reportData.history){
+      reportData.history.forEach(function(r){
+        idx.push({type:"汇报", icon:"📝", title: (r.typeText||"")+" · "+(r.audienceText||""), sub: (r.createdAt||"")+" ｜ "+(r.input||"").slice(0,30),
+          keys: ((r.input||"")+(r.typeText||"")).toLowerCase(),
+          open: function(){ closeModal(); go("report"); }});
+      });
+    }
+  }catch(e){}
   return idx;
 }
 function openGlobalSearch(){
-  if(!GSEARCH_IDX) GSEARCH_IDX = buildSearchIndex();
-  setModal('<h2>🔍 全局搜索</h2><div class="m-sub">搜岗位 / 笔记 / 公司 / 简历，全部知识库内容</div>'
-    + '<div class="search" style="margin-bottom:12px"><span>🔍</span><input id="gsInput" placeholder="输入关键词，如：供应链 / 济南 / 比亚迪…" autofocus></div>'
+  GSEARCH_IDX = buildSearchIndex();
+  setModal('<h2>✨ 全域搜索</h2><div class="m-sub">搜记账 / 饮食 / 灵感 / 任务 / 求职 / 知识库，工作台所有内容一键直达</div>'
+    + '<div class="search" style="margin-bottom:14px"><span>🔍</span><input id="gsInput" placeholder="输入关键词，如：奶茶 / 面试 / 灵感 / 供应链 / 比亚迪…" autofocus></div>'
     + '<div id="gsResults"></div>');
   var inp = document.getElementById("gsInput");
   function doSearch(){
@@ -9260,7 +9332,7 @@ function openGlobalSearch(){
     var html = gsList.slice(0,30).map(function(x,i){
       return '<div class="note-item" onclick="gsOpen('+i+')"><span class="ni-ic">'+x.icon+'</span><div style="flex:1;min-width:0"><div style="font-weight:800;font-size:13.5px">'+esc(x.title)+'</div><div style="font-size:11.5px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(x.sub)+'</div></div><span style="font-size:11px;color:var(--pink-deep);background:var(--pink-soft);padding:2px 8px;border-radius:20px;flex-shrink:0">'+x.type+'</span></div>';
     }).join("");
-    document.getElementById("gsResults").innerHTML = q ? (html || '<div style="text-align:center;color:var(--muted);padding:20px">🐾 没有找到相关结果</div>') : '<div style="text-align:center;color:var(--muted);padding:20px">输入关键词开始搜索～</div>';
+    document.getElementById("gsResults").innerHTML = q ? (html || '<div style="text-align:center;color:var(--muted);padding:28px 20px;line-height:1.8">🐾 没有找到相关内容<br><span style="font-size:12px">换个关键词试试，或检查拼写～</span></div>') : '<div style="text-align:center;color:var(--muted);padding:28px 20px;line-height:1.8">🔍 输入关键词开始搜索<br><span style="font-size:12px">支持搜索：记账 / 饮食 / 灵感 / 任务 / 求职 / 知识库等所有模块</span></div>';
   }
   inp.addEventListener("input", doSearch);
   inp.addEventListener("keydown", function(e){ if(e.key==="Enter") doSearch(); });
