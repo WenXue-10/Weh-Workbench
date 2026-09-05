@@ -299,17 +299,27 @@ a{color:var(--pink-deep);text-decoration:none}
 .kb-folder .kf-name{font-size:13px;font-weight:800;margin-bottom:6px;color:color-mix(in srgb, var(--text) 75%, #000)}
 .kb-folder .note-item{margin-bottom:6px}
 .kb-folder .kb-folder{margin-left:14px;background:rgba(255,255,255,.25);box-shadow:inset 3px 0 0 var(--pink-soft)}
-.note-body{font-size:13.5px;line-height:1.7;color:color-mix(in srgb, var(--text) 72%, #000)}
-.note-body h1,.note-body h2,.note-body h3{margin:14px 0 6px;color:color-mix(in srgb, var(--text) 72%, #000);font-weight:800}
-.note-body table{width:100%;border-collapse:collapse;font-size:12px;margin:8px 0}
-.note-body th,.note-body td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
-.note-body th{background:var(--pink-soft)}
-.note-body img{max-width:100%;border-radius:12px}
-.note-body blockquote{border-left:3px solid var(--pink);background:var(--pink-soft);padding:8px 12px;border-radius:8px;margin:8px 0;color:color-mix(in srgb, var(--muted) 80%, #000)}
-.note-body ul,.note-body ol{padding-left:20px;margin:6px 0}
-.note-body li{margin:3px 0}
-.note-body code{background:var(--gray-soft);padding:1px 6px;border-radius:6px;font-size:12px}
-.note-body pre{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px;overflow-x:auto;font-size:12px}
+.note-body{font-size:14.5px;line-height:1.9;color:color-mix(in srgb, var(--text) 72%, #000)}
+.note-body p{margin:0 0 1.1em 0;line-height:1.9}
+.note-body h1{margin:1.8em 0 0.9em;font-size:1.6em;font-weight:800;padding-bottom:0.3em;border-bottom:1px solid rgba(0,0,0,0.08)}
+.note-body h2{margin:1.5em 0 0.8em;font-size:1.35em;font-weight:800}
+.note-body h3{margin:1.3em 0 0.7em;font-size:1.18em;font-weight:700}
+.note-body h4,.note-body h5,.note-body h6{margin:1.1em 0 0.6em;font-weight:700}
+.note-body table{width:100%;border-collapse:collapse;font-size:13px;margin:1.2em 0}
+.note-body th,.note-body td{border:1px solid var(--line);padding:10px 12px;text-align:left;vertical-align:top;line-height:1.7}
+.note-body th{background:var(--pink-soft);font-weight:700}
+.note-body img{max-width:100%;border-radius:12px;margin:1em 0}
+.note-body blockquote{border-left:4px solid var(--pink);background:var(--pink-soft);padding:12px 18px;border-radius:0 10px 10px 0;margin:1.2em 0;color:color-mix(in srgb, var(--muted) 80%, #000);line-height:1.8}
+.note-body blockquote p{margin-bottom:0.5em}
+.note-body ul,.note-body ol{padding-left:1.8em;margin:1em 0}
+.note-body li{margin:0.5em 0;line-height:1.8}
+.note-body li ul,.note-body li ol{margin:0.4em 0}
+.note-body code{background:var(--gray-soft);padding:2px 8px;border-radius:6px;font-size:13px}
+.note-body pre{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px;overflow-x:auto;font-size:13px;margin:1.2em 0;line-height:1.7}
+.note-body pre code{background:transparent;padding:0}
+.note-body hr{margin:2em 0;border:none;border-top:1px solid rgba(0,0,0,0.1)}
+.note-body a{color:var(--pink-deep);text-decoration:none;border-bottom:1px solid rgba(0,0,0,0.1)}
+.note-body a:hover{border-bottom-color:var(--pink-deep)}
 @media(max-width:820px){
   .resume-actions .pill{min-width:0}
   .resume-actions .pill{flex:1 1 46%}

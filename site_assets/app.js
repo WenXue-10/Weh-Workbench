@@ -209,7 +209,8 @@ function openResume(i){
 var KB_FLAT = [];
 function flattenKb(){
   KB_FLAT = [];
-  KBS.forEach(function(k){
+  var allKbs = [].concat(KBS, BCKBS, CET6KBS, SOPKBS);
+  allKbs.forEach(function(k){
     (k.groups||[{title:"", notes:k.notes||[]}]).forEach(function(g){
       (function walk(ns){ ns.forEach(function(n){ if(n.children){ walk(n.children); } else { KB_FLAT.push(n); } }); })(g.notes||[]);
     });
