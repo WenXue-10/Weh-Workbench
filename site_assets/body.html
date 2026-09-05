@@ -115,21 +115,37 @@
 
       <!-- 📚 百川智库 -->
       <section id="module-baichuan" class="view">
-        <div class="empty-state">
-          <div class="empty-icon">📚</div>
-          <div class="empty-title">百川智库</div>
-          <div class="empty-desc">你的第二大脑，所有知识沉淀在这里<br>跟Obsidian百川智库打通，手机随时翻看～</div>
-          <div class="empty-tag">🚧 正在搭建中</div>
+        <div class="page-head">
+          <div class="page-title">📚 百川智库</div>
+          <div class="page-sub">你的第二大脑 · 技能技巧 / 工具方法 / 任务流程 / 灵感碎片</div>
+        </div>
+        <div class="stat-grid">
+          <div class="stat-card p1"><div class="em">📄</div><div class="lab">知识笔记</div><div class="num" id="bcKbCount">0</div></div>
+          <div class="stat-card p2"><div class="em">🛠️</div><div class="lab">技能技巧</div><div class="num" id="bcSkillCount">0</div></div>
+          <div class="stat-card p3"><div class="em">🔧</div><div class="lab">工具方法</div><div class="num" id="bcToolCount">0</div></div>
+          <div class="stat-card p4"><div class="em">💡</div><div class="lab">灵感碎片</div><div class="num" id="bcIdeaCount">0</div></div>
+        </div>
+        <div class="card">
+          <div class="card-head">📂 知识分类</div>
+          <div class="kb-grid" id="bcKbGrid"></div>
         </div>
       </section>
 
       <!-- 💼 求职小窝 -->
       <section id="module-career" class="view">
-        <div class="empty-state">
-          <div class="empty-icon">💼</div>
-          <div class="empty-title">求职小窝</div>
-          <div class="empty-desc">作战看板、岗位看板、公司池、每日日报、简历库、知识库<br>求职全周期管理，跟SCM-Career知识库打通～</div>
-          <div class="empty-tag">🚧 正在整合中（代码已有，马上搬过来）</div>
+        <div class="page-head">
+          <div class="page-title">💼 求职小窝</div>
+          <div class="page-sub">2027届秋招全周期管理 · 跟SCM-Career知识库打通</div>
+        </div>
+        <div class="stat-grid">
+          <div class="stat-card p1"><div class="em">🐾</div><div class="lab">岗位总数</div><div class="num" id="jobCount">0</div></div>
+          <div class="stat-card p2"><div class="em">📄</div><div class="lab">简历版本</div><div class="num" id="resumeCount">0</div></div>
+          <div class="stat-card p3"><div class="em">📚</div><div class="lab">知识库笔记</div><div class="num" id="kbCount">0</div></div>
+          <div class="stat-card p4"><div class="em">🏢</div><div class="lab">关注公司</div><div class="num" id="companyCount">0</div></div>
+        </div>
+        <div class="card">
+          <div class="card-head">📚 知识库分类</div>
+          <div class="kb-grid" id="kbGrid"></div>
         </div>
       </section>
 

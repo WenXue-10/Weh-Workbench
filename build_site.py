@@ -500,6 +500,29 @@ _KB_META = [
     ("99_系统与规则", "⚙️", "Skill 规则、问题日志", "c4", "gen"),
 ]
 
+# ========== 百川智库 ==========
+BAICHUAN_ROOT = r"D:\Obsidian\Weh-Brain\05-Skills\百川智库"
+_BAICHUAN_META = [
+    ("01-技能技巧", "🛠️", "各种实用技能与方法技巧", ),
+    ("02-任务流程", "📋", "标准化任务处理流程", ),
+    ("03-工具方法", "🔧", "软件工具使用方法与教程", ),
+    ("04-灵感碎片", "💡", "碎片化灵感与想法记录", ),
+    ("IDENTITY", "👤", "身份设定与个人画像", ),
+    ("KERNEL", "🧠", "核心规则与底层逻辑", ),
+    ("WORKFLOWS", "⚙️", "工作流与自动化流程", ),
+    ("_模板", "📄", "各类模板文件", ),
+]
+
+def scan_baichuan():
+    """扫描百川智库知识库，返回与kb相同结构的数据"""
+    bc = []
+    for item in _BAICHUAN_META:
+        folder, icon, desc = item[0], item[1], item[2]
+        notes = _walk_notes(os.path.join(BAICHUAN_ROOT, folder))
+        bc.append({"icon": icon, "name": folder, "desc": desc, "cls": "", "groups": [{"title": "", "notes": notes}]})
+    return bc
+
+
 def _md_note(path):
     fn = os.path.basename(path)
     return {"title": os.path.splitext(fn)[0], "icon": "📄", "html": md_to_html(strip_fm(read(path)))}
@@ -875,6 +898,7 @@ def build():
     todo = []
     resumes = scan_resumes()
     kb = scan_kb(jobs, resumes)
+    baichuanKb = scan_baichuan()
     stats = {
         "jobs": len(jobs),
         "rec": sum(1 for j in jobs if j.get("status") == "rec"),
@@ -891,6 +915,7 @@ def build():
         "timeline": timeline,
         "resumes": resumes,
         "kb": kb,
+        "baichuanKb": baichuanKb,
         "images": {"bg": bg, "av": av, "theme": theme, "bgMobile": bgm},
     "appIcons": app_icons,
     }

@@ -51,14 +51,11 @@ a{color:var(--pink-deep);text-decoration:none}
 @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 /* ===== 统计卡片（马卡龙渐变） ===== */
 .stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
-.stat-card{border-radius:24px;padding:16px 18px;box-shadow:var(--shadow-sm);border:1px solid rgba(255,255,255,.6)}
-.stat-card.p1{background:linear-gradient(135deg,var(--stat1a),var(--stat1b))}
-.stat-card.p2{background:linear-gradient(135deg,var(--stat2a),var(--stat2b))}
-.stat-card.p3{background:linear-gradient(135deg,var(--stat3a),var(--stat3b))}
-.stat-card.p4{background:linear-gradient(135deg,var(--stat4a),var(--stat4b))}
-.stat-card .em{font-size:17px}
-.stat-card .lab{font-size:12.5px;font-weight:600;color:var(--muted);margin-top:2px}
-.stat-card .num{font-size:27px;font-weight:800;margin-top:2px}
+.stat-card{border-radius:22px;padding:16px 18px;box-shadow:var(--shadow-sm);border:1px solid rgba(255,255,255,.75);background:rgba(255,255,255,.68);backdrop-filter:blur(14px) saturate(1.2);-webkit-backdrop-filter:blur(14px) saturate(1.2);transition:transform .18s,box-shadow .18s,border-color .18s}
+.stat-card:hover{transform:translateY(-2px);box-shadow:var(--shadow);border-color:#ffc4da}
+.stat-card .em{font-size:18px;display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:12px;background:rgba(255,227,238,.7);margin-bottom:6px}
+.stat-card .lab{font-size:12px;font-weight:600;color:var(--muted)}
+.stat-card .num{font-size:26px;font-weight:800;margin-top:2px;background:linear-gradient(135deg,var(--pink-deep),#b48ed9);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 /* ===== 卡片 ===== */
 .card{background:var(--card-bg);backdrop-filter:blur(16px) saturate(1.25);-webkit-backdrop-filter:blur(16px) saturate(1.25);border:1px solid var(--line);border-radius:24px;padding:18px 20px;box-shadow:var(--shadow-sm);margin-bottom:16px;transition:transform .18s,box-shadow .18s}.card:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
 .card-head{font-size:15px;font-weight:800;margin-bottom:12px;display:flex;align-items:center;gap:8px}
@@ -130,18 +127,14 @@ a{color:var(--pink-deep);text-decoration:none}
 .tl-body li{margin:4px 0 4px 18px}
 /* ===== 知识库 ===== */
 .note{font-size:12.5px;color:var(--muted);background:rgba(255,255,255,.84);border:1px solid var(--line);border-radius:16px;padding:11px 15px;margin-bottom:16px;box-shadow:var(--shadow-sm)}
-.kb-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-.kb-card{border-radius:22px;padding:16px;cursor:pointer;transition:.15s;border:1px solid rgba(255,255,255,.7);box-shadow:var(--shadow-sm)}
-.kb-card:hover{transform:translateY(-3px);box-shadow:var(--shadow)}
-.kb-card.c1{background:linear-gradient(135deg,rgba(255,227,238,.72),rgba(255,208,226,.72))}
-.kb-card.c2{background:linear-gradient(135deg,rgba(239,232,255,.72),rgba(226,214,255,.72))}
-.kb-card.c3{background:linear-gradient(135deg,rgba(217,247,233,.72),rgba(195,240,221,.72))}
-.kb-card.c4{background:linear-gradient(135deg,rgba(255,233,220,.72),rgba(255,220,200,.72))}
-.kb-card.c5{background:linear-gradient(135deg,rgba(224,242,255,.72),rgba(207,233,255,.72))}
-.kb-card .ic{font-size:21px}
-.kb-card .kn{font-weight:800;font-size:14px;margin-top:6px}
-.kb-card .kd{font-size:12.5px;color:var(--muted);margin-top:3px}
-.kb-card .ncount{display:inline-block;margin-top:9px;font-size:11.5px;background:rgba(255,255,255,.75);color:var(--pink-deep);padding:3px 10px;border-radius:20px;font-weight:700}
+.kb-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.kb-card{border-radius:20px;padding:16px 18px;cursor:pointer;transition:.18s;border:1px solid rgba(255,255,255,.75);box-shadow:var(--shadow-sm);background:rgba(255,255,255,.68);backdrop-filter:blur(14px) saturate(1.2);-webkit-backdrop-filter:blur(14px) saturate(1.2);display:flex;align-items:center;gap:14px}
+.kb-card:hover{transform:translateY(-2px);box-shadow:var(--shadow);border-color:#ffc4da}
+.kb-card .ic{font-size:22px;display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:14px;background:rgba(255,227,238,.75);flex-shrink:0}
+.kb-card .kb-info{flex:1;min-width:0}
+.kb-card .kn{font-weight:800;font-size:14px}
+.kb-card .kd{font-size:12px;color:var(--muted);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.kb-card .ncount{display:inline-flex;align-items:center;font-size:11.5px;background:rgba(255,227,238,.85);color:var(--pink-deep);padding:3px 10px;border-radius:20px;font-weight:700;flex-shrink:0}
 /* 简历分组 */
 .resume-group{margin-bottom:20px}
 .group-head{font-size:14.5px;font-weight:800;margin-bottom:10px;display:flex;align-items:center;gap:8px}

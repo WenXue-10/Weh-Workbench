@@ -1,7 +1,7 @@
 /* ===== 文雪求职小窝 · 前端逻辑（数据由生成器自动注入） ===== */
 var D = window.SITE_DATA || {};
 var JOBS = D.jobs || [], COMPS = D.companies || [], TL = D.timeline || [];
-var RESUMES = D.resumes || {general:[], custom:[]}, KBS = D.kb || [];
+var RESUMES = D.resumes || {general:[], custom:[]}, KBS = D.kb || [], BCKBS = D.baichuanKb || [];
 var IMGS = D.images || {bg:{}, av:{}};
 /* 快捷操作中转站（Cloudflare Worker），接入后由助手填写 */
 var BRIDGE = { url: "https://1473705102-gh71l7a70a.ap-shanghai.tencentscf.com", key: "XNTbRx7spQJHDGWfKjchz8iSL2OIwoFY" };
@@ -224,7 +224,7 @@ function renderKb(){
   document.getElementById("kbGrid").innerHTML = KBS.map(function(k,i){
     var cnt = 0;
     (k.groups||[{title:"", notes:k.notes||[]}]).forEach(function(g){ cnt += countNotes(g.notes); });
-    return '<div class="kb-card '+k.cls+'" onclick="openKb('+i+')"><div class="ic">'+k.icon+'</div><div class="kn">'+esc(k.name)+'</div><div class="kd">'+esc(k.desc)+'</div><span class="ncount">'+cnt+' 项</span></div>';
+    return '<div class="kb-card" onclick="openKb('+i+')"><div class="ic">'+k.icon+'</div><div class="kb-info"><div class="kn">'+esc(k.name)+'</div><div class="kd">'+esc(k.desc)+'</div></div><span class="ncount">'+cnt+' 项</span></div>';
   }).join("");
 }
 function renderNotes(ns){
@@ -250,6 +250,40 @@ function openKbNote(idx){
   var n = KB_FLAT[idx];
   if(!n) return;
   setModal('<h2>'+n.icon+' '+esc(n.title)+'</h2><div style="margin-top:12px" class="note-body">'+(n.html||'<p>暂无内容</p>')+'</div>');
+}
+
+function renderBcKb(){
+  var grid = document.getElementById("bcKbGrid");
+  if(!grid) return;
+  grid.innerHTML = BCKBS.map(function(k,i){
+    var cnt = 0;
+    (k.groups||[{title:"", notes:k.notes||[]}]).forEach(function(g){ cnt += countNotes(g.notes); });
+    return '<div class="kb-card" onclick="openBcKb('+i+')"><div class="ic">'+k.icon+'</div><div class="kb-info"><div class="kn">'+esc(k.name)+'</div><div class="kd">'+esc(k.desc)+'</div></div><span class="ncount">'+cnt+' 项</span></div>';
+  }).join("");
+  // 更新统计数字
+  var total = 0, skill = 0, tool = 0, idea = 0;
+  BCKBS.forEach(function(k){
+    var cnt = 0;
+    (k.groups||[{notes:k.notes||[]}]).forEach(function(g){ cnt += countNotes(g.notes); });
+    total += cnt;
+    if(k.name.indexOf("技能") >= 0) skill = cnt;
+    if(k.name.indexOf("工具") >= 0) tool = cnt;
+    if(k.name.indexOf("灵感") >= 0) idea = cnt;
+  });
+  if(document.getElementById("bcKbCount")) document.getElementById("bcKbCount").textContent = total;
+  if(document.getElementById("bcSkillCount")) document.getElementById("bcSkillCount").textContent = skill;
+  if(document.getElementById("bcToolCount")) document.getElementById("bcToolCount").textContent = tool;
+  if(document.getElementById("bcIdeaCount")) document.getElementById("bcIdeaCount").textContent = idea;
+}
+function openBcKb(i){
+  var k = BCKBS[i];
+  var html = "";
+  (k.groups||[{title:"", notes:k.notes||[]}]).forEach(function(g){
+    if(g.title) html += '<div class="kb-section">'+esc(g.title)+'</div>';
+    var items = renderNotes(g.notes);
+    html += items || '<div style="color:var(--muted);font-size:13px;margin:4px 0">（空）🐾</div>';
+  });
+  setModal('<h2>'+k.icon+' '+esc(k.name)+'</h2><div class="m-sub">'+esc(k.desc)+' · 点击查看</div>'+(html||'<div class="m-sub">这个文件夹还没有内容 🐾</div>'));
 }
 
 /* ---------- 全局搜索 ---------- */
@@ -499,9 +533,27 @@ document.addEventListener("keydown", function(e){ if(e.key==="Escape") closeModa
   if(upd && D.updated) upd.textContent = "自动同步 · " + D.updated;
   // 求职相关渲染（只有页面上有对应元素时才执行）
   try{
-    if(document.getElementById("statJobs")){
-      flattenKb(); renderHome(); renderJobs(); renderCompanies();
-      renderTimeline(); renderResumes(); renderKb();
+    var hasCareer = document.getElementById("kbGrid") || document.getElementById("statJobs");
+    if(hasCareer){
+      flattenKb(); renderKb();
+    }
+    if(document.getElementById("bcKbGrid")){
+      flattenKb(); renderBcKb();
+      // 更新统计数字
+      var kbTotal = 0;
+      KBS.forEach(function(k){ (k.groups||[{notes:k.notes||[]}]).forEach(function(g){ (function walk(ns){ ns.forEach(function(n){ kbTotal += n.children ? (function(){var c=0;(function w2(x){x.forEach(function(z){c+=z.children?w2(z.children):1});return c;})(n.children)})() : 1; }); })(g.notes||[]); }); });
+      if(document.getElementById("kbCount")) document.getElementById("kbCount").textContent = kbTotal;
+      if(document.getElementById("jobCount")) document.getElementById("jobCount").textContent = (JOBS||[]).length;
+      var resTotal = (RESUMES.general||[]).length;
+      (RESUMES.custom||[]).forEach(function(c){ resTotal += (c.items||[]).length; });
+      if(document.getElementById("resumeCount")) document.getElementById("resumeCount").textContent = resTotal;
+      var compTotal = 0;
+      (COMPS||[]).forEach(function(g){ (g.groups||[]).forEach(function(c){ compTotal += ((c.name||"").split(/[、，,]/).filter(function(x){return x.trim()}).length); }); });
+      if(document.getElementById("companyCount")) document.getElementById("companyCount").textContent = compTotal;
+      // 旧版求职首页的渲染
+      if(document.getElementById("statJobs")){
+        renderHome(); renderJobs(); renderCompanies(); renderTimeline(); renderResumes();
+      }
     }
   }catch(e){ console.log("求职模块渲染跳过:", e.message); }
   applyBg(); applyAv(); applyIcon();
