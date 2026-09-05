@@ -465,3 +465,36 @@ a{color:var(--pink-deep);text-decoration:none}
 .m-week-bar.today .m-week-bar-day{color:var(--pink-deep);font-weight:800}
 /* 占比条冲动消费高亮 */
 .cat-bar-fill.impulse-cat{background:linear-gradient(90deg,#ff8a8a,#ff6b6b)}
+
+
+/* ========== 决策顾问模块 ========== */
+.decision-left{width:280px;flex-shrink:0;display:flex;flex-direction:column;gap:16px}
+.dec-setting{margin-bottom:14px}
+.dec-label{font-size:12px;color:var(--muted);font-weight:600;margin-bottom:6px}
+.dec-select{width:100%;border:1px solid var(--line);border-radius:12px;padding:9px 12px;font-size:13px;background:rgba(255,255,255,.85);outline:none;cursor:pointer;color:var(--text)}
+.dec-select:focus{border-color:var(--pink-deep)}
+.dec-save-btn{background:linear-gradient(135deg,var(--pink-deep),#b48ed9);color:#fff;text-align:center;padding:10px;border-radius:12px;font-size:13px;font-weight:700;cursor:pointer;transition:.15s;margin-top:8px}
+.dec-save-btn:hover{transform:translateY(-1px);box-shadow:var(--shadow-sm)}
+.dec-rules{display:flex;flex-direction:column;gap:10px}
+.dec-rule{font-size:12px;line-height:1.6;color:var(--text);background:rgba(255,227,238,.4);padding:8px 12px;border-radius:10px}
+.dec-chat-messages{max-height:380px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;margin-bottom:12px;min-height:200px}
+.dec-chat-msg{max-width:88%;padding:11px 16px;border-radius:16px;font-size:13px;line-height:1.7;word-break:break-word}
+.dec-chat-msg.user{align-self:flex-end;background:linear-gradient(135deg,var(--pink-deep),#b48ed9);color:#fff;border-bottom-right-radius:4px}
+.dec-chat-msg.ai{align-self:flex-start;background:rgba(255,255,255,.85);border:1px solid var(--line);border-bottom-left-radius:4px}
+.dec-chat-msg.ai .ai-question{color:#e05050;font-weight:700;margin-top:6px;display:block}
+.dec-score-layout{display:flex;gap:20px;align-items:center}
+.dec-score-ring{width:120px;height:120px;border-radius:50%;background:conic-gradient(var(--pink-deep) 0%,rgba(255,255,255,.5) 0%);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .5s}
+.dec-score-inner{width:90px;height:90px;border-radius:50%;background:rgba(255,255,255,.9);display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:inset 0 2px 8px rgba(0,0,0,.06)}
+.dec-score-num{font-size:32px;font-weight:900;background:linear-gradient(135deg,var(--pink-deep),#b48ed9);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1}
+.dec-score-label{font-size:11px;color:var(--muted);margin-top:2px;font-weight:600}
+.dec-score-detail{flex:1;min-width:0}
+.dec-score-item{font-size:13px;line-height:1.7;margin-bottom:8px}
+.dec-score-item b{color:var(--pink-deep)}
+.dec-score-verdict{margin-top:10px;padding:10px 14px;border-radius:12px;font-size:13px;font-weight:700;text-align:center}
+.dec-score-verdict.pass{background:rgba(217,247,233,.8);color:#2d8a5e}
+.dec-score-verdict.fail{background:rgba(255,224,224,.8);color:#e05050}
+@media(max-width:900px){
+  .money-layout{flex-direction:column}
+  .decision-left{width:100%}
+  .money-right{width:100%!important}
+}

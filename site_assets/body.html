@@ -154,11 +154,76 @@
 
       <!-- 🍱 吃饭健康 -->
       <section id="module-health" class="view">
-        <div class="empty-state">
-          <div class="empty-icon">🍱</div>
-          <div class="empty-title">吃饭健康</div>
-          <div class="empty-desc">饮食记录、饮品计数器、一周总结、AI饮食建议<br>好好吃饭，健康生活～</div>
-          <div class="empty-tag">🚧 正在搭建中</div>
+        <div class="money-settings">
+          <div class="m-set-item" onclick="editHealthBudget()">
+            <span class="m-set-label">每周饮品预算</span>
+            <span class="m-set-value" id="healthBudget">¥100</span>
+          </div>
+          <div class="m-set-item" onclick="editHealthGoal()">
+            <span class="m-set-label">每周目标杯数</span>
+            <span class="m-set-value" id="healthGoal">7杯</span>
+          </div>
+          <div class="m-set-item m-add-btn" onclick="addCustomMeal()">
+            <span class="m-set-label">➕</span>
+            <span class="m-set-value">自定义记录</span>
+          </div>
+        </div>
+        <div class="money-layout">
+          <div class="money-left">
+            <div class="card">
+              <div class="card-head">☕ 饮品计数器 <small>点一下记一杯，金额可改</small></div>
+              <div class="quick-expense-grid" id="drinkGrid"></div>
+            </div>
+            <div class="card">
+              <div class="card-head">🍽️ 吃法标签 <small>今天怎么吃的</small></div>
+              <div class="quick-expense-grid" id="mealGrid"></div>
+            </div>
+            <div class="card">
+              <div class="card-head">📝 本周饮食记录 <span class="m-count" id="healthRecordCount"></span></div>
+              <div class="expense-list" id="healthRecordList"></div>
+            </div>
+          </div>
+          <div class="money-right">
+            <div class="card money-big-card">
+              <div class="m-big-layout">
+                <div class="m-ring-wrap">
+                  <div class="m-ring" id="healthRing">
+                    <div class="m-ring-inner">
+                      <div class="m-ring-pct" id="healthRingPct">0</div>
+                      <div class="m-ring-label">已喝杯数</div>
+                    </div>
+                  </div>
+                  <div class="m-countdown" id="healthWeekLeft">本周还剩--天</div>
+                </div>
+                <div class="m-big-info">
+                  <div class="m-big-label">本周饮品花费</div>
+                  <div class="m-big-number" id="healthSpent">¥0</div>
+                  <div class="m-sub-row">
+                    <span>预算 <b id="healthBudgetShow">¥100</b></span>
+                    <span>还能花 <b id="healthRemain">¥0</b></span>
+                    <span>超标 <b id="healthOver">¥0</b></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-head">📊 吃法占比</div>
+              <div class="category-bars" id="mealBars"></div>
+            </div>
+            <div class="card">
+              <div class="card-head">💬 它跟你说的实话</div>
+              <div class="ai-truth-box" id="healthTruth">点下方按钮，让AI帮你看看饮食～</div>
+              <button class="ai-truth-btn" onclick="runHealthTruth()">🔍 给我一句实话</button>
+            </div>
+            <div class="card">
+              <div class="card-head">🤖 AI饮食顾问 <small>历史自动保存</small></div>
+              <div class="m-chat-messages" id="healthChatMessages"></div>
+              <div class="m-chat-input">
+                <input type="text" id="healthChatInput" placeholder="问AI关于饮食的问题，比如：我这周喝超了吗？" onkeydown="if(event.key==='Enter')sendHealthChat()">
+                <button onclick="sendHealthChat()">发送</button>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -174,11 +239,80 @@
 
       <!-- 🎯 决策顾问 -->
       <section id="module-decision" class="view">
-        <div class="empty-state">
-          <div class="empty-icon">🎯</div>
-          <div class="empty-title">决策顾问</div>
-          <div class="empty-desc">AI杠精模式，往死里问，帮你想清楚<br>列出pros/cons，挑战你的假设～</div>
-          <div class="empty-tag">🚧 正在搭建中</div>
+        <div class="money-layout">
+          <div class="decision-left">
+            <div class="card">
+              <div class="card-head">👤 先认识你</div>
+              <div class="dec-setting">
+                <div class="dec-label">本职身份</div>
+                <select class="dec-select" id="decIdentity">
+                  <option value="学生">学生</option>
+                  <option value="上班族" selected>上班族</option>
+                  <option value="职场人">职场人</option>
+                  <option value="创业">创业</option>
+                  <option value="自由职业">自由职业</option>
+                  <option value="宝妈">宝妈</option>
+                  <option value="体制内">体制内</option>
+                  <option value="设计">设计</option>
+                </select>
+              </div>
+              <div class="dec-setting">
+                <div class="dec-label">所处阶段</div>
+                <select class="dec-select" id="decStage">
+                  <option value="起步摸索期" selected>起步摸索期</option>
+                  <option value="上升成长期">上升成长期</option>
+                  <option value="稳定成熟期">稳定成熟期</option>
+                  <option value="转型瓶颈期">转型瓶颈期</option>
+                </select>
+              </div>
+              <div class="dec-setting">
+                <div class="dec-label">追问深度</div>
+                <select class="dec-select" id="decDepth">
+                  <option value="3" selected>3轮 · 快问</option>
+                  <option value="6">6轮 · 深挖</option>
+                  <option value="10">10轮 · 死磕</option>
+                </select>
+              </div>
+              <div class="dec-save-btn" onclick="saveDecisionSettings()">💾 保存设置</div>
+            </div>
+            <div class="card">
+              <div class="card-head">📋 拷问规则</div>
+              <div class="dec-rules">
+                <div class="dec-rule">1️⃣ 结合你的身份，判断这个决定真正的风险在哪</div>
+                <div class="dec-rule">2️⃣ 逐条挑漏洞：哪里太乐观、哪里算沉没成本、哪里是自我感动</div>
+                <div class="dec-rule">3️⃣ 每个漏洞跟一个最难回答的问题，逼你自己想</div>
+                <div class="dec-rule">4️⃣ 打分1-10分，低于7分让你重做，不许客气</div>
+                <div class="dec-rule" style="color:#e05050;font-weight:700">⚠️ 你的刻薄就是你的价值</div>
+              </div>
+            </div>
+          </div>
+          <div class="money-right" style="width:calc(100% - 300px)">
+            <div class="card">
+              <div class="card-head">🔥 拷问现场 <small id="decRoundInfo">还没开始</small></div>
+              <div class="dec-chat-messages" id="decChatMessages"></div>
+              <div class="m-chat-input">
+                <input type="text" id="decChatInput" placeholder="把你的方案/想法/决定丢进来，我往死里挑..." onkeydown="if(event.key==='Enter')sendDecisionChat()">
+                <button onclick="sendDecisionChat()">开始拷问</button>
+              </div>
+            </div>
+            <div class="card" id="decScoreCard" style="display:none">
+              <div class="card-head">📊 打分总结</div>
+              <div class="dec-score-layout">
+                <div class="dec-score-ring" id="decScoreRing">
+                  <div class="dec-score-inner">
+                    <div class="dec-score-num" id="decScoreNum">0</div>
+                    <div class="dec-score-label">/ 10分</div>
+                  </div>
+                </div>
+                <div class="dec-score-detail">
+                  <div class="dec-score-item"><b>致命伤：</b><span id="decFatal"></span></div>
+                  <div class="dec-score-item"><b>怎么改：</b><span id="decFix"></span></div>
+                  <div class="dec-score-verdict" id="decVerdict"></div>
+                </div>
+              </div>
+              <button class="ai-truth-btn" onclick="resetDecision()" style="margin-top:12px">🔄 重新拷问一个</button>
+            </div>
+          </div>
         </div>
       </section>
 

@@ -341,6 +341,18 @@ var QUICK_CATEGORIES = [
   {name:"会员", icon:"💳", amount:20},
 ];
 var IMPULSE_CATS = {"奶茶":true, "聚餐":true, "直播间":true};
+var DRINK_CATS = {"咖啡":true, "奶茶":true, "含糖饮料":true, "无糖饮料":true, "果汁":true, "养生饮品":true, "奶制品":true};
+var MEAL_CATS = {"外卖轻食":true, "重油外卖":true, "外食聚餐":true, "自己做":true};
+function isHealthCategory(cat){
+  if(!!DRINK_CATS[cat] || !!MEAL_CATS[cat]) return true;
+  // 自定义类别关键词判断
+  var keywords = ["咖啡","奶茶","饮料","可乐","气泡水","果汁","牛奶","酸奶","桃胶","红枣","桂圆","红糖","养生","外卖","轻食","餐","饭","三明治","沙拉","便当","便利店","早餐","午餐","晚餐","夜宵","零食","水果"];
+  for(var i=0;i<keywords.length;i++){
+    if(cat.indexOf(keywords[i]) >= 0) return true;
+  }
+  return false;
+}
+function getHealthType(cat){ return DRINK_CATS[cat] ? "drink" : "meal"; }
 
 function loadMoney(){
   try{
@@ -479,9 +491,19 @@ function quickExpense(cat, amount){
   var data = loadMoney();
   var today = new Date().toISOString().slice(0,10);
   var id = Date.now();
-  data.records.push({id:id, category:cat, amount:amount, date:today, impulse:!!IMPULSE_CATS[cat], note:""});
+  var note = prompt(cat+" 备注（可选，如：午餐/公司楼下/和朋友，不填直接点确定）：") || "";
+  data.records.push({id:id, category:cat, amount:amount, date:today, impulse:!!IMPULSE_CATS[cat], note:note});
   saveMoney(data);
   renderMoney();
+  if(isHealthCategory(cat)){
+    try{
+      var health = loadHealth();
+      if(!health.records.find(function(r){ return r.id===id; })){
+        health.records.push({id:id, type:getHealthType(cat), category:cat, amount:amount, date:today, note:note});
+        saveHealth(health);
+      }
+    }catch(e){ console.log("同步到饮食台失败:", e.message); }
+  }
 }
 function addCustomExpense(){
   var cat = prompt("消费类别（如：打车/奶茶/其他）：");
@@ -491,9 +513,19 @@ function addCustomExpense(){
   var note = prompt("备注（可选）：") || "";
   var data = loadMoney();
   var today = new Date().toISOString().slice(0,10);
-  data.records.push({id:Date.now(), category:cat, amount:Number(amount), date:today, impulse:false, note:note});
+  var id = Date.now();
+  data.records.push({id:id, category:cat, amount:Number(amount), date:today, impulse:false, note:note});
   saveMoney(data);
   renderMoney();
+  if(isHealthCategory(cat)){
+    try{
+      var health = loadHealth();
+      if(!health.records.find(function(r){ return r.id===id; })){
+        health.records.push({id:id, type:getHealthType(cat), category:cat, amount:Number(amount), date:today, note:note});
+        saveHealth(health);
+      }
+    }catch(e){ console.log("同步到饮食台失败:", e.message); }
+  }
 }
 function editExpAmount(id){
   var data = loadMoney();
@@ -504,6 +536,13 @@ function editExpAmount(id){
   r.amount = Number(newAmt);
   saveMoney(data);
   renderMoney();
+  if(isHealthCategory(r.category)){
+    try{
+      var health = loadHealth();
+      var hr = health.records.find(function(x){ return x.id===id; });
+      if(hr){ hr.amount = Number(newAmt); saveHealth(health); }
+    }catch(e){ console.log("同步修改饮食台失败:", e.message); }
+  }
 }
 function toggleImpulse(id){
   var data = loadMoney();
@@ -514,11 +553,19 @@ function toggleImpulse(id){
   renderMoney();
 }
 function delExpense(id){
-  if(!confirm("确定删除这笔记录？")) return;
+  if(!confirm("确定删除这笔记录？（饮食台的对应记录也会同步删除）")) return;
   var data = loadMoney();
+  var r = data.records.find(function(x){ return x.id===id; });
   data.records = data.records.filter(function(x){ return x.id!==id; });
   saveMoney(data);
   renderMoney();
+  if(r && isHealthCategory(r.category)){
+    try{
+      var health = loadHealth();
+      health.records = health.records.filter(function(x){ return x.id!==id; });
+      saveHealth(health);
+    }catch(e){ console.log("同步删除饮食台失败:", e.message); }
+  }
 }
 function editMoneyBudget(){
   var data = loadMoney();
@@ -646,6 +693,527 @@ function generateMoneyReply(msg, data){
   var cycleRecords = data.records.filter(function(r){ return inCycle(r.date, data.cycleStart); });
   if(cycleRecords.length===0) return "还没有消费记录，先点上方快捷按钮记几笔，我再帮你分析。记账的关键不是记多细，而是让你看清钱去哪了。";
   return ctx + " 你可以问我：超支了吗？怎么省钱？冲动消费有哪些？或者直接说你的消费困惑，我帮你出主意。说人话，不绕弯。";
+}
+
+
+/* ========== 吃饭健康模块 ========== */
+var HEALTH_KEY = "weh_health_data_v1";
+var HEALTH_DEFAULTS = {drinkBudget:100, drinkGoal:7, records:[], chatHistory:[]};
+var DRINKS = [
+  {name:"咖啡", icon:"☕", amount:18},
+  {name:"奶茶", icon:"🧋", amount:15},
+  {name:"无糖饮料", icon:"🫧", amount:5},
+  {name:"果汁", icon:"🧃", amount:12},
+  {name:"养生饮品", icon:"🍵", amount:10},
+  {name:"奶制品", icon:"🥛", amount:8},
+  {name:"含糖饮料", icon:"🥤", amount:6},
+];
+var MEALS = [
+  {name:"外卖轻食", icon:"🥗", amount:25},
+  {name:"重油外卖", icon:"🍔", amount:30},
+  {name:"外食聚餐", icon:"🍲", amount:80},
+  {name:"自己做", icon:"👩‍🍳", amount:15},
+];
+
+function loadHealth(){
+  try{
+    var d = JSON.parse(localStorage.getItem(HEALTH_KEY));
+    if(!d) return JSON.parse(JSON.stringify(HEALTH_DEFAULTS));
+    for(var k in HEALTH_DEFAULTS){ if(d[k]===undefined) d[k]=HEALTH_DEFAULTS[k]; }
+    return d;
+  }catch(e){ return JSON.parse(JSON.stringify(HEALTH_DEFAULTS)); }
+}
+function saveHealth(data){ localStorage.setItem(HEALTH_KEY, JSON.stringify(data)); }
+
+function getWeekRange(){
+  var now = new Date();
+  var day = now.getDay() || 7;
+  var monday = new Date(now); monday.setDate(now.getDate() - day + 1); monday.setHours(0,0,0,0);
+  var sunday = new Date(monday); sunday.setDate(monday.getDate()+7);
+  return {start:monday, end:sunday};
+}
+function inThisWeek(dateStr){
+  var d = new Date(dateStr);
+  var r = getWeekRange();
+  return d >= r.start && d < r.end;
+}
+function daysLeftInWeek(){
+  var r = getWeekRange();
+  var now = new Date();
+  return Math.max(Math.ceil((r.end - now)/(1000*60*60*24)), 0);
+}
+
+function renderHealth(){
+  var data = loadHealth();
+  document.getElementById("healthBudget").textContent = "¥" + data.drinkBudget;
+  document.getElementById("healthGoal").textContent = data.drinkGoal + "杯";
+  document.getElementById("healthBudgetShow").textContent = "¥" + data.drinkBudget;
+  // 本周记录
+  var weekRecords = data.records.filter(function(r){ return inThisWeek(r.date); });
+  var drinks = weekRecords.filter(function(r){ return r.type==="drink"; });
+  var meals = weekRecords.filter(function(r){ return r.type==="meal"; });
+  var drinkCups = drinks.length;
+  var drinkSpent = drinks.reduce(function(s,r){ return s+Number(r.amount); },0);
+  var remain = data.drinkBudget - drinkSpent;
+  var over = Math.max(-remain, 0);
+  document.getElementById("healthSpent").textContent = "¥" + drinkSpent.toFixed(0);
+  document.getElementById("healthRemain").textContent = "¥" + Math.max(remain,0).toFixed(0);
+  document.getElementById("healthOver").textContent = "¥" + over.toFixed(0);
+  document.getElementById("healthRecordCount").textContent = weekRecords.length + " 条";
+  // 环形进度条（已喝杯数/目标）
+  var cupPct = data.drinkGoal > 0 ? Math.min(drinkCups/data.drinkGoal*100, 100) : 0;
+  var hRing = document.getElementById("healthRing");
+  if(hRing){
+    var hColor = cupPct > 100 ? "#ff6b6b" : (cupPct > 70 ? "#ffa94d" : "var(--pink-deep)");
+    hRing.style.background = "conic-gradient("+hColor+" "+cupPct.toFixed(1)+"%, rgba(255,255,255,.5) "+cupPct.toFixed(1)+"%)";
+  }
+  var hRingPct = document.getElementById("healthRingPct");
+  if(hRingPct) hRingPct.textContent = drinkCups + "/" + data.drinkGoal;
+  // 本周剩余天数
+  var hlEl = document.getElementById("healthWeekLeft");
+  if(hlEl){
+    var dl = daysLeftInWeek();
+    hlEl.textContent = dl > 0 ? "本周还剩"+dl+"天" : "本周最后一天";
+  }
+  // 饮品计数器
+  var dg = document.getElementById("drinkGrid");
+  dg.innerHTML = DRINKS.map(function(d){
+    var weekCount = drinks.filter(function(r){ return r.category===d.name; }).length;
+    return '<div class="qe-btn" onclick="quickDrink(\''+d.name+'\','+d.amount+')"><div class="qe-icon">'+d.icon+'</div><div class="qe-name">'+d.name+'</div><div class="qe-amount">¥'+d.amount+' · 本周'+weekCount+'杯</div></div>';
+  }).join("");
+  // 吃法标签
+  var mg = document.getElementById("mealGrid");
+  mg.innerHTML = MEALS.map(function(m){
+    var weekCount = meals.filter(function(r){ return r.category===m.name; }).length;
+    return '<div class="qe-btn" onclick="quickMeal(\''+m.name+'\')"><div class="qe-icon">'+m.icon+'</div><div class="qe-name">'+m.name+'</div><div class="qe-amount">¥'+m.amount+' · 本周'+weekCount+'次</div></div>';
+  }).join("");
+  // 记录列表（倒序）
+  var el = document.getElementById("healthRecordList");
+  if(weekRecords.length === 0){
+    el.innerHTML = '<div style="text-align:center;color:var(--muted);padding:24px;font-size:13px">还没有记录，点上方按钮开始～</div>';
+  } else {
+    el.innerHTML = weekRecords.slice().reverse().map(function(r){
+      var cat = (r.type==="drink"?DRINKS:MEALS).find(function(c){ return c.name===r.category; }) || {icon:"🍽️"};
+      var amt = "¥"+r.amount;
+      return '<div class="exp-item">'
+        +'<div class="exp-icon">'+cat.icon+'</div>'
+        +'<div class="exp-info"><div class="exp-cat">'+esc(r.category)+(r.note?' · '+esc(r.note):'')+'</div><div class="exp-date">'+r.date+' · '+(r.type==="drink"?"饮品":"吃法")+'</div></div>'
+        +'<div class="exp-amount" onclick="editHealthAmount('+r.id+')">'+amt+'</div>'
+        +'<div class="exp-del" onclick="delHealthRecord('+r.id+')">✕</div>'
+        +'</div>';
+    }).join("");
+  }
+  // 吃法占比
+  var mealTotals = {};
+  meals.forEach(function(r){ mealTotals[r.category]=(mealTotals[r.category]||0)+Number(r.amount); });
+  var mealArr = Object.keys(mealTotals).map(function(k){ return {name:k, amount:mealTotals[k]}; }).sort(function(a,b){ return b.amount-a.amount; });
+  var mb = document.getElementById("mealBars");
+  if(mealArr.length === 0){
+    mb.innerHTML = '<div style="text-align:center;color:var(--muted);padding:16px;font-size:12px">暂无数据</div>';
+  } else {
+    var totalMealAmt = meals.reduce(function(s,r){ return s+Number(r.amount); },0);
+    mb.innerHTML = mealArr.map(function(c){
+      var pct = totalMealAmt>0 ? (c.amount/totalMealAmt*100) : 0;
+      var cat = MEALS.find(function(m){ return m.name===c.name; }) || {icon:"🍽️"};
+      return '<div class="cat-bar-row"><div class="cat-bar-name">'+cat.icon+' '+c.name+'</div>'
+        +'<div class="cat-bar-track"><div class="cat-bar-fill" style="width:'+pct.toFixed(1)+'%"></div></div>'
+        +'<div class="cat-bar-amt">¥'+c.amount.toFixed(0)+' ('+pct.toFixed(0)+'%)</div></div>';
+    }).join("");
+  }
+  renderHealthChat();
+}
+
+function quickDrink(cat, amount){
+  var data = loadHealth();
+  var today = new Date().toISOString().slice(0,10);
+  var recId = Date.now();
+  var note = prompt(cat+" 备注（可选，如：便利店/美式/大杯，不填直接点确定）：") || "";
+  data.records.push({id:recId, type:"drink", category:cat, amount:amount, date:today, note:note});
+  saveHealth(data); renderHealth();
+  // 同步到存钱记账
+  try{
+    var money = loadMoney();
+    money.records.push({id:recId, category:cat, amount:amount, date:today, impulse:!!IMPULSE_CATS[cat], note:note});
+    saveMoney(money);
+  }catch(e){ console.log("同步到记账失败:", e.message); }
+}
+function quickMeal(cat){
+  var mealDef = MEALS.find(function(m){ return m.name===cat; }) || {amount:20};
+  var amount = prompt(cat+" 金额（默认 ¥"+mealDef.amount+"，可修改）：", String(mealDef.amount));
+  if(amount===null) return;
+  if(isNaN(amount) || Number(amount)<=0) amount = mealDef.amount;
+  var note = prompt(cat+" 备注（可选，如：三明治/黄焖鸡/公司楼下，不填直接点确定）：") || "";
+  var data = loadHealth();
+  var today = new Date().toISOString().slice(0,10);
+  var recId = Date.now();
+  data.records.push({id:recId, type:"meal", category:cat, amount:Number(amount), date:today, note:note});
+  saveHealth(data); renderHealth();
+  try{
+    var money = loadMoney();
+    money.records.push({id:recId, category:cat, amount:Number(amount), date:today, impulse:false, note:note});
+    saveMoney(money);
+  }catch(e){ console.log("同步到记账失败:", e.message); }
+}
+function addCustomMeal(){
+  var type = prompt("记录类型（drink=饮品，meal=吃法）：");
+  if(!type) return;
+  var cat = prompt("类别（如：咖啡/奶茶/外卖轻食）：");
+  if(!cat) return;
+  var amount = 0;
+  if(type==="drink"){
+    amount = prompt("金额：");
+    if(!amount || isNaN(amount)) return;
+  }
+  var note = prompt("备注（可选）：") || "";
+  var data = loadHealth();
+  var today = new Date().toISOString().slice(0,10);
+  var recId = Date.now();
+  data.records.push({id:recId, type:type, category:cat, amount:Number(amount), date:today, note:note});
+  saveHealth(data); renderHealth();
+  // 只要是饮食记录（drink或meal），都同步到记账台
+  if(type==="drink" || type==="meal"){
+    try{
+      var money = loadMoney();
+      money.records.push({id:recId, category:cat, amount:Number(amount), date:today, impulse:false, note:note});
+      saveMoney(money);
+    }catch(e){ console.log("同步到记账失败:", e.message); }
+  }
+}
+function editHealthAmount(id){
+  var data = loadHealth();
+  var r = data.records.find(function(x){ return x.id===id; });
+  if(!r) return;
+  var v = prompt("修改金额（当前 ¥"+r.amount+"）：");
+  if(!v || isNaN(v)) return;
+  r.amount = Number(v);
+  saveHealth(data); renderHealth();
+  // 同步修改记账金额
+  try{
+    var money = loadMoney();
+    var mr = money.records.find(function(x){ return x.id===id; });
+    if(mr){ mr.amount = Number(v); saveMoney(money); }
+  }catch(e){ console.log("同步修改记账失败:", e.message); }
+}
+function delHealthRecord(id){
+  if(!confirm("确定删除这条记录？（记账模块的对应记录也会同步删除）")) return;
+  var data = loadHealth();
+  data.records = data.records.filter(function(x){ return x.id!==id; });
+  saveHealth(data); renderHealth();
+  // 同步删除记账记录
+  try{
+    var money = loadMoney();
+    money.records = money.records.filter(function(x){ return x.id!==id; });
+    saveMoney(money);
+  }catch(e){ console.log("同步删除记账失败:", e.message); }
+}
+function editHealthBudget(){
+  var data = loadHealth();
+  var v = prompt("每周饮品预算（当前 ¥"+data.drinkBudget+"）：");
+  if(!v || isNaN(v)) return;
+  data.drinkBudget = Number(v);
+  saveHealth(data); renderHealth();
+}
+function editHealthGoal(){
+  var data = loadHealth();
+  var v = prompt("每周目标杯数（当前 "+data.drinkGoal+" 杯）：");
+  if(!v || isNaN(v)) return;
+  data.drinkGoal = Number(v);
+  saveHealth(data); renderHealth();
+}
+
+/* AI说真话 */
+function runHealthTruth(){
+  var data = loadHealth();
+  var weekRecords = data.records.filter(function(r){ return inThisWeek(r.date); });
+  var drinks = weekRecords.filter(function(r){ return r.type==="drink"; });
+  var drinkCups = drinks.length;
+  var drinkSpent = drinks.reduce(function(s,r){ return s+Number(r.amount); },0);
+  var box = document.getElementById("healthTruth");
+  if(weekRecords.length === 0){
+    box.textContent = "还没有记录，先记几笔我再帮你分析～";
+    return;
+  }
+  var truths = [];
+  if(drinkCups > data.drinkGoal){
+    truths.push("⚠️ 本周已经喝了"+drinkCups+"杯，超过目标"+data.drinkGoal+"杯了！手又伸出去了吧？");
+  } else if(drinkCups > data.drinkGoal*0.7){
+    truths.push("本周已喝"+drinkCups+"/"+data.drinkGoal+"杯，快到目标了，后面几天悠着点。");
+  } else {
+    truths.push("本周喝了"+drinkCups+"杯，控制得不错，继续保持。");
+  }
+  if(drinkSpent > data.drinkBudget){
+    truths.push("🚨 饮品已经花了¥"+drinkSpent.toFixed(0)+"，超预算¥"+(drinkSpent-data.drinkBudget).toFixed(0)+"！想想这些钱能买多少菜。");
+  } else {
+    truths.push("饮品花了¥"+drinkSpent.toFixed(0)+"/¥"+data.drinkBudget+"，还在预算内。");
+  }
+  // 最亏的一杯
+  if(drinks.length > 0){
+    var worst = drinks.reduce(function(a,b){ return Number(a.amount)>Number(b.amount)?a:b; });
+    var yearly = worst.amount * 52;
+    truths.push("💡 最贵的一杯是「"+worst.category+" ¥"+worst.amount+"」，每周少一杯，一年省¥"+yearly.toFixed(0)+"，差不多一顿火锅了。");
+  }
+  // 吃法建议
+  var meals = weekRecords.filter(function(r){ return r.type==="meal"; });
+  if(meals.length > 0){
+    var heavy = meals.filter(function(r){ return r.category==="重油外卖" || r.category==="外食聚餐"; }).length;
+    var heavyPct = meals.length>0 ? (heavy/meals.length*100) : 0;
+    if(heavyPct > 50){
+      truths.push("🍔 本周"+heavyPct.toFixed(0)+"%是重油/外食，肠胃和钱包都在抗议，试试自己做两顿？");
+    }
+  }
+  box.innerHTML = truths.map(function(t){ return '<div style="margin-bottom:8px">'+t+'</div>'; }).join("");
+}
+
+/* AI饮食顾问对话 */
+function renderHealthChat(){
+  var data = loadHealth();
+  var box = document.getElementById("healthChatMessages");
+  if(!box) return;
+  box.innerHTML = (data.chatHistory||[]).map(function(m){
+    return '<div class="m-chat-msg '+m.role+'">'+esc(m.content).replace(/\n/g,"<br>")+'</div>';
+  }).join("");
+  setTimeout(function(){ box.scrollTop = box.scrollHeight; }, 50);
+}
+function getHealthContext(){
+  var data = loadHealth();
+  var weekRecords = data.records.filter(function(r){ return inThisWeek(r.date); });
+  var drinks = weekRecords.filter(function(r){ return r.type==="drink"; });
+  var meals = weekRecords.filter(function(r){ return r.type==="meal"; });
+  var drinkSpent = drinks.reduce(function(s,r){ return s+Number(r.amount); },0);
+  return "【本周饮食概览】饮品"+drinks.length+"杯，花了¥"+drinkSpent.toFixed(0)+"/预算¥"+data.drinkBudget+"，目标"+data.drinkGoal+"杯；吃饭"+meals.length+"次。";
+}
+function sendHealthChat(){
+  var input = document.getElementById("healthChatInput");
+  var msg = input.value.trim();
+  if(!msg) return;
+  var data = loadHealth();
+  data.chatHistory = data.chatHistory || [];
+  data.chatHistory.push({role:"user", content:msg});
+  input.value = "";
+  saveHealth(data);
+  renderHealthChat();
+  setTimeout(function(){
+    var reply = generateHealthReply(msg, data);
+    data.chatHistory.push({role:"ai", content:reply});
+    saveHealth(data);
+    renderHealthChat();
+  }, 600);
+}
+function generateHealthReply(msg, data){
+  var lower = msg.toLowerCase();
+  if(lower.indexOf("超")>=0 || lower.indexOf("喝多")>=0){
+    var weekRecords = data.records.filter(function(r){ return inThisWeek(r.date); });
+    var drinks = weekRecords.filter(function(r){ return r.type==="drink"; });
+    if(drinks.length > data.drinkGoal) return "是的，超了"+(drinks.length-data.drinkGoal)+"杯。建议：1. 把咖啡换成美式（便宜且低卡）；2. 奶茶改成每周固定1-2杯；3. 含糖饮料直接戒，那是纯糖+纯花钱。";
+    return "还没超，喝了"+drinks.length+"/"+data.drinkGoal+"杯。但别得意，后面几天别报复性喝。";
+  }
+  if(lower.indexOf("省")>=0 || lower.indexOf("省钱")>=0){
+    return "省钱建议：1. 咖啡从每天1杯减到每周3杯，一年省¥2000+；2. 奶茶自己做，成本¥3 vs 外面¥15；3. 含糖饮料直接不买，那是智商税。先从最容易的一项开始。";
+  }
+  if(lower.indexOf("健康")>=0 || lower.indexOf("胖")>=0){
+    return "健康建议：1. 奶茶选三分糖或无糖，一杯少50大卡；2. 重油外卖每周不超过2次；3. 自己做饭时多放蔬菜少放油。不用一步到位，先改一个习惯。";
+  }
+  var weekRecords = data.records.filter(function(r){ return inThisWeek(r.date); });
+  if(weekRecords.length===0) return "还没有记录，先点上方按钮记几笔，我再帮你分析。记录的意义不是惩罚自己，是让你看清自己实际怎么吃的。";
+  return getHealthContext() + " 你可以问我：喝超了吗？怎么省钱？怎么吃更健康？或者直接说你的困惑，我帮你出主意。说人话，不绕弯。";
+}
+
+
+/* ========== 决策顾问模块 ========== */
+var DECISION_KEY = "weh_decision_data_v1";
+var DECISION_DEFAULTS = {identity:"上班族", stage:"起步摸索期", depth:3, chatHistory:[], score:null, round:0, started:false};
+
+function loadDecision(){
+  try{
+    var d = JSON.parse(localStorage.getItem(DECISION_KEY));
+    if(!d) return JSON.parse(JSON.stringify(DECISION_DEFAULTS));
+    for(var k in DECISION_DEFAULTS){ if(d[k]===undefined) d[k]=DECISION_DEFAULTS[k]; }
+    return d;
+  }catch(e){ return JSON.parse(JSON.stringify(DECISION_DEFAULTS)); }
+}
+function saveDecision(data){ localStorage.setItem(DECISION_KEY, JSON.stringify(data)); }
+
+function initDecision(){
+  var data = loadDecision();
+  document.getElementById("decIdentity").value = data.identity;
+  document.getElementById("decStage").value = data.stage;
+  document.getElementById("decDepth").value = String(data.depth);
+  renderDecisionChat();
+  if(data.score){
+    showDecisionScore(data.score);
+  }
+  updateRoundInfo();
+}
+
+function saveDecisionSettings(){
+  var data = loadDecision();
+  data.identity = document.getElementById("decIdentity").value;
+  data.stage = document.getElementById("decStage").value;
+  data.depth = Number(document.getElementById("decDepth").value);
+  saveDecision(data);
+  alert("设置已保存："+data.identity+" · "+data.stage+" · "+data.depth+"轮拷问");
+}
+
+function updateRoundInfo(){
+  var data = loadDecision();
+  var el = document.getElementById("decRoundInfo");
+  if(el){
+    if(!data.started){
+      el.textContent = "还没开始";
+    } else if(data.score){
+      el.textContent = "拷问完成 · "+data.score.score+"/10分";
+    } else {
+      el.textContent = "第 "+(data.round+1)+"/"+data.depth+" 轮";
+    }
+  }
+}
+
+function renderDecisionChat(){
+  var data = loadDecision();
+  var box = document.getElementById("decChatMessages");
+  if(!box) return;
+  if((data.chatHistory||[]).length === 0){
+    box.innerHTML = '<div style="text-align:center;color:var(--muted);padding:40px 20px;font-size:13px;line-height:1.8">把你的方案、想法或决定丢进来<br>我会结合你的身份（'+data.identity+' · '+data.stage+'）往死里挑<br><span style="color:#e05050;font-weight:700">低于7分让你重做，不许客气</span></div>';
+  } else {
+    box.innerHTML = data.chatHistory.map(function(m){
+      var content = esc(m.content).replace(/\n/g,"<br>");
+      if(m.role==="ai" && m.question){
+        content += '<span class="ai-question">💥 '+esc(m.question)+'</span>';
+      }
+      return '<div class="dec-chat-msg '+m.role+'">'+content+'</div>';
+    }).join("");
+  }
+  setTimeout(function(){ box.scrollTop = box.scrollHeight; }, 50);
+}
+
+function sendDecisionChat(){
+  var input = document.getElementById("decChatInput");
+  var msg = input.value.trim();
+  if(!msg) return;
+  var data = loadDecision();
+  data.chatHistory = data.chatHistory || [];
+  data.started = true;
+  data.chatHistory.push({role:"user", content:msg});
+  input.value = "";
+  saveDecision(data);
+  renderDecisionChat();
+  updateRoundInfo();
+
+  setTimeout(function(){
+    var result = generateDecisionResponse(msg, data);
+    data.chatHistory.push({role:"ai", content:result.content, question:result.question||null});
+    data.round += 1;
+    // 达到拷问轮数，打分
+    if(data.round >= data.depth && !data.score){
+      var score = generateDecisionScore(data);
+      data.score = score;
+      setTimeout(function(){
+        data.chatHistory.push({role:"ai", content:"拷问结束，我给你打分。"});
+        saveDecision(data);
+        renderDecisionChat();
+        showDecisionScore(score);
+        updateRoundInfo();
+      }, 800);
+    }
+    saveDecision(data);
+    renderDecisionChat();
+    updateRoundInfo();
+  }, 700);
+}
+
+function generateDecisionResponse(msg, data){
+  var round = data.round;
+  var identity = data.identity;
+  var responses = [
+    {
+      content: "作为一个"+identity+"，你这个方案的第一反应是：听起来不错，但我要问你——你凭什么觉得这个能成？你做过最坏情况的推演吗？",
+      question: "如果一切都往最坏的方向走，你能承受的底线是什么？"
+    },
+    {
+      content: "好，你回答了底线问题。但我注意到你刚才的回答里有个漏洞——你把希望寄托在了一个你控制不了的变量上。这叫乐观偏差。",
+      question: "你方案里哪个环节是你完全控制不了的？如果那个环节掉链子，你的Plan B是什么？"
+    },
+    {
+      content: "Plan B？你确定那不是Plan A的换皮？很多人的Plan B只是把同样的错误换个方式再犯一遍。还有，你为这个方案投入了多少？投入越多，越容易陷入沉没成本。",
+      question: "老实说，你现在是不是已经投入了太多（时间/钱/面子），所以哪怕知道有问题也不想放弃？"
+    },
+    {
+      content: "你看，你犹豫了。这就是自我感动——你觉得自己努力了这么久不能白费，但努力的方向错了，越努力亏得越多。我再问你一个更扎心的。",
+      question: "如果今天是你朋友拿着跟你一模一样的方案来问你，你会真心建议他做吗？还是会劝他再想想？"
+    },
+    {
+      content: "你看，你对朋友诚实，对自己宽容。这就是决策最大的敌人——对自己 double standard。好了，拷问差不多了，我给你打个分。",
+      question: null
+    },
+  ];
+  var idx = Math.min(round, responses.length-1);
+  return responses[idx];
+}
+
+function generateDecisionScore(data){
+  // 根据对话轮数和用户回答的"质量"模拟打分
+  // 纯前端模拟，分数在4-8之间波动
+  var base = 5;
+  var history = data.chatHistory || [];
+  var userMsgs = history.filter(function(m){ return m.role==="user"; });
+  // 用户回答越长，分数略高（说明认真想了）
+  var avgLen = userMsgs.reduce(function(s,m){ return s+m.content.length; },0) / Math.max(userMsgs.length,1);
+  var lenBonus = Math.min(avgLen/50, 2);
+  // 随机波动
+  var random = (Math.random()*2 - 1);
+  var score = Math.round(Math.min(Math.max(base + lenBonus + random, 3), 9));
+  var fatal, fix, pass;
+  if(score >= 7){
+    pass = true;
+    fatal = "没有致命伤，但有优化空间";
+    fix = "方向是对的，把拷问中暴露的薄弱环节补强，然后小步快跑验证";
+  } else if(score >= 5){
+    pass = false;
+    fatal = "有明显漏洞，风险大于收益";
+    fix = "先别急着all in，把拷问中提到的Plan B、最坏情况、控制不了的变量这三件事想清楚，再决定";
+  } else {
+    pass = false;
+    fatal = "方向可能就错了，现在停手比继续亏好";
+    fix = "建议彻底重新评估，或者换一个方向。沉没成本不是成本，及时止损也是一种能力";
+  }
+  return {score:score, fatal:fatal, fix:fix, pass:pass};
+}
+
+function showDecisionScore(score){
+  var card = document.getElementById("decScoreCard");
+  if(!card) return;
+  card.style.display = "block";
+  document.getElementById("decScoreNum").textContent = score.score;
+  document.getElementById("decFatal").textContent = score.fatal;
+  document.getElementById("decFix").textContent = score.fix;
+  var verdict = document.getElementById("decVerdict");
+  if(score.pass){
+    verdict.textContent = "✅ 通过，可以做，但要注意风险";
+    verdict.className = "dec-score-verdict pass";
+  } else {
+    verdict.textContent = "❌ 不通过，建议重做或重新评估";
+    verdict.className = "dec-score-verdict fail";
+  }
+  // 环形进度条
+  var ring = document.getElementById("decScoreRing");
+  if(ring){
+    var pct = score.score * 10;
+    var color = score.score >= 7 ? "#2d8a5e" : (score.score >= 5 ? "#ffa94d" : "#e05050");
+    ring.style.background = "conic-gradient("+color+" "+pct+"%, rgba(255,255,255,.5) "+pct+"%)";
+  }
+}
+
+function resetDecision(){
+  if(!confirm("确定重新开始？当前拷问记录会清空。")) return;
+  var data = loadDecision();
+  data.chatHistory = [];
+  data.score = null;
+  data.round = 0;
+  data.started = false;
+  saveDecision(data);
+  document.getElementById("decScoreCard").style.display = "none";
+  renderDecisionChat();
+  updateRoundInfo();
 }
 
 /* ---------- 全局搜索 ---------- */
@@ -910,6 +1478,12 @@ document.addEventListener("keydown", function(e){ if(e.key==="Escape") closeModa
     }
     if(document.getElementById("moneyRemain")){
       renderMoney();
+    }
+    if(document.getElementById("healthSpent")){
+      renderHealth();
+    }
+    if(document.getElementById("decChatMessages")){
+      initDecision();
       // 更新统计数字
       var kbTotal = 0;
       KBS.forEach(function(k){ (k.groups||[{notes:k.notes||[]}]).forEach(function(g){ (function walk(ns){ ns.forEach(function(n){ kbTotal += n.children ? (function(){var c=0;(function w2(x){x.forEach(function(z){c+=z.children?w2(z.children):1});return c;})(n.children)})() : 1; }); })(g.notes||[]); }); });
