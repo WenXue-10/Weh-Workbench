@@ -18,6 +18,9 @@ ASSETS = os.path.join(BASE, "site_assets")
 OUT = os.path.join(BASE, "docs")
 FILES_DIR = os.path.join(OUT, "files")
 
+# 知识库根目录：Weh-Brain 里的 SCM-Career 项目
+KB_ROOT = r"D:\Obsidian\Weh-Brain\01-Projects\SCM-Career"
+
 try:
     _md = markdown.Markdown(extensions=["tables", "fenced_code", "sane_lists"]) if markdown else None
 except Exception:
@@ -225,7 +228,7 @@ def find_files(folder, prefixes):
 
 def scan_jobs():
     jobs = []
-    research = os.path.join(BASE, "01_岗位搜集与背调", "公司调研")
+    research = os.path.join(KB_ROOT, "01_岗位搜集与背调", "公司调研")
     if not os.path.isdir(research):
         return jobs
     for company in sorted(os.listdir(research)):
@@ -281,7 +284,7 @@ def scan_jobs():
                         job["report"]["pdf"] = gen_pdf_from_md(rt_path, "背调报告：" + fm.get("岗位名称", fn[:-3]))
                     break
             # 定制简历
-            rp = os.path.join(BASE, "02_定制简历库", company, posdir)
+            rp = os.path.join(KB_ROOT, "02_定制简历库", company, posdir)
             if os.path.isdir(rp):
                 res = {}
                 for fn in sorted(os.listdir(rp)):
@@ -293,7 +296,7 @@ def scan_jobs():
                 if res:
                     job["resume"] = res
             # JD 原文
-            jp = os.path.join(BASE, "07_原始材料库", company, posdir)
+            jp = os.path.join(KB_ROOT, "07_原始材料库", company, posdir)
             if os.path.isdir(jp):
                 jd = {}
                 pdfs = [os.path.join(jp, fn) for fn in os.listdir(jp) if fn.lower().endswith(".pdf")]
@@ -325,7 +328,7 @@ def _classify_result(res):
     return "📋 其他"
 
 def scan_companies():
-    p = os.path.join(BASE, "01_岗位搜集与背调", "🗂️ 候选线索池.md")
+    p = os.path.join(KB_ROOT, "01_岗位搜集与背调", "🗂️ 候选线索池.md")
     if not os.path.exists(p):
         return []
     text = read(p)
@@ -379,7 +382,7 @@ def scan_companies():
 
 # ---------- 日报 / 待办 ----------
 def scan_timeline():
-    p = os.path.join(BASE, "01_岗位搜集与背调", "📅 岗位日报归档.md")
+    p = os.path.join(KB_ROOT, "01_岗位搜集与背调", "📅 岗位日报归档.md")
     if not os.path.exists(p):
         return [], []
     text = read(p)
@@ -421,7 +424,7 @@ _DOC_KEY = {
 }
 def scan_resumes():
     general = []
-    gdir = os.path.join(BASE, "02_定制简历库", "通用简历")
+    gdir = os.path.join(KB_ROOT, "02_定制简历库", "通用简历")
     if os.path.isdir(gdir):
         all_files = sorted(os.listdir(gdir))
         for fn in all_files:
@@ -445,7 +448,7 @@ def scan_resumes():
                         break
                 general.append({"name": name, "desc": "通用底版 · 适配" + direction, "pdf": pdf, "doc": doc})
     custom = []
-    cdir = os.path.join(BASE, "02_定制简历库")
+    cdir = os.path.join(KB_ROOT, "02_定制简历库")
     if os.path.isdir(cdir):
         for company in sorted(os.listdir(cdir)):
             if company == "通用简历":
@@ -537,10 +540,10 @@ def _kb_01(jobs):
     groups.append({"title": "📊 岗位汇总表（自动生成）",
                    "notes": [{"title": "全部岗位汇总", "icon": "📊", "html": jobs_table_html(jobs)}]})
     for fn, title, icon in [("🗂️ 目标公司池.md", "目标公司池完整清单", "🏢"), ("📅 岗位日报归档.md", "岗位日报归档", "📅")]:
-        p = os.path.join(BASE, "01_岗位搜集与背调", fn)
+        p = os.path.join(KB_ROOT, "01_岗位搜集与背调", fn)
         if os.path.exists(p):
             groups.append({"title": icon + " " + title[:4], "notes": [{"title": title, "icon": icon, "html": md_to_html(strip_fm(read(p)))}]})
-    research = os.path.join(BASE, "01_岗位搜集与背调", "公司调研")
+    research = os.path.join(KB_ROOT, "01_岗位搜集与背调", "公司调研")
     companies = []
     if os.path.isdir(research):
         for company in sorted(os.listdir(research)):
@@ -590,7 +593,7 @@ def _kb_02(resumes):
 
 
 def _kb_03():
-    root = os.path.join(BASE, "03_笔面试题库")
+    root = os.path.join(KB_ROOT, "03_笔面试题库")
     groups = []
     if not os.path.isdir(root):
         return groups
@@ -628,7 +631,7 @@ def _kb_03():
 
 def _kb_07():
     """07_原始材料库：公司 > 岗位方向 > 材料文件，顶部保留材料索引"""
-    root = os.path.join(BASE, "07_原始材料库")
+    root = os.path.join(KB_ROOT, "07_原始材料库")
     groups = []
     idx = os.path.join(root, "📋 材料索引.md")
     if os.path.exists(idx):
@@ -661,7 +664,7 @@ def _kb_07():
 
 def _kb_08():
     """08_个人资料库：核心档案（根目录 md）+ 各子目录（如报告论文与作品）"""
-    root = os.path.join(BASE, "08_个人资料库")
+    root = os.path.join(KB_ROOT, "08_个人资料库")
     groups = []
     core = []
     if os.path.isdir(root):
@@ -689,7 +692,7 @@ def _kb_08():
 
 def _kb_04():
     """04_实战复盘：根目录文件（错题本等）+ 按企业/岗位分组的面试复盘"""
-    root = os.path.join(BASE, "04_实战复盘")
+    root = os.path.join(KB_ROOT, "04_实战复盘")
     groups = []
     # 根目录下的文件（如错题本.md）
     root_files = []
@@ -748,7 +751,7 @@ def scan_kb(jobs, resumes):
         elif handler == "kb08":
             groups = _kb_08()
         else:
-            groups = [{"title": "", "notes": _walk_notes(os.path.join(BASE, folder))}]
+            groups = [{"title": "", "notes": _walk_notes(os.path.join(KB_ROOT, folder))}]
         kb.append({"icon": icon, "name": folder, "desc": desc, "cls": cls, "groups": groups})
     return kb
 
@@ -865,14 +868,19 @@ def build():
         if os.path.exists(sp):
             shutil.copy2(sp, os.path.join(OUT, fname))
 
-    # 阶段1：不扫描Obsidian，用空数据占位
-    jobs = []
-    companies = []
-    timeline = []
+    # 扫描Obsidian知识库数据
+    jobs = scan_jobs()
+    companies = scan_companies()
+    timeline = scan_timeline()
     todo = []
-    resumes = {"general": [], "custom": []}
-    kb = []
-    stats = {"jobs": 0, "rec": 0, "interview": 0, "offer": 0}
+    resumes = scan_resumes()
+    kb = scan_kb(jobs, resumes)
+    stats = {
+        "jobs": len(jobs),
+        "rec": sum(1 for j in jobs if j.get("status") == "rec"),
+        "interview": sum(1 for j in jobs if j.get("status") == "interview"),
+        "offer": sum(1 for j in jobs if j.get("status") == "offer"),
+    }
 
     data = {
         "updated": __import__("datetime").datetime.now().strftime("%Y-%m-%d %H:%M"),
