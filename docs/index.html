@@ -22,7 +22,7 @@
   --shadow:0 8px 24px rgba(224,122,166,.14);
   --shadow-sm:0 4px 14px rgba(224,122,166,.10);
   --grad-from:#ff8fb8; --grad-to:#c9a8ff; --grad-shadow:rgba(255,126,180,.35); --grad-ring:#ffd0e2;
-  --card-bg:rgba(255,255,255,.84); --topbar-bg:rgba(255,247,250,.74); --nav-bg:rgba(255,255,255,.9);
+  --glass-opacity:.84; --card-bg:rgba(255,255,255,var(--glass-opacity)); --topbar-bg:rgba(255,247,250,.74); --nav-bg:rgba(255,255,255,.9);
   --veil-top:rgba(255,247,250,.66); --veil-bot:rgba(255,247,250,.8);
   --stat1a:rgba(255,227,238,.72); --stat1b:rgba(255,208,226,.72);
   --stat2a:rgba(239,232,255,.72); --stat2b:rgba(226,214,255,.72);
@@ -57,7 +57,8 @@ a{color:var(--pink-deep);text-decoration:none}
 .sync .dot{width:8px;height:8px;border-radius:50%;background:var(--mint);box-shadow:0 0 0 3px rgba(52,201,142,.18)}
 .content{padding:22px 26px 40px;max-width:1080px;width:100%;margin:0 auto}
 .view{display:none}
-.view.active{display:block;animation:fade .3s ease}
+.view.active{display:block;animation:slide .2s ease}
+@keyframes slide{from{transform:translateY(6px)}to{transform:none}}
 @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 /* ===== 统计卡片（马卡龙渐变） ===== */
 .stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
@@ -509,6 +510,216 @@ a{color:var(--pink-deep);text-decoration:none}
   .money-right{width:100%!important}
 }
 
+
+/* ========== 灵感捕捉模块 ========== */
+.inspire-input-bar{display:flex;gap:10px;margin-bottom:16px}
+.inspire-input-bar input{flex:1;border:1px solid var(--line);border-radius:14px;padding:12px 18px;font-size:14px;background:rgba(255,255,255,.85);outline:none;transition:.15s}
+.inspire-input-bar input:focus{border-color:var(--pink-deep);box-shadow:0 0 0 3px rgba(219,112,147,.12)}
+.inspire-input-bar button{background:linear-gradient(135deg,var(--pink-deep),#b48ed9);color:#fff;border:none;border-radius:14px;padding:0 24px;font-size:14px;font-weight:700;cursor:pointer;transition:.15s;white-space:nowrap}
+.inspire-input-bar button:hover{transform:translateY(-1px);box-shadow:var(--shadow-sm)}
+.inspire-left{width:300px;flex-shrink:0}
+.inspire-list{max-height:520px;overflow-y:auto;display:flex;flex-direction:column;gap:8px}
+.inspire-item{padding:12px 14px;border-radius:12px;background:rgba(255,255,255,.6);border:1px solid transparent;cursor:pointer;transition:.15s}
+.inspire-item:hover{background:rgba(255,255,255,.9);border-color:var(--line)}
+.inspire-item.active{background:rgba(219,112,147,.1);border-color:var(--pink-deep)}
+.inspire-item-text{font-size:13px;line-height:1.5;color:var(--text);margin-bottom:6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.inspire-item-meta{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--muted)}
+.inspire-tag{padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700}
+.inspire-tag.pending{background:rgba(255,169,77,.2);color:#d48806}
+.inspire-tag.recorded{background:rgba(114,176,94,.2);color:#52803a}
+.inspire-tag.action{background:rgba(219,112,147,.2);color:var(--pink-deep)}
+.inspire-detail{min-height:200px;font-size:13px;line-height:1.8;color:var(--text)}
+.inspire-detail .d-section{margin-bottom:16px}
+.inspire-detail .d-label{font-weight:800;color:var(--pink-deep);margin-bottom:6px;font-size:13px}
+.inspire-detail .d-content{background:rgba(255,255,255,.6);padding:10px 14px;border-radius:10px;font-size:13px;line-height:1.7}
+.inspire-action-btn{flex:1;min-width:120px;padding:10px 16px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.8);font-size:12px;font-weight:700;cursor:pointer;transition:.15s;color:var(--text)}
+.inspire-action-btn:hover{border-color:var(--pink-deep);background:rgba(219,112,147,.08)}
+@media(max-width:900px){
+  .inspire-left{width:100%}
+  .money-right{width:100%!important}
+}
+
+
+/* ========== 待办清单模块 ========== */
+.todo-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.todo-stat-card{background:rgba(255,255,255,.7);backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:16px;padding:16px;text-align:center;transition:.15s}
+.todo-stat-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-sm)}
+.todo-stat-num{font-size:28px;font-weight:900;background:linear-gradient(135deg,var(--pink-deep),#b48ed9);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1}
+.todo-stat-label{font-size:12px;color:var(--muted);margin-top:4px;font-weight:600}
+.todo-add-bar{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+.todo-add-bar input[type="text"]{flex:1;min-width:200px;border:1px solid var(--line);border-radius:12px;padding:10px 14px;font-size:13px;background:rgba(255,255,255,.85);outline:none;transition:.15s}
+.todo-add-bar input[type="text"]:focus{border-color:var(--pink-deep);box-shadow:0 0 0 3px rgba(219,112,147,.12)}
+.todo-add-bar select{border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:13px;background:rgba(255,255,255,.85);outline:none;cursor:pointer;color:var(--text)}
+.todo-add-bar input[type="date"]{border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:13px;background:rgba(255,255,255,.85);outline:none;color:var(--text)}
+.todo-add-bar button{background:linear-gradient(135deg,var(--pink-deep),#b48ed9);color:#fff;border:none;border-radius:12px;padding:0 20px;font-size:13px;font-weight:700;cursor:pointer;transition:.15s;white-space:nowrap}
+.todo-add-bar button:hover{transform:translateY(-1px);box-shadow:var(--shadow-sm)}
+.todo-list{display:flex;flex-direction:column;gap:8px;max-height:520px;overflow-y:auto}
+.todo-item{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:12px;background:rgba(255,255,255,.6);border:1px solid transparent;transition:.15s}
+.todo-item:hover{background:rgba(255,255,255,.9);border-color:var(--line)}
+.todo-item.done{opacity:.55}
+.todo-item.done .todo-text{text-decoration:line-through}
+.todo-check{width:22px;height:22px;border:2px solid var(--pink-deep);border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:.15s;background:rgba(255,255,255,.8)}
+.todo-check:hover{background:rgba(219,112,147,.1)}
+.todo-check.checked{background:var(--pink-deep);color:#fff;font-size:14px;font-weight:900}
+.todo-content{flex:1;min-width:0}
+.todo-text{font-size:13.5px;font-weight:600;color:var(--text);margin-bottom:3px;word-break:break-word}
+.todo-meta{display:flex;gap:8px;align-items:center;font-size:11px;color:var(--muted);flex-wrap:wrap}
+.todo-cat-tag{padding:2px 8px;border-radius:8px;font-weight:700;font-size:10px}
+.todo-cat-tag.work{background:rgba(114,147,219,.15);color:#4a6fa5}
+.todo-cat-tag.study{background:rgba(114,176,94,.15);color:#52803a}
+.todo-cat-tag.life{background:rgba(219,168,114,.15);color:#a57a3a}
+.todo-cat-tag.other{background:rgba(160,160,160,.15);color:#666}
+.todo-priority-tag{font-size:11px;font-weight:700}
+.todo-due{font-size:11px;font-weight:600}
+.todo-due.overdue{color:#e05050;font-weight:800}
+.todo-due.today{color:#d48806;font-weight:800}
+.todo-actions{display:flex;gap:6px;flex-shrink:0}
+.todo-action-btn{width:28px;height:28px;border:1px solid var(--line);border-radius:8px;background:rgba(255,255,255,.8);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;transition:.15s;color:var(--text)}
+.todo-action-btn:hover{border-color:var(--pink-deep);background:rgba(219,112,147,.08)}
+.todo-empty{text-align:center;color:var(--muted);padding:40px 20px;font-size:13px;line-height:1.8}
+@media(max-width:900px){
+  .todo-stats{grid-template-columns:repeat(2,1fr)}
+}
+
+
+/* ========== 工作汇报台模块 ========== */
+.report-setting{margin-bottom:16px}
+.report-label{font-size:12px;font-weight:700;color:var(--muted);margin-bottom:8px}
+.report-options{display:flex;gap:6px;flex-wrap:wrap}
+.report-option{flex:1;min-width:80px;text-align:center;padding:8px 10px;border:1px solid var(--line);border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;transition:.15s;background:rgba(255,255,255,.7);color:var(--text)}
+.report-option:hover{border-color:var(--pink-deep);background:rgba(219,112,147,.08)}
+.report-option.active{background:linear-gradient(135deg,var(--pink-deep),#b48ed9);color:#fff;border-color:transparent}
+.report-setting textarea{width:100%;border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:13px;background:rgba(255,255,255,.85);outline:none;transition:.15s;resize:vertical;font-family:inherit;line-height:1.6}
+.report-setting textarea:focus{border-color:var(--pink-deep);box-shadow:0 0 0 3px rgba(219,112,147,.12)}
+.report-generate-btn{width:100%;padding:12px;background:linear-gradient(135deg,var(--pink-deep),#b48ed9);color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:800;cursor:pointer;transition:.15s;margin-top:8px}
+.report-generate-btn:hover{transform:translateY(-1px);box-shadow:var(--shadow-sm)}
+.report-generate-btn:active{transform:translateY(0)}
+.report-history{max-height:300px;overflow-y:auto;display:flex;flex-direction:column;gap:6px}
+.report-history-item{padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.6);border:1px solid transparent;cursor:pointer;transition:.15s}
+.report-history-item:hover{background:rgba(255,255,255,.9);border-color:var(--line)}
+.report-history-item.active{background:rgba(219,112,147,.1);border-color:var(--pink-deep)}
+.report-history-title{font-size:12px;font-weight:700;margin-bottom:3px}
+.report-history-meta{font-size:10px;color:var(--muted)}
+.report-result{font-size:13px;line-height:1.8;color:var(--text)}
+.report-section{margin-bottom:18px}
+.report-section-title{font-size:13px;font-weight:800;color:var(--pink-deep);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--line)}
+.report-section-content{background:rgba(255,255,255,.6);padding:12px 16px;border-radius:10px;line-height:1.8}
+.report-section-content ul{margin:0;padding-left:20px}
+.report-section-content li{margin-bottom:4px}
+.report-question{background:rgba(255,169,77,.08);border-left:3px solid #ffa94d;padding:10px 14px;border-radius:0 8px 8px 0;margin-bottom:8px}
+.report-question-q{font-weight:700;font-size:12px;margin-bottom:4px;color:#d48806}
+.report-question-a{font-size:12px;color:var(--text);line-height:1.6}
+@media(max-width:900px){
+  .money-left{width:100%!important}
+  .money-right{width:100%!important}
+}
+
+.report-delete-btn{
+  width:24px;height:24px;
+  display:flex;align-items:center;justify-content:center;
+  border-radius:6px;cursor:pointer;
+  font-size:12px;opacity:.5;
+  transition:.15s;flex-shrink:0;
+}
+.report-delete-btn:hover{
+  opacity:1;
+  background:rgba(224,80,80,.1);
+}
+
+
+/* ========== 日计划台模块 ========== */
+.daily-header{display:flex;gap:20px;align-items:center;margin-bottom:16px;padding:16px 20px;background:rgba(255,255,255,.7);backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:16px}
+.daily-date{display:flex;align-items:center;gap:12px}
+.daily-date-num{font-size:42px;font-weight:900;line-height:1;background:linear-gradient(135deg,var(--pink-deep),#b48ed9);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.daily-date-text{font-size:13px;color:var(--muted);line-height:1.5;font-weight:600}
+.daily-progress{flex:1}
+.daily-progress-label{font-size:12px;font-weight:700;color:var(--muted);margin-bottom:6px}
+.daily-progress-label span{color:var(--pink-deep);font-weight:800}
+.daily-progress-bar{height:10px;background:rgba(0,0,0,.06);border-radius:5px;overflow:hidden}
+.daily-progress-fill{height:100%;background:linear-gradient(90deg,var(--pink-deep),#b48ed9);border-radius:5px;transition:width .3s ease}
+.daily-add-form{display:flex;flex-direction:column;gap:10px}
+.daily-add-form input[type="text"]{width:100%;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:13px;background:rgba(255,255,255,.85);outline:none;transition:.15s;box-sizing:border-box}
+.daily-add-form input[type="text"]:focus{border-color:var(--pink-deep);box-shadow:0 0 0 3px rgba(219,112,147,.12)}
+.daily-add-row{display:flex;gap:8px}
+.daily-add-row select{flex:1;border:1px solid var(--line);border-radius:10px;padding:8px;font-size:12px;background:rgba(255,255,255,.85);outline:none;cursor:pointer;color:var(--text)}
+.daily-add-row button{padding:0 16px;background:linear-gradient(135deg,var(--pink-deep),#b48ed9);color:#fff;border:none;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;transition:.15s;white-space:nowrap}
+.daily-add-row button:hover{transform:translateY(-1px);box-shadow:var(--shadow-sm)}
+.daily-task-list{max-height:400px;overflow-y:auto;display:flex;flex-direction:column;gap:6px}
+.daily-task-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.6);border:1px solid transparent;transition:.15s}
+.daily-task-item:hover{background:rgba(255,255,255,.9);border-color:var(--line)}
+.daily-task-item.done{opacity:.5}
+.daily-task-item.done .daily-task-text{text-decoration:line-through}
+.daily-task-check{width:20px;height:20px;border:2px solid var(--pink-deep);border-radius:5px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:.15s;background:rgba(255,255,255,.8)}
+.daily-task-check:hover{background:rgba(219,112,147,.1)}
+.daily-task-check.checked{background:var(--pink-deep);color:#fff;font-size:12px;font-weight:900}
+.daily-task-content{flex:1;min-width:0}
+.daily-task-text{font-size:13px;font-weight:600;margin-bottom:2px;word-break:break-word}
+.daily-task-meta{font-size:10px;color:var(--muted);display:flex;gap:8px}
+.daily-task-delete{width:22px;height:22px;display:flex;align-items:center;justify-content:center;border-radius:5px;cursor:pointer;font-size:11px;opacity:.4;transition:.15s;flex-shrink:0}
+.daily-task-delete:hover{opacity:1;background:rgba(224,80,80,.1)}
+.daily-timeline{display:flex;flex-direction:column;gap:4px;max-height:300px;overflow-y:auto}
+.daily-time-block{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;background:rgba(255,255,255,.6);border-left:3px solid var(--pink-deep);font-size:12px}
+.daily-time-block.done{opacity:.4;border-left-color:#999}
+.daily-time-range{font-weight:800;color:var(--pink-deep);min-width:90px;font-size:11px}
+.daily-time-block.done .daily-time-range{color:#999}
+.daily-time-title{flex:1;font-weight:600;color:var(--text)}
+.daily-time-duration{font-size:10px;color:var(--muted)}
+.daily-truth{padding:12px 16px;background:rgba(255,240,246,.5);border-radius:10px;font-size:13px;line-height:1.7;color:var(--text)}
+.daily-truth .truth-label{font-weight:800;color:var(--pink-deep);margin-bottom:4px}
+#dailyReview{width:100%;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:13px;background:rgba(255,255,255,.85);outline:none;transition:.15s;resize:vertical;font-family:inherit;line-height:1.6;box-sizing:border-box}
+#dailyReview:focus{border-color:var(--pink-deep);box-shadow:0 0 0 3px rgba(219,112,147,.12)}
+@media(max-width:900px){
+  .daily-header{flex-direction:column;align-items:flex-start}
+  .money-left{width:100%!important}
+  .money-right{width:100%!important}
+}
+
+
+/* ========== 设置页 ========== */
+.settings-layout{display:flex;gap:20px;min-height:600px}
+.settings-nav{width:180px;flex-shrink:0;display:flex;flex-direction:column;gap:4px}
+.settings-nav-item{padding:12px 16px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;transition:.15s;color:var(--muted)}
+.settings-nav-item:hover{background:rgba(255,255,255,.6);color:var(--text)}
+.settings-nav-item.active{background:linear-gradient(135deg,var(--pink-deep),#b48ed9);color:#fff}
+.settings-content{flex:1}
+.settings-tab{display:none}
+.settings-tab.active{display:block}
+.setting-row{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid var(--line)}
+.setting-row:last-child{border-bottom:none}
+.setting-label{font-size:13px;font-weight:600;color:var(--text)}
+.setting-control{display:flex;align-items:center;gap:10px}
+.setting-control input[type="number"]{width:100px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-size:12px;background:rgba(255,255,255,.85);outline:none}
+.setting-control input[type="number"]:focus{border-color:var(--pink-deep)}
+.setting-control select{padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-size:12px;background:rgba(255,255,255,.85);outline:none;cursor:pointer;color:var(--text)}
+.setting-control input[type="range"]{width:120px;accent-color:var(--pink-deep)}
+.setting-btn{padding:8px 16px;border:1px solid var(--line);border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;transition:.15s;background:rgba(255,255,255,.8);color:var(--text)}
+.setting-btn:hover{border-color:var(--pink-deep);background:rgba(219,112,147,.08)}
+.setting-btn-danger{border-color:#e05050;color:#e05050}
+.setting-btn-danger:hover{background:rgba(224,80,80,.08);border-color:#e05050}
+.setting-link{color:var(--pink-deep);font-size:12px;font-weight:600;text-decoration:none}
+.setting-link:hover{text-decoration:underline}
+.setting-subtitle{font-size:12px;font-weight:800;color:var(--pink-deep);margin:16px 0 8px;padding-top:12px;border-top:1px solid var(--line)}
+.theme-picker{display:flex;gap:8px}
+.theme-dot{width:28px;height:28px;border-radius:50%;cursor:pointer;transition:.15s;border:2px solid transparent}
+.theme-dot:hover{transform:scale(1.1)}
+.theme-dot.active{border-color:#fff;box-shadow:0 0 0 2px var(--pink-deep)}
+.about-section{text-align:center;padding:24px 0}
+.about-logo{font-size:48px;margin-bottom:8px}
+.about-name{font-size:20px;font-weight:900;background:linear-gradient(135deg,var(--pink-deep),#b48ed9);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.about-sub{font-size:13px;color:var(--muted);margin-top:4px}
+.about-version{font-size:12px;color:var(--muted);margin-top:8px}
+.about-changelog{margin-top:20px}
+.about-changelog-title{font-size:14px;font-weight:800;margin-bottom:12px}
+.about-changelog-item{padding:12px 16px;background:rgba(255,255,255,.5);border-radius:10px;margin-bottom:10px}
+.about-changelog-version{font-size:13px;font-weight:800;color:var(--pink-deep)}
+.about-changelog-date{font-size:11px;color:var(--muted);margin-bottom:8px}
+.about-changelog-item ul{margin:0;padding-left:18px;font-size:12px;line-height:1.8;color:var(--text)}
+@media(max-width:900px){
+  .settings-layout{flex-direction:column}
+  .settings-nav{width:100%;flex-direction:row;overflow-x:auto}
+  .settings-nav-item{white-space:nowrap}
+}
+
 </style>
 </head>
 <body>
@@ -524,11 +735,13 @@ a{color:var(--pink-deep);text-decoration:none}
     <div class="nav-item" data-module="health">🍱 吃饭健康</div>
     <div class="nav-item" data-module="inspiration">💡 灵感捕捉</div>
     <div class="nav-item" data-module="decision">🎯 决策顾问</div>
-    <div class="nav-item" data-module="baichuan">📚 百川智库</div>
-    <div class="nav-item" data-module="career">💼 求职小窝</div>
-    <div class="nav-item" data-module="cet6">📖 六级学习</div>
+    <div class="nav-item" data-module="report">📝 工作汇报台</div>
+    <div class="nav-item" data-module="daily">📅 日计划台</div>
+    <div class="nav-item" data-module="todo">✅ Weh Tasks</div>
+    <div class="nav-item" data-module="baichuan">📚 灵犀库</div>
+    <div class="nav-item" data-module="career">💼 SCM Career</div>
+    <div class="nav-item" data-module="cet6">📖 CET-6备战</div>
     <div class="nav-item" data-module="sop">🛠️ 工作SOP</div>
-    <div class="nav-item" data-module="todo">✅ 待办清单</div>
     <div class="nav-item" data-module="settings">⚙️ 设置</div>
     <div class="foot">🐾 数据本地存储 · 知识库自动同步<br>慢慢搭建中，敬请期待 ✨</div>
   </aside>
@@ -552,18 +765,18 @@ a{color:var(--pink-deep);text-decoration:none}
           <div style="font-size:13px;color:var(--muted);margin-top:6px">这是你的专属AI工作室，慢慢搭建中。左侧切换不同模块，每个模块都有对应的AI助手帮你干活～</div>
         </div>
         <div class="stat-grid">
-          <div class="stat-card p1"><div class="em">💰</div><div class="lab">存钱记账</div><div class="num" style="font-size:14px">即将上线</div></div>
-          <div class="stat-card p2"><div class="em">🍱</div><div class="lab">吃饭健康</div><div class="num" style="font-size:14px">即将上线</div></div>
-          <div class="stat-card p3"><div class="em">💡</div><div class="lab">灵感捕捉</div><div class="num" style="font-size:14px">即将上线</div></div>
-          <div class="stat-card p4"><div class="em">🎯</div><div class="lab">决策顾问</div><div class="num" style="font-size:14px">即将上线</div></div>
+          <div class="stat-card p1" onclick="go('money')" style="cursor:pointer"><div class="em">💰</div><div class="lab">存钱记账</div><div class="num" id="homeMoneyCount">0</div><div class="lab" style="font-size:11px;margin-top:2px">笔消费记录</div></div>
+          <div class="stat-card p2" onclick="go('health')" style="cursor:pointer"><div class="em">🍱</div><div class="lab">吃饭健康</div><div class="num" id="homeHealthCount">0</div><div class="lab" style="font-size:11px;margin-top:2px">条饮食记录</div></div>
+          <div class="stat-card p3" onclick="go('inspiration')" style="cursor:pointer"><div class="em">💡</div><div class="lab">灵感捕捉</div><div class="num" id="homeInspireCount">0</div><div class="lab" style="font-size:11px;margin-top:2px">条灵感</div></div>
+          <div class="stat-card p4" onclick="go('decision')" style="cursor:pointer"><div class="em">🎯</div><div class="lab">决策顾问</div><div class="num" id="homeDecisionCount">0</div><div class="lab" style="font-size:11px;margin-top:2px">次拷问</div></div>
         </div>
         <div class="two-col">
           <div class="card">
             <div class="card-head">📚 知识库模块</div>
             <div class="quick-grid">
-              <a data-module="baichuan">📚 百川智库</a>
-              <a data-module="career">💼 求职小窝</a>
-              <a data-module="cet6">📖 六级学习</a>
+              <a data-module="baichuan">📚 灵犀库</a>
+              <a data-module="career">💼 SCM Career</a>
+              <a data-module="cet6">📖 CET-6备战</a>
               <a data-module="sop">🛠️ 工作SOP</a>
             </div>
           </div>
@@ -572,7 +785,7 @@ a{color:var(--pink-deep);text-decoration:none}
             <div class="quick-grid">
               <a data-module="money">💰 存钱记账</a>
               <a data-module="health">🍱 吃饭健康</a>
-              <a data-module="todo">✅ 待办清单</a>
+              <a data-module="todo">✅ Weh Tasks</a>
               <a data-module="settings">⚙️ 设置</a>
             </div>
           </div>
@@ -742,11 +955,40 @@ a{color:var(--pink-deep);text-decoration:none}
 
       <!-- 💡 灵感捕捉 -->
       <section id="module-inspiration" class="view">
-        <div class="empty-state">
-          <div class="empty-icon">💡</div>
-          <div class="empty-title">灵感捕捉</div>
-          <div class="empty-desc">随手记灵感，AI自动拆解、延伸、关联知识库<br>好想法不再溜走～</div>
-          <div class="empty-tag">🚧 正在搭建中</div>
+        <div class="inspire-input-bar">
+          <input type="text" id="inspireInput" placeholder="想到什么？直接记下来，回车保存..." onkeydown="if(event.key==='Enter')addInspire()">
+          <button onclick="addInspire()">💡 捕捉</button>
+        </div>
+        <div class="money-layout">
+          <div class="inspire-left">
+            <div class="card">
+              <div class="card-head">📝 灵感列表 <span class="m-count" id="inspireCount"></span></div>
+              <div class="inspire-list" id="inspireList"></div>
+            </div>
+          </div>
+          <div class="money-right" style="width:calc(100% - 320px)">
+            <div class="card" id="inspireDetailCard">
+              <div class="card-head">🤖 AI灵感延伸 <small id="inspireDetailTitle">选一条灵感看看</small></div>
+              <div class="inspire-detail" id="inspireDetail">
+                <div style="text-align:center;color:var(--muted);padding:40px 20px;font-size:13px;line-height:1.8">
+                  从左边选一条灵感<br>
+                  AI会帮你：追问、延伸、关联、判断值不值得做<br>
+                  <span style="color:var(--pink-deep);font-weight:700">碎片化想法不记录就溜走了</span>
+                </div>
+              </div>
+              <div id="inspireActions" style="margin-top:16px;display:none;gap:10px;flex-wrap:wrap">
+                <button class="inspire-action-btn" onclick="addInspireToTodo(currentInspireId)">✅→待办</button>
+                <button class="inspire-action-btn" onclick="addInspireToDaily(currentInspireId)">📅→今日</button>
+                <button class="inspire-action-btn" onclick="exportInspire(currentInspireId)">📥 导出MD</button>
+                <button class="inspire-action-btn" onclick="markInspire('recorded')">📌 已记录</button>
+                <button class="inspire-action-btn" onclick="markInspire('action')">✅ 已行动</button>
+                <button class="inspire-action-btn" onclick="deleteCurrentInspire()">🗑️ 删除</button>
+              </div>
+              <div style="margin-top:10px;text-align:center">
+                <button class="inspire-action-btn" style="width:100%;background:linear-gradient(135deg,var(--pink-deep),#b48ed9);color:#fff;border:none" onclick="exportAllInspire()">📦 批量导出所有灵感为MD</button>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -829,7 +1071,58 @@ a{color:var(--pink-deep);text-decoration:none}
         </div>
       </section>
 
-      <!-- 📚 百川智库 -->
+            <!-- 📝 工作汇报台 -->
+      <section id="module-report" class="view">
+        <div class="money-layout">
+          <div class="money-left" style="width:340px">
+            <div class="card">
+              <div class="card-head">⚙️ 汇报设置</div>
+              <div class="report-setting">
+                <div class="report-label">汇报类型</div>
+                <div class="report-options">
+                  <div class="report-option active" data-type="weekly" onclick="selectReportType('weekly')">📅 周报</div>
+                  <div class="report-option" data-type="project" onclick="selectReportType('project')">📊 项目进展</div>
+                  <div class="report-option" data-type="review" onclick="selectReportType('review')">🔄 复盘总结</div>
+                </div>
+              </div>
+              <div class="report-setting">
+                <div class="report-label">汇报对象</div>
+                <div class="report-options">
+                  <div class="report-option active" data-audience="leader" onclick="selectReportAudience('leader')">👔 直系领导</div>
+                  <div class="report-option" data-audience="client" onclick="selectReportAudience('client')">🤝 甲方</div>
+                  <div class="report-option" data-audience="teacher" onclick="selectReportAudience('teacher')">🎓 老师</div>
+                </div>
+              </div>
+              <div class="report-setting">
+                <div class="report-label">碎碎念（做了什么/遇到什么/下一步）</div>
+                <textarea id="reportInput" placeholder="把这周做的事、遇到的问题、下一步计划随便写，越碎越好，AI帮你整理成精简汇报..." rows="8"></textarea>
+              </div>
+              <button class="report-generate-btn" onclick="generateReport()">✨ 生成精简汇报</button>
+            </div>
+            <div class="card">
+              <div class="card-head">📜 历史汇报 <span class="m-count" id="reportHistoryCount"></span></div>
+              <div class="report-history" id="reportHistory"></div>
+            </div>
+          </div>
+          <div class="money-right" style="width:calc(100% - 360px)">
+            <div class="card" id="reportResultCard">
+              <div class="card-head">📝 汇报结果 <small id="reportResultTitle">在左边填写后点生成</small>
+                <button id="reportExportBtn" style="display:none;float:right;font-size:12px;padding:4px 12px;background:linear-gradient(135deg,var(--pink-deep),#b48ed9);color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:700" onclick="exportReport()">📥 导出MD</button>
+              </div>
+              <div class="report-result" id="reportResult">
+                <div style="text-align:center;color:var(--muted);padding:60px 20px;font-size:13px;line-height:1.8">
+                  选择汇报类型和对象<br>
+                  在左边输入碎碎念（做了什么、遇到什么问题、下一步计划）<br>
+                  点"✨ 生成精简汇报"<br>
+                  <span style="color:var(--pink-deep);font-weight:700">AI会参考工作SOP的模板，把"做了一大堆"翻译成"做出了什么"</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+<!-- 📚 百川智库 -->
       <section id="module-baichuan" class="view">
         <div class="page-head">
           <div class="page-title">📚 百川智库</div>
@@ -901,23 +1194,311 @@ a{color:var(--pink-deep);text-decoration:none}
         </div>
       </section>
 
-      <!-- ✅ 待办清单 -->
+            <!-- 📅 日计划台 -->
+      <section id="module-daily" class="view">
+        <div class="daily-header">
+          <div class="daily-date">
+            <div class="daily-date-num" id="dailyDateNum">--</div>
+            <div class="daily-date-text"><span id="dailyWeekday">--</span><br><span id="dailyMonth">--</span></div>
+          </div>
+          <div class="daily-progress">
+            <div class="daily-progress-label">今日完成进度 <span id="dailyProgressText">0/0</span></div>
+            <div class="daily-progress-bar"><div class="daily-progress-fill" id="dailyProgressFill" style="width:0%"></div></div>
+          </div>
+        </div>
+        <div class="money-layout">
+          <div class="money-left" style="width:360px">
+            <div class="card">
+              <div class="card-head">➕ 添加今日任务</div>
+              <div class="daily-add-form">
+                <input type="text" id="dailyInput" placeholder="要做什么？回车快速添加..." onkeydown="if(event.key==='Enter')addDailyTask()">
+                <div class="daily-add-row">
+                  <select id="dailyPriority">
+                    <option value="high">🔴 高优先</option>
+                    <option value="medium" selected>🟡 中优先</option>
+                    <option value="low">🟢 低优先</option>
+                  </select>
+                  <select id="dailyDuration">
+                    <option value="15">15分钟</option>
+                    <option value="30" selected>30分钟</option>
+                    <option value="60">1小时</option>
+                    <option value="120">2小时</option>
+                  </select>
+                  <button onclick="addDailyTask()">添加</button>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-head">📋 今日任务 <span class="m-count" id="dailyTaskCount"></span></div>
+              <div class="daily-task-list" id="dailyTaskList"></div>
+            </div>
+          </div>
+          <div class="money-right" style="width:calc(100% - 380px)">
+            <div class="card">
+              <div class="card-head">⏰ 时间轴安排 <small>按预计时长自动排布</small></div>
+              <div class="daily-timeline" id="dailyTimeline"></div>
+            </div>
+            <div class="card">
+              <div class="card-head">💬 AI说真话</div>
+              <div class="daily-truth" id="dailyTruth">
+                <div style="text-align:center;color:var(--muted);padding:24px;font-size:13px">添加任务后AI会给你实话实说～</div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-head">📝 今日复盘</div>
+              <textarea id="dailyReview" placeholder="今天做得怎么样？有什么收获和不足？写下来明天会更好～" rows="3" onchange="saveDailyReview()"></textarea>
+            </div>
+          </div>
+        </div>
+      </section>
+
+<!-- ✅ 待办清单 -->
       <section id="module-todo" class="view">
-        <div class="empty-state">
-          <div class="empty-icon">✅</div>
-          <div class="empty-title">待办清单</div>
-          <div class="empty-desc">今日待办、全部任务、完成打卡、优先级管理<br>事情一件一件搞定～</div>
-          <div class="empty-tag">🚧 正在搭建中</div>
+        <div class="todo-stats">
+          <div class="todo-stat-card">
+            <div class="todo-stat-num" id="todoTotal">0</div>
+            <div class="todo-stat-label">全部</div>
+          </div>
+          <div class="todo-stat-card">
+            <div class="todo-stat-num" id="todoPending">0</div>
+            <div class="todo-stat-label">待完成</div>
+          </div>
+          <div class="todo-stat-card">
+            <div class="todo-stat-num" id="todoDone">0</div>
+            <div class="todo-stat-label">已完成</div>
+          </div>
+          <div class="todo-stat-card">
+            <div class="todo-stat-num" id="todoToday">0</div>
+            <div class="todo-stat-label">今日到期</div>
+          </div>
+        </div>
+        <div class="todo-add-bar">
+          <input type="text" id="todoInput" placeholder="要做什么？回车快速添加..." onkeydown="if(event.key==='Enter')addTodo()">
+          <select id="todoPriority">
+            <option value="high">🔴 高优先级</option>
+            <option value="medium" selected>🟡 中优先级</option>
+            <option value="low">🟢 低优先级</option>
+          </select>
+          <select id="todoCategory">
+            <option value="work">💼 工作</option>
+            <option value="study">📖 学习</option>
+            <option value="life">🏠 生活</option>
+            <option value="other">📌 其他</option>
+          </select>
+          <input type="date" id="todoDueDate" style="width:140px">
+          <button onclick="addTodo()">➕ 添加</button>
+        </div>
+        <div class="card">
+          <div class="card-head">📋 待办列表 <span class="m-count" id="todoListCount"></span></div>
+          <div class="todo-list" id="todoList"></div>
         </div>
       </section>
 
       <!-- ⚙️ 设置 -->
       <section id="module-settings" class="view">
-        <div class="empty-state">
-          <div class="empty-icon">⚙️</div>
-          <div class="empty-title">设置</div>
-          <div class="empty-desc">换头像、换背景、主题切换、数据备份/导出、AI API配置<br>个性化你的工作台～</div>
-          <div class="empty-tag">🚧 正在搭建中</div>
+        <div class="settings-layout">
+          <!-- 左侧：设置分类导航 -->
+          <div class="settings-nav">
+            <div class="settings-nav-item active" data-tab="profile" onclick="switchSettingsTab('profile')">👤 个人信息</div>
+            <div class="settings-nav-item" data-tab="appearance" onclick="switchSettingsTab('appearance')">🎨 外观设置</div>
+            <div class="settings-nav-item" data-tab="data" onclick="switchSettingsTab('data')">💾 数据管理</div>
+            <div class="settings-nav-item" data-tab="preference" onclick="switchSettingsTab('preference')">⚙️ 模块偏好</div>
+            <div class="settings-nav-item" data-tab="about" onclick="switchSettingsTab('about')">ℹ️ 关于</div>
+          </div>
+
+          <!-- 右侧：设置内容 -->
+          <div class="settings-content">
+            <!-- 个人信息 -->
+            <div class="settings-tab active" id="settings-profile">
+              <div class="card">
+                <div class="card-head">👤 个人信息</div>
+                <div class="setting-row">
+                  <div class="setting-label">头像</div>
+                  <div class="setting-control">
+                    <button class="setting-btn" onclick="openPersonalize()">更换头像</button>
+                  </div>
+                </div>
+                <div class="setting-row">
+                  <div class="setting-label">背景图</div>
+                  <div class="setting-control">
+                    <button class="setting-btn" onclick="openPersonalize()">更换背景</button>
+                  </div>
+                </div>
+                <div class="setting-row">
+                  <div class="setting-label">应用图标</div>
+                  <div class="setting-control">
+                    <button class="setting-btn" onclick="openIconPicker()">更换图标</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 外观设置 -->
+            <div class="settings-tab" id="settings-appearance">
+              <div class="card">
+                <div class="card-head">🎨 外观设置</div>
+                <div class="setting-row">
+                  <div class="setting-label">主题色</div>
+                  <div class="setting-control">
+                    <div class="theme-picker">
+                      <div class="theme-dot theme-pink active" style="background:linear-gradient(135deg,#db7093,#b48ed9)" onclick="setTheme('pink')" title="粉紫"></div>
+                      <div class="theme-dot theme-blue" style="background:linear-gradient(135deg,#74b9ff,#a29bfe)" onclick="setTheme('blue')" title="蓝紫"></div>
+                      <div class="theme-dot theme-green" style="background:linear-gradient(135deg,#55efc4,#81ecec)" onclick="setTheme('green')" title="青绿"></div>
+                      <div class="theme-dot theme-orange" style="background:linear-gradient(135deg,#ffa502,#ff6348)" onclick="setTheme('orange')" title="暖橙"></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="setting-row">
+                  <div class="setting-label">毛玻璃透明度</div>
+                  <div class="setting-control">
+                    <input type="range" id="glassOpacity" min="50" max="95" value="75" onchange="setGlassOpacity(this.value)">
+                    <span id="glassOpacityValue">75%</span>
+                  </div>
+                </div>
+                <div class="setting-row">
+                  <div class="setting-label">字体大小</div>
+                  <div class="setting-control">
+                    <select id="fontSize" onchange="setFontSize(this.value)">
+                      <option value="small">小</option>
+                      <option value="medium" selected>中</option>
+                      <option value="large">大</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 数据管理 -->
+            <div class="settings-tab" id="settings-data">
+              <div class="card">
+                <div class="card-head">💾 数据管理</div>
+                <div class="setting-row">
+                  <div class="setting-label">导出所有数据</div>
+                  <div class="setting-control">
+                    <button class="setting-btn" onclick="exportAllData()">📤 导出JSON备份</button>
+                  </div>
+                </div>
+                <div class="setting-row">
+                  <div class="setting-label">导入数据</div>
+                  <div class="setting-control">
+                    <button class="setting-btn" onclick="document.getElementById('importDataInput').click()">📥 从备份恢复</button>
+                    <input type="file" id="importDataInput" accept=".json" style="display:none" onchange="importAllData(event)">
+                  </div>
+                </div>
+                <div class="setting-row">
+                  <div class="setting-label">清空模块数据</div>
+                  <div class="setting-control">
+                    <select id="clearModuleSelect">
+                      <option value="">选择模块...</option>
+                      <option value="money">存钱记账</option>
+                      <option value="health">吃饭健康</option>
+                      <option value="inspire">灵感捕捉</option>
+                      <option value="decision">决策顾问</option>
+                      <option value="report">工作汇报台</option>
+                      <option value="daily">日计划台</option>
+                      <option value="todo">Weh Tasks</option>
+                    </select>
+                    <button class="setting-btn setting-btn-danger" onclick="clearModuleData()">🗑️ 清空</button>
+                  </div>
+                </div>
+                <div class="setting-row">
+                  <div class="setting-label">重置全部数据</div>
+                  <div class="setting-control">
+                    <button class="setting-btn setting-btn-danger" onclick="resetAllData()">⚠️ 重置全部</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 模块偏好 -->
+            <div class="settings-tab" id="settings-preference">
+              <div class="card">
+                <div class="card-head">⚙️ 模块偏好</div>
+                <div class="setting-subtitle">💰 存钱记账</div>
+                <div class="setting-row">
+                  <div class="setting-label">默认月预算</div>
+                  <div class="setting-control">
+                    <input type="number" id="prefMoneyBudget" value="3000" onchange="savePreference()">
+                  </div>
+                </div>
+                <div class="setting-row">
+                  <div class="setting-label">默认固定存款</div>
+                  <div class="setting-control">
+                    <input type="number" id="prefMoneySave" value="600" onchange="savePreference()">
+                  </div>
+                </div>
+                <div class="setting-row">
+                  <div class="setting-label">账单日（每月几号）</div>
+                  <div class="setting-control">
+                    <input type="number" id="prefMoneyCycle" value="20" min="1" max="28" onchange="savePreference()">
+                  </div>
+                </div>
+                <div class="setting-subtitle">🍱 吃饭健康</div>
+                <div class="setting-row">
+                  <div class="setting-label">每周饮品预算</div>
+                  <div class="setting-control">
+                    <input type="number" id="prefHealthBudget" value="100" onchange="savePreference()">
+                  </div>
+                </div>
+                <div class="setting-row">
+                  <div class="setting-label">每周目标杯数</div>
+                  <div class="setting-control">
+                    <input type="number" id="prefHealthGoal" value="7" onchange="savePreference()">
+                  </div>
+                </div>
+                <div class="setting-subtitle">📅 日计划台</div>
+                <div class="setting-row">
+                  <div class="setting-label">每日开始时间</div>
+                  <div class="setting-control">
+                    <select id="prefDailyStart" onchange="savePreference()">
+                      <option value="8">8:00</option>
+                      <option value="9" selected>9:00</option>
+                      <option value="10">10:00</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 关于 -->
+            <div class="settings-tab" id="settings-about">
+              <div class="card">
+                <div class="card-head">ℹ️ 关于</div>
+                <div class="about-section">
+                  <div class="about-logo">✨</div>
+                  <div class="about-name">Weh Atelier</div>
+                  <div class="about-sub">🐾 个人AI工作室</div>
+                  <div class="about-version">版本 v1.0.0</div>
+                </div>
+                <div class="setting-row">
+                  <div class="setting-label">项目地址</div>
+                  <div class="setting-control">
+                    <a href="https://github.com/WenXue-10/Weh-Workbench" target="_blank" class="setting-link">GitHub 仓库</a>
+                  </div>
+                </div>
+                <div class="setting-row">
+                  <div class="setting-label">线上地址</div>
+                  <div class="setting-control">
+                    <a href="https://WenXue-10.github.io/Weh-Workbench/" target="_blank" class="setting-link">在线访问</a>
+                  </div>
+                </div>
+                <div class="about-changelog">
+                  <div class="about-changelog-title">📝 更新日志</div>
+                  <div class="about-changelog-item">
+                    <div class="about-changelog-version">v1.0.0</div>
+                    <div class="about-changelog-date">2026-09-05</div>
+                    <ul>
+                      <li>完成视频里5个工作台：存钱台、饮食台、杠精台、汇报台、日计划台</li>
+                      <li>完成灵感捕捉、Weh Tasks、4个知识库模块</li>
+                      <li>三模块联动：灵感→Weh Tasks→日计划台</li>
+                      <li>背景图/头像/图标自定义，主题跟随背景</li>
+                      <li>全局搜索功能</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -937,7 +1518,7 @@ a{color:var(--pink-deep);text-decoration:none}
 
 <script>
 window.SITE_DATA = {
- "updated": "2026-09-05 16:28",
+ "updated": "2026-09-05 18:33",
  "stats": {
   "jobs": 32,
   "rec": 0,
@@ -7504,6 +8085,1067 @@ function resetDecision(){
   updateRoundInfo();
 }
 
+
+/* ========== 灵感捕捉模块 ========== */
+var INSPIRE_KEY = "weh_inspire_data_v1";
+var INSPIRE_DEFAULTS = {records:[]};
+var currentInspireId = null;
+
+function loadInspire(){
+  try{
+    var d = JSON.parse(localStorage.getItem(INSPIRE_KEY));
+    if(!d) return JSON.parse(JSON.stringify(INSPIRE_DEFAULTS));
+    for(var k in INSPIRE_DEFAULTS){ if(d[k]===undefined) d[k]=INSPIRE_DEFAULTS[k]; }
+    return d;
+  }catch(e){ return JSON.parse(JSON.stringify(INSPIRE_DEFAULTS)); }
+}
+function saveInspire(data){ localStorage.setItem(INSPIRE_KEY, JSON.stringify(data)); }
+
+function addInspire(){
+  var input = document.getElementById("inspireInput");
+  var content = input.value.trim();
+  if(!content) return;
+  var data = loadInspire();
+  var now = new Date();
+  data.records.push({
+    id: Date.now(),
+    content: content,
+    date: now.toISOString().slice(0,10),
+    time: nowTimeStr(),
+    status: "pending",
+    aiExtension: null
+  });
+  saveInspire(data);
+  input.value = "";
+  renderInspire();
+}
+
+function renderInspire(){
+  var data = loadInspire();
+  var list = document.getElementById("inspireList");
+  var count = document.getElementById("inspireCount");
+  if(count) count.textContent = data.records.length + " 条";
+  if(!list) return;
+  if(data.records.length === 0){
+    list.innerHTML = '<div style="text-align:center;color:var(--muted);padding:32px 16px;font-size:13px">还没有灵感<br>在上方输入框记录第一条吧～</div>';
+    return;
+  }
+  var sorted = data.records.slice().sort(function(a,b){
+    var ta = (a.date||"") + " " + (a.time||"00:00");
+    var tb = (b.date||"") + " " + (b.time||"00:00");
+    return tb.localeCompare(ta);
+  });
+  list.innerHTML = sorted.map(function(r){
+    var statusText = {pending:"待处理", recorded:"已记录", action:"已行动"}[r.status] || "待处理";
+    var activeCls = r.id === currentInspireId ? " active" : "";
+    return '<div class="inspire-item'+activeCls+'" onclick="selectInspire('+r.id+')">'
+      +'<div class="inspire-item-text">'+esc(r.content)+'</div>'
+      +'<div class="inspire-item-meta"><span>'+r.date+' '+(r.time||"")+'</span>'
+      +'<span class="inspire-tag '+r.status+'">'+statusText+'</span></div>'
+      +'</div>';
+  }).join("");
+}
+
+function selectInspire(id){
+  currentInspireId = id;
+  renderInspire();
+  var data = loadInspire();
+  var r = data.records.find(function(x){ return x.id===id; });
+  if(!r) return;
+  document.getElementById("inspireDetailTitle").textContent = r.date + " " + (r.time||"");
+  document.getElementById("inspireActions").style.display = "flex";
+  // 如果还没有AI延伸，生成一个
+  if(!r.aiExtension){
+    r.aiExtension = generateInspireExtension(r.content);
+    saveInspire(data);
+  }
+  renderInspireDetail(r.aiExtension);
+}
+
+function renderInspireDetail(ext){
+  var box = document.getElementById("inspireDetail");
+  if(!box) return;
+  box.innerHTML = ''
+    +'<div class="d-section"><div class="d-label">💭 原始想法</div><div class="d-content">'+esc(ext.original)+'</div></div>'
+    +'<div class="d-section"><div class="d-label">❓ 值得追问的</div><div class="d-content">'+ext.questions.map(function(q){return '· '+esc(q);}).join('<br>')+'</div></div>'
+    +'<div class="d-section"><div class="d-label">🚀 可以延伸的方向</div><div class="d-content">'+ext.directions.map(function(d){return '· '+esc(d);}).join('<br>')+'</div></div>'
+    +'<div class="d-section"><div class="d-label">⚖️ 值不值得做</div><div class="d-content">'+esc(ext.judgment)+'</div></div>'
+    +'<div class="d-section"><div class="d-label">🔗 可能关联</div><div class="d-content">'+esc(ext.related)+'</div></div>';
+}
+
+function generateInspireExtension(content){
+  var lower = content.toLowerCase();
+  var questions = [];
+  var directions = [];
+  var judgment = "";
+  var related = "";
+
+  // 根据灵感内容生成不同的延伸
+  if(lower.indexOf("做")>=0 || lower.indexOf("创业")>=0 || lower.indexOf("项目")>=0){
+    questions = ["这个想法的核心价值是什么？谁会为此付费/花时间？", "最小可行版本是什么？能不能一周内做出来验证？", "最大的风险是什么？如果失败了损失有多大？"];
+    directions = ["先写一页纸的商业画布，把价值、用户、成本想清楚", "找3个目标用户聊聊，验证需求是不是真的", "做一个最小原型，哪怕是PPT或草图，先拿给别人看"];
+    judgment = "有行动潜力，但需要先验证需求，别一上来就all in。建议用最小成本试错，验证了再投入。";
+    related = "可能关联：求职/创业/项目管理。可以转到决策顾问模块做更深入的拷问。";
+  } else if(lower.indexOf("学")>=0 || lower.indexOf("考")>=0 || lower.indexOf("技能")>=0){
+    questions = ["学这个的目的是什么？是兴趣还是职业需要？", "有没有明确的学习路径和时间规划？", "学完之后怎么用？有没有输出的场景？"];
+    directions = ["列一个3个月的学习计划，每周固定时间", "找一个学习搭子或社群，互相监督", "边学边输出，写笔记或做小项目，学以致用"];
+    judgment = "值得投入，但要避免'收藏等于学会'的错觉。制定明确计划和输出场景，才能真正学到。";
+    related = "可能关联：六级学习/求职/工作SOP。可以把学习计划加入待办清单。";
+  } else if(lower.indexOf("写")>=0 || lower.indexOf("文章")>=0 || lower.indexOf("内容")>=0){
+    questions = ["想写给谁看？目标读者的痛点是什么？", "核心观点是什么？一句话能说清吗？", "有没有独特的视角或案例？还是只是重复别人说过的？"];
+    directions = ["先写一个大纲，把核心观点和结构定下来", "找3篇同主题的爆款文章，分析它们的结构和角度", "定一个截止日期，先写完再改，别追求完美"];
+    judgment = "有创作潜力，但要避免完美主义导致迟迟不动笔。先完成再完美，写出来才有修改的基础。";
+    related = "可能关联：百川智库/求职。可以把素材存入知识库，或者作为简历项目的素材。";
+  } else {
+    questions = ["这个想法为什么现在出现？是看到了什么还是经历了什么？", "如果不做，三个月后会后悔吗？", "这个想法跟你目前的大目标一致吗？"];
+    directions = ["先放一放，过一周再看，如果还觉得有价值就行动", "跟一个信任的朋友聊聊，听听外部视角", "把想法拆成最小的一步，今天就能做的那种"];
+    judgment = "暂时不确定价值，建议先沉淀一下。好的想法会反复出现，一时冲动的想法会很快遗忘。";
+    related = "可能关联：决策顾问/待办清单。如果决定行动，可以加入待办清单跟踪进度。";
+  }
+
+  return {
+    original: content,
+    questions: questions,
+    directions: directions,
+    judgment: judgment,
+    related: related
+  };
+}
+
+function markInspire(status){
+  if(!currentInspireId) return;
+  var data = loadInspire();
+  var r = data.records.find(function(x){ return x.id===currentInspireId; });
+  if(!r) return;
+  r.status = status;
+  saveInspire(data);
+  renderInspire();
+  var statusText = {recorded:"已记录", action:"已行动"}[status] || status;
+  alert("已标记为：" + statusText);
+}
+
+function deleteCurrentInspire(){
+  if(!currentInspireId) return;
+  if(!confirm("确定删除这条灵感？")) return;
+  var data = loadInspire();
+  data.records = data.records.filter(function(x){ return x.id!==currentInspireId; });
+  saveInspire(data);
+  currentInspireId = null;
+  document.getElementById("inspireDetailTitle").textContent = "选一条灵感看看";
+  document.getElementById("inspireActions").style.display = "none";
+  document.getElementById("inspireDetail").innerHTML = '<div style="text-align:center;color:var(--muted);padding:40px 20px;font-size:13px;line-height:1.8">从左边选一条灵感<br>AI会帮你：追问、延伸、关联、判断值不值得做<br><span style="color:var(--pink-deep);font-weight:700">碎片化想法不记录就溜走了</span></div>';
+  renderInspire();
+}
+
+function inspireToMarkdown(r){
+  var statusText = {pending:"待处理", recorded:"已记录", action:"已行动"}[r.status] || "待处理";
+  var ext = r.aiExtension || generateInspireExtension(r.content);
+  var title = r.content.length > 30 ? r.content.slice(0,30) + "..." : r.content;
+  var md = "---\n";
+  md += "title: " + title.replace(/"/g, "\'") + "\n";
+  md += "date: " + r.date + "\n";
+  md += "time: " + (r.time || "") + "\n";
+  md += "status: " + statusText + "\n";
+  md += "tags: [灵感, 碎片化想法]\n";
+  md += "---\n\n";
+  md += "# 💡 原始想法\n\n";
+  md += r.content + "\n\n";
+  md += "# 🤖 AI延伸\n\n";
+  md += "## ❓ 值得追问的\n\n";
+  ext.questions.forEach(function(q){ md += "- " + q + "\n"; });
+  md += "\n";
+  md += "## 🚀 可以延伸的方向\n\n";
+  ext.directions.forEach(function(d){ md += "- " + d + "\n"; });
+  md += "\n";
+  md += "## ⚖️ 值不值得做\n\n";
+  md += ext.judgment + "\n\n";
+  md += "## 🔗 可能关联\n\n";
+  md += ext.related + "\n\n";
+  md += "---\n";
+  md += "*由 Weh Atelier 灵感捕捉模块导出 · " + new Date().toISOString().slice(0,10) + "*\n";
+  return md;
+}
+
+function downloadMD(filename, content){
+  var blob = new Blob([content], {type: "text/markdown;charset=utf-8"});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function exportInspire(id){
+  if(!id) return;
+  var data = loadInspire();
+  var r = data.records.find(function(x){ return x.id===id; });
+  if(!r) return;
+  var md = inspireToMarkdown(r);
+  var filename = "灵感-" + r.date + "-" + (r.content.slice(0,10).replace(/[\\/:*?"<>|]/g,"_")) + ".md";
+  downloadMD(filename, md);
+}
+
+function exportAllInspire(){
+  var data = loadInspire();
+  if(data.records.length === 0){
+    alert("还没有灵感可以导出");
+    return;
+  }
+  if(!confirm("确定导出全部 " + data.records.length + " 条灵感？每条会生成一个MD文件。")) return;
+  var sorted = data.records.slice().sort(function(a,b){
+    var ta = (a.date||"") + " " + (a.time||"00:00");
+    var tb = (b.date||"") + " " + (b.time||"00:00");
+    return ta.localeCompare(tb);
+  });
+  sorted.forEach(function(r, i){
+    setTimeout(function(){
+      var md = inspireToMarkdown(r);
+      var filename = "灵感-" + r.date + "-" + (r.content.slice(0,10).replace(/[\\/:*?"<>|]/g,"_")) + ".md";
+      downloadMD(filename, md);
+    }, i * 300);
+  });
+  setTimeout(function(){
+    alert("已导出 " + sorted.length + " 条灵感，请检查下载文件夹，然后放到 Weh-Brain 的 00-灵感库 目录里。");
+  }, sorted.length * 300 + 500);
+}
+
+/* ========== 待办清单模块 ========== */
+var TODO_KEY = "weh_todo_data_v1";
+var TODO_DEFAULTS = {items:[]};
+var PRIORITY_ORDER = {high:0, medium:1, low:2};
+var PRIORITY_TEXT = {high:"🔴 高", medium:"🟡 中", low:"🟢 低"};
+var CATEGORY_TEXT = {work:"💼 工作", study:"📖 学习", life:"🏠 生活", other:"📌 其他"};
+
+function loadTodo(){
+  try{
+    var d = JSON.parse(localStorage.getItem(TODO_KEY));
+    if(!d) return JSON.parse(JSON.stringify(TODO_DEFAULTS));
+    for(var k in TODO_DEFAULTS){ if(d[k]===undefined) d[k]=TODO_DEFAULTS[k]; }
+    return d;
+  }catch(e){ return JSON.parse(JSON.stringify(TODO_DEFAULTS)); }
+}
+function saveTodo(data){ localStorage.setItem(TODO_KEY, JSON.stringify(data)); }
+
+function addTodo(){
+  var input = document.getElementById("todoInput");
+  var title = input.value.trim();
+  if(!title) return;
+  var priority = document.getElementById("todoPriority").value;
+  var category = document.getElementById("todoCategory").value;
+  var dueDate = document.getElementById("todoDueDate").value || "";
+  var data = loadTodo();
+  data.items.push({
+    id: Date.now(),
+    title: title,
+    priority: priority,
+    category: category,
+    dueDate: dueDate,
+    done: false,
+    createdAt: new Date().toISOString().slice(0,10)
+  });
+  saveTodo(data);
+  input.value = "";
+  document.getElementById("todoDueDate").value = "";
+  renderTodo();
+}
+
+function toggleTodo(id){
+  var data = loadTodo();
+  var item = data.items.find(function(x){ return x.id===id; });
+  if(!item) return;
+  item.done = !item.done;
+  saveTodo(data);
+  renderTodo();
+}
+
+function deleteTodo(id){
+  if(!confirm("确定删除这个待办？")) return;
+  var data = loadTodo();
+  data.items = data.items.filter(function(x){ return x.id!==id; });
+  saveTodo(data);
+  renderTodo();
+}
+
+function editTodo(id){
+  var data = loadTodo();
+  var item = data.items.find(function(x){ return x.id===id; });
+  if(!item) return;
+  var newTitle = prompt("修改待办内容（当前："+item.title+"）：", item.title);
+  if(!newTitle || !newTitle.trim()) return;
+  item.title = newTitle.trim();
+  saveTodo(data);
+  renderTodo();
+}
+
+function getDueStatus(dueDate){
+  if(!dueDate) return {text:"", cls:""};
+  var today = new Date().toISOString().slice(0,10);
+  if(dueDate < today) return {text:"⚠️ 已逾期 "+dueDate, cls:"overdue"};
+  if(dueDate === today) return {text:"📅 今日到期", cls:"today"};
+  return {text:"📅 "+dueDate, cls:""};
+}
+
+function renderTodo(){
+  var data = loadTodo();
+  var items = data.items;
+  // 统计
+  var total = items.length;
+  var done = items.filter(function(i){ return i.done; }).length;
+  var pending = total - done;
+  var today = new Date().toISOString().slice(0,10);
+  var todayDue = items.filter(function(i){ return !i.done && i.dueDate === today; }).length;
+  document.getElementById("todoTotal").textContent = total;
+  document.getElementById("todoPending").textContent = pending;
+  document.getElementById("todoDone").textContent = done;
+  document.getElementById("todoToday").textContent = todayDue;
+  document.getElementById("todoListCount").textContent = pending + " 项待完成";
+
+  var list = document.getElementById("todoList");
+  if(!list) return;
+  if(items.length === 0){
+    list.innerHTML = '<div class="todo-empty">还没有待办事项<br>在上方输入框添加第一个吧～</div>';
+    return;
+  }
+  // 排序：未完成的按优先级+截止日期，完成的放底部
+  var sorted = items.slice().sort(function(a,b){
+    if(a.done !== b.done) return a.done ? 1 : -1;
+    if(PRIORITY_ORDER[a.priority] !== PRIORITY_ORDER[b.priority]) return PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority];
+    if(a.dueDate && b.dueDate) return a.dueDate.localeCompare(b.dueDate);
+    if(a.dueDate) return -1;
+    if(b.dueDate) return 1;
+    return b.id - a.id;
+  });
+
+  list.innerHTML = sorted.map(function(item){
+    var due = getDueStatus(item.dueDate);
+    var doneCls = item.done ? " done" : "";
+    var checkedCls = item.done ? " checked" : "";
+    var checkIcon = item.done ? "✓" : "";
+    return '<div class="todo-item'+doneCls+'">'
+      +'<div class="todo-check'+checkedCls+'" onclick="toggleTodo('+item.id+')">'+checkIcon+'</div>'
+      +'<div class="todo-content">'
+        +'<div class="todo-text">'+esc(item.title)+'</div>'
+        +'<div class="todo-meta">'
+          +'<span class="todo-cat-tag '+item.category+'">'+CATEGORY_TEXT[item.category]+'</span>'
+          +'<span class="todo-priority-tag">'+PRIORITY_TEXT[item.priority]+'</span>'
+          +(due.text ? '<span class="todo-due '+due.cls+'">'+due.text+'</span>' : '')
+          +'<span style="color:var(--muted)">创建于 '+item.createdAt+'</span>'
+        +'</div>'
+      +'</div>'
+      +'<div class="todo-actions">'
+        +'<div class="todo-action-btn" onclick="addToDailyFromTodo('+item.id+')" title="加到今日计划">📅</div>'
+        +'<div class="todo-action-btn" onclick="editTodo('+item.id+')" title="编辑">✏️</div>'
+        +'<div class="todo-action-btn" onclick="deleteTodo('+item.id+')" title="删除">🗑️</div>'
+      +'</div>'
+      +'</div>';
+  }).join("");
+}
+
+
+/* ========== 首页统计更新 ========== */
+function updateHomeStats(){
+  try{
+    // 存钱记账：本期消费笔数
+    var moneyData = JSON.parse(localStorage.getItem("weh_money_data_v1"));
+    var moneyCount = moneyData && moneyData.records ? moneyData.records.length : 0;
+    var el1 = document.getElementById("homeMoneyCount");
+    if(el1) el1.textContent = moneyCount;
+  }catch(e){}
+  try{
+    // 吃饭健康：本周饮食记录数
+    var healthData = JSON.parse(localStorage.getItem("weh_health_data_v1"));
+    var healthCount = healthData && healthData.records ? healthData.records.length : 0;
+    var el2 = document.getElementById("homeHealthCount");
+    if(el2) el2.textContent = healthCount;
+  }catch(e){}
+  try{
+    // 灵感捕捉：灵感总数
+    var inspireData = JSON.parse(localStorage.getItem("weh_inspire_data_v1"));
+    var inspireCount = inspireData && inspireData.records ? inspireData.records.length : 0;
+    var el3 = document.getElementById("homeInspireCount");
+    if(el3) el3.textContent = inspireCount;
+  }catch(e){}
+  try{
+    // 决策顾问：拷问次数
+    var decData = JSON.parse(localStorage.getItem("weh_decision_data_v1"));
+    var decCount = decData && decData.chatHistory ? decData.chatHistory.length : 0;
+    var el4 = document.getElementById("homeDecisionCount");
+    if(el4) el4.textContent = decCount;
+  }catch(e){}
+}
+
+/* ========== 工作汇报台模块 ========== */
+var REPORT_KEY = "weh_report_data_v1";
+var REPORT_DEFAULTS = {currentType:"weekly", currentAudience:"leader", history:[]};
+var currentReportId = null;
+
+function loadReport(){
+  try{
+    var d = JSON.parse(localStorage.getItem(REPORT_KEY));
+    if(!d) return JSON.parse(JSON.stringify(REPORT_DEFAULTS));
+    for(var k in REPORT_DEFAULTS){ if(d[k]===undefined) d[k]=REPORT_DEFAULTS[k]; }
+    return d;
+  }catch(e){ return JSON.parse(JSON.stringify(REPORT_DEFAULTS)); }
+}
+function saveReport(data){ localStorage.setItem(REPORT_KEY, JSON.stringify(data)); }
+
+function selectReportType(type){
+  var data = loadReport();
+  data.currentType = type;
+  saveReport(data);
+  document.querySelectorAll(".report-option[data-type]").forEach(function(el){
+    el.classList.toggle("active", el.dataset.type === type);
+  });
+}
+
+function selectReportAudience(audience){
+  var data = loadReport();
+  data.currentAudience = audience;
+  saveReport(data);
+  document.querySelectorAll(".report-option[data-audience]").forEach(function(el){
+    el.classList.toggle("active", el.dataset.audience === audience);
+  });
+}
+
+function generateReport(){
+  var input = document.getElementById("reportInput").value.trim();
+  if(!input){
+    alert("请先输入碎碎念内容");
+    return;
+  }
+  var data = loadReport();
+  var type = data.currentType;
+  var audience = data.currentAudience;
+
+  // 解析输入，提取要点
+  var lines = input.split(/[\n。；;]/).map(function(l){ return l.trim(); }).filter(function(l){ return l.length > 0; });
+  var typeText = {weekly:"周报", project:"项目进展", review:"复盘总结"}[type];
+  var audienceText = {leader:"直系领导", client:"甲方", teacher:"老师"}[audience];
+
+  // 生成精简汇报要点
+  var highlights = [];
+  if(type === "weekly"){
+    highlights = lines.slice(0, 5).map(function(l, i){
+      var prefix = ["✅ 完成", "🔄 进行中", "📌 重点", "💡 亮点", "⚠️ 风险"][i] || "📌";
+      return prefix + "：" + (l.length > 40 ? l.slice(0,40)+"..." : l);
+    });
+  } else if(type === "project"){
+    highlights = [
+      "📊 项目进度：" + (lines[0] ? lines[0].slice(0,30) : "按计划推进中"),
+      "✅ 已完成：" + (lines[1] ? lines[1].slice(0,30) : "核心功能开发"),
+      "🔄 进行中：" + (lines[2] ? lines[2].slice(0,30) : "测试与优化"),
+      "⚠️ 风险与问题：" + (lines[3] ? lines[3].slice(0,30) : "暂无重大风险"),
+      "📅 下一步：" + (lines[4] ? lines[4].slice(0,30) : "继续按计划推进")
+    ];
+  } else {
+    highlights = [
+      "🎯 目标回顾：" + (lines[0] ? lines[0].slice(0,30) : "原定目标达成情况"),
+      "✅ 做得好的：" + (lines[1] ? lines[1].slice(0,30) : "流程优化、效率提升"),
+      "❌ 不足与教训：" + (lines[2] ? lines[2].slice(0,30) : "沟通不及时、预估偏差"),
+      "💡 改进措施：" + (lines[3] ? lines[3].slice(0,30) : "建立同步机制、优化预估方法"),
+      "📌 下次重点：" + (lines[4] ? lines[4].slice(0,30) : "落实改进措施")
+    ];
+  }
+
+  // 生成预判追问
+  var questions = [];
+  if(audience === "leader"){
+    questions = [
+      {q: "这个事情的优先级是什么？跟其他任务比怎么排？", a: "建议回答：目前优先级是P0，因为直接影响下周上线；其他任务已协调顺延，不影响整体节奏。"},
+      {q: "遇到的这个问题，你打算怎么解决？需要什么支持？", a: "建议回答：已初步定位原因，计划本周内出解决方案；需要XX部门配合提供数据，已在协调中。"},
+      {q: "下一步的时间节点能保证吗？风险点在哪里？", a: "建议回答：按目前进度可以保证；主要风险在XX环节，已准备Plan B，最坏情况延迟1天，不影响最终交付。"}
+    ];
+  } else if(audience === "client"){
+    questions = [
+      {q: "目前的进度是否符合合同约定？会不会延期？", a: "建议回答：目前进度符合预期，关键节点均按时完成；整体不会延期，后续会每周同步进度。"},
+      {q: "这个方案的效果怎么衡量？有没有数据支撑？", a: "建议回答：效果通过XX指标衡量，上线后会提供数据周报；目前已有小范围测试数据，效果符合预期。"},
+      {q: "后续维护和支持怎么安排？", a: "建议回答：上线后提供3个月免费维护，之后按年度服务合同执行；有专属对接人，响应时间不超过4小时。"}
+    ];
+  } else {
+    questions = [
+      {q: "这个项目的核心创新点是什么？", a: "建议回答：核心创新在于XX方法的应用，相比传统方案效率提升30%；已有初步实验数据验证。"},
+      {q: "参考文献和理论依据是什么？", a: "建议回答：主要参考XX等人2023年的研究，以及XX理论框架；文献清单已整理在附录中。"},
+      {q: "下一步的研究计划是什么？", a: "建议回答：下一步计划扩大样本量做验证，同时探索XX方向的延伸应用；预计3个月内出阶段性成果。"}
+    ];
+  }
+
+  var result = {
+    type: type,
+    audience: audience,
+    typeText: typeText,
+    audienceText: audienceText,
+    input: input,
+    highlights: highlights,
+    questions: questions,
+    createdAt: new Date().toISOString().slice(0,16).replace("T", " ")
+  };
+
+  // 保存到历史
+  var reportId = Date.now();
+  data.history.unshift({
+    id: reportId,
+    type: type,
+    audience: audience,
+    typeText: typeText,
+    audienceText: audienceText,
+    input: input,
+    highlights: highlights,
+    questions: questions,
+    createdAt: result.createdAt
+  });
+  if(data.history.length > 20) data.history = data.history.slice(0, 20);
+  saveReport(data);
+  currentReportId = reportId;
+
+  renderReportResult(result);
+  renderReportHistory();
+}
+
+function renderReportResult(result){
+  var box = document.getElementById("reportResult");
+  var title = document.getElementById("reportResultTitle");
+  var exportBtn = document.getElementById("reportExportBtn");
+  if(!box) return;
+  title.textContent = result.typeText + " · 汇报对象：" + result.audienceText + " · " + result.createdAt;
+  exportBtn.style.display = "inline-block";
+
+  var highlightsHtml = result.highlights.map(function(h){ return "<li>" + esc(h) + "</li>"; }).join("");
+  var questionsHtml = result.questions.map(function(q){
+    return '<div class="report-question"><div class="report-question-q">❓ ' + esc(q.q) + '</div><div class="report-question-a">💡 ' + esc(q.a) + '</div></div>';
+  }).join("");
+
+  box.innerHTML = ''
+    + '<div class="report-section"><div class="report-section-title">📝 精简汇报（' + result.typeText + '）</div>'
+    + '<div class="report-section-content"><ul>' + highlightsHtml + '</ul></div></div>'
+    + '<div class="report-section"><div class="report-section-title">🎯 预判' + result.audienceText + '会追问的3个问题</div>'
+    + '<div>' + questionsHtml + '</div></div>'
+    + '<div class="report-section"><div class="report-section-title">💡 原始碎碎念</div>'
+    + '<div class="report-section-content" style="color:var(--muted);font-size:12px">' + esc(result.input).replace(/\n/g, "<br>") + '</div></div>';
+}
+
+function renderReportHistory(){
+  var data = loadReport();
+  var box = document.getElementById("reportHistory");
+  var count = document.getElementById("reportHistoryCount");
+  if(count) count.textContent = data.history.length + " 份";
+  if(!box) return;
+  if(data.history.length === 0){
+    box.innerHTML = '<div style="text-align:center;color:var(--muted);padding:20px;font-size:12px">还没有历史汇报</div>';
+    return;
+  }
+  box.innerHTML = data.history.map(function(r){
+    var activeCls = r.id === currentReportId ? " active" : "";
+    return '<div class="report-history-item'+activeCls+'" onclick="loadReportHistory('+r.id+')">'
+      +'<div style="display:flex;justify-content:space-between;align-items:flex-start">'
+      +'<div style="flex:1">'
+      +'<div class="report-history-title">'+r.typeText+' · '+r.audienceText+'</div>'
+      +'<div class="report-history-meta">'+r.createdAt+' · '+(r.input.length>20?r.input.slice(0,20)+"...":r.input)+'</div>'
+      +'</div>'
+      +'<div class="report-delete-btn" onclick="event.stopPropagation();deleteReport('+r.id+')" title="删除">🗑️</div>'
+      +'</div>'
+      +'</div>';
+  }).join("");
+}
+
+function loadReportHistory(id){
+  var data = loadReport();
+  var r = data.history.find(function(x){ return x.id===id; });
+  if(!r) return;
+  currentReportId = id;
+  renderReportResult(r);
+  renderReportHistory();
+}
+
+function exportReport(){
+  if(!currentReportId){
+    alert("请先生成或选择一份汇报");
+    return;
+  }
+  var data = loadReport();
+  var r = data.history.find(function(x){ return x.id===currentReportId; });
+  if(!r) return;
+
+  var md = "---\n";
+  md += "title: " + r.typeText + " - " + r.createdAt.slice(0,10) + "\n";
+  md += "type: " + r.type + "\n";
+  md += "audience: " + r.audience + "\n";
+  md += "date: " + r.createdAt.slice(0,10) + "\n";
+  md += "tags: [工作汇报, " + r.typeText + "]\n";
+  md += "---\n\n";
+  md += "# " + r.typeText + "（汇报对象：" + r.audienceText + "）\n\n";
+  md += "> 生成时间：" + r.createdAt + "\n\n";
+  md += "## 📝 精简汇报\n\n";
+  r.highlights.forEach(function(h){ md += "- " + h + "\n"; });
+  md += "\n";
+  md += "## 🎯 预判追问\n\n";
+  r.questions.forEach(function(q, i){
+    md += "### " + (i+1) + ". " + q.q + "\n\n";
+    md += "**建议回答**：" + q.a + "\n\n";
+  });
+  md += "## 💡 原始碎碎念\n\n";
+  md += r.input + "\n\n";
+  md += "---\n";
+  md += "*由 Weh Atelier 工作汇报台生成 · 参考工作SOP知识库模板*\n";
+
+  var filename = "汇报-" + r.typeText + "-" + r.createdAt.slice(0,10) + ".md";
+  var blob = new Blob([md], {type: "text/markdown;charset=utf-8"});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+
+function deleteReport(id){
+  if(!confirm("确定删除这份汇报？")) return;
+  var data = loadReport();
+  data.history = data.history.filter(function(x){ return x.id!==id; });
+  saveReport(data);
+  if(currentReportId === id){
+    currentReportId = null;
+    document.getElementById("reportResultTitle").textContent = "在左边填写后点生成";
+    document.getElementById("reportExportBtn").style.display = "none";
+    document.getElementById("reportResult").innerHTML = '<div style="text-align:center;color:var(--muted);padding:60px 20px;font-size:13px;line-height:1.8">选择汇报类型和对象<br>在左边输入碎碎念（做了什么、遇到什么问题、下一步计划）<br>点"✨ 生成精简汇报"<br><span style="color:var(--pink-deep);font-weight:700">AI会参考工作SOP的模板，把"做了一大堆"翻译成"做出了什么"</span></div>';
+  }
+  renderReportHistory();
+}
+
+
+
+/* ========== 日计划台模块 ========== */
+var DAILY_KEY = "weh_daily_data_v1";
+var DAILY_DEFAULTS = {date:"", tasks:[], review:""};
+var DAILY_PRIORITY = {high:{text:"🔴 高", color:"#e05050"}, medium:{text:"🟡 中", color:"#ffa94d"}, low:{text:"🟢 低", color:"#72b05e"}};
+
+function loadDaily(){
+  try{
+    var d = JSON.parse(localStorage.getItem(DAILY_KEY));
+    var today = new Date().toISOString().slice(0,10);
+    if(!d || d.date !== today){
+      // 新的一天，重置
+      return JSON.parse(JSON.stringify(DAILY_DEFAULTS));
+    }
+    for(var k in DAILY_DEFAULTS){ if(d[k]===undefined) d[k]=DAILY_DEFAULTS[k]; }
+    return d;
+  }catch(e){ return JSON.parse(JSON.stringify(DAILY_DEFAULTS)); }
+}
+function saveDaily(data){
+  data.date = new Date().toISOString().slice(0,10);
+  localStorage.setItem(DAILY_KEY, JSON.stringify(data));
+}
+
+function addDailyTask(){
+  var input = document.getElementById("dailyInput");
+  var title = input.value.trim();
+  if(!title) return;
+  var priority = document.getElementById("dailyPriority").value;
+  var duration = parseInt(document.getElementById("dailyDuration").value);
+  var data = loadDaily();
+  data.tasks.push({
+    id: Date.now(),
+    title: title,
+    priority: priority,
+    duration: duration,
+    done: false
+  });
+  saveDaily(data);
+  input.value = "";
+  renderDaily();
+}
+
+function toggleDailyTask(id){
+  var data = loadDaily();
+  var task = data.tasks.find(function(t){ return t.id===id; });
+  if(!task) return;
+  task.done = !task.done;
+  saveDaily(data);
+  renderDaily();
+}
+
+function deleteDailyTask(id){
+  var data = loadDaily();
+  data.tasks = data.tasks.filter(function(t){ return t.id!==id; });
+  saveDaily(data);
+  renderDaily();
+}
+
+function saveDailyReview(){
+  var review = document.getElementById("dailyReview").value;
+  var data = loadDaily();
+  data.review = review;
+  saveDaily(data);
+}
+
+function renderDaily(){
+  var data = loadDaily();
+  var today = new Date();
+  var weekdays = ["周日","周一","周二","周三","周四","周五","周六"];
+  document.getElementById("dailyDateNum").textContent = today.getDate();
+  document.getElementById("dailyWeekday").textContent = weekdays[today.getDay()];
+  document.getElementById("dailyMonth").textContent = (today.getMonth()+1) + "月";
+
+  // 进度
+  var total = data.tasks.length;
+  var done = data.tasks.filter(function(t){ return t.done; }).length;
+  document.getElementById("dailyProgressText").textContent = done + "/" + total;
+  var percent = total > 0 ? Math.round(done/total*100) : 0;
+  document.getElementById("dailyProgressFill").style.width = percent + "%";
+
+  // 任务列表
+  document.getElementById("dailyTaskCount").textContent = total + " 项";
+  var list = document.getElementById("dailyTaskList");
+  if(total === 0){
+    list.innerHTML = '<div style="text-align:center;color:var(--muted);padding:24px;font-size:12px">还没有任务，在上方添加第一个吧～</div>';
+  } else {
+    // 按优先级排序
+    var sorted = data.tasks.slice().sort(function(a,b){
+      var order = {high:0, medium:1, low:2};
+      if(order[a.priority] !== order[b.priority]) return order[a.priority] - order[b.priority];
+      return a.id - b.id;
+    });
+    list.innerHTML = sorted.map(function(t){
+      var doneCls = t.done ? " done" : "";
+      var checkedCls = t.done ? " checked" : "";
+      var p = DAILY_PRIORITY[t.priority];
+      return '<div class="daily-task-item'+doneCls+'">'
+        +'<div class="daily-task-check'+checkedCls+'" onclick="toggleDailyTask('+t.id+')">'+(t.done?"✓":"")+'</div>'
+        +'<div class="daily-task-content">'
+          +'<div class="daily-task-text">'+esc(t.title)+'</div>'
+          +'<div class="daily-task-meta"><span>'+p.text+'</span><span>⏱️ '+t.duration+'分钟</span></div>'
+        +'</div>'
+        +'<div class="daily-task-delete" onclick="deleteDailyTask('+t.id+')">🗑️</div>'
+        +'</div>';
+    }).join("");
+  }
+
+  // 时间轴
+  var timeline = document.getElementById("dailyTimeline");
+  var pendingTasks = data.tasks.filter(function(t){ return !t.done; });
+  if(pendingTasks.length === 0){
+    timeline.innerHTML = '<div style="text-align:center;color:var(--muted);padding:20px;font-size:12px">今日任务全部完成啦！🎉</div>';
+  } else {
+    var startHour = 9; // 从9点开始
+    var currentMin = startHour * 60;
+    timeline.innerHTML = pendingTasks.map(function(t){
+      var startH = Math.floor(currentMin/60);
+      var startM = currentMin % 60;
+      var endMin = currentMin + t.duration;
+      var endH = Math.floor(endMin/60);
+      var endM = endMin % 60;
+      var timeStr = (startH<10?"0":"")+startH+":"+(startM<10?"0":"")+startM+" - "+(endH<10?"0":"")+endH+":"+(endM<10?"0":"")+endM;
+      currentMin = endMin;
+      var p = DAILY_PRIORITY[t.priority];
+      return '<div class="daily-time-block" style="border-left-color:'+p.color+'">'
+        +'<span class="daily-time-range">'+timeStr+'</span>'
+        +'<span class="daily-time-title">'+esc(t.title)+'</span>'
+        +'<span class="daily-time-duration">'+t.duration+'分钟</span>'
+        +'</div>';
+    }).join("");
+  }
+
+  // AI说真话
+  var truthBox = document.getElementById("dailyTruth");
+  if(total === 0){
+    truthBox.innerHTML = '<div style="text-align:center;color:var(--muted);padding:12px;font-size:13px">添加任务后AI会给你实话实说～</div>';
+  } else {
+    var totalMin = data.tasks.reduce(function(sum,t){ return sum + t.duration; }, 0);
+    var totalHour = (totalMin/60).toFixed(1);
+    var truth = "";
+    if(total > 8){
+      truth = '<div class="truth-label">⚠️ 排太多了</div>你今天排了 '+total+' 件事，预计需要 '+totalHour+' 小时，明显做不完。建议砍掉 '+Math.ceil(total*0.3)+' 件低优先级的，先保证高优先级的完成质量。';
+    } else if(totalHour > 8){
+      truth = '<div class="truth-label">⏰ 时间太紧</div>全部任务预计需要 '+totalHour+' 小时，超过了正常工作时长。建议把一些任务移到明天，或者降低预期。';
+    } else if(done === total && total > 0){
+      truth = '<div class="truth-label">🎉 全部完成</div>今天 '+total+' 件任务全部完成，效率很高！记得复盘一下哪些做得好，哪些可以改进。';
+    } else if(done > 0){
+      truth = '<div class="truth-label">💪 继续加油</div>已完成 '+done+'/'+total+' 件，进度 '+percent+'%。保持节奏，高优先级的先做完。';
+    } else {
+      truth = '<div class="truth-label">🚀 开始吧</div>今天有 '+total+' 件任务，预计 '+totalHour+' 小时。先从高优先级的开始，一件一件来。';
+    }
+    truthBox.innerHTML = truth;
+  }
+
+  // 复盘
+  document.getElementById("dailyReview").value = data.review || "";
+}
+
+
+function addToDailyFromTodo(todoId){
+  var todoData = JSON.parse(localStorage.getItem("weh_todo_data_v1"));
+  if(!todoData || !todoData.items) return;
+  var todo = todoData.items.find(function(t){ return t.id===todoId; });
+  if(!todo) return;
+  if(todo.done){
+    alert("该任务已完成，无需加到今日计划");
+    return;
+  }
+  var dailyData = loadDaily();
+  // 检查是否已经加过
+  var exists = dailyData.tasks.some(function(t){ return t.title === todo.title; });
+  if(exists){
+    alert("该任务已在今日计划中");
+    return;
+  }
+  dailyData.tasks.push({
+    id: Date.now(),
+    title: todo.title,
+    priority: todo.priority,
+    duration: 30,
+    done: false
+  });
+  saveDaily(dailyData);
+  alert("已加到今日计划：" + todo.title);
+  if(document.getElementById("dailyInput")){
+    renderDaily();
+  }
+}
+
+function addInspireToTodo(inspireId){
+  var inspireData = loadInspire();
+  var r = inspireData.records.find(function(x){ return x.id===inspireId; });
+  if(!r) return;
+  var todoData = JSON.parse(localStorage.getItem("weh_todo_data_v1"));
+  if(!todoData) todoData = {items:[]};
+  var exists = todoData.items.some(function(t){ return t.title === r.content; });
+  if(exists){
+    alert("该灵感已在待办清单中");
+    return;
+  }
+  todoData.items.push({
+    id: Date.now(),
+    title: r.content,
+    priority: "medium",
+    category: "other",
+    dueDate: "",
+    done: false,
+    createdAt: new Date().toISOString().slice(0,10)
+  });
+  localStorage.setItem("weh_todo_data_v1", JSON.stringify(todoData));
+  alert("已转到待办清单：" + (r.content.length>20?r.content.slice(0,20)+"...":r.content));
+}
+
+function addInspireToDaily(inspireId){
+  var inspireData = loadInspire();
+  var r = inspireData.records.find(function(x){ return x.id===inspireId; });
+  if(!r) return;
+  var dailyData = loadDaily();
+  var exists = dailyData.tasks.some(function(t){ return t.title === r.content; });
+  if(exists){
+    alert("该灵感已在今日计划中");
+    return;
+  }
+  dailyData.tasks.push({
+    id: Date.now(),
+    title: r.content,
+    priority: "medium",
+    duration: 30,
+    done: false
+  });
+  saveDaily(dailyData);
+  alert("已加到今日计划：" + (r.content.length>20?r.content.slice(0,20)+"...":r.content));
+  if(document.getElementById("dailyInput")){
+    renderDaily();
+  }
+}
+
+function initDaily(){
+  renderDaily();
+}
+function initReport(){
+  var data = loadReport();
+  // 恢复选中状态
+  document.querySelectorAll(".report-option[data-type]").forEach(function(el){
+    el.classList.toggle("active", el.dataset.type === data.currentType);
+  });
+  document.querySelectorAll(".report-option[data-audience]").forEach(function(el){
+    el.classList.toggle("active", el.dataset.audience === data.currentAudience);
+  });
+  renderReportHistory();
+}
+
+/* ========== 设置页 ========== */
+var SETTINGS_KEY = "weh_settings_v1";
+var SETTINGS_DEFAULTS = {theme:"pink", glassOpacity:75, fontSize:"medium", preferences:{}};
+var DATA_KEYS = {
+  money: "weh_money_data_v1",
+  health: "weh_health_data_v1",
+  inspire: "weh_inspire_data_v1",
+  decision: "weh_decision_data_v1",
+  report: "weh_report_data_v1",
+  daily: "weh_daily_data_v1",
+  todo: "weh_todo_data_v1"
+};
+
+function loadSettings(){
+  try{
+    var s = JSON.parse(localStorage.getItem(SETTINGS_KEY));
+    if(!s) return JSON.parse(JSON.stringify(SETTINGS_DEFAULTS));
+    for(var k in SETTINGS_DEFAULTS){ if(s[k]===undefined) s[k]=SETTINGS_DEFAULTS[k]; }
+    return s;
+  }catch(e){ return JSON.parse(JSON.stringify(SETTINGS_DEFAULTS)); }
+}
+function saveSettings(s){ localStorage.setItem(SETTINGS_KEY, JSON.stringify(s)); }
+
+function switchSettingsTab(tab){
+  document.querySelectorAll(".settings-nav-item").forEach(function(el){
+    el.classList.toggle("active", el.dataset.tab === tab);
+  });
+  document.querySelectorAll(".settings-tab").forEach(function(el){
+    el.classList.toggle("active", el.id === "settings-"+tab);
+  });
+}
+
+function setTheme(theme){
+  var s = loadSettings();
+  s.theme = theme;
+  saveSettings(s);
+  document.querySelectorAll(".theme-dot").forEach(function(el){
+    el.classList.toggle("active", el.classList.contains("theme-"+theme));
+  });
+  // 应用主题色（通过CSS变量）
+  var colors = {
+    pink: {primary:"#db7093", secondary:"#b48ed9"},
+    blue: {primary:"#74b9ff", secondary:"#a29bfe"},
+    green: {primary:"#00b894", secondary:"#81ecec"},
+    orange: {primary:"#ffa502", secondary:"#ff6348"}
+  };
+  var c = colors[theme] || colors.pink;
+  document.documentElement.style.setProperty("--pink-deep", c.primary);
+  document.documentElement.style.setProperty("--purple", c.secondary);
+}
+
+function setGlassOpacity(value){
+  var s = loadSettings();
+  s.glassOpacity = parseInt(value);
+  saveSettings(s);
+  document.getElementById("glassOpacityValue").textContent = value + "%";
+  // 应用透明度
+  document.documentElement.style.setProperty("--glass-opacity", value/100);
+}
+
+function setFontSize(size){
+  var s = loadSettings();
+  s.fontSize = size;
+  saveSettings(s);
+  var sizes = {small:"13px", medium:"14px", large:"15px"};
+  document.documentElement.style.fontSize = sizes[size] || "14px";
+}
+
+function exportAllData(){
+  var data = {};
+  for(var key in DATA_KEYS){
+    try{
+      var val = localStorage.getItem(DATA_KEYS[key]);
+      if(val) data[key] = JSON.parse(val);
+    }catch(e){}
+  }
+  data.settings = loadSettings();
+  data.exportTime = new Date().toISOString();
+  var blob = new Blob([JSON.stringify(data, null, 2)], {type:"application/json"});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement("a");
+  a.href = url;
+  a.download = "weh-atelier-backup-" + new Date().toISOString().slice(0,10) + ".json";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  alert("数据已导出");
+}
+
+function importAllData(event){
+  var file = event.target.files[0];
+  if(!file) return;
+  if(!confirm("导入数据会覆盖当前所有数据，确定继续？")) return;
+  var reader = new FileReader();
+  reader.onload = function(e){
+    try{
+      var data = JSON.parse(e.target.result);
+      for(var key in DATA_KEYS){
+        if(data[key]){
+          localStorage.setItem(DATA_KEYS[key], JSON.stringify(data[key]));
+        }
+      }
+      if(data.settings){
+        localStorage.setItem(SETTINGS_KEY, JSON.stringify(data.settings));
+      }
+      alert("数据导入成功，页面即将刷新");
+      setTimeout(function(){ location.reload(); }, 1000);
+    }catch(err){
+      alert("导入失败：文件格式错误");
+    }
+  };
+  reader.readAsText(file);
+}
+
+function clearModuleData(){
+  var module = document.getElementById("clearModuleSelect").value;
+  if(!module){
+    alert("请先选择要清空的模块");
+    return;
+  }
+  var moduleNames = {money:"存钱记账", health:"吃饭健康", inspire:"灵感捕捉", decision:"决策顾问", report:"工作汇报台", daily:"日计划台", todo:"Weh Tasks"};
+  if(!confirm("确定清空「" + (moduleNames[module]||module) + "」的所有数据？此操作不可恢复！")) return;
+  localStorage.removeItem(DATA_KEYS[module]);
+  alert("已清空，页面即将刷新");
+  setTimeout(function(){ location.reload(); }, 1000);
+}
+
+function resetAllData(){
+  if(!confirm("确定重置全部数据？所有模块的数据和设置都会被清空，此操作不可恢复！")) return;
+  if(!confirm("再次确认：真的要重置全部数据吗？")) return;
+  for(var key in DATA_KEYS){
+    localStorage.removeItem(DATA_KEYS[key]);
+  }
+  localStorage.removeItem(SETTINGS_KEY);
+  alert("已重置全部数据，页面即将刷新");
+  setTimeout(function(){ location.reload(); }, 1000);
+}
+
+function savePreference(){
+  var s = loadSettings();
+  s.preferences.moneyBudget = parseInt(document.getElementById("prefMoneyBudget").value) || 3000;
+  s.preferences.moneySave = parseInt(document.getElementById("prefMoneySave").value) || 600;
+  s.preferences.moneyCycle = parseInt(document.getElementById("prefMoneyCycle").value) || 20;
+  s.preferences.healthBudget = parseInt(document.getElementById("prefHealthBudget").value) || 100;
+  s.preferences.healthGoal = parseInt(document.getElementById("prefHealthGoal").value) || 7;
+  s.preferences.dailyStart = parseInt(document.getElementById("prefDailyStart").value) || 9;
+  saveSettings(s);
+  alert("偏好已保存");
+}
+
+function loadPreference(){
+  var s = loadSettings();
+  var p = s.preferences || {};
+  if(document.getElementById("prefMoneyBudget")) document.getElementById("prefMoneyBudget").value = p.moneyBudget || 3000;
+  if(document.getElementById("prefMoneySave")) document.getElementById("prefMoneySave").value = p.moneySave || 600;
+  if(document.getElementById("prefMoneyCycle")) document.getElementById("prefMoneyCycle").value = p.moneyCycle || 20;
+  if(document.getElementById("prefHealthBudget")) document.getElementById("prefHealthBudget").value = p.healthBudget || 100;
+  if(document.getElementById("prefHealthGoal")) document.getElementById("prefHealthGoal").value = p.healthGoal || 7;
+  if(document.getElementById("prefDailyStart")) document.getElementById("prefDailyStart").value = p.dailyStart || 9;
+  if(document.getElementById("glassOpacity")) document.getElementById("glassOpacity").value = s.glassOpacity || 75;
+  if(document.getElementById("glassOpacityValue")) document.getElementById("glassOpacityValue").textContent = (s.glassOpacity || 75) + "%";
+  if(document.getElementById("fontSize")) document.getElementById("fontSize").value = s.fontSize || "medium";
+  // 应用已保存的设置
+  if(s.theme && s.theme !== "pink") setTheme(s.theme);
+  if(s.glassOpacity) document.documentElement.style.setProperty("--glass-opacity", s.glassOpacity/100);
+  if(s.fontSize && s.fontSize !== "medium"){
+    var sizes = {small:"13px", medium:"14px", large:"15px"};
+    document.documentElement.style.fontSize = sizes[s.fontSize] || "14px";
+  }
+}
+
+function initSettings(){
+  loadPreference();
+}
+
 /* ---------- 全局搜索 ---------- */
 function plainText(html){
   var d = document.createElement("div"); d.innerHTML = html || ""; return (d.textContent||"").replace(/\s+/g," ").trim();
@@ -7592,9 +9234,9 @@ function applyThemeByHue(H,H2){
   root.setProperty("--text",hsl(H,0.28,0.34));
   root.setProperty("--muted",hsl(H,0.18,0.58));
   // 卡片/侧栏：半透明毛玻璃，透出背景图
-  root.setProperty("--card-bg",hsla(H,0.4,0.99,0.58));
-  root.setProperty("--topbar-bg",hsla(H,0.45,0.98,0.48));
-  root.setProperty("--nav-bg",hsla(H,0.45,0.99,0.62));
+  root.setProperty("--card-bg","hsla("+Math.round(H)+",40%,99%,var(--glass-opacity))");
+  root.setProperty("--topbar-bg","hsla("+Math.round(H)+",45%,98%,var(--glass-opacity))");
+  root.setProperty("--nav-bg","hsla("+Math.round(H)+",45%,99%,var(--glass-opacity))");
   // 整体柔光层（很淡，让背景图透出来）
   root.setProperty("--veil-top",hsla(H,0.5,0.97,0.28));
   root.setProperty("--veil-bot",hsla(H,0.5,0.97,0.38));
@@ -7687,9 +9329,9 @@ function setIcon(k){
 /* ---------- 页面切换 ---------- */
 var TITLES = {
   home:"🏠 首页总览", money:"💰 存钱记账", health:"🍱 吃饭健康",
-  inspiration:"💡 灵感捕捉", decision:"🎯 决策顾问", baichuan:"📚 百川智库",
-  career:"💼 求职小窝", cet6:"📖 六级学习", sop:"🛠️ 工作SOP",
-  todo:"✅ 待办清单", settings:"⚙️ 设置",
+  inspiration:"💡 灵感捕捉", decision:"🎯 决策顾问", report:"📝 工作汇报台",
+  baichuan:"📚 灵犀库", career:"💼 SCM Career", cet6:"📖 CET-6备战", sop:"🛠️ 工作SOP",
+  daily:"📅 日计划台", todo:"✅ 待办清单", settings:"⚙️ 设置",
   jobs:"🐾 岗位看板", companies:"🐈 目标公司池", timeline:"😺 每日日报",
   resume:"📄 简历库", knowledge:"📚 知识库"
 };
@@ -7772,8 +9414,25 @@ document.addEventListener("keydown", function(e){ if(e.key==="Escape") closeModa
     }
     if(document.getElementById("decChatMessages")){
       initDecision();
-      // 更新统计数字
-      var kbTotal = 0;
+    }
+    if(document.getElementById("inspireList")){
+      renderInspire();
+    }
+    if(document.getElementById("todoList")){
+      renderTodo();
+    }
+    updateHomeStats();
+    if(document.getElementById("reportInput")){
+      initReport();
+    }
+    if(document.getElementById("dailyInput")){
+      initDaily();
+    }
+    if(document.getElementById("settings-profile")){
+      initSettings();
+    }
+    // 更新统计数字
+    var kbTotal = 0;
       KBS.forEach(function(k){ (k.groups||[{notes:k.notes||[]}]).forEach(function(g){ (function walk(ns){ ns.forEach(function(n){ kbTotal += n.children ? (function(){var c=0;(function w2(x){x.forEach(function(z){c+=z.children?w2(z.children):1});return c;})(n.children)})() : 1; }); })(g.notes||[]); }); });
       if(document.getElementById("kbCount")) document.getElementById("kbCount").textContent = kbTotal;
       if(document.getElementById("jobCount")) document.getElementById("jobCount").textContent = (JOBS||[]).length;
@@ -7787,7 +9446,6 @@ document.addEventListener("keydown", function(e){ if(e.key==="Escape") closeModa
       if(document.getElementById("statJobs")){
         renderHome(); renderJobs(); renderCompanies(); renderTimeline(); renderResumes();
       }
-    }
   }catch(e){ console.log("求职模块渲染跳过:", e.message); }
   applyBg(); applyAv(); applyIcon();
 })();

@@ -1254,6 +1254,1067 @@ function resetDecision(){
   updateRoundInfo();
 }
 
+
+/* ========== 灵感捕捉模块 ========== */
+var INSPIRE_KEY = "weh_inspire_data_v1";
+var INSPIRE_DEFAULTS = {records:[]};
+var currentInspireId = null;
+
+function loadInspire(){
+  try{
+    var d = JSON.parse(localStorage.getItem(INSPIRE_KEY));
+    if(!d) return JSON.parse(JSON.stringify(INSPIRE_DEFAULTS));
+    for(var k in INSPIRE_DEFAULTS){ if(d[k]===undefined) d[k]=INSPIRE_DEFAULTS[k]; }
+    return d;
+  }catch(e){ return JSON.parse(JSON.stringify(INSPIRE_DEFAULTS)); }
+}
+function saveInspire(data){ localStorage.setItem(INSPIRE_KEY, JSON.stringify(data)); }
+
+function addInspire(){
+  var input = document.getElementById("inspireInput");
+  var content = input.value.trim();
+  if(!content) return;
+  var data = loadInspire();
+  var now = new Date();
+  data.records.push({
+    id: Date.now(),
+    content: content,
+    date: now.toISOString().slice(0,10),
+    time: nowTimeStr(),
+    status: "pending",
+    aiExtension: null
+  });
+  saveInspire(data);
+  input.value = "";
+  renderInspire();
+}
+
+function renderInspire(){
+  var data = loadInspire();
+  var list = document.getElementById("inspireList");
+  var count = document.getElementById("inspireCount");
+  if(count) count.textContent = data.records.length + " 条";
+  if(!list) return;
+  if(data.records.length === 0){
+    list.innerHTML = '<div style="text-align:center;color:var(--muted);padding:32px 16px;font-size:13px">还没有灵感<br>在上方输入框记录第一条吧～</div>';
+    return;
+  }
+  var sorted = data.records.slice().sort(function(a,b){
+    var ta = (a.date||"") + " " + (a.time||"00:00");
+    var tb = (b.date||"") + " " + (b.time||"00:00");
+    return tb.localeCompare(ta);
+  });
+  list.innerHTML = sorted.map(function(r){
+    var statusText = {pending:"待处理", recorded:"已记录", action:"已行动"}[r.status] || "待处理";
+    var activeCls = r.id === currentInspireId ? " active" : "";
+    return '<div class="inspire-item'+activeCls+'" onclick="selectInspire('+r.id+')">'
+      +'<div class="inspire-item-text">'+esc(r.content)+'</div>'
+      +'<div class="inspire-item-meta"><span>'+r.date+' '+(r.time||"")+'</span>'
+      +'<span class="inspire-tag '+r.status+'">'+statusText+'</span></div>'
+      +'</div>';
+  }).join("");
+}
+
+function selectInspire(id){
+  currentInspireId = id;
+  renderInspire();
+  var data = loadInspire();
+  var r = data.records.find(function(x){ return x.id===id; });
+  if(!r) return;
+  document.getElementById("inspireDetailTitle").textContent = r.date + " " + (r.time||"");
+  document.getElementById("inspireActions").style.display = "flex";
+  // 如果还没有AI延伸，生成一个
+  if(!r.aiExtension){
+    r.aiExtension = generateInspireExtension(r.content);
+    saveInspire(data);
+  }
+  renderInspireDetail(r.aiExtension);
+}
+
+function renderInspireDetail(ext){
+  var box = document.getElementById("inspireDetail");
+  if(!box) return;
+  box.innerHTML = ''
+    +'<div class="d-section"><div class="d-label">💭 原始想法</div><div class="d-content">'+esc(ext.original)+'</div></div>'
+    +'<div class="d-section"><div class="d-label">❓ 值得追问的</div><div class="d-content">'+ext.questions.map(function(q){return '· '+esc(q);}).join('<br>')+'</div></div>'
+    +'<div class="d-section"><div class="d-label">🚀 可以延伸的方向</div><div class="d-content">'+ext.directions.map(function(d){return '· '+esc(d);}).join('<br>')+'</div></div>'
+    +'<div class="d-section"><div class="d-label">⚖️ 值不值得做</div><div class="d-content">'+esc(ext.judgment)+'</div></div>'
+    +'<div class="d-section"><div class="d-label">🔗 可能关联</div><div class="d-content">'+esc(ext.related)+'</div></div>';
+}
+
+function generateInspireExtension(content){
+  var lower = content.toLowerCase();
+  var questions = [];
+  var directions = [];
+  var judgment = "";
+  var related = "";
+
+  // 根据灵感内容生成不同的延伸
+  if(lower.indexOf("做")>=0 || lower.indexOf("创业")>=0 || lower.indexOf("项目")>=0){
+    questions = ["这个想法的核心价值是什么？谁会为此付费/花时间？", "最小可行版本是什么？能不能一周内做出来验证？", "最大的风险是什么？如果失败了损失有多大？"];
+    directions = ["先写一页纸的商业画布，把价值、用户、成本想清楚", "找3个目标用户聊聊，验证需求是不是真的", "做一个最小原型，哪怕是PPT或草图，先拿给别人看"];
+    judgment = "有行动潜力，但需要先验证需求，别一上来就all in。建议用最小成本试错，验证了再投入。";
+    related = "可能关联：求职/创业/项目管理。可以转到决策顾问模块做更深入的拷问。";
+  } else if(lower.indexOf("学")>=0 || lower.indexOf("考")>=0 || lower.indexOf("技能")>=0){
+    questions = ["学这个的目的是什么？是兴趣还是职业需要？", "有没有明确的学习路径和时间规划？", "学完之后怎么用？有没有输出的场景？"];
+    directions = ["列一个3个月的学习计划，每周固定时间", "找一个学习搭子或社群，互相监督", "边学边输出，写笔记或做小项目，学以致用"];
+    judgment = "值得投入，但要避免'收藏等于学会'的错觉。制定明确计划和输出场景，才能真正学到。";
+    related = "可能关联：六级学习/求职/工作SOP。可以把学习计划加入待办清单。";
+  } else if(lower.indexOf("写")>=0 || lower.indexOf("文章")>=0 || lower.indexOf("内容")>=0){
+    questions = ["想写给谁看？目标读者的痛点是什么？", "核心观点是什么？一句话能说清吗？", "有没有独特的视角或案例？还是只是重复别人说过的？"];
+    directions = ["先写一个大纲，把核心观点和结构定下来", "找3篇同主题的爆款文章，分析它们的结构和角度", "定一个截止日期，先写完再改，别追求完美"];
+    judgment = "有创作潜力，但要避免完美主义导致迟迟不动笔。先完成再完美，写出来才有修改的基础。";
+    related = "可能关联：百川智库/求职。可以把素材存入知识库，或者作为简历项目的素材。";
+  } else {
+    questions = ["这个想法为什么现在出现？是看到了什么还是经历了什么？", "如果不做，三个月后会后悔吗？", "这个想法跟你目前的大目标一致吗？"];
+    directions = ["先放一放，过一周再看，如果还觉得有价值就行动", "跟一个信任的朋友聊聊，听听外部视角", "把想法拆成最小的一步，今天就能做的那种"];
+    judgment = "暂时不确定价值，建议先沉淀一下。好的想法会反复出现，一时冲动的想法会很快遗忘。";
+    related = "可能关联：决策顾问/待办清单。如果决定行动，可以加入待办清单跟踪进度。";
+  }
+
+  return {
+    original: content,
+    questions: questions,
+    directions: directions,
+    judgment: judgment,
+    related: related
+  };
+}
+
+function markInspire(status){
+  if(!currentInspireId) return;
+  var data = loadInspire();
+  var r = data.records.find(function(x){ return x.id===currentInspireId; });
+  if(!r) return;
+  r.status = status;
+  saveInspire(data);
+  renderInspire();
+  var statusText = {recorded:"已记录", action:"已行动"}[status] || status;
+  alert("已标记为：" + statusText);
+}
+
+function deleteCurrentInspire(){
+  if(!currentInspireId) return;
+  if(!confirm("确定删除这条灵感？")) return;
+  var data = loadInspire();
+  data.records = data.records.filter(function(x){ return x.id!==currentInspireId; });
+  saveInspire(data);
+  currentInspireId = null;
+  document.getElementById("inspireDetailTitle").textContent = "选一条灵感看看";
+  document.getElementById("inspireActions").style.display = "none";
+  document.getElementById("inspireDetail").innerHTML = '<div style="text-align:center;color:var(--muted);padding:40px 20px;font-size:13px;line-height:1.8">从左边选一条灵感<br>AI会帮你：追问、延伸、关联、判断值不值得做<br><span style="color:var(--pink-deep);font-weight:700">碎片化想法不记录就溜走了</span></div>';
+  renderInspire();
+}
+
+function inspireToMarkdown(r){
+  var statusText = {pending:"待处理", recorded:"已记录", action:"已行动"}[r.status] || "待处理";
+  var ext = r.aiExtension || generateInspireExtension(r.content);
+  var title = r.content.length > 30 ? r.content.slice(0,30) + "..." : r.content;
+  var md = "---\n";
+  md += "title: " + title.replace(/"/g, "\'") + "\n";
+  md += "date: " + r.date + "\n";
+  md += "time: " + (r.time || "") + "\n";
+  md += "status: " + statusText + "\n";
+  md += "tags: [灵感, 碎片化想法]\n";
+  md += "---\n\n";
+  md += "# 💡 原始想法\n\n";
+  md += r.content + "\n\n";
+  md += "# 🤖 AI延伸\n\n";
+  md += "## ❓ 值得追问的\n\n";
+  ext.questions.forEach(function(q){ md += "- " + q + "\n"; });
+  md += "\n";
+  md += "## 🚀 可以延伸的方向\n\n";
+  ext.directions.forEach(function(d){ md += "- " + d + "\n"; });
+  md += "\n";
+  md += "## ⚖️ 值不值得做\n\n";
+  md += ext.judgment + "\n\n";
+  md += "## 🔗 可能关联\n\n";
+  md += ext.related + "\n\n";
+  md += "---\n";
+  md += "*由 Weh Atelier 灵感捕捉模块导出 · " + new Date().toISOString().slice(0,10) + "*\n";
+  return md;
+}
+
+function downloadMD(filename, content){
+  var blob = new Blob([content], {type: "text/markdown;charset=utf-8"});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function exportInspire(id){
+  if(!id) return;
+  var data = loadInspire();
+  var r = data.records.find(function(x){ return x.id===id; });
+  if(!r) return;
+  var md = inspireToMarkdown(r);
+  var filename = "灵感-" + r.date + "-" + (r.content.slice(0,10).replace(/[\\/:*?"<>|]/g,"_")) + ".md";
+  downloadMD(filename, md);
+}
+
+function exportAllInspire(){
+  var data = loadInspire();
+  if(data.records.length === 0){
+    alert("还没有灵感可以导出");
+    return;
+  }
+  if(!confirm("确定导出全部 " + data.records.length + " 条灵感？每条会生成一个MD文件。")) return;
+  var sorted = data.records.slice().sort(function(a,b){
+    var ta = (a.date||"") + " " + (a.time||"00:00");
+    var tb = (b.date||"") + " " + (b.time||"00:00");
+    return ta.localeCompare(tb);
+  });
+  sorted.forEach(function(r, i){
+    setTimeout(function(){
+      var md = inspireToMarkdown(r);
+      var filename = "灵感-" + r.date + "-" + (r.content.slice(0,10).replace(/[\\/:*?"<>|]/g,"_")) + ".md";
+      downloadMD(filename, md);
+    }, i * 300);
+  });
+  setTimeout(function(){
+    alert("已导出 " + sorted.length + " 条灵感，请检查下载文件夹，然后放到 Weh-Brain 的 00-灵感库 目录里。");
+  }, sorted.length * 300 + 500);
+}
+
+/* ========== 待办清单模块 ========== */
+var TODO_KEY = "weh_todo_data_v1";
+var TODO_DEFAULTS = {items:[]};
+var PRIORITY_ORDER = {high:0, medium:1, low:2};
+var PRIORITY_TEXT = {high:"🔴 高", medium:"🟡 中", low:"🟢 低"};
+var CATEGORY_TEXT = {work:"💼 工作", study:"📖 学习", life:"🏠 生活", other:"📌 其他"};
+
+function loadTodo(){
+  try{
+    var d = JSON.parse(localStorage.getItem(TODO_KEY));
+    if(!d) return JSON.parse(JSON.stringify(TODO_DEFAULTS));
+    for(var k in TODO_DEFAULTS){ if(d[k]===undefined) d[k]=TODO_DEFAULTS[k]; }
+    return d;
+  }catch(e){ return JSON.parse(JSON.stringify(TODO_DEFAULTS)); }
+}
+function saveTodo(data){ localStorage.setItem(TODO_KEY, JSON.stringify(data)); }
+
+function addTodo(){
+  var input = document.getElementById("todoInput");
+  var title = input.value.trim();
+  if(!title) return;
+  var priority = document.getElementById("todoPriority").value;
+  var category = document.getElementById("todoCategory").value;
+  var dueDate = document.getElementById("todoDueDate").value || "";
+  var data = loadTodo();
+  data.items.push({
+    id: Date.now(),
+    title: title,
+    priority: priority,
+    category: category,
+    dueDate: dueDate,
+    done: false,
+    createdAt: new Date().toISOString().slice(0,10)
+  });
+  saveTodo(data);
+  input.value = "";
+  document.getElementById("todoDueDate").value = "";
+  renderTodo();
+}
+
+function toggleTodo(id){
+  var data = loadTodo();
+  var item = data.items.find(function(x){ return x.id===id; });
+  if(!item) return;
+  item.done = !item.done;
+  saveTodo(data);
+  renderTodo();
+}
+
+function deleteTodo(id){
+  if(!confirm("确定删除这个待办？")) return;
+  var data = loadTodo();
+  data.items = data.items.filter(function(x){ return x.id!==id; });
+  saveTodo(data);
+  renderTodo();
+}
+
+function editTodo(id){
+  var data = loadTodo();
+  var item = data.items.find(function(x){ return x.id===id; });
+  if(!item) return;
+  var newTitle = prompt("修改待办内容（当前："+item.title+"）：", item.title);
+  if(!newTitle || !newTitle.trim()) return;
+  item.title = newTitle.trim();
+  saveTodo(data);
+  renderTodo();
+}
+
+function getDueStatus(dueDate){
+  if(!dueDate) return {text:"", cls:""};
+  var today = new Date().toISOString().slice(0,10);
+  if(dueDate < today) return {text:"⚠️ 已逾期 "+dueDate, cls:"overdue"};
+  if(dueDate === today) return {text:"📅 今日到期", cls:"today"};
+  return {text:"📅 "+dueDate, cls:""};
+}
+
+function renderTodo(){
+  var data = loadTodo();
+  var items = data.items;
+  // 统计
+  var total = items.length;
+  var done = items.filter(function(i){ return i.done; }).length;
+  var pending = total - done;
+  var today = new Date().toISOString().slice(0,10);
+  var todayDue = items.filter(function(i){ return !i.done && i.dueDate === today; }).length;
+  document.getElementById("todoTotal").textContent = total;
+  document.getElementById("todoPending").textContent = pending;
+  document.getElementById("todoDone").textContent = done;
+  document.getElementById("todoToday").textContent = todayDue;
+  document.getElementById("todoListCount").textContent = pending + " 项待完成";
+
+  var list = document.getElementById("todoList");
+  if(!list) return;
+  if(items.length === 0){
+    list.innerHTML = '<div class="todo-empty">还没有待办事项<br>在上方输入框添加第一个吧～</div>';
+    return;
+  }
+  // 排序：未完成的按优先级+截止日期，完成的放底部
+  var sorted = items.slice().sort(function(a,b){
+    if(a.done !== b.done) return a.done ? 1 : -1;
+    if(PRIORITY_ORDER[a.priority] !== PRIORITY_ORDER[b.priority]) return PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority];
+    if(a.dueDate && b.dueDate) return a.dueDate.localeCompare(b.dueDate);
+    if(a.dueDate) return -1;
+    if(b.dueDate) return 1;
+    return b.id - a.id;
+  });
+
+  list.innerHTML = sorted.map(function(item){
+    var due = getDueStatus(item.dueDate);
+    var doneCls = item.done ? " done" : "";
+    var checkedCls = item.done ? " checked" : "";
+    var checkIcon = item.done ? "✓" : "";
+    return '<div class="todo-item'+doneCls+'">'
+      +'<div class="todo-check'+checkedCls+'" onclick="toggleTodo('+item.id+')">'+checkIcon+'</div>'
+      +'<div class="todo-content">'
+        +'<div class="todo-text">'+esc(item.title)+'</div>'
+        +'<div class="todo-meta">'
+          +'<span class="todo-cat-tag '+item.category+'">'+CATEGORY_TEXT[item.category]+'</span>'
+          +'<span class="todo-priority-tag">'+PRIORITY_TEXT[item.priority]+'</span>'
+          +(due.text ? '<span class="todo-due '+due.cls+'">'+due.text+'</span>' : '')
+          +'<span style="color:var(--muted)">创建于 '+item.createdAt+'</span>'
+        +'</div>'
+      +'</div>'
+      +'<div class="todo-actions">'
+        +'<div class="todo-action-btn" onclick="addToDailyFromTodo('+item.id+')" title="加到今日计划">📅</div>'
+        +'<div class="todo-action-btn" onclick="editTodo('+item.id+')" title="编辑">✏️</div>'
+        +'<div class="todo-action-btn" onclick="deleteTodo('+item.id+')" title="删除">🗑️</div>'
+      +'</div>'
+      +'</div>';
+  }).join("");
+}
+
+
+/* ========== 首页统计更新 ========== */
+function updateHomeStats(){
+  try{
+    // 存钱记账：本期消费笔数
+    var moneyData = JSON.parse(localStorage.getItem("weh_money_data_v1"));
+    var moneyCount = moneyData && moneyData.records ? moneyData.records.length : 0;
+    var el1 = document.getElementById("homeMoneyCount");
+    if(el1) el1.textContent = moneyCount;
+  }catch(e){}
+  try{
+    // 吃饭健康：本周饮食记录数
+    var healthData = JSON.parse(localStorage.getItem("weh_health_data_v1"));
+    var healthCount = healthData && healthData.records ? healthData.records.length : 0;
+    var el2 = document.getElementById("homeHealthCount");
+    if(el2) el2.textContent = healthCount;
+  }catch(e){}
+  try{
+    // 灵感捕捉：灵感总数
+    var inspireData = JSON.parse(localStorage.getItem("weh_inspire_data_v1"));
+    var inspireCount = inspireData && inspireData.records ? inspireData.records.length : 0;
+    var el3 = document.getElementById("homeInspireCount");
+    if(el3) el3.textContent = inspireCount;
+  }catch(e){}
+  try{
+    // 决策顾问：拷问次数
+    var decData = JSON.parse(localStorage.getItem("weh_decision_data_v1"));
+    var decCount = decData && decData.chatHistory ? decData.chatHistory.length : 0;
+    var el4 = document.getElementById("homeDecisionCount");
+    if(el4) el4.textContent = decCount;
+  }catch(e){}
+}
+
+/* ========== 工作汇报台模块 ========== */
+var REPORT_KEY = "weh_report_data_v1";
+var REPORT_DEFAULTS = {currentType:"weekly", currentAudience:"leader", history:[]};
+var currentReportId = null;
+
+function loadReport(){
+  try{
+    var d = JSON.parse(localStorage.getItem(REPORT_KEY));
+    if(!d) return JSON.parse(JSON.stringify(REPORT_DEFAULTS));
+    for(var k in REPORT_DEFAULTS){ if(d[k]===undefined) d[k]=REPORT_DEFAULTS[k]; }
+    return d;
+  }catch(e){ return JSON.parse(JSON.stringify(REPORT_DEFAULTS)); }
+}
+function saveReport(data){ localStorage.setItem(REPORT_KEY, JSON.stringify(data)); }
+
+function selectReportType(type){
+  var data = loadReport();
+  data.currentType = type;
+  saveReport(data);
+  document.querySelectorAll(".report-option[data-type]").forEach(function(el){
+    el.classList.toggle("active", el.dataset.type === type);
+  });
+}
+
+function selectReportAudience(audience){
+  var data = loadReport();
+  data.currentAudience = audience;
+  saveReport(data);
+  document.querySelectorAll(".report-option[data-audience]").forEach(function(el){
+    el.classList.toggle("active", el.dataset.audience === audience);
+  });
+}
+
+function generateReport(){
+  var input = document.getElementById("reportInput").value.trim();
+  if(!input){
+    alert("请先输入碎碎念内容");
+    return;
+  }
+  var data = loadReport();
+  var type = data.currentType;
+  var audience = data.currentAudience;
+
+  // 解析输入，提取要点
+  var lines = input.split(/[\n。；;]/).map(function(l){ return l.trim(); }).filter(function(l){ return l.length > 0; });
+  var typeText = {weekly:"周报", project:"项目进展", review:"复盘总结"}[type];
+  var audienceText = {leader:"直系领导", client:"甲方", teacher:"老师"}[audience];
+
+  // 生成精简汇报要点
+  var highlights = [];
+  if(type === "weekly"){
+    highlights = lines.slice(0, 5).map(function(l, i){
+      var prefix = ["✅ 完成", "🔄 进行中", "📌 重点", "💡 亮点", "⚠️ 风险"][i] || "📌";
+      return prefix + "：" + (l.length > 40 ? l.slice(0,40)+"..." : l);
+    });
+  } else if(type === "project"){
+    highlights = [
+      "📊 项目进度：" + (lines[0] ? lines[0].slice(0,30) : "按计划推进中"),
+      "✅ 已完成：" + (lines[1] ? lines[1].slice(0,30) : "核心功能开发"),
+      "🔄 进行中：" + (lines[2] ? lines[2].slice(0,30) : "测试与优化"),
+      "⚠️ 风险与问题：" + (lines[3] ? lines[3].slice(0,30) : "暂无重大风险"),
+      "📅 下一步：" + (lines[4] ? lines[4].slice(0,30) : "继续按计划推进")
+    ];
+  } else {
+    highlights = [
+      "🎯 目标回顾：" + (lines[0] ? lines[0].slice(0,30) : "原定目标达成情况"),
+      "✅ 做得好的：" + (lines[1] ? lines[1].slice(0,30) : "流程优化、效率提升"),
+      "❌ 不足与教训：" + (lines[2] ? lines[2].slice(0,30) : "沟通不及时、预估偏差"),
+      "💡 改进措施：" + (lines[3] ? lines[3].slice(0,30) : "建立同步机制、优化预估方法"),
+      "📌 下次重点：" + (lines[4] ? lines[4].slice(0,30) : "落实改进措施")
+    ];
+  }
+
+  // 生成预判追问
+  var questions = [];
+  if(audience === "leader"){
+    questions = [
+      {q: "这个事情的优先级是什么？跟其他任务比怎么排？", a: "建议回答：目前优先级是P0，因为直接影响下周上线；其他任务已协调顺延，不影响整体节奏。"},
+      {q: "遇到的这个问题，你打算怎么解决？需要什么支持？", a: "建议回答：已初步定位原因，计划本周内出解决方案；需要XX部门配合提供数据，已在协调中。"},
+      {q: "下一步的时间节点能保证吗？风险点在哪里？", a: "建议回答：按目前进度可以保证；主要风险在XX环节，已准备Plan B，最坏情况延迟1天，不影响最终交付。"}
+    ];
+  } else if(audience === "client"){
+    questions = [
+      {q: "目前的进度是否符合合同约定？会不会延期？", a: "建议回答：目前进度符合预期，关键节点均按时完成；整体不会延期，后续会每周同步进度。"},
+      {q: "这个方案的效果怎么衡量？有没有数据支撑？", a: "建议回答：效果通过XX指标衡量，上线后会提供数据周报；目前已有小范围测试数据，效果符合预期。"},
+      {q: "后续维护和支持怎么安排？", a: "建议回答：上线后提供3个月免费维护，之后按年度服务合同执行；有专属对接人，响应时间不超过4小时。"}
+    ];
+  } else {
+    questions = [
+      {q: "这个项目的核心创新点是什么？", a: "建议回答：核心创新在于XX方法的应用，相比传统方案效率提升30%；已有初步实验数据验证。"},
+      {q: "参考文献和理论依据是什么？", a: "建议回答：主要参考XX等人2023年的研究，以及XX理论框架；文献清单已整理在附录中。"},
+      {q: "下一步的研究计划是什么？", a: "建议回答：下一步计划扩大样本量做验证，同时探索XX方向的延伸应用；预计3个月内出阶段性成果。"}
+    ];
+  }
+
+  var result = {
+    type: type,
+    audience: audience,
+    typeText: typeText,
+    audienceText: audienceText,
+    input: input,
+    highlights: highlights,
+    questions: questions,
+    createdAt: new Date().toISOString().slice(0,16).replace("T", " ")
+  };
+
+  // 保存到历史
+  var reportId = Date.now();
+  data.history.unshift({
+    id: reportId,
+    type: type,
+    audience: audience,
+    typeText: typeText,
+    audienceText: audienceText,
+    input: input,
+    highlights: highlights,
+    questions: questions,
+    createdAt: result.createdAt
+  });
+  if(data.history.length > 20) data.history = data.history.slice(0, 20);
+  saveReport(data);
+  currentReportId = reportId;
+
+  renderReportResult(result);
+  renderReportHistory();
+}
+
+function renderReportResult(result){
+  var box = document.getElementById("reportResult");
+  var title = document.getElementById("reportResultTitle");
+  var exportBtn = document.getElementById("reportExportBtn");
+  if(!box) return;
+  title.textContent = result.typeText + " · 汇报对象：" + result.audienceText + " · " + result.createdAt;
+  exportBtn.style.display = "inline-block";
+
+  var highlightsHtml = result.highlights.map(function(h){ return "<li>" + esc(h) + "</li>"; }).join("");
+  var questionsHtml = result.questions.map(function(q){
+    return '<div class="report-question"><div class="report-question-q">❓ ' + esc(q.q) + '</div><div class="report-question-a">💡 ' + esc(q.a) + '</div></div>';
+  }).join("");
+
+  box.innerHTML = ''
+    + '<div class="report-section"><div class="report-section-title">📝 精简汇报（' + result.typeText + '）</div>'
+    + '<div class="report-section-content"><ul>' + highlightsHtml + '</ul></div></div>'
+    + '<div class="report-section"><div class="report-section-title">🎯 预判' + result.audienceText + '会追问的3个问题</div>'
+    + '<div>' + questionsHtml + '</div></div>'
+    + '<div class="report-section"><div class="report-section-title">💡 原始碎碎念</div>'
+    + '<div class="report-section-content" style="color:var(--muted);font-size:12px">' + esc(result.input).replace(/\n/g, "<br>") + '</div></div>';
+}
+
+function renderReportHistory(){
+  var data = loadReport();
+  var box = document.getElementById("reportHistory");
+  var count = document.getElementById("reportHistoryCount");
+  if(count) count.textContent = data.history.length + " 份";
+  if(!box) return;
+  if(data.history.length === 0){
+    box.innerHTML = '<div style="text-align:center;color:var(--muted);padding:20px;font-size:12px">还没有历史汇报</div>';
+    return;
+  }
+  box.innerHTML = data.history.map(function(r){
+    var activeCls = r.id === currentReportId ? " active" : "";
+    return '<div class="report-history-item'+activeCls+'" onclick="loadReportHistory('+r.id+')">'
+      +'<div style="display:flex;justify-content:space-between;align-items:flex-start">'
+      +'<div style="flex:1">'
+      +'<div class="report-history-title">'+r.typeText+' · '+r.audienceText+'</div>'
+      +'<div class="report-history-meta">'+r.createdAt+' · '+(r.input.length>20?r.input.slice(0,20)+"...":r.input)+'</div>'
+      +'</div>'
+      +'<div class="report-delete-btn" onclick="event.stopPropagation();deleteReport('+r.id+')" title="删除">🗑️</div>'
+      +'</div>'
+      +'</div>';
+  }).join("");
+}
+
+function loadReportHistory(id){
+  var data = loadReport();
+  var r = data.history.find(function(x){ return x.id===id; });
+  if(!r) return;
+  currentReportId = id;
+  renderReportResult(r);
+  renderReportHistory();
+}
+
+function exportReport(){
+  if(!currentReportId){
+    alert("请先生成或选择一份汇报");
+    return;
+  }
+  var data = loadReport();
+  var r = data.history.find(function(x){ return x.id===currentReportId; });
+  if(!r) return;
+
+  var md = "---\n";
+  md += "title: " + r.typeText + " - " + r.createdAt.slice(0,10) + "\n";
+  md += "type: " + r.type + "\n";
+  md += "audience: " + r.audience + "\n";
+  md += "date: " + r.createdAt.slice(0,10) + "\n";
+  md += "tags: [工作汇报, " + r.typeText + "]\n";
+  md += "---\n\n";
+  md += "# " + r.typeText + "（汇报对象：" + r.audienceText + "）\n\n";
+  md += "> 生成时间：" + r.createdAt + "\n\n";
+  md += "## 📝 精简汇报\n\n";
+  r.highlights.forEach(function(h){ md += "- " + h + "\n"; });
+  md += "\n";
+  md += "## 🎯 预判追问\n\n";
+  r.questions.forEach(function(q, i){
+    md += "### " + (i+1) + ". " + q.q + "\n\n";
+    md += "**建议回答**：" + q.a + "\n\n";
+  });
+  md += "## 💡 原始碎碎念\n\n";
+  md += r.input + "\n\n";
+  md += "---\n";
+  md += "*由 Weh Atelier 工作汇报台生成 · 参考工作SOP知识库模板*\n";
+
+  var filename = "汇报-" + r.typeText + "-" + r.createdAt.slice(0,10) + ".md";
+  var blob = new Blob([md], {type: "text/markdown;charset=utf-8"});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+
+function deleteReport(id){
+  if(!confirm("确定删除这份汇报？")) return;
+  var data = loadReport();
+  data.history = data.history.filter(function(x){ return x.id!==id; });
+  saveReport(data);
+  if(currentReportId === id){
+    currentReportId = null;
+    document.getElementById("reportResultTitle").textContent = "在左边填写后点生成";
+    document.getElementById("reportExportBtn").style.display = "none";
+    document.getElementById("reportResult").innerHTML = '<div style="text-align:center;color:var(--muted);padding:60px 20px;font-size:13px;line-height:1.8">选择汇报类型和对象<br>在左边输入碎碎念（做了什么、遇到什么问题、下一步计划）<br>点"✨ 生成精简汇报"<br><span style="color:var(--pink-deep);font-weight:700">AI会参考工作SOP的模板，把"做了一大堆"翻译成"做出了什么"</span></div>';
+  }
+  renderReportHistory();
+}
+
+
+
+/* ========== 日计划台模块 ========== */
+var DAILY_KEY = "weh_daily_data_v1";
+var DAILY_DEFAULTS = {date:"", tasks:[], review:""};
+var DAILY_PRIORITY = {high:{text:"🔴 高", color:"#e05050"}, medium:{text:"🟡 中", color:"#ffa94d"}, low:{text:"🟢 低", color:"#72b05e"}};
+
+function loadDaily(){
+  try{
+    var d = JSON.parse(localStorage.getItem(DAILY_KEY));
+    var today = new Date().toISOString().slice(0,10);
+    if(!d || d.date !== today){
+      // 新的一天，重置
+      return JSON.parse(JSON.stringify(DAILY_DEFAULTS));
+    }
+    for(var k in DAILY_DEFAULTS){ if(d[k]===undefined) d[k]=DAILY_DEFAULTS[k]; }
+    return d;
+  }catch(e){ return JSON.parse(JSON.stringify(DAILY_DEFAULTS)); }
+}
+function saveDaily(data){
+  data.date = new Date().toISOString().slice(0,10);
+  localStorage.setItem(DAILY_KEY, JSON.stringify(data));
+}
+
+function addDailyTask(){
+  var input = document.getElementById("dailyInput");
+  var title = input.value.trim();
+  if(!title) return;
+  var priority = document.getElementById("dailyPriority").value;
+  var duration = parseInt(document.getElementById("dailyDuration").value);
+  var data = loadDaily();
+  data.tasks.push({
+    id: Date.now(),
+    title: title,
+    priority: priority,
+    duration: duration,
+    done: false
+  });
+  saveDaily(data);
+  input.value = "";
+  renderDaily();
+}
+
+function toggleDailyTask(id){
+  var data = loadDaily();
+  var task = data.tasks.find(function(t){ return t.id===id; });
+  if(!task) return;
+  task.done = !task.done;
+  saveDaily(data);
+  renderDaily();
+}
+
+function deleteDailyTask(id){
+  var data = loadDaily();
+  data.tasks = data.tasks.filter(function(t){ return t.id!==id; });
+  saveDaily(data);
+  renderDaily();
+}
+
+function saveDailyReview(){
+  var review = document.getElementById("dailyReview").value;
+  var data = loadDaily();
+  data.review = review;
+  saveDaily(data);
+}
+
+function renderDaily(){
+  var data = loadDaily();
+  var today = new Date();
+  var weekdays = ["周日","周一","周二","周三","周四","周五","周六"];
+  document.getElementById("dailyDateNum").textContent = today.getDate();
+  document.getElementById("dailyWeekday").textContent = weekdays[today.getDay()];
+  document.getElementById("dailyMonth").textContent = (today.getMonth()+1) + "月";
+
+  // 进度
+  var total = data.tasks.length;
+  var done = data.tasks.filter(function(t){ return t.done; }).length;
+  document.getElementById("dailyProgressText").textContent = done + "/" + total;
+  var percent = total > 0 ? Math.round(done/total*100) : 0;
+  document.getElementById("dailyProgressFill").style.width = percent + "%";
+
+  // 任务列表
+  document.getElementById("dailyTaskCount").textContent = total + " 项";
+  var list = document.getElementById("dailyTaskList");
+  if(total === 0){
+    list.innerHTML = '<div style="text-align:center;color:var(--muted);padding:24px;font-size:12px">还没有任务，在上方添加第一个吧～</div>';
+  } else {
+    // 按优先级排序
+    var sorted = data.tasks.slice().sort(function(a,b){
+      var order = {high:0, medium:1, low:2};
+      if(order[a.priority] !== order[b.priority]) return order[a.priority] - order[b.priority];
+      return a.id - b.id;
+    });
+    list.innerHTML = sorted.map(function(t){
+      var doneCls = t.done ? " done" : "";
+      var checkedCls = t.done ? " checked" : "";
+      var p = DAILY_PRIORITY[t.priority];
+      return '<div class="daily-task-item'+doneCls+'">'
+        +'<div class="daily-task-check'+checkedCls+'" onclick="toggleDailyTask('+t.id+')">'+(t.done?"✓":"")+'</div>'
+        +'<div class="daily-task-content">'
+          +'<div class="daily-task-text">'+esc(t.title)+'</div>'
+          +'<div class="daily-task-meta"><span>'+p.text+'</span><span>⏱️ '+t.duration+'分钟</span></div>'
+        +'</div>'
+        +'<div class="daily-task-delete" onclick="deleteDailyTask('+t.id+')">🗑️</div>'
+        +'</div>';
+    }).join("");
+  }
+
+  // 时间轴
+  var timeline = document.getElementById("dailyTimeline");
+  var pendingTasks = data.tasks.filter(function(t){ return !t.done; });
+  if(pendingTasks.length === 0){
+    timeline.innerHTML = '<div style="text-align:center;color:var(--muted);padding:20px;font-size:12px">今日任务全部完成啦！🎉</div>';
+  } else {
+    var startHour = 9; // 从9点开始
+    var currentMin = startHour * 60;
+    timeline.innerHTML = pendingTasks.map(function(t){
+      var startH = Math.floor(currentMin/60);
+      var startM = currentMin % 60;
+      var endMin = currentMin + t.duration;
+      var endH = Math.floor(endMin/60);
+      var endM = endMin % 60;
+      var timeStr = (startH<10?"0":"")+startH+":"+(startM<10?"0":"")+startM+" - "+(endH<10?"0":"")+endH+":"+(endM<10?"0":"")+endM;
+      currentMin = endMin;
+      var p = DAILY_PRIORITY[t.priority];
+      return '<div class="daily-time-block" style="border-left-color:'+p.color+'">'
+        +'<span class="daily-time-range">'+timeStr+'</span>'
+        +'<span class="daily-time-title">'+esc(t.title)+'</span>'
+        +'<span class="daily-time-duration">'+t.duration+'分钟</span>'
+        +'</div>';
+    }).join("");
+  }
+
+  // AI说真话
+  var truthBox = document.getElementById("dailyTruth");
+  if(total === 0){
+    truthBox.innerHTML = '<div style="text-align:center;color:var(--muted);padding:12px;font-size:13px">添加任务后AI会给你实话实说～</div>';
+  } else {
+    var totalMin = data.tasks.reduce(function(sum,t){ return sum + t.duration; }, 0);
+    var totalHour = (totalMin/60).toFixed(1);
+    var truth = "";
+    if(total > 8){
+      truth = '<div class="truth-label">⚠️ 排太多了</div>你今天排了 '+total+' 件事，预计需要 '+totalHour+' 小时，明显做不完。建议砍掉 '+Math.ceil(total*0.3)+' 件低优先级的，先保证高优先级的完成质量。';
+    } else if(totalHour > 8){
+      truth = '<div class="truth-label">⏰ 时间太紧</div>全部任务预计需要 '+totalHour+' 小时，超过了正常工作时长。建议把一些任务移到明天，或者降低预期。';
+    } else if(done === total && total > 0){
+      truth = '<div class="truth-label">🎉 全部完成</div>今天 '+total+' 件任务全部完成，效率很高！记得复盘一下哪些做得好，哪些可以改进。';
+    } else if(done > 0){
+      truth = '<div class="truth-label">💪 继续加油</div>已完成 '+done+'/'+total+' 件，进度 '+percent+'%。保持节奏，高优先级的先做完。';
+    } else {
+      truth = '<div class="truth-label">🚀 开始吧</div>今天有 '+total+' 件任务，预计 '+totalHour+' 小时。先从高优先级的开始，一件一件来。';
+    }
+    truthBox.innerHTML = truth;
+  }
+
+  // 复盘
+  document.getElementById("dailyReview").value = data.review || "";
+}
+
+
+function addToDailyFromTodo(todoId){
+  var todoData = JSON.parse(localStorage.getItem("weh_todo_data_v1"));
+  if(!todoData || !todoData.items) return;
+  var todo = todoData.items.find(function(t){ return t.id===todoId; });
+  if(!todo) return;
+  if(todo.done){
+    alert("该任务已完成，无需加到今日计划");
+    return;
+  }
+  var dailyData = loadDaily();
+  // 检查是否已经加过
+  var exists = dailyData.tasks.some(function(t){ return t.title === todo.title; });
+  if(exists){
+    alert("该任务已在今日计划中");
+    return;
+  }
+  dailyData.tasks.push({
+    id: Date.now(),
+    title: todo.title,
+    priority: todo.priority,
+    duration: 30,
+    done: false
+  });
+  saveDaily(dailyData);
+  alert("已加到今日计划：" + todo.title);
+  if(document.getElementById("dailyInput")){
+    renderDaily();
+  }
+}
+
+function addInspireToTodo(inspireId){
+  var inspireData = loadInspire();
+  var r = inspireData.records.find(function(x){ return x.id===inspireId; });
+  if(!r) return;
+  var todoData = JSON.parse(localStorage.getItem("weh_todo_data_v1"));
+  if(!todoData) todoData = {items:[]};
+  var exists = todoData.items.some(function(t){ return t.title === r.content; });
+  if(exists){
+    alert("该灵感已在待办清单中");
+    return;
+  }
+  todoData.items.push({
+    id: Date.now(),
+    title: r.content,
+    priority: "medium",
+    category: "other",
+    dueDate: "",
+    done: false,
+    createdAt: new Date().toISOString().slice(0,10)
+  });
+  localStorage.setItem("weh_todo_data_v1", JSON.stringify(todoData));
+  alert("已转到待办清单：" + (r.content.length>20?r.content.slice(0,20)+"...":r.content));
+}
+
+function addInspireToDaily(inspireId){
+  var inspireData = loadInspire();
+  var r = inspireData.records.find(function(x){ return x.id===inspireId; });
+  if(!r) return;
+  var dailyData = loadDaily();
+  var exists = dailyData.tasks.some(function(t){ return t.title === r.content; });
+  if(exists){
+    alert("该灵感已在今日计划中");
+    return;
+  }
+  dailyData.tasks.push({
+    id: Date.now(),
+    title: r.content,
+    priority: "medium",
+    duration: 30,
+    done: false
+  });
+  saveDaily(dailyData);
+  alert("已加到今日计划：" + (r.content.length>20?r.content.slice(0,20)+"...":r.content));
+  if(document.getElementById("dailyInput")){
+    renderDaily();
+  }
+}
+
+function initDaily(){
+  renderDaily();
+}
+function initReport(){
+  var data = loadReport();
+  // 恢复选中状态
+  document.querySelectorAll(".report-option[data-type]").forEach(function(el){
+    el.classList.toggle("active", el.dataset.type === data.currentType);
+  });
+  document.querySelectorAll(".report-option[data-audience]").forEach(function(el){
+    el.classList.toggle("active", el.dataset.audience === data.currentAudience);
+  });
+  renderReportHistory();
+}
+
+/* ========== 设置页 ========== */
+var SETTINGS_KEY = "weh_settings_v1";
+var SETTINGS_DEFAULTS = {theme:"pink", glassOpacity:75, fontSize:"medium", preferences:{}};
+var DATA_KEYS = {
+  money: "weh_money_data_v1",
+  health: "weh_health_data_v1",
+  inspire: "weh_inspire_data_v1",
+  decision: "weh_decision_data_v1",
+  report: "weh_report_data_v1",
+  daily: "weh_daily_data_v1",
+  todo: "weh_todo_data_v1"
+};
+
+function loadSettings(){
+  try{
+    var s = JSON.parse(localStorage.getItem(SETTINGS_KEY));
+    if(!s) return JSON.parse(JSON.stringify(SETTINGS_DEFAULTS));
+    for(var k in SETTINGS_DEFAULTS){ if(s[k]===undefined) s[k]=SETTINGS_DEFAULTS[k]; }
+    return s;
+  }catch(e){ return JSON.parse(JSON.stringify(SETTINGS_DEFAULTS)); }
+}
+function saveSettings(s){ localStorage.setItem(SETTINGS_KEY, JSON.stringify(s)); }
+
+function switchSettingsTab(tab){
+  document.querySelectorAll(".settings-nav-item").forEach(function(el){
+    el.classList.toggle("active", el.dataset.tab === tab);
+  });
+  document.querySelectorAll(".settings-tab").forEach(function(el){
+    el.classList.toggle("active", el.id === "settings-"+tab);
+  });
+}
+
+function setTheme(theme){
+  var s = loadSettings();
+  s.theme = theme;
+  saveSettings(s);
+  document.querySelectorAll(".theme-dot").forEach(function(el){
+    el.classList.toggle("active", el.classList.contains("theme-"+theme));
+  });
+  // 应用主题色（通过CSS变量）
+  var colors = {
+    pink: {primary:"#db7093", secondary:"#b48ed9"},
+    blue: {primary:"#74b9ff", secondary:"#a29bfe"},
+    green: {primary:"#00b894", secondary:"#81ecec"},
+    orange: {primary:"#ffa502", secondary:"#ff6348"}
+  };
+  var c = colors[theme] || colors.pink;
+  document.documentElement.style.setProperty("--pink-deep", c.primary);
+  document.documentElement.style.setProperty("--purple", c.secondary);
+}
+
+function setGlassOpacity(value){
+  var s = loadSettings();
+  s.glassOpacity = parseInt(value);
+  saveSettings(s);
+  document.getElementById("glassOpacityValue").textContent = value + "%";
+  // 应用透明度
+  document.documentElement.style.setProperty("--glass-opacity", value/100);
+}
+
+function setFontSize(size){
+  var s = loadSettings();
+  s.fontSize = size;
+  saveSettings(s);
+  var sizes = {small:"13px", medium:"14px", large:"15px"};
+  document.documentElement.style.fontSize = sizes[size] || "14px";
+}
+
+function exportAllData(){
+  var data = {};
+  for(var key in DATA_KEYS){
+    try{
+      var val = localStorage.getItem(DATA_KEYS[key]);
+      if(val) data[key] = JSON.parse(val);
+    }catch(e){}
+  }
+  data.settings = loadSettings();
+  data.exportTime = new Date().toISOString();
+  var blob = new Blob([JSON.stringify(data, null, 2)], {type:"application/json"});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement("a");
+  a.href = url;
+  a.download = "weh-atelier-backup-" + new Date().toISOString().slice(0,10) + ".json";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  alert("数据已导出");
+}
+
+function importAllData(event){
+  var file = event.target.files[0];
+  if(!file) return;
+  if(!confirm("导入数据会覆盖当前所有数据，确定继续？")) return;
+  var reader = new FileReader();
+  reader.onload = function(e){
+    try{
+      var data = JSON.parse(e.target.result);
+      for(var key in DATA_KEYS){
+        if(data[key]){
+          localStorage.setItem(DATA_KEYS[key], JSON.stringify(data[key]));
+        }
+      }
+      if(data.settings){
+        localStorage.setItem(SETTINGS_KEY, JSON.stringify(data.settings));
+      }
+      alert("数据导入成功，页面即将刷新");
+      setTimeout(function(){ location.reload(); }, 1000);
+    }catch(err){
+      alert("导入失败：文件格式错误");
+    }
+  };
+  reader.readAsText(file);
+}
+
+function clearModuleData(){
+  var module = document.getElementById("clearModuleSelect").value;
+  if(!module){
+    alert("请先选择要清空的模块");
+    return;
+  }
+  var moduleNames = {money:"存钱记账", health:"吃饭健康", inspire:"灵感捕捉", decision:"决策顾问", report:"工作汇报台", daily:"日计划台", todo:"Weh Tasks"};
+  if(!confirm("确定清空「" + (moduleNames[module]||module) + "」的所有数据？此操作不可恢复！")) return;
+  localStorage.removeItem(DATA_KEYS[module]);
+  alert("已清空，页面即将刷新");
+  setTimeout(function(){ location.reload(); }, 1000);
+}
+
+function resetAllData(){
+  if(!confirm("确定重置全部数据？所有模块的数据和设置都会被清空，此操作不可恢复！")) return;
+  if(!confirm("再次确认：真的要重置全部数据吗？")) return;
+  for(var key in DATA_KEYS){
+    localStorage.removeItem(DATA_KEYS[key]);
+  }
+  localStorage.removeItem(SETTINGS_KEY);
+  alert("已重置全部数据，页面即将刷新");
+  setTimeout(function(){ location.reload(); }, 1000);
+}
+
+function savePreference(){
+  var s = loadSettings();
+  s.preferences.moneyBudget = parseInt(document.getElementById("prefMoneyBudget").value) || 3000;
+  s.preferences.moneySave = parseInt(document.getElementById("prefMoneySave").value) || 600;
+  s.preferences.moneyCycle = parseInt(document.getElementById("prefMoneyCycle").value) || 20;
+  s.preferences.healthBudget = parseInt(document.getElementById("prefHealthBudget").value) || 100;
+  s.preferences.healthGoal = parseInt(document.getElementById("prefHealthGoal").value) || 7;
+  s.preferences.dailyStart = parseInt(document.getElementById("prefDailyStart").value) || 9;
+  saveSettings(s);
+  alert("偏好已保存");
+}
+
+function loadPreference(){
+  var s = loadSettings();
+  var p = s.preferences || {};
+  if(document.getElementById("prefMoneyBudget")) document.getElementById("prefMoneyBudget").value = p.moneyBudget || 3000;
+  if(document.getElementById("prefMoneySave")) document.getElementById("prefMoneySave").value = p.moneySave || 600;
+  if(document.getElementById("prefMoneyCycle")) document.getElementById("prefMoneyCycle").value = p.moneyCycle || 20;
+  if(document.getElementById("prefHealthBudget")) document.getElementById("prefHealthBudget").value = p.healthBudget || 100;
+  if(document.getElementById("prefHealthGoal")) document.getElementById("prefHealthGoal").value = p.healthGoal || 7;
+  if(document.getElementById("prefDailyStart")) document.getElementById("prefDailyStart").value = p.dailyStart || 9;
+  if(document.getElementById("glassOpacity")) document.getElementById("glassOpacity").value = s.glassOpacity || 75;
+  if(document.getElementById("glassOpacityValue")) document.getElementById("glassOpacityValue").textContent = (s.glassOpacity || 75) + "%";
+  if(document.getElementById("fontSize")) document.getElementById("fontSize").value = s.fontSize || "medium";
+  // 应用已保存的设置
+  if(s.theme && s.theme !== "pink") setTheme(s.theme);
+  if(s.glassOpacity) document.documentElement.style.setProperty("--glass-opacity", s.glassOpacity/100);
+  if(s.fontSize && s.fontSize !== "medium"){
+    var sizes = {small:"13px", medium:"14px", large:"15px"};
+    document.documentElement.style.fontSize = sizes[s.fontSize] || "14px";
+  }
+}
+
+function initSettings(){
+  loadPreference();
+}
+
 /* ---------- 全局搜索 ---------- */
 function plainText(html){
   var d = document.createElement("div"); d.innerHTML = html || ""; return (d.textContent||"").replace(/\s+/g," ").trim();
@@ -1342,9 +2403,9 @@ function applyThemeByHue(H,H2){
   root.setProperty("--text",hsl(H,0.28,0.34));
   root.setProperty("--muted",hsl(H,0.18,0.58));
   // 卡片/侧栏：半透明毛玻璃，透出背景图
-  root.setProperty("--card-bg",hsla(H,0.4,0.99,0.58));
-  root.setProperty("--topbar-bg",hsla(H,0.45,0.98,0.48));
-  root.setProperty("--nav-bg",hsla(H,0.45,0.99,0.62));
+  root.setProperty("--card-bg","hsla("+Math.round(H)+",40%,99%,var(--glass-opacity))");
+  root.setProperty("--topbar-bg","hsla("+Math.round(H)+",45%,98%,var(--glass-opacity))");
+  root.setProperty("--nav-bg","hsla("+Math.round(H)+",45%,99%,var(--glass-opacity))");
   // 整体柔光层（很淡，让背景图透出来）
   root.setProperty("--veil-top",hsla(H,0.5,0.97,0.28));
   root.setProperty("--veil-bot",hsla(H,0.5,0.97,0.38));
@@ -1437,9 +2498,9 @@ function setIcon(k){
 /* ---------- 页面切换 ---------- */
 var TITLES = {
   home:"🏠 首页总览", money:"💰 存钱记账", health:"🍱 吃饭健康",
-  inspiration:"💡 灵感捕捉", decision:"🎯 决策顾问", baichuan:"📚 百川智库",
-  career:"💼 求职小窝", cet6:"📖 六级学习", sop:"🛠️ 工作SOP",
-  todo:"✅ 待办清单", settings:"⚙️ 设置",
+  inspiration:"💡 灵感捕捉", decision:"🎯 决策顾问", report:"📝 工作汇报台",
+  baichuan:"📚 灵犀库", career:"💼 SCM Career", cet6:"📖 CET-6备战", sop:"🛠️ 工作SOP",
+  daily:"📅 日计划台", todo:"✅ 待办清单", settings:"⚙️ 设置",
   jobs:"🐾 岗位看板", companies:"🐈 目标公司池", timeline:"😺 每日日报",
   resume:"📄 简历库", knowledge:"📚 知识库"
 };
@@ -1522,8 +2583,25 @@ document.addEventListener("keydown", function(e){ if(e.key==="Escape") closeModa
     }
     if(document.getElementById("decChatMessages")){
       initDecision();
-      // 更新统计数字
-      var kbTotal = 0;
+    }
+    if(document.getElementById("inspireList")){
+      renderInspire();
+    }
+    if(document.getElementById("todoList")){
+      renderTodo();
+    }
+    updateHomeStats();
+    if(document.getElementById("reportInput")){
+      initReport();
+    }
+    if(document.getElementById("dailyInput")){
+      initDaily();
+    }
+    if(document.getElementById("settings-profile")){
+      initSettings();
+    }
+    // 更新统计数字
+    var kbTotal = 0;
       KBS.forEach(function(k){ (k.groups||[{notes:k.notes||[]}]).forEach(function(g){ (function walk(ns){ ns.forEach(function(n){ kbTotal += n.children ? (function(){var c=0;(function w2(x){x.forEach(function(z){c+=z.children?w2(z.children):1});return c;})(n.children)})() : 1; }); })(g.notes||[]); }); });
       if(document.getElementById("kbCount")) document.getElementById("kbCount").textContent = kbTotal;
       if(document.getElementById("jobCount")) document.getElementById("jobCount").textContent = (JOBS||[]).length;
@@ -1537,7 +2615,6 @@ document.addEventListener("keydown", function(e){ if(e.key==="Escape") closeModa
       if(document.getElementById("statJobs")){
         renderHome(); renderJobs(); renderCompanies(); renderTimeline(); renderResumes();
       }
-    }
   }catch(e){ console.log("求职模块渲染跳过:", e.message); }
   applyBg(); applyAv(); applyIcon();
 })();

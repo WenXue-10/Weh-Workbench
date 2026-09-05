@@ -11,11 +11,13 @@
     <div class="nav-item" data-module="health">🍱 吃饭健康</div>
     <div class="nav-item" data-module="inspiration">💡 灵感捕捉</div>
     <div class="nav-item" data-module="decision">🎯 决策顾问</div>
-    <div class="nav-item" data-module="baichuan">📚 百川智库</div>
-    <div class="nav-item" data-module="career">💼 求职小窝</div>
-    <div class="nav-item" data-module="cet6">📖 六级学习</div>
+    <div class="nav-item" data-module="report">📝 工作汇报台</div>
+    <div class="nav-item" data-module="daily">📅 日计划台</div>
+    <div class="nav-item" data-module="todo">✅ Weh Tasks</div>
+    <div class="nav-item" data-module="baichuan">📚 灵犀库</div>
+    <div class="nav-item" data-module="career">💼 SCM Career</div>
+    <div class="nav-item" data-module="cet6">📖 CET-6备战</div>
     <div class="nav-item" data-module="sop">🛠️ 工作SOP</div>
-    <div class="nav-item" data-module="todo">✅ 待办清单</div>
     <div class="nav-item" data-module="settings">⚙️ 设置</div>
     <div class="foot">🐾 数据本地存储 · 知识库自动同步<br>慢慢搭建中，敬请期待 ✨</div>
   </aside>
@@ -39,18 +41,18 @@
           <div style="font-size:13px;color:var(--muted);margin-top:6px">这是你的专属AI工作室，慢慢搭建中。左侧切换不同模块，每个模块都有对应的AI助手帮你干活～</div>
         </div>
         <div class="stat-grid">
-          <div class="stat-card p1"><div class="em">💰</div><div class="lab">存钱记账</div><div class="num" style="font-size:14px">即将上线</div></div>
-          <div class="stat-card p2"><div class="em">🍱</div><div class="lab">吃饭健康</div><div class="num" style="font-size:14px">即将上线</div></div>
-          <div class="stat-card p3"><div class="em">💡</div><div class="lab">灵感捕捉</div><div class="num" style="font-size:14px">即将上线</div></div>
-          <div class="stat-card p4"><div class="em">🎯</div><div class="lab">决策顾问</div><div class="num" style="font-size:14px">即将上线</div></div>
+          <div class="stat-card p1" onclick="go('money')" style="cursor:pointer"><div class="em">💰</div><div class="lab">存钱记账</div><div class="num" id="homeMoneyCount">0</div><div class="lab" style="font-size:11px;margin-top:2px">笔消费记录</div></div>
+          <div class="stat-card p2" onclick="go('health')" style="cursor:pointer"><div class="em">🍱</div><div class="lab">吃饭健康</div><div class="num" id="homeHealthCount">0</div><div class="lab" style="font-size:11px;margin-top:2px">条饮食记录</div></div>
+          <div class="stat-card p3" onclick="go('inspiration')" style="cursor:pointer"><div class="em">💡</div><div class="lab">灵感捕捉</div><div class="num" id="homeInspireCount">0</div><div class="lab" style="font-size:11px;margin-top:2px">条灵感</div></div>
+          <div class="stat-card p4" onclick="go('decision')" style="cursor:pointer"><div class="em">🎯</div><div class="lab">决策顾问</div><div class="num" id="homeDecisionCount">0</div><div class="lab" style="font-size:11px;margin-top:2px">次拷问</div></div>
         </div>
         <div class="two-col">
           <div class="card">
             <div class="card-head">📚 知识库模块</div>
             <div class="quick-grid">
-              <a data-module="baichuan">📚 百川智库</a>
-              <a data-module="career">💼 求职小窝</a>
-              <a data-module="cet6">📖 六级学习</a>
+              <a data-module="baichuan">📚 灵犀库</a>
+              <a data-module="career">💼 SCM Career</a>
+              <a data-module="cet6">📖 CET-6备战</a>
               <a data-module="sop">🛠️ 工作SOP</a>
             </div>
           </div>
@@ -59,7 +61,7 @@
             <div class="quick-grid">
               <a data-module="money">💰 存钱记账</a>
               <a data-module="health">🍱 吃饭健康</a>
-              <a data-module="todo">✅ 待办清单</a>
+              <a data-module="todo">✅ Weh Tasks</a>
               <a data-module="settings">⚙️ 设置</a>
             </div>
           </div>
@@ -229,11 +231,40 @@
 
       <!-- 💡 灵感捕捉 -->
       <section id="module-inspiration" class="view">
-        <div class="empty-state">
-          <div class="empty-icon">💡</div>
-          <div class="empty-title">灵感捕捉</div>
-          <div class="empty-desc">随手记灵感，AI自动拆解、延伸、关联知识库<br>好想法不再溜走～</div>
-          <div class="empty-tag">🚧 正在搭建中</div>
+        <div class="inspire-input-bar">
+          <input type="text" id="inspireInput" placeholder="想到什么？直接记下来，回车保存..." onkeydown="if(event.key==='Enter')addInspire()">
+          <button onclick="addInspire()">💡 捕捉</button>
+        </div>
+        <div class="money-layout">
+          <div class="inspire-left">
+            <div class="card">
+              <div class="card-head">📝 灵感列表 <span class="m-count" id="inspireCount"></span></div>
+              <div class="inspire-list" id="inspireList"></div>
+            </div>
+          </div>
+          <div class="money-right" style="width:calc(100% - 320px)">
+            <div class="card" id="inspireDetailCard">
+              <div class="card-head">🤖 AI灵感延伸 <small id="inspireDetailTitle">选一条灵感看看</small></div>
+              <div class="inspire-detail" id="inspireDetail">
+                <div style="text-align:center;color:var(--muted);padding:40px 20px;font-size:13px;line-height:1.8">
+                  从左边选一条灵感<br>
+                  AI会帮你：追问、延伸、关联、判断值不值得做<br>
+                  <span style="color:var(--pink-deep);font-weight:700">碎片化想法不记录就溜走了</span>
+                </div>
+              </div>
+              <div id="inspireActions" style="margin-top:16px;display:none;gap:10px;flex-wrap:wrap">
+                <button class="inspire-action-btn" onclick="addInspireToTodo(currentInspireId)">✅→待办</button>
+                <button class="inspire-action-btn" onclick="addInspireToDaily(currentInspireId)">📅→今日</button>
+                <button class="inspire-action-btn" onclick="exportInspire(currentInspireId)">📥 导出MD</button>
+                <button class="inspire-action-btn" onclick="markInspire('recorded')">📌 已记录</button>
+                <button class="inspire-action-btn" onclick="markInspire('action')">✅ 已行动</button>
+                <button class="inspire-action-btn" onclick="deleteCurrentInspire()">🗑️ 删除</button>
+              </div>
+              <div style="margin-top:10px;text-align:center">
+                <button class="inspire-action-btn" style="width:100%;background:linear-gradient(135deg,var(--pink-deep),#b48ed9);color:#fff;border:none" onclick="exportAllInspire()">📦 批量导出所有灵感为MD</button>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -316,7 +347,58 @@
         </div>
       </section>
 
-      <!-- 📚 百川智库 -->
+            <!-- 📝 工作汇报台 -->
+      <section id="module-report" class="view">
+        <div class="money-layout">
+          <div class="money-left" style="width:340px">
+            <div class="card">
+              <div class="card-head">⚙️ 汇报设置</div>
+              <div class="report-setting">
+                <div class="report-label">汇报类型</div>
+                <div class="report-options">
+                  <div class="report-option active" data-type="weekly" onclick="selectReportType('weekly')">📅 周报</div>
+                  <div class="report-option" data-type="project" onclick="selectReportType('project')">📊 项目进展</div>
+                  <div class="report-option" data-type="review" onclick="selectReportType('review')">🔄 复盘总结</div>
+                </div>
+              </div>
+              <div class="report-setting">
+                <div class="report-label">汇报对象</div>
+                <div class="report-options">
+                  <div class="report-option active" data-audience="leader" onclick="selectReportAudience('leader')">👔 直系领导</div>
+                  <div class="report-option" data-audience="client" onclick="selectReportAudience('client')">🤝 甲方</div>
+                  <div class="report-option" data-audience="teacher" onclick="selectReportAudience('teacher')">🎓 老师</div>
+                </div>
+              </div>
+              <div class="report-setting">
+                <div class="report-label">碎碎念（做了什么/遇到什么/下一步）</div>
+                <textarea id="reportInput" placeholder="把这周做的事、遇到的问题、下一步计划随便写，越碎越好，AI帮你整理成精简汇报..." rows="8"></textarea>
+              </div>
+              <button class="report-generate-btn" onclick="generateReport()">✨ 生成精简汇报</button>
+            </div>
+            <div class="card">
+              <div class="card-head">📜 历史汇报 <span class="m-count" id="reportHistoryCount"></span></div>
+              <div class="report-history" id="reportHistory"></div>
+            </div>
+          </div>
+          <div class="money-right" style="width:calc(100% - 360px)">
+            <div class="card" id="reportResultCard">
+              <div class="card-head">📝 汇报结果 <small id="reportResultTitle">在左边填写后点生成</small>
+                <button id="reportExportBtn" style="display:none;float:right;font-size:12px;padding:4px 12px;background:linear-gradient(135deg,var(--pink-deep),#b48ed9);color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:700" onclick="exportReport()">📥 导出MD</button>
+              </div>
+              <div class="report-result" id="reportResult">
+                <div style="text-align:center;color:var(--muted);padding:60px 20px;font-size:13px;line-height:1.8">
+                  选择汇报类型和对象<br>
+                  在左边输入碎碎念（做了什么、遇到什么问题、下一步计划）<br>
+                  点"✨ 生成精简汇报"<br>
+                  <span style="color:var(--pink-deep);font-weight:700">AI会参考工作SOP的模板，把"做了一大堆"翻译成"做出了什么"</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+<!-- 📚 百川智库 -->
       <section id="module-baichuan" class="view">
         <div class="page-head">
           <div class="page-title">📚 百川智库</div>
@@ -388,23 +470,311 @@
         </div>
       </section>
 
-      <!-- ✅ 待办清单 -->
+            <!-- 📅 日计划台 -->
+      <section id="module-daily" class="view">
+        <div class="daily-header">
+          <div class="daily-date">
+            <div class="daily-date-num" id="dailyDateNum">--</div>
+            <div class="daily-date-text"><span id="dailyWeekday">--</span><br><span id="dailyMonth">--</span></div>
+          </div>
+          <div class="daily-progress">
+            <div class="daily-progress-label">今日完成进度 <span id="dailyProgressText">0/0</span></div>
+            <div class="daily-progress-bar"><div class="daily-progress-fill" id="dailyProgressFill" style="width:0%"></div></div>
+          </div>
+        </div>
+        <div class="money-layout">
+          <div class="money-left" style="width:360px">
+            <div class="card">
+              <div class="card-head">➕ 添加今日任务</div>
+              <div class="daily-add-form">
+                <input type="text" id="dailyInput" placeholder="要做什么？回车快速添加..." onkeydown="if(event.key==='Enter')addDailyTask()">
+                <div class="daily-add-row">
+                  <select id="dailyPriority">
+                    <option value="high">🔴 高优先</option>
+                    <option value="medium" selected>🟡 中优先</option>
+                    <option value="low">🟢 低优先</option>
+                  </select>
+                  <select id="dailyDuration">
+                    <option value="15">15分钟</option>
+                    <option value="30" selected>30分钟</option>
+                    <option value="60">1小时</option>
+                    <option value="120">2小时</option>
+                  </select>
+                  <button onclick="addDailyTask()">添加</button>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-head">📋 今日任务 <span class="m-count" id="dailyTaskCount"></span></div>
+              <div class="daily-task-list" id="dailyTaskList"></div>
+            </div>
+          </div>
+          <div class="money-right" style="width:calc(100% - 380px)">
+            <div class="card">
+              <div class="card-head">⏰ 时间轴安排 <small>按预计时长自动排布</small></div>
+              <div class="daily-timeline" id="dailyTimeline"></div>
+            </div>
+            <div class="card">
+              <div class="card-head">💬 AI说真话</div>
+              <div class="daily-truth" id="dailyTruth">
+                <div style="text-align:center;color:var(--muted);padding:24px;font-size:13px">添加任务后AI会给你实话实说～</div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-head">📝 今日复盘</div>
+              <textarea id="dailyReview" placeholder="今天做得怎么样？有什么收获和不足？写下来明天会更好～" rows="3" onchange="saveDailyReview()"></textarea>
+            </div>
+          </div>
+        </div>
+      </section>
+
+<!-- ✅ 待办清单 -->
       <section id="module-todo" class="view">
-        <div class="empty-state">
-          <div class="empty-icon">✅</div>
-          <div class="empty-title">待办清单</div>
-          <div class="empty-desc">今日待办、全部任务、完成打卡、优先级管理<br>事情一件一件搞定～</div>
-          <div class="empty-tag">🚧 正在搭建中</div>
+        <div class="todo-stats">
+          <div class="todo-stat-card">
+            <div class="todo-stat-num" id="todoTotal">0</div>
+            <div class="todo-stat-label">全部</div>
+          </div>
+          <div class="todo-stat-card">
+            <div class="todo-stat-num" id="todoPending">0</div>
+            <div class="todo-stat-label">待完成</div>
+          </div>
+          <div class="todo-stat-card">
+            <div class="todo-stat-num" id="todoDone">0</div>
+            <div class="todo-stat-label">已完成</div>
+          </div>
+          <div class="todo-stat-card">
+            <div class="todo-stat-num" id="todoToday">0</div>
+            <div class="todo-stat-label">今日到期</div>
+          </div>
+        </div>
+        <div class="todo-add-bar">
+          <input type="text" id="todoInput" placeholder="要做什么？回车快速添加..." onkeydown="if(event.key==='Enter')addTodo()">
+          <select id="todoPriority">
+            <option value="high">🔴 高优先级</option>
+            <option value="medium" selected>🟡 中优先级</option>
+            <option value="low">🟢 低优先级</option>
+          </select>
+          <select id="todoCategory">
+            <option value="work">💼 工作</option>
+            <option value="study">📖 学习</option>
+            <option value="life">🏠 生活</option>
+            <option value="other">📌 其他</option>
+          </select>
+          <input type="date" id="todoDueDate" style="width:140px">
+          <button onclick="addTodo()">➕ 添加</button>
+        </div>
+        <div class="card">
+          <div class="card-head">📋 待办列表 <span class="m-count" id="todoListCount"></span></div>
+          <div class="todo-list" id="todoList"></div>
         </div>
       </section>
 
       <!-- ⚙️ 设置 -->
       <section id="module-settings" class="view">
-        <div class="empty-state">
-          <div class="empty-icon">⚙️</div>
-          <div class="empty-title">设置</div>
-          <div class="empty-desc">换头像、换背景、主题切换、数据备份/导出、AI API配置<br>个性化你的工作台～</div>
-          <div class="empty-tag">🚧 正在搭建中</div>
+        <div class="settings-layout">
+          <!-- 左侧：设置分类导航 -->
+          <div class="settings-nav">
+            <div class="settings-nav-item active" data-tab="profile" onclick="switchSettingsTab('profile')">👤 个人信息</div>
+            <div class="settings-nav-item" data-tab="appearance" onclick="switchSettingsTab('appearance')">🎨 外观设置</div>
+            <div class="settings-nav-item" data-tab="data" onclick="switchSettingsTab('data')">💾 数据管理</div>
+            <div class="settings-nav-item" data-tab="preference" onclick="switchSettingsTab('preference')">⚙️ 模块偏好</div>
+            <div class="settings-nav-item" data-tab="about" onclick="switchSettingsTab('about')">ℹ️ 关于</div>
+          </div>
+
+          <!-- 右侧：设置内容 -->
+          <div class="settings-content">
+            <!-- 个人信息 -->
+            <div class="settings-tab active" id="settings-profile">
+              <div class="card">
+                <div class="card-head">👤 个人信息</div>
+                <div class="setting-row">
+                  <div class="setting-label">头像</div>
+                  <div class="setting-control">
+                    <button class="setting-btn" onclick="openPersonalize()">更换头像</button>
+                  </div>
+                </div>
+                <div class="setting-row">
+                  <div class="setting-label">背景图</div>
+                  <div class="setting-control">
+                    <button class="setting-btn" onclick="openPersonalize()">更换背景</button>
+                  </div>
+                </div>
+                <div class="setting-row">
+                  <div class="setting-label">应用图标</div>
+                  <div class="setting-control">
+                    <button class="setting-btn" onclick="openIconPicker()">更换图标</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 外观设置 -->
+            <div class="settings-tab" id="settings-appearance">
+              <div class="card">
+                <div class="card-head">🎨 外观设置</div>
+                <div class="setting-row">
+                  <div class="setting-label">主题色</div>
+                  <div class="setting-control">
+                    <div class="theme-picker">
+                      <div class="theme-dot theme-pink active" style="background:linear-gradient(135deg,#db7093,#b48ed9)" onclick="setTheme('pink')" title="粉紫"></div>
+                      <div class="theme-dot theme-blue" style="background:linear-gradient(135deg,#74b9ff,#a29bfe)" onclick="setTheme('blue')" title="蓝紫"></div>
+                      <div class="theme-dot theme-green" style="background:linear-gradient(135deg,#55efc4,#81ecec)" onclick="setTheme('green')" title="青绿"></div>
+                      <div class="theme-dot theme-orange" style="background:linear-gradient(135deg,#ffa502,#ff6348)" onclick="setTheme('orange')" title="暖橙"></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="setting-row">
+                  <div class="setting-label">毛玻璃透明度</div>
+                  <div class="setting-control">
+                    <input type="range" id="glassOpacity" min="50" max="95" value="75" onchange="setGlassOpacity(this.value)">
+                    <span id="glassOpacityValue">75%</span>
+                  </div>
+                </div>
+                <div class="setting-row">
+                  <div class="setting-label">字体大小</div>
+                  <div class="setting-control">
+                    <select id="fontSize" onchange="setFontSize(this.value)">
+                      <option value="small">小</option>
+                      <option value="medium" selected>中</option>
+                      <option value="large">大</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 数据管理 -->
+            <div class="settings-tab" id="settings-data">
+              <div class="card">
+                <div class="card-head">💾 数据管理</div>
+                <div class="setting-row">
+                  <div class="setting-label">导出所有数据</div>
+                  <div class="setting-control">
+                    <button class="setting-btn" onclick="exportAllData()">📤 导出JSON备份</button>
+                  </div>
+                </div>
+                <div class="setting-row">
+                  <div class="setting-label">导入数据</div>
+                  <div class="setting-control">
+                    <button class="setting-btn" onclick="document.getElementById('importDataInput').click()">📥 从备份恢复</button>
+                    <input type="file" id="importDataInput" accept=".json" style="display:none" onchange="importAllData(event)">
+                  </div>
+                </div>
+                <div class="setting-row">
+                  <div class="setting-label">清空模块数据</div>
+                  <div class="setting-control">
+                    <select id="clearModuleSelect">
+                      <option value="">选择模块...</option>
+                      <option value="money">存钱记账</option>
+                      <option value="health">吃饭健康</option>
+                      <option value="inspire">灵感捕捉</option>
+                      <option value="decision">决策顾问</option>
+                      <option value="report">工作汇报台</option>
+                      <option value="daily">日计划台</option>
+                      <option value="todo">Weh Tasks</option>
+                    </select>
+                    <button class="setting-btn setting-btn-danger" onclick="clearModuleData()">🗑️ 清空</button>
+                  </div>
+                </div>
+                <div class="setting-row">
+                  <div class="setting-label">重置全部数据</div>
+                  <div class="setting-control">
+                    <button class="setting-btn setting-btn-danger" onclick="resetAllData()">⚠️ 重置全部</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 模块偏好 -->
+            <div class="settings-tab" id="settings-preference">
+              <div class="card">
+                <div class="card-head">⚙️ 模块偏好</div>
+                <div class="setting-subtitle">💰 存钱记账</div>
+                <div class="setting-row">
+                  <div class="setting-label">默认月预算</div>
+                  <div class="setting-control">
+                    <input type="number" id="prefMoneyBudget" value="3000" onchange="savePreference()">
+                  </div>
+                </div>
+                <div class="setting-row">
+                  <div class="setting-label">默认固定存款</div>
+                  <div class="setting-control">
+                    <input type="number" id="prefMoneySave" value="600" onchange="savePreference()">
+                  </div>
+                </div>
+                <div class="setting-row">
+                  <div class="setting-label">账单日（每月几号）</div>
+                  <div class="setting-control">
+                    <input type="number" id="prefMoneyCycle" value="20" min="1" max="28" onchange="savePreference()">
+                  </div>
+                </div>
+                <div class="setting-subtitle">🍱 吃饭健康</div>
+                <div class="setting-row">
+                  <div class="setting-label">每周饮品预算</div>
+                  <div class="setting-control">
+                    <input type="number" id="prefHealthBudget" value="100" onchange="savePreference()">
+                  </div>
+                </div>
+                <div class="setting-row">
+                  <div class="setting-label">每周目标杯数</div>
+                  <div class="setting-control">
+                    <input type="number" id="prefHealthGoal" value="7" onchange="savePreference()">
+                  </div>
+                </div>
+                <div class="setting-subtitle">📅 日计划台</div>
+                <div class="setting-row">
+                  <div class="setting-label">每日开始时间</div>
+                  <div class="setting-control">
+                    <select id="prefDailyStart" onchange="savePreference()">
+                      <option value="8">8:00</option>
+                      <option value="9" selected>9:00</option>
+                      <option value="10">10:00</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 关于 -->
+            <div class="settings-tab" id="settings-about">
+              <div class="card">
+                <div class="card-head">ℹ️ 关于</div>
+                <div class="about-section">
+                  <div class="about-logo">✨</div>
+                  <div class="about-name">Weh Atelier</div>
+                  <div class="about-sub">🐾 个人AI工作室</div>
+                  <div class="about-version">版本 v1.0.0</div>
+                </div>
+                <div class="setting-row">
+                  <div class="setting-label">项目地址</div>
+                  <div class="setting-control">
+                    <a href="https://github.com/WenXue-10/Weh-Workbench" target="_blank" class="setting-link">GitHub 仓库</a>
+                  </div>
+                </div>
+                <div class="setting-row">
+                  <div class="setting-label">线上地址</div>
+                  <div class="setting-control">
+                    <a href="https://WenXue-10.github.io/Weh-Workbench/" target="_blank" class="setting-link">在线访问</a>
+                  </div>
+                </div>
+                <div class="about-changelog">
+                  <div class="about-changelog-title">📝 更新日志</div>
+                  <div class="about-changelog-item">
+                    <div class="about-changelog-version">v1.0.0</div>
+                    <div class="about-changelog-date">2026-09-05</div>
+                    <ul>
+                      <li>完成视频里5个工作台：存钱台、饮食台、杠精台、汇报台、日计划台</li>
+                      <li>完成灵感捕捉、Weh Tasks、4个知识库模块</li>
+                      <li>三模块联动：灵感→Weh Tasks→日计划台</li>
+                      <li>背景图/头像/图标自定义，主题跟随背景</li>
+                      <li>全局搜索功能</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
