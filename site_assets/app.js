@@ -2640,6 +2640,8 @@ function go(view){
   });
   var titleEl = document.getElementById("pageTitle");
   if(titleEl) titleEl.textContent = TITLES[view] || view;
+  // SCM Career模块底栏显示控制
+  document.body.classList.toggle("career-active", view==="career");
   window.scrollTo({top:0});
 }
 document.addEventListener("click", function(e){
