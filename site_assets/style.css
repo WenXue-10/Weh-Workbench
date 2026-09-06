@@ -734,20 +734,20 @@ a{color:var(--pink-deep);text-decoration:none}
 .sub-tab-bar{
   display:none;
   position:fixed;
-  bottom:16px;
+  bottom:28px;
   left:50%;
   transform:translateX(-50%);
-  height:58px;
-  padding:0 12px;
+  height:52px;
+  padding:0 10px;
   background:var(--card-bg);
   backdrop-filter:blur(var(--blur-radius)) saturate(1.3);
   -webkit-backdrop-filter:blur(var(--blur-radius)) saturate(1.3);
   border:1px solid var(--line);
-  border-radius:20px;
-  box-shadow:var(--shadow);
+  border-radius:18px;
+  box-shadow:0 8px 32px rgba(0,0,0,0.1);
   align-items:center;
   justify-content:center;
-  gap:6px;
+  gap:8px;
   z-index:100;
 }
 body.career-active .sub-tab-bar{display:flex}
@@ -755,10 +755,10 @@ body.career-active .sub-tab-bar{display:flex}
 .sub-tab{
   display:flex;
   align-items:center;
-  gap:5px;
-  padding:9px 16px;
-  border-radius:14px;
-  font-size:12.5px;
+  gap:6px;
+  padding:8px 14px;
+  border-radius:12px;
+  font-size:12px;
   font-weight:600;
   color:var(--muted);
   cursor:pointer;
@@ -767,13 +767,13 @@ body.career-active .sub-tab-bar{display:flex}
   user-select:none;
 }
 .sub-tab:hover{
-  background:color-mix(in srgb, var(--pink-deep) 8%, transparent);
+  background:color-mix(in srgb, var(--pink-deep) 6%, transparent);
   color:var(--text);
 }
 .sub-tab.active{
-  background:linear-gradient(135deg,var(--pink),var(--purple));
-  color:#fff;
-  box-shadow:0 4px 14px rgba(219,112,147,0.3);
+  background:color-mix(in srgb, var(--pink-deep) 15%, var(--card-bg));
+  color:var(--pink-deep);
+  box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--pink-deep) 20%, transparent);
 }
 
 /* 子模块列表样式 */
@@ -819,17 +819,17 @@ body.career-active .sub-tab-bar{display:flex}
 /* 响应式 */
 @media(max-width:900px){
   .sub-tab-bar{
-    bottom:12px;
-    left:12px;
-    right:12px;
+    bottom:16px;
+    left:16px;
+    right:16px;
     transform:none;
-    height:52px;
+    height:48px;
     padding:0 8px;
     gap:4px;
     overflow-x:auto;
     justify-content:flex-start;
   }
-  .sub-tab{padding:8px 12px;font-size:11.5px;flex-shrink:0}
-  .career-sub-content{padding-bottom:76px}
+  .sub-tab{padding:7px 12px;font-size:11px;flex-shrink:0}
+  .career-sub-content{padding-bottom:80px}
 }
 
