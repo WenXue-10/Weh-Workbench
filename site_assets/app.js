@@ -2744,10 +2744,144 @@ document.addEventListener("keydown", function(e){ if(e.key==="Escape") closeModa
       var compTotal = 0;
       (COMPS||[]).forEach(function(g){ (g.groups||[]).forEach(function(c){ compTotal += ((c.name||"").split(/[、，,]/).filter(function(x){return x.trim()}).length); }); });
       if(document.getElementById("companyCount")) document.getElementById("companyCount").textContent = compTotal;
+      // 初始化底栏子模块
+      initCareerSubTabs();
       // 旧版求职首页的渲染
       if(document.getElementById("statJobs")){
         renderHome(); renderJobs(); renderCompanies(); renderTimeline(); renderResumes();
       }
   }catch(e){ console.log("求职模块渲染跳过:", e.message); }
+
+
+/* ===== SCM Career 底栏子模块导航 ===== */
+function initCareerSubTabs(){
+  var tabs = document.querySelectorAll('#module-career .sub-tab');
+  if(!tabs.length) return;
+  tabs.forEach(function(tab){
+    tab.addEventListener('click', function(){
+      var sub = this.getAttribute('data-sub');
+      switchCareerSub(sub);
+    });
+  });
+  // 渲染各子模块内容
+  renderCareerJobs();
+  renderCareerResumes();
+  renderCareerKbCategory();
+}
+
+function switchCareerSub(sub){
+  // 切换tab激活状态
+  document.querySelectorAll('#module-career .sub-tab').forEach(function(t){
+    t.classList.toggle('active', t.getAttribute('data-sub') === sub);
+  });
+  // 切换内容显示
+  document.querySelectorAll('#module-career .career-sub').forEach(function(el){
+    el.style.display = (el.id === 'career-sub-' + sub) ? '' : 'none';
+  });
+}
+
+function careerListItem(icon, title, sub, badge, onclick){
+  return '<div class="career-list-item" onclick="'+onclick+'">'
+    + '<div class="career-list-icon">'+icon+'</div>'
+    + '<div class="career-list-info">'
+    + '<div class="career-list-title">'+esc(title)+'</div>'
+    + (sub ? '<div class="career-list-sub">'+esc(sub)+'</div>' : '')
+    + '</div>'
+    + (badge ? '<div class="career-list-badge">'+esc(badge)+'</div>' : '')
+    + '</div>';
+}
+
+function renderCareerJobs(){
+  var listEl = document.getElementById('careerJobsList');
+  var countEl = document.getElementById('careerJobsCount');
+  if(!listEl) return;
+  if(!JOBS || !JOBS.length){
+    listEl.innerHTML = '<div class="career-list-empty">🐾 还没有搜集岗位，去知识库添加吧～</div>';
+    if(countEl) countEl.textContent = '';
+    return;
+  }
+  if(countEl) countEl.textContent = JOBS.length + ' 个';
+  var html = JOBS.map(function(j, i){
+    var badge = j.score + '分';
+    var sub = '📍 ' + (j.city||'') + ' · 💰 ' + (j.salary||'') + ' · ' + (j.statusTxt||'');
+    return careerListItem('🐾', j.company + ' · ' + j.pos, sub, badge, 'openJob('+i+')');
+  }).join('');
+  listEl.innerHTML = html;
+}
+
+function renderCareerResumes(){
+  // 先初始化RESUME_LIST（openResume依赖它）
+  RESUME_LIST = [];
+  (RESUMES.general||[]).forEach(function(r){ r._i = RESUME_LIST.length; RESUME_LIST.push(r); });
+  (RESUMES.custom||[]).forEach(function(cg){ (cg.items||[]).forEach(function(r){ r._i = RESUME_LIST.length; RESUME_LIST.push(r); }); });
+  // 通用简历
+  var genEl = document.getElementById('careerResumesGeneral');
+  if(genEl){
+    if(!RESUMES.general || !RESUMES.general.length){
+      genEl.innerHTML = '<div class="career-list-empty">📄 还没有通用简历模板</div>';
+    } else {
+      genEl.innerHTML = RESUMES.general.map(function(r, i){
+        return careerListItem('📄', r.name, r.desc, '', 'openResume('+i+')');
+      }).join('');
+    }
+  }
+  // 定制简历
+  var cusEl = document.getElementById('careerResumesCustom');
+  var cusCountEl = document.getElementById('careerResumesCustomCount');
+  if(cusEl){
+    var allCustom = [];
+    (RESUMES.custom||[]).forEach(function(cg){
+      (cg.items||[]).forEach(function(r){
+        allCustom.push({r:r, company:cg.company});
+      });
+    });
+    if(cusCountEl) cusCountEl.textContent = allCustom.length ? allCustom.length + ' 份' : '';
+    if(!allCustom.length){
+      cusEl.innerHTML = '<div class="career-list-empty">🎯 还没有定制简历，针对目标岗位生成吧～</div>';
+    } else {
+      cusEl.innerHTML = allCustom.map(function(item, i){
+        var r = item.r;
+        var idx = RESUMES.general.length + i;
+        return careerListItem('🎯', r.name, '💙 ' + item.company + ' · ' + (r.desc||''), '', 'openResume('+idx+')');
+      }).join('');
+    }
+  }
+}
+
+function renderCareerKbCategory(){
+  // 从KBS中找到对应分类并渲染
+  var categories = {
+    'careerInterviewList': '03_笔面试题库',
+    'careerReviewList': '04_实战复盘',
+    'careerSupplyChainList': '05_供应链知识库',
+    'careerCertList': '06_证书与附件',
+    'careerPersonalList': '08_个人资料库'
+  };
+  Object.keys(categories).forEach(function(elId){
+    var el = document.getElementById(elId);
+    if(!el) return;
+    var catName = categories[elId];
+    var kb = (KBS||[]).find(function(k){ return k.name && k.name.indexOf(catName) >= 0; });
+    if(!kb || !kb.groups || !kb.groups.length){
+      el.innerHTML = '<div class="career-list-empty">📂 这个分类还没有内容</div>';
+      return;
+    }
+    var allNotes = [];
+    kb.groups.forEach(function(g){
+      (g.notes||[]).forEach(function(n){ allNotes.push(n); });
+    });
+    if(!allNotes.length){
+      el.innerHTML = '<div class="career-list-empty">📂 这个分类还没有内容</div>';
+      return;
+    }
+    // 找到在KB_FLAT中的索引
+    el.innerHTML = allNotes.map(function(n){
+      var idx = KB_FLAT.indexOf(n);
+      var onclick = idx >= 0 ? 'openKbNote('+idx+')' : '';
+      return careerListItem(n.icon || '📄', n.title, '', '', onclick);
+    }).join('');
+  });
+}
+
   applyBg(); applyAv(); applyIcon();
 })();

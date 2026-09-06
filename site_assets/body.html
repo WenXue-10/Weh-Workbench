@@ -422,15 +422,79 @@
           <div class="page-title">💼 求职小窝</div>
           <div class="page-sub">2027届秋招全周期管理 · 跟SCM-Career知识库打通</div>
         </div>
-        <div class="stat-grid">
-          <div class="stat-card p1"><div class="em">🐾</div><div class="lab">岗位总数</div><div class="num" id="jobCount">0</div></div>
-          <div class="stat-card p2"><div class="em">📄</div><div class="lab">简历版本</div><div class="num" id="resumeCount">0</div></div>
-          <div class="stat-card p3"><div class="em">📚</div><div class="lab">知识库笔记</div><div class="num" id="kbCount">0</div></div>
-          <div class="stat-card p4"><div class="em">🏢</div><div class="lab">关注公司</div><div class="num" id="companyCount">0</div></div>
+        <!-- 子模块内容区 -->
+        <div class="career-sub-content">
+          <!-- 概览 -->
+          <div class="career-sub" id="career-sub-overview">
+            <div class="stat-grid">
+              <div class="stat-card p1"><div class="em">🐾</div><div class="lab">岗位总数</div><div class="num" id="jobCount">0</div></div>
+              <div class="stat-card p2"><div class="em">📄</div><div class="lab">简历版本</div><div class="num" id="resumeCount">0</div></div>
+              <div class="stat-card p3"><div class="em">📚</div><div class="lab">知识库笔记</div><div class="num" id="kbCount">0</div></div>
+              <div class="stat-card p4"><div class="em">🏢</div><div class="lab">关注公司</div><div class="num" id="companyCount">0</div></div>
+            </div>
+            <div class="card">
+              <div class="card-head">📚 知识库分类</div>
+              <div class="kb-grid" id="kbGrid"></div>
+            </div>
+          </div>
+          <!-- 岗位搜集 -->
+          <div class="career-sub" id="career-sub-jobs" style="display:none">
+            <div class="card">
+              <div class="card-head">🐾 岗位搜集与背调 <span class="m-count" id="careerJobsCount"></span></div>
+              <div class="career-list" id="careerJobsList"></div>
+            </div>
+          </div>
+          <!-- 简历库 -->
+          <div class="career-sub" id="career-sub-resumes" style="display:none">
+            <div class="card">
+              <div class="card-head">📄 通用简历模板</div>
+              <div class="career-list" id="careerResumesGeneral"></div>
+            </div>
+            <div class="card">
+              <div class="card-head">🎯 定制简历 <span class="m-count" id="careerResumesCustomCount"></span></div>
+              <div class="career-list" id="careerResumesCustom"></div>
+            </div>
+          </div>
+          <!-- 笔面试 -->
+          <div class="career-sub" id="career-sub-interview" style="display:none">
+            <div class="card">
+              <div class="card-head">✍️ 笔面试题库</div>
+              <div class="career-list" id="careerInterviewList"></div>
+            </div>
+          </div>
+          <!-- 复盘 -->
+          <div class="career-sub" id="career-sub-review" style="display:none">
+            <div class="card">
+              <div class="card-head">🪞 实战复盘</div>
+              <div class="career-list" id="careerReviewList"></div>
+            </div>
+          </div>
+          <!-- 资料库 -->
+          <div class="career-sub" id="career-sub-materials" style="display:none">
+            <div class="card">
+              <div class="card-head">📖 供应链知识库</div>
+              <div class="career-list" id="careerSupplyChainList"></div>
+            </div>
+            <div class="card">
+              <div class="card-head">🎓 证书与附件</div>
+              <div class="career-list" id="careerCertList"></div>
+            </div>
+            <div class="card">
+              <div class="card-head">👤 个人资料库</div>
+              <div class="career-list" id="careerPersonalList"></div>
+            </div>
+          </div>
         </div>
-        <div class="card">
-          <div class="card-head">📚 知识库分类</div>
-          <div class="kb-grid" id="kbGrid"></div>
+        <!-- 底栏子模块导航 -->
+        <div class="sub-tab-bar">
+          <div class="sub-tab active" data-sub="overview">📊 概览</div>
+          <div class="sub-tab" data-sub="jobs">🐾 岗位</div>
+          <div class="sub-tab" data-sub="resumes">📄 简历</div>
+          <div class="sub-tab" data-sub="interview">✍️ 笔面试</div>
+          <div class="sub-tab" data-sub="review">🪞 复盘</div>
+          <div class="sub-tab" data-sub="materials">📚 资料</div>
+        </div>
+      </section>
         </div>
       </section>
 

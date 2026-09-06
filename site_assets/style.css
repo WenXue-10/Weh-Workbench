@@ -723,3 +723,98 @@ a{color:var(--pink-deep);text-decoration:none}
   .settings-nav{width:100%;flex-direction:row;overflow-x:auto}
   .settings-nav-item{white-space:nowrap}
 }
+
+
+/* ===== SCM Career 底栏子模块导航 ===== */
+.career-sub-content{padding-bottom:80px;min-height:calc(100vh - 200px)}
+.career-sub{animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+.sub-tab-bar{
+  position:fixed;
+  bottom:0;
+  left:220px;
+  right:0;
+  height:64px;
+  background:rgba(255,255,255,0.72);
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+  border-top:1px solid rgba(255,255,255,0.5);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  padding:0 24px;
+  z-index:100;
+  box-shadow:0 -4px 20px rgba(0,0,0,0.06);
+}
+.sub-tab{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  padding:10px 20px;
+  border-radius:14px;
+  font-size:13px;
+  font-weight:600;
+  color:var(--muted);
+  cursor:pointer;
+  transition:all .25s ease;
+  white-space:nowrap;
+  user-select:none;
+}
+.sub-tab:hover{
+  background:rgba(255,255,255,0.6);
+  color:var(--text);
+  transform:translateY(-2px);
+}
+.sub-tab.active{
+  background:linear-gradient(135deg,var(--pink),var(--purple));
+  color:#fff;
+  box-shadow:0 4px 16px rgba(219,112,147,0.35);
+  transform:translateY(-2px);
+}
+
+/* 子模块列表样式 */
+.career-list{display:flex;flex-direction:column;gap:8px}
+.career-list-item{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:14px 18px;
+  background:rgba(255,255,255,0.55);
+  border-radius:14px;
+  cursor:pointer;
+  transition:all .2s ease;
+  border:1px solid rgba(255,255,255,0.4);
+}
+.career-list-item:hover{
+  background:rgba(255,255,255,0.8);
+  transform:translateX(4px);
+  box-shadow:0 4px 12px rgba(0,0,0,0.06);
+}
+.career-list-icon{font-size:22px;flex-shrink:0}
+.career-list-info{flex:1;min-width:0}
+.career-list-title{font-size:14px;font-weight:700;color:var(--text);margin-bottom:2px}
+.career-list-sub{font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.career-list-badge{
+  flex-shrink:0;
+  padding:4px 10px;
+  border-radius:8px;
+  font-size:11px;
+  font-weight:700;
+  background:rgba(219,112,147,0.12);
+  color:var(--pink-deep);
+}
+.career-list-empty{
+  text-align:center;
+  padding:40px 20px;
+  color:var(--muted);
+  font-size:13px;
+}
+
+/* 响应式 */
+@media(max-width:900px){
+  .sub-tab-bar{left:0;height:56px;padding:0 12px;gap:4px}
+  .sub-tab{padding:8px 12px;font-size:12px}
+  .career-sub-content{padding-bottom:70px}
+}
