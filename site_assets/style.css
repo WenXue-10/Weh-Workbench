@@ -714,6 +714,9 @@ a{color:var(--pink-deep);text-decoration:none}
 .setting-control input[type="range"]{width:120px;accent-color:var(--pink-deep)}
 .setting-btn{padding:8px 16px;border:1px solid var(--line);border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;transition:.15s;background:rgba(255,255,255,.8);color:var(--text)}
 .setting-btn:hover{border-color:var(--pink-deep);background:rgba(219,112,147,.08)}
+.setting-hint{font-size:12px;color:var(--muted);line-height:1.7;padding:4px 0 8px}
+.sync-input{width:230px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-size:12px;background:rgba(255,255,255,.85);outline:none;color:var(--text)}
+.sync-input:focus{border-color:var(--pink-deep)}
 .setting-btn-danger{border-color:#e05050;color:#e05050}
 .setting-btn-danger:hover{background:rgba(224,80,80,.08);border-color:#e05050}
 .setting-link{color:var(--pink-deep);font-size:12px;font-weight:600;text-decoration:none}

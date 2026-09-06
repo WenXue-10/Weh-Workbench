@@ -724,6 +724,9 @@ a{color:var(--pink-deep);text-decoration:none}
 .setting-control input[type="range"]{width:120px;accent-color:var(--pink-deep)}
 .setting-btn{padding:8px 16px;border:1px solid var(--line);border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;transition:.15s;background:rgba(255,255,255,.8);color:var(--text)}
 .setting-btn:hover{border-color:var(--pink-deep);background:rgba(219,112,147,.08)}
+.setting-hint{font-size:12px;color:var(--muted);line-height:1.7;padding:4px 0 8px}
+.sync-input{width:230px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-size:12px;background:rgba(255,255,255,.85);outline:none;color:var(--text)}
+.sync-input:focus{border-color:var(--pink-deep)}
 .setting-btn-danger{border-color:#e05050;color:#e05050}
 .setting-btn-danger:hover{background:rgba(224,80,80,.08);border-color:#e05050}
 .setting-link{color:var(--pink-deep);font-size:12px;font-weight:600;text-decoration:none}
@@ -2923,6 +2926,7 @@ body.sop-active .sub-tab-bar{display:flex}
             <div class="settings-nav-item active" data-tab="profile" onclick="switchSettingsTab('profile')">👤 个人信息</div>
             <div class="settings-nav-item" data-tab="appearance" onclick="switchSettingsTab('appearance')">🎨 外观设置</div>
             <div class="settings-nav-item" data-tab="data" onclick="switchSettingsTab('data')">💾 数据管理</div>
+            <div class="settings-nav-item" data-tab="sync" onclick="switchSettingsTab('sync')">☁️ 云同步</div>
             <div class="settings-nav-item" data-tab="preference" onclick="switchSettingsTab('preference')">⚙️ 模块偏好</div>
             <div class="settings-nav-item" data-tab="about" onclick="switchSettingsTab('about')">ℹ️ 关于</div>
           </div>
@@ -3040,6 +3044,47 @@ body.sop-active .sub-tab-bar{display:flex}
                   <div class="setting-label">重置全部数据</div>
                   <div class="setting-control">
                     <button class="setting-btn setting-btn-danger" onclick="resetAllData()">⚠️ 重置全部</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 云同步 -->
+            <div class="settings-tab" id="settings-sync">
+              <div class="card">
+                <div class="card-head">☁️ Gist 云同步</div>
+                <div class="setting-hint">数据默认只存在浏览器本地，换设备/浏览器看不到。配置 GitHub Gist 后，可在电脑和手机之间同步数据。Token 只存在本浏览器，请勿泄露或提交到代码仓库。</div>
+                <div class="setting-row">
+                  <div class="setting-label">GitHub Token</div>
+                  <div class="setting-control">
+                    <input type="password" id="syncToken" placeholder="ghp_...（只勾 gist 权限）" class="sync-input">
+                  </div>
+                </div>
+                <div class="setting-row">
+                  <div class="setting-label">Gist ID</div>
+                  <div class="setting-control">
+                    <input type="text" id="syncGistId" placeholder="留空则自动创建" class="sync-input">
+                  </div>
+                </div>
+                <div class="setting-row">
+                  <div class="setting-label">自动同步</div>
+                  <div class="setting-control">
+                    <input type="checkbox" id="syncAuto" onchange="saveSyncConfig()" style="width:16px;height:16px;accent-color:var(--pink-deep)">
+                    <span style="font-size:12px;color:var(--muted)">修改后自动上传 · 打开页面自动下载</span>
+                  </div>
+                </div>
+                <div class="setting-row">
+                  <div class="setting-label">同步状态</div>
+                  <div class="setting-control">
+                    <span id="syncStatus" style="font-size:12px;color:var(--muted)">未配置</span>
+                  </div>
+                </div>
+                <div class="setting-row">
+                  <div class="setting-label">操作</div>
+                  <div class="setting-control">
+                    <button class="setting-btn" onclick="syncConnect()">🔗 保存并连接</button>
+                    <button class="setting-btn" id="syncBtn-upload" onclick="syncNow('upload')">☁️ 上传</button>
+                    <button class="setting-btn" id="syncBtn-download" onclick="syncNow('download')">📥 下载</button>
                   </div>
                 </div>
               </div>
@@ -3166,7 +3211,7 @@ body.sop-active .sub-tab-bar{display:flex}
 
 <script>
 window.SITE_DATA = {
- "updated": "2026-09-07 00:24",
+ "updated": "2026-09-07 01:48",
  "stats": {
   "jobs": 32,
   "rec": 0,
@@ -5503,7 +5548,7 @@ window.SITE_DATA = {
       {
        "title": "2027届应届生毕业前规划_求职考公考研时间线_2026-09-06",
        "icon": "📄",
-       "html": "<blockquote>\n<p>2027 届应届生毕业前完整规划，精确到月份，覆盖求职/考公/考研三类。9 月是真正的分水岭——最怕的不是没准备，而是没想清楚走哪条路。</p>\n</blockquote>\n<h2>速读（核心结论）</h2>\n<ol>\n<li><strong>9 月第一件事：确定主线和退路</strong>——别找工作/考公/考研都想试，最后三不沾；方向越具体（具体到城市+行业+岗位），后面准备越容易</li>\n<li><strong>求职三件事（9 月起）</strong>：改好第一版简历每天投二三十份边投边改 + 建立投递进度表防错过 + 先拿小公司练面试最后面心仪企业</li>\n<li><strong>考研 9 月定死</strong>：院校/专业课/资料/复习计划别再犹豫，尤其专业课别想着最后突击；同时建议投几份秋招简历，掂量专业还值不值得考研</li>\n<li><strong>至少拿 3 个 offer 再躺平</strong>——每年有应届生被公司毁约；对比 offer 别光盯薪资，看工作内容/成长空间/领导风格/五险一金/加班</li>\n<li><strong>1 月是春招准备黄金期</strong>——复盘秋招+补充岗位相关经历（做账号/作品集/项目），别浪费时间考没用的证</li>\n</ol>\n<h2>正文：按月时间线</h2>\n<h3>9 月（分水岭，确定主线）</h3>\n<p><strong>求职</strong>：\n- 先定行业/岗位/城市——别只说\"进大厂年入百万\"，要具体到\"北京的软件开发、上海的游戏策划、杭州的互联网运营、能源电力通信金融央国企\"\n- 金九银十，但七八月份大厂已开提前批\n- <strong>三件事</strong>：\n  1. 改好第一版简历，每天投二三十份，边投边改——投运营突出运营案例，投技术突出项目和技术栈，别一份简历投遍所有岗\n  2. 建立投递进度表（公司/岗位/笔试/面试结果），防错过测评面试，方便复盘\n  3. 开始练面试——先拿小公司练手，自我介绍/项目经历/实习经历练熟，最后面特别想进的\n- 部分央国企网申卡四六级，12 月还有一次机会</p>\n<p><strong>考公</strong>：\n- 先确定主抓哪些考试（国考/省考/选调生/事业单位）\n- 国考 67% 岗位只要应届生；选调生有党员/学生干部/校级及以上荣誉硬性要求（很多条件不是临时能补的）\n- 选岗：研究近三年招考人数、专业限制、竞争比例、地区，别只盯工资高的（报录比基本百里挑一）\n- 建议每天抽 1 小时海投找工作保底</p>\n<p><strong>考研</strong>：\n- 9 月是黄金复习期，重点打基础\n- 别再犹豫考哪个学校，院校/专业课/资料/复习计划定死——尤其专业课别想着最后突击两个月\n- <strong>特别建议</strong>：去看看秋招投几份简历，了解专业最新就业情况，掂量专业还值不值得考研；读研提升不大就趁早转找工作</p>\n<h3>10 月（关键选择期，稳住心态）</h3>\n<p><strong>求职</strong>：\n- 没拿到 offer 别放弃，每天投 30 份（一个月近 1000 家，你可以失败 999 次，面试官只要失败一次你就有工作）\n- 拿到 offer 别直接躺平（除非香到无法拒绝）——<strong>至少拿 3 个 offer 握选择权</strong>（每年有应届生被公司毁约）\n- 对比 offer 别光盯薪资：工作内容/成长空间/领导风格/五险一金/加班情况，拉表逐项对比排除</p>\n<p><strong>考公</strong>：\n- 国考通知发布，报名开始\n- 别扎堆热门岗，注意专业/学历/政治面貌/基层经历/应届生身份要求，<strong>选限制多竞争小的，避开三不限炮灰岗</strong>——岗位选得好比多考两三分更重要\n- 报完名盯紧资格审查结果和缴费确认时间</p>\n<p><strong>考研</strong>：\n- 报名开始，学校专业定下别来回换，核对报名信息\n- 猛攻专业课刷错题；基础不错就开始整套模拟卡时间适应考试节奏</p>\n<h3>11 月（查漏补缺）</h3>\n<p><strong>求职</strong>：\n- 秋招尾声，没拿到 offer 先分析失败原因（面试失败就练沟通表达，这时候简陋成功率很高）\n- 持续关注秋招补录、国企招聘信息（企业会放出一批补录岗位）</p>\n<p><strong>考公</strong>：\n- 国考冲刺，重点模拟考试把握时间提高正确率——特别是数量题，很多人不是不会是时间不够\n- <strong>稳定发挥比学新东西更重要</strong></p>\n<p><strong>考研</strong>：\n- 最后冲刺，查漏补缺，回归课本重点章节\n- 别频繁换资料，少看制造焦虑的经验帖</p>\n<h3>12 月（各种考试，秋招基本结束）</h3>\n<p><strong>求职</strong>：\n- 拿到 offer 别万事大吉，逐一确认 offer 细节（岗位/工作内容/薪资结构/工作地点/入职时间）\n- 提前搞定学校课程和毕业论文——每年有学生因挂科/延期毕业影响入职\n- 没拿到 offer 根据投递表复盘，全力准备春招</p>\n<p><strong>考公</strong>：国考大多 11 月底或 12 月初笔试\n<strong>考研</strong>：12 月下旬笔试\n- 考前最后阶段：刷真题保持手感，调整作息——拼的不是谁学得最多而是谁发挥最稳，别学崩了</p>\n<h3>1 月（可以休息，但提前准备）</h3>\n<p><strong>求职</strong>：\n- 秋招没满意 offer 的，1 月是<strong>准备春招黄金期</strong>\n- 先复盘秋招（简历为什么没人看、面试为什么失败），再补充有价值的经历：\n  - 想做运营就去做账号\n  - 想做设计就整理作品集\n  - 想做技术就完善项目\n- <strong>别浪费时间考一堆没用的证</strong>——最后半年最值钱的是和岗位直接相关的经历</p>\n<p><strong>考公</strong>：\n- 关注国考成绩，理想就准备面试\n- 没进面别放弃（后面还有省考/选调/事业单位）\n- 觉得机会不大就别把所有希望压在公务员上，每天投几份简历留退路</p>\n<p><strong>考研</strong>：\n- 初试结束短暂休息，然后准备复试（专业知识/英语自我介绍/常见面试问题/科研项目经历）\n- 感觉不确定的同步了解调剂和就业信息，别傻等</p>\n<h3>2 月（机会不等人）</h3>\n<p><strong>求职</strong>：\n- 重点关注<strong>春招提前批</strong>——很多企业春节前后就开放岗位，等开学就完了\n- 每天刷企业官网/招聘平台/学校就业网站，看到匹配马上投\n- 春招岗位招满就下，没秋招那么宽裕</p>\n<p><strong>考公</strong>：盯紧省考公告（省考不是全国一张卷，不同省份时间不同）</p>\n<h2>对文雪的针对性启示</h2>\n<ul>\n<li><strong>当前状态</strong>：2027 届供应链管理，秋招（供应链/采购/项目管理，优先济南及周边，央国企子公司+高潜力企业）与考研（本校管科）并行</li>\n<li><strong>9 月重点确认</strong>：秋招和考研的主线/退路是否明确？当前是并行，需明确主次和时间分配</li>\n<li><strong>求职三件事已有 scm 技能支持</strong>：scm-resume-customization（简历定制）、scm-job-matching（岗位匹配）、scm-interview-prep（面试准备）——正好对应视频里的\"改简历+投递表+练面试\"</li>\n<li><strong>央国企四六级</strong>：已过四级，无卡点</li>\n<li><strong>考研本校管科</strong>：专业课复习计划需定死，别犹豫；同时可投几份秋招简历了解就业市场</li>\n<li><strong>方向具体化</strong>：当前目标\"济南及周边+央国企子公司+高潜力企业\"已较具体，可进一步细化到行业（能源/电力/通信/金融/制造）</li>\n</ul>\n<h2>易混淆点 / 关键补充</h2>\n<ul>\n<li><strong>主线 ≠ 只做一件事</strong>：确定主线后，退路也要留（如考研为主但每天投几份简历保底），但不能三条线平均用力</li>\n<li><strong>投简历数量 ≠ 质量</strong>：每天二三十份是基准，但针对不同岗位优化简历更重要——一份简历投遍所有岗=无头苍蝇</li>\n<li><strong>春招提前批 ≠ 等开学</strong>：春节前后就开放，招满就下，比秋招节奏快</li>\n<li><strong>考证 ≠ 竞争力</strong>：最后半年最值钱的是岗位相关经历，不是证书数量</li>\n</ul>\n<h2>关联笔记</h2>\n<ul>\n<li>文雪-求职目标画像（SCM-Career 项目画像）</li>\n<li>今年效率是去年十倍_人机共创三步循环_2026-09-06（AI 时代求职的人机共创思路）</li>\n</ul>\n<h2>反思</h2>\n<ul>\n<li>视频的时间线框架可作为 SCM-Career 项目的月度规划参考，每月对照检查进度</li>\n</ul>\n<h2>行动项</h2>\n<ul>\n<li>[ ] 确认秋招/考研主线和退路，明确时间分配比例（优先级：高）</li>\n<li>[ ] 9 月求职三件事：简历第一版优化 + 投递进度表 + 小公司面试练手（用 scm 技能）（优先级：高）</li>\n<li>[ ] 考研：专业课复习计划定死，别再犹豫学校和资料（优先级：中）</li>\n</ul>"
+       "html": "<blockquote>\n<p>2027 届应届生毕业前完整规划，精确到月份，覆盖求职/考公/考研三类。9 月是真正的分水岭——最怕的不是没准备，而是没想清楚走哪条路。</p>\n</blockquote>\n<h2>速读（核心结论）</h2>\n<ol>\n<li><strong>9 月第一件事：确定主线和退路</strong>——别找工作/考公/考研都想试，最后三不沾；方向越具体（具体到城市+行业+岗位），后面准备越容易</li>\n<li><strong>求职三件事（9 月起）</strong>：改好第一版简历每天投二三十份边投边改 + 建立投递进度表防错过 + 先拿小公司练面试最后面心仪企业</li>\n<li><strong>考研 9 月定死</strong>：院校/专业课/资料/复习计划别再犹豫，尤其专业课别想着最后突击；同时建议投几份秋招简历，掂量专业还值不值得考研</li>\n<li><strong>至少拿 3 个 offer 再躺平</strong>——每年有应届生被公司毁约；对比 offer 别光盯薪资，看工作内容/成长空间/领导风格/五险一金/加班</li>\n<li><strong>1 月是春招准备黄金期</strong>——复盘秋招+补充岗位相关经历（做账号/作品集/项目），别浪费时间考没用的证</li>\n</ol>\n<h2>正文：按月时间线</h2>\n<h3>9 月（分水岭，确定主线）</h3>\n<p><strong>求职</strong>：\n- 先定行业/岗位/城市——别只说\"进大厂年入百万\"，要具体到\"北京的软件开发、上海的游戏策划、杭州的互联网运营、能源电力通信金融央国企\"\n- 金九银十，但七八月份大厂已开提前批\n- <strong>三件事</strong>：\n  1. 改好第一版简历，每天投二三十份，边投边改——投运营突出运营案例，投技术突出项目和技术栈，别一份简历投遍所有岗\n  2. 建立投递进度表（公司/岗位/笔试/面试结果），防错过测评面试，方便复盘\n  3. 开始练面试——先拿小公司练手，自我介绍/项目经历/实习经历练熟，最后面特别想进的\n- 部分央国企网申卡四六级，12 月还有一次机会</p>\n<p><strong>考公</strong>：\n- 先确定主抓哪些考试（国考/省考/选调生/事业单位）\n- 国考 67% 岗位只要应届生；选调生有党员/学生干部/校级及以上荣誉硬性要求（很多条件不是临时能补的）\n- 选岗：研究近三年招考人数、专业限制、竞争比例、地区，别只盯工资高的（报录比基本百里挑一）\n- 建议每天抽 1 小时海投找工作保底</p>\n<p><strong>考研</strong>：\n- 9 月是黄金复习期，重点打基础\n- 别再犹豫考哪个学校，院校/专业课/资料/复习计划定死——尤其专业课别想着最后突击两个月\n- <strong>特别建议</strong>：去看看秋招投几份简历，了解专业最新就业情况，掂量专业还值不值得考研；读研提升不大就趁早转找工作</p>\n<h3>10 月（关键选择期，稳住心态）</h3>\n<p><strong>求职</strong>：\n- 没拿到 offer 别放弃，每天投 30 份（一个月近 1000 家，你可以失败 999 次，面试官只要失败一次你就有工作）\n- 拿到 offer 别直接躺平（除非香到无法拒绝）——<strong>至少拿 3 个 offer 握选择权</strong>（每年有应届生被公司毁约）\n- 对比 offer 别光盯薪资：工作内容/成长空间/领导风格/五险一金/加班情况，拉表逐项对比排除</p>\n<p><strong>考公</strong>：\n- 国考通知发布，报名开始\n- 别扎堆热门岗，注意专业/学历/政治面貌/基层经历/应届生身份要求，<strong>选限制多竞争小的，避开三不限炮灰岗</strong>——岗位选得好比多考两三分更重要\n- 报完名盯紧资格审查结果和缴费确认时间</p>\n<p><strong>考研</strong>：\n- 报名开始，学校专业定下别来回换，核对报名信息\n- 猛攻专业课刷错题；基础不错就开始整套模拟卡时间适应考试节奏</p>\n<h3>11 月（查漏补缺）</h3>\n<p><strong>求职</strong>：\n- 秋招尾声，没拿到 offer 先分析失败原因（面试失败就练沟通表达，这时候简陋成功率很高）\n- 持续关注秋招补录、国企招聘信息（企业会放出一批补录岗位）</p>\n<p><strong>考公</strong>：\n- 国考冲刺，重点模拟考试把握时间提高正确率——特别是数量题，很多人不是不会是时间不够\n- <strong>稳定发挥比学新东西更重要</strong></p>\n<p><strong>考研</strong>：\n- 最后冲刺，查漏补缺，回归课本重点章节\n- 别频繁换资料，少看制造焦虑的经验帖</p>\n<h3>12 月（各种考试，秋招基本结束）</h3>\n<p><strong>求职</strong>：\n- 拿到 offer 别万事大吉，逐一确认 offer 细节（岗位/工作内容/薪资结构/工作地点/入职时间）\n- 提前搞定学校课程和毕业论文——每年有学生因挂科/延期毕业影响入职\n- 没拿到 offer 根据投递表复盘，全力准备春招</p>\n<p><strong>考公</strong>：国考大多 11 月底或 12 月初笔试\n<strong>考研</strong>：12 月下旬笔试\n- 考前最后阶段：刷真题保持手感，调整作息——拼的不是谁学得最多而是谁发挥最稳，别学崩了</p>\n<h3>1 月（可以休息，但提前准备）</h3>\n<p><strong>求职</strong>：\n- 秋招没满意 offer 的，1 月是<strong>准备春招黄金期</strong>\n- 先复盘秋招（简历为什么没人看、面试为什么失败），再补充有价值的经历：\n  - 想做运营就去做账号\n  - 想做设计就整理作品集\n  - 想做技术就完善项目\n- <strong>别浪费时间考一堆没用的证</strong>——最后半年最值钱的是和岗位直接相关的经历</p>\n<p><strong>考公</strong>：\n- 关注国考成绩，理想就准备面试\n- 没进面别放弃（后面还有省考/选调/事业单位）\n- 觉得机会不大就别把所有希望压在公务员上，每天投几份简历留退路</p>\n<p><strong>考研</strong>：\n- 初试结束短暂休息，然后准备复试（专业知识/英语自我介绍/常见面试问题/科研项目经历）\n- 感觉不确定的同步了解调剂和就业信息，别傻等</p>\n<h3>2 月（机会不等人）</h3>\n<p><strong>求职</strong>：\n- 重点关注<strong>春招提前批</strong>——很多企业春节前后就开放岗位，等开学就完了\n- 每天刷企业官网/招聘平台/学校就业网站，看到匹配马上投\n- 春招岗位招满就下，没秋招那么宽裕</p>\n<p><strong>考公</strong>：盯紧省考公告（省考不是全国一张卷，不同省份时间不同）</p>\n<h2>对文雪的针对性启示</h2>\n<ul>\n<li><strong>当前状态</strong>：2027 届供应链管理，秋招为主（供应链/采购/项目管理，优先济南及周边，央国企子公司+高潜力企业），暂时不考虑考研</li>\n<li><strong>9 月重点确认</strong>：秋招主线是否明确？目标岗位/行业/城市是否具体化？投递策略是否定好？</li>\n<li><strong>求职三件事已有 scm 技能支持</strong>：scm-resume-customization（简历定制）、scm-job-matching（岗位匹配）、scm-interview-prep（面试准备）——正好对应视频里的\"改简历+投递表+练面试\"</li>\n<li><strong>央国企四六级</strong>：已过四级，无卡点</li>\n<li><strong>方向具体化</strong>：当前目标\"济南及周边+央国企子公司+高潜力企业\"已较具体，可进一步细化到行业（能源/电力/通信/金融/制造）</li>\n</ul>\n<h2>易混淆点 / 关键补充</h2>\n<ul>\n<li><strong>主线 ≠ 只做一件事</strong>：确定主线后，退路也要留（如考研为主但每天投几份简历保底），但不能三条线平均用力</li>\n<li><strong>投简历数量 ≠ 质量</strong>：每天二三十份是基准，但针对不同岗位优化简历更重要——一份简历投遍所有岗=无头苍蝇</li>\n<li><strong>春招提前批 ≠ 等开学</strong>：春节前后就开放，招满就下，比秋招节奏快</li>\n<li><strong>考证 ≠ 竞争力</strong>：最后半年最值钱的是岗位相关经历，不是证书数量</li>\n</ul>\n<h2>关联笔记</h2>\n<ul>\n<li>文雪-求职目标画像（SCM-Career 项目画像）</li>\n<li>今年效率是去年十倍_人机共创三步循环_2026-09-06（AI 时代求职的人机共创思路）</li>\n</ul>\n<h2>反思</h2>\n<ul>\n<li>视频的时间线框架可作为 SCM-Career 项目的月度规划参考，每月对照检查进度</li>\n</ul>\n<h2>行动项</h2>\n<ul>\n<li>[ ] 确认秋招主线和目标岗位/行业/城市，明确投递策略（优先级：高）</li>\n<li>[ ] 9 月求职三件事：简历第一版优化 + 投递进度表 + 小公司面试练手（用 scm 技能）（优先级：高）</li>\n</ul>"
       },
       {
        "title": "文雪-求职目标画像",
@@ -7113,7 +7158,7 @@ window.SITE_DATA = {
       {
        "title": "学业与课程",
        "icon": "📄",
-       "html": "<h1>学业与课程</h1>\n<h2>基本信息（已核实）</h2>\n<ul>\n<li><strong>学校</strong>：山东大学（985/211）</li>\n<li><strong>学院/专业</strong>：管理学院 · 供应链管理 · 本科</li>\n<li><strong>在读时间</strong>：2022.09 – 2027.06（2027 届）</li>\n<li><strong>所在城市</strong>：济南</li>\n<li><strong>学号</strong>：202218271084</li>\n<li><strong>学籍说明（内部掌握，用户已确认）</strong>：2022.09 入学，大一结束后休学一年，复学后编入 23 级班（故综评表与课程报告封面均显示「供应链管理 23」），2027.06 毕业（2027 届，与休学一年吻合）。口径：简历/网申教育经历写 2022.09 – 2027.06，不主动展开休学；网申若有「学籍异动」必填项则如实填写休学；面试被问五年学制/空档期的对外说法待定（休学原因不虚构，见问题日志 #86）。</li>\n</ul>\n<h2>成绩</h2>\n<ul>\n<li><strong>均分</strong>：81.87 / 100</li>\n<li><strong>GPA</strong>：未收录（如需换算以学校开具为准）</li>\n<li><strong>排名</strong>：未收录</li>\n<li><strong>2024-2025 学年综评</strong>：素质能力评价量化总分 27.5（身心素养 9 + 文艺素养 3 + 劳动素养 15.5；参与类为主，无竞赛获奖加分）</li>\n<li>说明：简历默认不放均分/GPA（非加分项）；网申系统如实填写。若后续排名或成绩有亮点，可更新此处并考虑恢复简历 GPA 行。</li>\n</ul>\n<h2>核心课程（简历在用）</h2>\n<p>供应链建模与仿真、ERP供应链管理综合实验、供应链资源规划、采购管理、物流管理、统计学、Python程序设计、大数据管理与分析</p>\n<h2>完整课程清单（2026-08-26 从课程材料扫描补全）</h2>\n<blockquote>\n<p>来源：桌面「大学」文件夹各课程子目录 + 实习简历主修课栏。学期归属按报告落款时间推断，个别待核。</p>\n</blockquote>\n<p><strong>专业核心（大三学年为主，均已产出报告/实验，原件见 📚 作品清单）</strong></p>\n<ul>\n<li>供应链建模与仿真（2025 秋，期末报告=多多买菜选址优化）</li>\n<li>ERP 供应链管理综合实验（2025 秋，用友 U8 全流程）</li>\n<li>供应链资源规划（2025 秋，结课报告=绿色供应链数智化）</li>\n<li>采购管理（2025 秋，实验报告 ×3）</li>\n<li>库存管理与控制（启发式算法报告）</li>\n<li>成本与绩效管理（2025 秋，DEA 效率评价）</li>\n<li>供应链系统规划与设计（11 个 Python 实验）</li>\n<li>供应链管理前沿 + 实验课（2026 春，两篇课程论文）</li>\n<li>供应链金融（2026 春？，小组汇报第 6 部分）</li>\n<li>可持续供应链管理（2026 春，动力电池闭环供应链）</li>\n<li>企业经营模拟（cesim 模拟 9 回合 + 路演）</li>\n</ul>\n<p><strong>数据与信息系统类</strong></p>\n<ul>\n<li>大数据管理与分析综合实验（Hadoop/Hive/Sqoop，实验报告 1-3）</li>\n<li>数据科学与大数据分析（R 语言，BankMarketing 项目）</li>\n<li>管理信息系统（超市库存系统分析系列 + 课程设计）</li>\n<li>管理决策分析（Matlab / Maple）</li>\n</ul>\n<p><strong>管理与商科类</strong></p>\n<ul>\n<li>电子商务（IVS 虚拟购物研究）</li>\n<li>组织与战略管理（海底捞/苹果战略分析小组作业）</li>\n</ul>\n<p><strong>思政与通识</strong></p>\n<ul>\n<li>毛概（讲课 PPT）、习思想（题库）</li>\n</ul>\n<p><strong>实习简历另列主修课（大一大二基础课）</strong></p>\n<ul>\n<li>管理学原理、物流管理、仓储管理、供应链数据分析</li>\n</ul>\n<h2>语言能力（已核实成绩单）</h2>\n<ul>\n<li><strong>CET-4</strong>：<strong>503 分</strong>（2025 年 6 月，山东大学考点）。单项：听力 133 / 阅读 195 / 写作与翻译 175（单项与栏位对应以成绩单原件为准，原件：<code>06_证书与附件/CET4成绩单_202506.pdf</code>）</li>\n<li><strong>CET-6</strong>：2026 年 6 月已首考（准考证原件：<code>06_证书与附件/CET6准考证_202606.pdf</code>，成绩未收录——如已出分请告知补录）；2026-08 仍在备考（核心 2000 词/翻译预测等资料就绪，推测备战 2026.12 二战）</li>\n<li>简历口径维持「CET-4（可阅读英文专业资料与基础商务沟通）」；<strong>若六级通过，简历语言栏可升级为 CET-6（分数 500+ 时标注分数）</strong></li>\n</ul>\n<h2>荣誉奖励</h2>\n<ul>\n<li>山东大学 2024—2025 年暑期社会实践专项<strong>优秀等级</strong>（校级立项 · 团队成员，详见 项目与经历素材库）</li>\n<li>⚠️ 旧实习简历曾写「校级立项二等奖」，与综评表「校级立项·团队其他成员」表述不一致，面试/网申以综评表口径为准（见问题日志 #88）</li>\n</ul>\n<h2>证书与技能（与简历「综合技能」一致）</h2>\n<ul>\n<li><strong>计划与库存</strong>：供应链建模（Python求解）、供需平衡与需求波动管理、库存与效期管理、补货计划</li>\n<li><strong>ERP 系统</strong>：用友 U8+（采购/库存/存货核算全流程，熟悉单据流转与模块联动）</li>\n<li><strong>数据工具</strong>：Excel（数据透视表、VLOOKUP、函数、台账）、Python（pandas、matplotlib）、R、SPSS</li>\n<li><strong>课程中实际用过（可面试展开）</strong>：Matlab/Maple（管理决策分析）、Hadoop/Hive/Sqoop（大数据综合实验）、DEA 效率评价、Stackelberg 博弈建模、cesim 企业经营模拟</li>\n</ul>\n<h2>在读规划（2026-08 更新）</h2>\n<ul>\n<li><strong>考研备考中</strong>：目标山东大学管理科学与工程（科目：840 管理学、数学三、英语一、政治），考试约 2026 年 12 月，与秋招（2026.09-11）冲刺期完全重叠——<strong>求职节奏（秋招投递密度）与考研复习需统筹</strong>，建议在 文雪-求职目标画像 明确两手准备的优先级。</li>\n<li><strong>六级</strong>：备考中（推测 2026.12 二战），通过后更新简历语言栏。</li>\n</ul>\n<h2>待归档材料清单</h2>\n<ul>\n<li>[x] CET-4 成绩单（2025.06）→ <code>06_证书与附件/CET4成绩单_202506.pdf</code></li>\n<li>[x] CET-6 准考证（2026.06）→ <code>06_证书与附件/CET6准考证_202606.pdf</code></li>\n<li>[x] 综评量化表（2024-2025）→ <code>06_证书与附件/综评量化表_2024-2025.xlsx</code></li>\n<li>[ ] 完整成绩单（教务系统导出，含各科成绩与 GPA）</li>\n<li>[ ] 在读证明 / 学生证扫描件</li>\n<li>[ ] 六级成绩单（出分后）</li>\n<li>[ ] 考研准考证（报名后，2026.10-11）</li>\n</ul>"
+       "html": "<h1>学业与课程</h1>\n<h2>基本信息（已核实）</h2>\n<ul>\n<li><strong>学校</strong>：山东大学（985/211）</li>\n<li><strong>学院/专业</strong>：管理学院 · 供应链管理 · 本科</li>\n<li><strong>在读时间</strong>：2022.09 – 2027.06（2027 届）</li>\n<li><strong>所在城市</strong>：济南</li>\n<li><strong>学号</strong>：202218271084</li>\n<li><strong>学籍说明（内部掌握，用户已确认）</strong>：2022.09 入学，大一结束后休学一年，复学后编入 23 级班（故综评表与课程报告封面均显示「供应链管理 23」），2027.06 毕业（2027 届，与休学一年吻合）。口径：简历/网申教育经历写 2022.09 – 2027.06，不主动展开休学；网申若有「学籍异动」必填项则如实填写休学；面试被问五年学制/空档期的对外说法待定（休学原因不虚构，见问题日志 #86）。</li>\n</ul>\n<h2>成绩</h2>\n<ul>\n<li><strong>均分</strong>：81.87 / 100</li>\n<li><strong>GPA</strong>：未收录（如需换算以学校开具为准）</li>\n<li><strong>排名</strong>：未收录</li>\n<li><strong>2024-2025 学年综评</strong>：素质能力评价量化总分 27.5（身心素养 9 + 文艺素养 3 + 劳动素养 15.5；参与类为主，无竞赛获奖加分）</li>\n<li>说明：简历默认不放均分/GPA（非加分项）；网申系统如实填写。若后续排名或成绩有亮点，可更新此处并考虑恢复简历 GPA 行。</li>\n</ul>\n<h2>核心课程（简历在用）</h2>\n<p>供应链建模与仿真、ERP供应链管理综合实验、供应链资源规划、采购管理、物流管理、统计学、Python程序设计、大数据管理与分析</p>\n<h2>完整课程清单（2026-08-26 从课程材料扫描补全）</h2>\n<blockquote>\n<p>来源：桌面「大学」文件夹各课程子目录 + 实习简历主修课栏。学期归属按报告落款时间推断，个别待核。</p>\n</blockquote>\n<p><strong>专业核心（大三学年为主，均已产出报告/实验，原件见 📚 作品清单）</strong></p>\n<ul>\n<li>供应链建模与仿真（2025 秋，期末报告=多多买菜选址优化）</li>\n<li>ERP 供应链管理综合实验（2025 秋，用友 U8 全流程）</li>\n<li>供应链资源规划（2025 秋，结课报告=绿色供应链数智化）</li>\n<li>采购管理（2025 秋，实验报告 ×3）</li>\n<li>库存管理与控制（启发式算法报告）</li>\n<li>成本与绩效管理（2025 秋，DEA 效率评价）</li>\n<li>供应链系统规划与设计（11 个 Python 实验）</li>\n<li>供应链管理前沿 + 实验课（2026 春，两篇课程论文）</li>\n<li>供应链金融（2026 春？，小组汇报第 6 部分）</li>\n<li>可持续供应链管理（2026 春，动力电池闭环供应链）</li>\n<li>企业经营模拟（cesim 模拟 9 回合 + 路演）</li>\n</ul>\n<p><strong>数据与信息系统类</strong></p>\n<ul>\n<li>大数据管理与分析综合实验（Hadoop/Hive/Sqoop，实验报告 1-3）</li>\n<li>数据科学与大数据分析（R 语言，BankMarketing 项目）</li>\n<li>管理信息系统（超市库存系统分析系列 + 课程设计）</li>\n<li>管理决策分析（Matlab / Maple）</li>\n</ul>\n<p><strong>管理与商科类</strong></p>\n<ul>\n<li>电子商务（IVS 虚拟购物研究）</li>\n<li>组织与战略管理（海底捞/苹果战略分析小组作业）</li>\n</ul>\n<p><strong>思政与通识</strong></p>\n<ul>\n<li>毛概（讲课 PPT）、习思想（题库）</li>\n</ul>\n<p><strong>实习简历另列主修课（大一大二基础课）</strong></p>\n<ul>\n<li>管理学原理、物流管理、仓储管理、供应链数据分析</li>\n</ul>\n<h2>语言能力（已核实成绩单）</h2>\n<ul>\n<li><strong>CET-4</strong>：<strong>503 分</strong>（2025 年 6 月，山东大学考点）。单项：听力 133 / 阅读 195 / 写作与翻译 175（单项与栏位对应以成绩单原件为准，原件：<code>06_证书与附件/CET4成绩单_202506.pdf</code>）</li>\n<li><strong>CET-6</strong>：2026 年 6 月已首考（准考证原件：<code>06_证书与附件/CET6准考证_202606.pdf</code>，成绩未收录——如已出分请告知补录）；2026-08 仍在备考（核心 2000 词/翻译预测等资料就绪，推测备战 2026.12 二战）</li>\n<li>简历口径维持「CET-4（可阅读英文专业资料与基础商务沟通）」；<strong>若六级通过，简历语言栏可升级为 CET-6（分数 500+ 时标注分数）</strong></li>\n</ul>\n<h2>荣誉奖励</h2>\n<ul>\n<li>山东大学 2024—2025 年暑期社会实践专项<strong>优秀等级</strong>（校级立项 · 团队成员，详见 项目与经历素材库）</li>\n<li>⚠️ 旧实习简历曾写「校级立项二等奖」，与综评表「校级立项·团队其他成员」表述不一致，面试/网申以综评表口径为准（见问题日志 #88）</li>\n</ul>\n<h2>证书与技能（与简历「综合技能」一致）</h2>\n<ul>\n<li><strong>计划与库存</strong>：供应链建模（Python求解）、供需平衡与需求波动管理、库存与效期管理、补货计划</li>\n<li><strong>ERP 系统</strong>：用友 U8+（采购/库存/存货核算全流程，熟悉单据流转与模块联动）</li>\n<li><strong>数据工具</strong>：Excel（数据透视表、VLOOKUP、函数、台账）、Python（pandas、matplotlib）、R、SPSS</li>\n<li><strong>课程中实际用过（可面试展开）</strong>：Matlab/Maple（管理决策分析）、Hadoop/Hive/Sqoop（大数据综合实验）、DEA 效率评价、Stackelberg 博弈建模、cesim 企业经营模拟</li>\n</ul>\n<h2>在读规划（2026-09 更新）</h2>\n<ul>\n<li><strong>暂时不考虑考研</strong>，专注秋招</li>\n<li><strong>六级</strong>：备考中（推测 2026.12 二战），通过后更新简历语言栏。</li>\n</ul>\n<h2>待归档材料清单</h2>\n<ul>\n<li>[x] CET-4 成绩单（2025.06）→ <code>06_证书与附件/CET4成绩单_202506.pdf</code></li>\n<li>[x] CET-6 准考证（2026.06）→ <code>06_证书与附件/CET6准考证_202606.pdf</code></li>\n<li>[x] 综评量化表（2024-2025）→ <code>06_证书与附件/综评量化表_2024-2025.xlsx</code></li>\n<li>[ ] 完整成绩单（教务系统导出，含各科成绩与 GPA）</li>\n<li>[ ] 在读证明 / 学生证扫描件</li>\n<li>[ ] 六级成绩单（出分后）</li>\n</ul>"
       },
       {
        "title": "投递追踪表",
@@ -7128,7 +7173,7 @@ window.SITE_DATA = {
       {
        "title": "📋 个人资料索引",
        "icon": "📄",
-       "html": "<h1>📋 个人资料索引</h1>\n<blockquote>\n<p>用途：集中存放文雪的个人资料——学业课程、项目与经历全量素材、个人特质、课程报告论文等。\n供简历定制（Skill 3）、面试备考（Skill 4）、复盘（Skill 5）随时取材，也方便手机随时查阅。</p>\n</blockquote>\n<h2>文件清单</h2>\n<table>\n<thead>\n<tr>\n<th style=\"text-align: left;\">文件</th>\n<th style=\"text-align: left;\">内容</th>\n<th style=\"text-align: left;\">更新状态</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td style=\"text-align: left;\">学业与课程</td>\n<td style=\"text-align: left;\">学校专业、完整课程清单、CET4/6、荣誉、综评、考研规划</td>\n<td style=\"text-align: left;\">✅ 2026-08-26 全量更新（桌面大学文件夹扫描）</td>\n</tr>\n<tr>\n<td style=\"text-align: left;\">项目与经历素材库</td>\n<td style=\"text-align: left;\">5 个项目（新增动力电池闭环供应链）+ 3 段实践（新增家教；宁波软装已移除）+ 暑期实践全细节</td>\n<td style=\"text-align: left;\">✅ 2026-08-26 全量更新</td>\n</tr>\n<tr>\n<td style=\"text-align: left;\">个人特质与评价</td>\n<td style=\"text-align: left;\">性格特质、自我评价原文、他人评价（待收集）、测评（待补）</td>\n<td style=\"text-align: left;\">✅ 2026-08-26 更新</td>\n</tr>\n<tr>\n<td style=\"text-align: left;\"><code>报告论文与作品/📚 作品清单.md</code></td>\n<td style=\"text-align: left;\">全部课程报告论文与实践成果登记表（含原件路径与简历对应关系）</td>\n<td style=\"text-align: left;\">✅ 2026-08-26 新建</td>\n</tr>\n<tr>\n<td style=\"text-align: left;\"><code>报告论文与作品/</code>（7 份核心原件）</td>\n<td style=\"text-align: left;\">简历项目佐证：多多买菜选址、ERP 论文、银行营销分析、动力电池定价、绿色供应链综述、两份实践报告</td>\n<td style=\"text-align: left;\">✅ 已归档，其余原件仍在源路径（见作品清单）</td>\n</tr>\n</tbody>\n</table>\n<h2>信息源</h2>\n<ul>\n<li>主信息源：<code>D:\\HuaweiMoveData\\Users\\22814\\Desktop\\大学\\</code>（课程材料、证件、综评、实践材料、考研资料，2026-08-25 全量扫描）</li>\n<li>证件扫描件另存：<code>06_证书与附件/</code>（CET4 成绩单、CET6 准考证、综评量化表、寒假实践证明盖章件）</li>\n</ul>\n<h2>维护规则</h2>\n<ol>\n<li><strong>新资料先归档</strong>：写过的课程报告/论文/大作业、成绩单、获奖证明等，原件放 <code>报告论文与作品/</code>，并在 学业与课程 或素材库里补一条索引。</li>\n<li><strong>简历不放的细节存这里</strong>：如 GPA、课程成绩、项目方向定位等被简历精简掉的信息，都以此处为准。</li>\n<li><strong>与 文雪-求职目标画像 的分工</strong>：画像管「想找什么工作、怎么筛选」；本库管「我有什么材料、我是谁」。</li>\n<li>每次有新经历/新证书/新课程完成，随手补一条，避免投递前临时翻找。</li>\n</ol>\n<h2>关联文件</h2>\n<ul>\n<li>求职战略与红线：文雪-求职目标画像</li>\n<li>证书扫描件：<code>06_证书与附件/</code></li>\n<li>通用简历底版：<code>02_定制简历库/通用简历/</code></li>\n</ul>"
+       "html": "<h1>📋 个人资料索引</h1>\n<blockquote>\n<p>用途：集中存放文雪的个人资料——学业课程、项目与经历全量素材、个人特质、课程报告论文等。\n供简历定制（Skill 3）、面试备考（Skill 4）、复盘（Skill 5）随时取材，也方便手机随时查阅。</p>\n</blockquote>\n<h2>文件清单</h2>\n<table>\n<thead>\n<tr>\n<th style=\"text-align: left;\">文件</th>\n<th style=\"text-align: left;\">内容</th>\n<th style=\"text-align: left;\">更新状态</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td style=\"text-align: left;\">学业与课程</td>\n<td style=\"text-align: left;\">学校专业、完整课程清单、CET4/6、荣誉、综评</td>\n<td style=\"text-align: left;\">✅ 2026-09-07 更新（移除考研规划）</td>\n</tr>\n<tr>\n<td style=\"text-align: left;\">项目与经历素材库</td>\n<td style=\"text-align: left;\">5 个项目（新增动力电池闭环供应链）+ 3 段实践（新增家教；宁波软装已移除）+ 暑期实践全细节</td>\n<td style=\"text-align: left;\">✅ 2026-08-26 全量更新</td>\n</tr>\n<tr>\n<td style=\"text-align: left;\">个人特质与评价</td>\n<td style=\"text-align: left;\">性格特质、自我评价原文、他人评价（待收集）、测评（待补）</td>\n<td style=\"text-align: left;\">✅ 2026-08-26 更新</td>\n</tr>\n<tr>\n<td style=\"text-align: left;\"><code>报告论文与作品/📚 作品清单.md</code></td>\n<td style=\"text-align: left;\">全部课程报告论文与实践成果登记表（含原件路径与简历对应关系）</td>\n<td style=\"text-align: left;\">✅ 2026-08-26 新建</td>\n</tr>\n<tr>\n<td style=\"text-align: left;\"><code>报告论文与作品/</code>（7 份核心原件）</td>\n<td style=\"text-align: left;\">简历项目佐证：多多买菜选址、ERP 论文、银行营销分析、动力电池定价、绿色供应链综述、两份实践报告</td>\n<td style=\"text-align: left;\">✅ 已归档，其余原件仍在源路径（见作品清单）</td>\n</tr>\n</tbody>\n</table>\n<h2>信息源</h2>\n<ul>\n<li>主信息源：<code>D:\\HuaweiMoveData\\Users\\22814\\Desktop\\大学\\</code>（课程材料、证件、综评、实践材料、考研资料，2026-08-25 全量扫描）</li>\n<li>证件扫描件另存：<code>06_证书与附件/</code>（CET4 成绩单、CET6 准考证、综评量化表、寒假实践证明盖章件）</li>\n</ul>\n<h2>维护规则</h2>\n<ol>\n<li><strong>新资料先归档</strong>：写过的课程报告/论文/大作业、成绩单、获奖证明等，原件放 <code>报告论文与作品/</code>，并在 学业与课程 或素材库里补一条索引。</li>\n<li><strong>简历不放的细节存这里</strong>：如 GPA、课程成绩、项目方向定位等被简历精简掉的信息，都以此处为准。</li>\n<li><strong>与 文雪-求职目标画像 的分工</strong>：画像管「想找什么工作、怎么筛选」；本库管「我有什么材料、我是谁」。</li>\n<li>每次有新经历/新证书/新课程完成，随手补一条，避免投递前临时翻找。</li>\n</ol>\n<h2>关联文件</h2>\n<ul>\n<li>求职战略与红线：文雪-求职目标画像</li>\n<li>证书扫描件：<code>06_证书与附件/</code></li>\n<li>通用简历底版：<code>02_定制简历库/通用简历/</code></li>\n</ul>"
       }
      ]
     },
@@ -7178,7 +7223,7 @@ window.SITE_DATA = {
       {
        "title": "📚 作品清单",
        "icon": "📄",
-       "html": "<h1>📚 作品清单（课程报告 · 论文 · 实践成果）</h1>\n<blockquote>\n<p>信息源：<code>D:\\HuaweiMoveData\\Users\\22814\\Desktop\\大学\\</code>（2026-08-25 全量扫描）。\n<strong>加粗</strong>条目已复制原件到本文件夹；其余原件仍在源路径，按需取用（Skill 3 定制简历 / Skill 4 面试备考可直接读原件挖细节）。</p>\n</blockquote>\n<h2>一、已归档核心作品（本文件夹内）</h2>\n<table>\n<thead>\n<tr>\n<th style=\"text-align: left;\">作品</th>\n<th style=\"text-align: left;\">对应简历素材</th>\n<th style=\"text-align: left;\">说明</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td style=\"text-align: left;\"><strong>供应链建模与仿真_多多买菜自提点选址与路径优化_202512.pdf</strong></td>\n<td style=\"text-align: left;\">简历项目 1《社区团购末端网络优化》原件</td>\n<td style=\"text-align: left;\">改进 p-median 选址 + VRPTW 路径双层优化，济南历下区真实小区，年龄分层服务半径（老年 600m / 中年 800m / 青年 1000m）</td>\n</tr>\n<tr>\n<td style=\"text-align: left;\"><strong>ERP供应链综合实验_用友U8应用实践与发展趋势_202512.pdf</strong></td>\n<td style=\"text-align: left;\">简历项目 2《ERP 供应链全流程模拟操作》</td>\n<td style=\"text-align: left;\">用友 U8 V15.0 采购/销售/库存/财务核算模块应用分析 + 多行业案例</td>\n</tr>\n<tr>\n<td style=\"text-align: left;\"><strong>数据科学与大数据分析_银行营销客户响应分析报告.docx</strong></td>\n<td style=\"text-align: left;\">简历项目 3《银行电话营销客户响应行为分析》</td>\n<td style=\"text-align: left;\">R 清洗 + 分层统计 + 帕累托/热力图/瀑布图，另有选做作业（Python 版）在源路径</td>\n</tr>\n<tr>\n<td style=\"text-align: left;\"><strong>可持续供应链管理_动力电池闭环供应链定价决策_202607.pdf</strong></td>\n<td style=\"text-align: left;\">面试学术作品</td>\n<td style=\"text-align: left;\">政府补贴下动力电池多渠道回收，Stackelberg 博弈模型，制造商/零售商/第三方回收商三方利润函数与博弈求解</td>\n</tr>\n<tr>\n<td style=\"text-align: left;\"><strong>供应链资源规划_数智融合驱动绿色供应链_202512.pdf</strong></td>\n<td style=\"text-align: left;\">面试可展示综述</td>\n<td style=\"text-align: left;\">基于 10 篇核心期刊文献：区块链溯源 / AI 预测 / 大数据 / 数字孪生赋能绿色供应链，施耐德、联想案例</td>\n</tr>\n<tr>\n<td style=\"text-align: left;\"><strong>社会实践报告_2025暑期_新疆疆韵文化调研_202509.docx</strong></td>\n<td style=\"text-align: left;\">暑期社会实践（校级立项·优秀）</td>\n<td style=\"text-align: left;\">8 天新疆伊犁/乌鲁木齐/吐鲁番调研全记录</td>\n</tr>\n</tbody>\n</table>\n<h2>二、供应链专业核心（源路径原件）</h2>\n<table>\n<thead>\n<tr>\n<th style=\"text-align: left;\">课程</th>\n<th style=\"text-align: left;\">作品 / 材料</th>\n<th style=\"text-align: left;\">源相对路径（大学\\）</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td style=\"text-align: left;\">供应链建模与仿真</td>\n<td style=\"text-align: left;\">《基于 Python 与 Excel 的社区生鲜超市供应链库存优化研究》（另一份独立报告）</td>\n<td style=\"text-align: left;\">供应链建模与仿真\\</td>\n</tr>\n<tr>\n<td style=\"text-align: left;\">供应链系统规划与设计</td>\n<td style=\"text-align: left;\">11 个实验 ipynb（Python 优化建模：二级供应链网络基础模型、Mining Problem 等）</td>\n<td style=\"text-align: left;\">供应链系统规划与设计\\</td>\n</tr>\n<tr>\n<td style=\"text-align: left;\">供应链管理前沿（刘懋圻）</td>\n<td style=\"text-align: left;\">论文①《分布鲁棒优化：供应链产品线设计中的稳健决策技术》（Wasserstein 距离、MNL 模型）②《大规模供应链网络的仿真与优化方法研究——基于 BOM、稀疏矩阵与反向传播》 + 期末论文代码（画图.ipynb）</td>\n<td style=\"text-align: left;\">供应链管理前沿——刘懋圻\\</td>\n</tr>\n<tr>\n<td style=\"text-align: left;\">供应链管理前沿实验课（孙华）</td>\n<td style=\"text-align: left;\">4 次作业（5.8 / 5.15 / 5.29 / 6.5）</td>\n<td style=\"text-align: left;\">供应链管理前沿实验课——孙华\\</td>\n</tr>\n<tr>\n<td style=\"text-align: left;\">供应链金融</td>\n<td style=\"text-align: left;\">小组汇报第 6 部分（PPT + 发言稿 + 《供应链应收账款融资的三方共赢模式及模型公式拆解》文献研读）</td>\n<td style=\"text-align: left;\">供应链金融\\实验课报告\\</td>\n</tr>\n<tr>\n<td style=\"text-align: left;\">库存管理与控制</td>\n<td style=\"text-align: left;\">《多种启发式算法解决经典优化问题》《经典优化问题的智能算法求解方案》</td>\n<td style=\"text-align: left;\">库存管理与控制\\</td>\n</tr>\n<tr>\n<td style=\"text-align: left;\">采购管理</td>\n<td style=\"text-align: left;\">实验报告一 / 二 / 三 + 采购管理思考题</td>\n<td style=\"text-align: left;\">采购管理\\</td>\n</tr>\n<tr>\n<td style=\"text-align: left;\">企业经营模拟（包春兵）</td>\n<td style=\"text-align: left;\">课程报告 + cesim 模拟 9 回合分析（回合 2/5/6/7/8）+ 路演 PPT《Lilith》两轮 + 视频剪辑脚本</td>\n<td style=\"text-align: left;\">企业经营模拟——包春兵\\</td>\n</tr>\n<tr>\n<td style=\"text-align: left;\">成本与绩效管理</td>\n<td style=\"text-align: left;\">期末报告《中国文化和旅游产业效率评价研究——基于 DEA 模型的实证分析》（2025.12，DEA-BCC，2012-2023 数据）+ 小组作业《中国空铁一体化网络分析——中心性度量与聚类分析》</td>\n<td style=\"text-align: left;\">成本与绩效管理\\期末报告\\</td>\n</tr>\n</tbody>\n</table>\n<h2>三、数据与信息系统类（源路径原件）</h2>\n<table>\n<thead>\n<tr>\n<th style=\"text-align: left;\">课程</th>\n<th style=\"text-align: left;\">作品 / 材料</th>\n<th style=\"text-align: left;\">源相对路径（大学\\）</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td style=\"text-align: left;\">大数据管理与分析综合实验（杨海军）</td>\n<td style=\"text-align: left;\">实验报告 1-3（docx+PDF）：虚拟机环境搭建、Hive、Sqoop + 综合案例 + 8 张订单分析表（csv/xlsx）</td>\n<td style=\"text-align: left;\">大数据管理与分析综合实验——杨海军\\</td>\n</tr>\n<tr>\n<td style=\"text-align: left;\">数据科学与大数据分析（王凯平）</td>\n<td style=\"text-align: left;\">BankMarketing 必做 + 选做（R/Python 双版本）+ 期末必做作业 + 附加作业 + 补充资料</td>\n<td style=\"text-align: left;\">数据科学与大数据分析——王凯平\\</td>\n</tr>\n<tr>\n<td style=\"text-align: left;\">管理决策分析</td>\n<td style=\"text-align: left;\">Matlab / Maple 实验（文雪 202218271084 管理决策分析.docx + 第四小组 PPT）</td>\n<td style=\"text-align: left;\">管理决策分析\\</td>\n</tr>\n<tr>\n<td style=\"text-align: left;\">管理信息系统</td>\n<td style=\"text-align: left;\">小型超市库存管理系统系列：实验报告一~四（系统分析/可行性分析/数据库分析/ipynb）+ 管理系统课程设计报告 + 利丰案例</td>\n<td style=\"text-align: left;\">管理信息系统\\</td>\n</tr>\n</tbody>\n</table>\n<h2>四、管理与商科类（源路径原件）</h2>\n<table>\n<thead>\n<tr>\n<th style=\"text-align: left;\">课程</th>\n<th style=\"text-align: left;\">作品 / 材料</th>\n<th style=\"text-align: left;\">源相对路径（大学\\）</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td style=\"text-align: left;\">电子商务</td>\n<td style=\"text-align: left;\">《电竞中交互式虚拟购物物（IVS）对消费者游戏乐趣及品牌态度的影响研究》（论文+PDF+第 19 组汇报 PPT）</td>\n<td style=\"text-align: left;\">电子商务\\</td>\n</tr>\n<tr>\n<td style=\"text-align: left;\">组织与战略管理</td>\n<td style=\"text-align: left;\">小组作业：海底捞企业战略分析、苹果公司相关多元化战略分析（含会议纪要 + PPT）</td>\n<td style=\"text-align: left;\">组织与战略管理\\</td>\n</tr>\n<tr>\n<td style=\"text-align: left;\">毛概 / 习思想</td>\n<td style=\"text-align: left;\">毛概讲课 PPT + 大纲、习思想题库</td>\n<td style=\"text-align: left;\">毛概\\ 习思想\\</td>\n</tr>\n</tbody>\n</table>\n<h2>五、实践与证书类成果</h2>\n<table>\n<thead>\n<tr>\n<th style=\"text-align: left;\">成果</th>\n<th style=\"text-align: left;\">存放位置</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td style=\"text-align: left;\">CET-4 成绩单（503 分，2025.06）</td>\n<td style=\"text-align: left;\"><code>06_证书与附件/CET4成绩单_202506.pdf</code></td>\n</tr>\n<tr>\n<td style=\"text-align: left;\">CET-6 准考证（2026.06 首考）</td>\n<td style=\"text-align: left;\"><code>06_证书与附件/CET6准考证_202606.pdf</code></td>\n</tr>\n<tr>\n<td style=\"text-align: left;\">综评量化表（2024-2025，总分 27.5）</td>\n<td style=\"text-align: left;\"><code>06_证书与附件/综评量化表_2024-2025.xlsx</code></td>\n</tr>\n<tr>\n<td style=\"text-align: left;\">2025 暑期实践过程材料（立项书、新闻稿 7 篇、万里边疆 PPT 60MB、写实记录）</td>\n<td style=\"text-align: left;\">源路径 2025暑期社会实践\\（体积大未复制）</td>\n</tr>\n<tr>\n<td style=\"text-align: left;\">素质能力评价佐证截图（安全知识竞赛、宪法知识学习、集体跳绳）</td>\n<td style=\"text-align: left;\">源路径 2024-2025素质能力评价\\</td>\n</tr>\n</tbody>\n</table>\n<h2>六、备考资料（不投简历，仅规划参考）</h2>\n<ul>\n<li><strong>考研</strong>：山东大学管理科学与工程（科目：840 管理学、数学三、英语一、政治），备考总规划与四科知识点大全已就绪 → 源路径 1-2026考研\\计划与资料\\；复试面试全攻略 → 1-2026考研\\考研面试\\</li>\n<li><strong>六级</strong>：核心 2000 词、翻译预测、写作主题词等（2026-08-25 更新，推测备考 2026.12 二战）→ 源路径 六级\\</li>\n</ul>\n<blockquote>\n<p>提醒：考研冲刺期（2026.09-12）与秋招（2026.09-11）完全重叠，两手准备的节奏需在 文雪-求职目标画像 层面权衡。</p>\n</blockquote>"
+       "html": "<h1>📚 作品清单（课程报告 · 论文 · 实践成果）</h1>\n<blockquote>\n<p>信息源：<code>D:\\HuaweiMoveData\\Users\\22814\\Desktop\\大学\\</code>（2026-08-25 全量扫描）。\n<strong>加粗</strong>条目已复制原件到本文件夹；其余原件仍在源路径，按需取用（Skill 3 定制简历 / Skill 4 面试备考可直接读原件挖细节）。</p>\n</blockquote>\n<h2>一、已归档核心作品（本文件夹内）</h2>\n<table>\n<thead>\n<tr>\n<th style=\"text-align: left;\">作品</th>\n<th style=\"text-align: left;\">对应简历素材</th>\n<th style=\"text-align: left;\">说明</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td style=\"text-align: left;\"><strong>供应链建模与仿真_多多买菜自提点选址与路径优化_202512.pdf</strong></td>\n<td style=\"text-align: left;\">简历项目 1《社区团购末端网络优化》原件</td>\n<td style=\"text-align: left;\">改进 p-median 选址 + VRPTW 路径双层优化，济南历下区真实小区，年龄分层服务半径（老年 600m / 中年 800m / 青年 1000m）</td>\n</tr>\n<tr>\n<td style=\"text-align: left;\"><strong>ERP供应链综合实验_用友U8应用实践与发展趋势_202512.pdf</strong></td>\n<td style=\"text-align: left;\">简历项目 2《ERP 供应链全流程模拟操作》</td>\n<td style=\"text-align: left;\">用友 U8 V15.0 采购/销售/库存/财务核算模块应用分析 + 多行业案例</td>\n</tr>\n<tr>\n<td style=\"text-align: left;\"><strong>数据科学与大数据分析_银行营销客户响应分析报告.docx</strong></td>\n<td style=\"text-align: left;\">简历项目 3《银行电话营销客户响应行为分析》</td>\n<td style=\"text-align: left;\">R 清洗 + 分层统计 + 帕累托/热力图/瀑布图，另有选做作业（Python 版）在源路径</td>\n</tr>\n<tr>\n<td style=\"text-align: left;\"><strong>可持续供应链管理_动力电池闭环供应链定价决策_202607.pdf</strong></td>\n<td style=\"text-align: left;\">面试学术作品</td>\n<td style=\"text-align: left;\">政府补贴下动力电池多渠道回收，Stackelberg 博弈模型，制造商/零售商/第三方回收商三方利润函数与博弈求解</td>\n</tr>\n<tr>\n<td style=\"text-align: left;\"><strong>供应链资源规划_数智融合驱动绿色供应链_202512.pdf</strong></td>\n<td style=\"text-align: left;\">面试可展示综述</td>\n<td style=\"text-align: left;\">基于 10 篇核心期刊文献：区块链溯源 / AI 预测 / 大数据 / 数字孪生赋能绿色供应链，施耐德、联想案例</td>\n</tr>\n<tr>\n<td style=\"text-align: left;\"><strong>社会实践报告_2025暑期_新疆疆韵文化调研_202509.docx</strong></td>\n<td style=\"text-align: left;\">暑期社会实践（校级立项·优秀）</td>\n<td style=\"text-align: left;\">8 天新疆伊犁/乌鲁木齐/吐鲁番调研全记录</td>\n</tr>\n</tbody>\n</table>\n<h2>二、供应链专业核心（源路径原件）</h2>\n<table>\n<thead>\n<tr>\n<th style=\"text-align: left;\">课程</th>\n<th style=\"text-align: left;\">作品 / 材料</th>\n<th style=\"text-align: left;\">源相对路径（大学\\）</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td style=\"text-align: left;\">供应链建模与仿真</td>\n<td style=\"text-align: left;\">《基于 Python 与 Excel 的社区生鲜超市供应链库存优化研究》（另一份独立报告）</td>\n<td style=\"text-align: left;\">供应链建模与仿真\\</td>\n</tr>\n<tr>\n<td style=\"text-align: left;\">供应链系统规划与设计</td>\n<td style=\"text-align: left;\">11 个实验 ipynb（Python 优化建模：二级供应链网络基础模型、Mining Problem 等）</td>\n<td style=\"text-align: left;\">供应链系统规划与设计\\</td>\n</tr>\n<tr>\n<td style=\"text-align: left;\">供应链管理前沿（刘懋圻）</td>\n<td style=\"text-align: left;\">论文①《分布鲁棒优化：供应链产品线设计中的稳健决策技术》（Wasserstein 距离、MNL 模型）②《大规模供应链网络的仿真与优化方法研究——基于 BOM、稀疏矩阵与反向传播》 + 期末论文代码（画图.ipynb）</td>\n<td style=\"text-align: left;\">供应链管理前沿——刘懋圻\\</td>\n</tr>\n<tr>\n<td style=\"text-align: left;\">供应链管理前沿实验课（孙华）</td>\n<td style=\"text-align: left;\">4 次作业（5.8 / 5.15 / 5.29 / 6.5）</td>\n<td style=\"text-align: left;\">供应链管理前沿实验课——孙华\\</td>\n</tr>\n<tr>\n<td style=\"text-align: left;\">供应链金融</td>\n<td style=\"text-align: left;\">小组汇报第 6 部分（PPT + 发言稿 + 《供应链应收账款融资的三方共赢模式及模型公式拆解》文献研读）</td>\n<td style=\"text-align: left;\">供应链金融\\实验课报告\\</td>\n</tr>\n<tr>\n<td style=\"text-align: left;\">库存管理与控制</td>\n<td style=\"text-align: left;\">《多种启发式算法解决经典优化问题》《经典优化问题的智能算法求解方案》</td>\n<td style=\"text-align: left;\">库存管理与控制\\</td>\n</tr>\n<tr>\n<td style=\"text-align: left;\">采购管理</td>\n<td style=\"text-align: left;\">实验报告一 / 二 / 三 + 采购管理思考题</td>\n<td style=\"text-align: left;\">采购管理\\</td>\n</tr>\n<tr>\n<td style=\"text-align: left;\">企业经营模拟（包春兵）</td>\n<td style=\"text-align: left;\">课程报告 + cesim 模拟 9 回合分析（回合 2/5/6/7/8）+ 路演 PPT《Lilith》两轮 + 视频剪辑脚本</td>\n<td style=\"text-align: left;\">企业经营模拟——包春兵\\</td>\n</tr>\n<tr>\n<td style=\"text-align: left;\">成本与绩效管理</td>\n<td style=\"text-align: left;\">期末报告《中国文化和旅游产业效率评价研究——基于 DEA 模型的实证分析》（2025.12，DEA-BCC，2012-2023 数据）+ 小组作业《中国空铁一体化网络分析——中心性度量与聚类分析》</td>\n<td style=\"text-align: left;\">成本与绩效管理\\期末报告\\</td>\n</tr>\n</tbody>\n</table>\n<h2>三、数据与信息系统类（源路径原件）</h2>\n<table>\n<thead>\n<tr>\n<th style=\"text-align: left;\">课程</th>\n<th style=\"text-align: left;\">作品 / 材料</th>\n<th style=\"text-align: left;\">源相对路径（大学\\）</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td style=\"text-align: left;\">大数据管理与分析综合实验（杨海军）</td>\n<td style=\"text-align: left;\">实验报告 1-3（docx+PDF）：虚拟机环境搭建、Hive、Sqoop + 综合案例 + 8 张订单分析表（csv/xlsx）</td>\n<td style=\"text-align: left;\">大数据管理与分析综合实验——杨海军\\</td>\n</tr>\n<tr>\n<td style=\"text-align: left;\">数据科学与大数据分析（王凯平）</td>\n<td style=\"text-align: left;\">BankMarketing 必做 + 选做（R/Python 双版本）+ 期末必做作业 + 附加作业 + 补充资料</td>\n<td style=\"text-align: left;\">数据科学与大数据分析——王凯平\\</td>\n</tr>\n<tr>\n<td style=\"text-align: left;\">管理决策分析</td>\n<td style=\"text-align: left;\">Matlab / Maple 实验（文雪 202218271084 管理决策分析.docx + 第四小组 PPT）</td>\n<td style=\"text-align: left;\">管理决策分析\\</td>\n</tr>\n<tr>\n<td style=\"text-align: left;\">管理信息系统</td>\n<td style=\"text-align: left;\">小型超市库存管理系统系列：实验报告一~四（系统分析/可行性分析/数据库分析/ipynb）+ 管理系统课程设计报告 + 利丰案例</td>\n<td style=\"text-align: left;\">管理信息系统\\</td>\n</tr>\n</tbody>\n</table>\n<h2>四、管理与商科类（源路径原件）</h2>\n<table>\n<thead>\n<tr>\n<th style=\"text-align: left;\">课程</th>\n<th style=\"text-align: left;\">作品 / 材料</th>\n<th style=\"text-align: left;\">源相对路径（大学\\）</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td style=\"text-align: left;\">电子商务</td>\n<td style=\"text-align: left;\">《电竞中交互式虚拟购物物（IVS）对消费者游戏乐趣及品牌态度的影响研究》（论文+PDF+第 19 组汇报 PPT）</td>\n<td style=\"text-align: left;\">电子商务\\</td>\n</tr>\n<tr>\n<td style=\"text-align: left;\">组织与战略管理</td>\n<td style=\"text-align: left;\">小组作业：海底捞企业战略分析、苹果公司相关多元化战略分析（含会议纪要 + PPT）</td>\n<td style=\"text-align: left;\">组织与战略管理\\</td>\n</tr>\n<tr>\n<td style=\"text-align: left;\">毛概 / 习思想</td>\n<td style=\"text-align: left;\">毛概讲课 PPT + 大纲、习思想题库</td>\n<td style=\"text-align: left;\">毛概\\ 习思想\\</td>\n</tr>\n</tbody>\n</table>\n<h2>五、实践与证书类成果</h2>\n<table>\n<thead>\n<tr>\n<th style=\"text-align: left;\">成果</th>\n<th style=\"text-align: left;\">存放位置</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td style=\"text-align: left;\">CET-4 成绩单（503 分，2025.06）</td>\n<td style=\"text-align: left;\"><code>06_证书与附件/CET4成绩单_202506.pdf</code></td>\n</tr>\n<tr>\n<td style=\"text-align: left;\">CET-6 准考证（2026.06 首考）</td>\n<td style=\"text-align: left;\"><code>06_证书与附件/CET6准考证_202606.pdf</code></td>\n</tr>\n<tr>\n<td style=\"text-align: left;\">综评量化表（2024-2025，总分 27.5）</td>\n<td style=\"text-align: left;\"><code>06_证书与附件/综评量化表_2024-2025.xlsx</code></td>\n</tr>\n<tr>\n<td style=\"text-align: left;\">2025 暑期实践过程材料（立项书、新闻稿 7 篇、万里边疆 PPT 60MB、写实记录）</td>\n<td style=\"text-align: left;\">源路径 2025暑期社会实践\\（体积大未复制）</td>\n</tr>\n<tr>\n<td style=\"text-align: left;\">素质能力评价佐证截图（安全知识竞赛、宪法知识学习、集体跳绳）</td>\n<td style=\"text-align: left;\">源路径 2024-2025素质能力评价\\</td>\n</tr>\n</tbody>\n</table>\n<h2>六、备考资料（不投简历，仅规划参考）</h2>\n<ul>\n<li><strong>考研（暂时不考虑）</strong>：山东大学管理科学与工程（科目：840 管理学、数学三、英语一、政治），备考总规划与四科知识点大全已就绪 → 源路径 1-2026考研\\计划与资料\\；复试面试全攻略 → 1-2026考研\\考研面试\\</li>\n<li><strong>六级</strong>：核心 2000 词、翻译预测、写作主题词等（2026-08-25 更新，推测备考 2026.12 二战）→ 源路径 六级\\</li>\n</ul>\n<blockquote>\n<p>注：暂时不考虑考研，专注秋招。考研资料保留备用。</p>\n</blockquote>"
       }
      ]
     }
@@ -7291,7 +7336,7 @@ window.SITE_DATA = {
       {
        "title": "应届生面试逆风翻盘六技巧_纯干货版_2026-09-03",
        "icon": "📄",
-       "html": "<h1>应届生面试逆风翻盘：普通本科零经验战胜硕士的六个技巧</h1>\n<blockquote>\n<p>来源：抖音「应届生求职经验分享（纯干货版）」作者自述：普通本科零经验，与上海归来硕士竞争同一岗位，逆风翻盘当场拿 offer</p>\n</blockquote>\n<h2>速读（核心结论）</h2>\n<ul>\n<li><strong>背景</strong>：普通本科、零全职经验，与上海硕士+两年经验者竞争同一岗位，最终老板当场录用、免试岗试用期、底薪加码、甚至提出主管+20%分红</li>\n<li><strong>翻盘核心</strong>：不是靠简历硬实力，而是靠\"对目标业务的微型提案\"——等待时主动分析业务问题，临走前大胆讲给老板听，说到第二点老板就拿笔记本记了一整页</li>\n<li><strong>六个可复用技巧</strong>：① 不管会不会先说会 ② 目的先于选择 ③ 遇到变故主动补救不空等 ④ 别信老板画的饼 ⑤ 老板问信心大声说可以 ⑥ 大方展示加分项</li>\n<li><strong>深层认知</strong>：没有实操的学习都是镜中观月；找工作看缘分但前提是把可控的事做到极致；不要去烂公司消耗自己</li>\n</ul>\n<h2>面试过程关键节点复盘</h2>\n<table>\n<thead>\n<tr>\n<th>节点</th>\n<th>发生了什么</th>\n<th>关键动作</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>人事面</td>\n<td>零经验但岗位技能\"都会\"</td>\n<td>技巧①：先拿到机会</td>\n</tr>\n<tr>\n<td>等待40分钟</td>\n<td>人事让下楼逛商场</td>\n<td>没逛，坐一楼分析业务，看出不少问题</td>\n</tr>\n<tr>\n<td>等老板2小时</td>\n<td>十几人一起等，无人离开</td>\n<td>把思考的问题复盘整理，发微信对话框备用</td>\n</tr>\n<tr>\n<td>见老板</td>\n<td>自我介绍摆烂只说姓名年龄</td>\n<td>⚠️ 反面教材，不要学</td>\n</tr>\n<tr>\n<td>老板选硕士</td>\n<td>一秒选定上海硕士</td>\n<td>作者没戏了，但起身又坐下</td>\n</tr>\n<tr>\n<td>临走前提问题</td>\n<td>问老板愿不愿意听业务问题</td>\n<td>老板耐心听，第二点就喊停记笔记，记了一整页</td>\n</tr>\n<tr>\n<td>能力测试</td>\n<td>10分钟分析隔壁同行</td>\n<td>人事带错路→技巧③主动补救→写自己业务未来方向</td>\n</tr>\n<tr>\n<td>二次测试</td>\n<td>5分钟写出6个点</td>\n<td>老板当场录用，免试岗试用期，底薪加码</td>\n</tr>\n<tr>\n<td>意外加分</td>\n<td>老板翻聊天记录看到之前写的方向</td>\n<td>提出主管+20%分红+合伙人（技巧④别信饼）</td>\n</tr>\n<tr>\n<td>信心测试</td>\n<td>老板问有没有信心</td>\n<td>停顿0.5秒大喊\"有\"（技巧⑤）</td>\n</tr>\n<tr>\n<td>成熟度追问</td>\n<td>老板问为什么思想成熟</td>\n<td>展示抖音账号（平时写自我成长文字）（技巧⑥）</td>\n</tr>\n</tbody>\n</table>\n<h2>六个核心技巧</h2>\n<h3>技巧①：不管会不会，咱先说会</h3>\n<ul>\n<li>任何东西都可以学，不是非要会了才能胜任，恰恰是通过一个机会增长出原本没有的能力</li>\n<li><strong>做中学，学中做</strong>，先得到机会再说，不要被招聘条件吓住</li>\n<li>反向判断：越是要求明确、门槛清晰的岗位，公司越正规、工作越务实；对无经验小白\"可做\"的岗位反倒要警惕含金量低、可替代性强、甚至有陷阱</li>\n<li>求职要<strong>向上够</strong>，去触碰那些你暂时配不上的机会</li>\n</ul>\n<h3>技巧②：目的先于选择</h3>\n<p>找工作前必须厘清真实目标，不要觉得差不多就行：</p>\n<table>\n<thead>\n<tr>\n<th>你的目的</th>\n<th>选择策略</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>窥见完整商业链路、积累行业认知</td>\n<td>不用执着起步岗位，从打杂干起也愿意</td>\n</tr>\n<tr>\n<td>赚钱为核心</td>\n<td>大方追逐高薪</td>\n</tr>\n<tr>\n<td>优先身心舒适</td>\n<td>选通勤近、压力小、工时规律的</td>\n</tr>\n<tr>\n<td>长期发展+专业壁垒</td>\n<td>谨慎筛选，宁缺毋滥</td>\n</tr>\n</tbody>\n</table>\n<blockquote>\n<p>目的清晰，选择才不会动摇。</p>\n</blockquote>\n<h3>技巧③：遇到变故不要空等，用主动补救代替被动归因</h3>\n<ul>\n<li>当因客观原因无法完成交办任务时，绝不要坐等过期或归咎外界</li>\n<li>哪怕原任务无法推进，也必须给上级一个交代，让他看到你的努力和应变能力</li>\n<li><strong>先想补救措施，无法补救就立刻转做其他有价值的事</strong>，一定不要让自己处于被动空转状态</li>\n<li>案例：人事带错了同行地址，作者没有干等，而是写了自己业务的未来调整方向</li>\n</ul>\n<h3>技巧④：不要轻易相信老板画的饼</h3>\n<ul>\n<li>老板当场说\"20%分红\"\"合伙人\"\"当主管\"——这些话有画饼成分，可能是气氛到了的助兴词</li>\n<li>可能是因为他从没遇到过满意的人，急于宣泄赞赏</li>\n<li><strong>没有写进合同里的任何话都算不得数</strong></li>\n<li>听听就得了，不要被大饼冲昏头脑，时刻保持清醒</li>\n<li>但不管是不是饼，被赏识已达成阶段性目标</li>\n</ul>\n<h3>技巧⑤：老板问能不能做到/有没有信心，不管有没有都大声说可以</h3>\n<ul>\n<li>做不到100分就尽量做到80分，做不到80分就做到60分</li>\n<li>很多时候老板交代的任务他自己也不一定能完成，他只是把理想效果抛给你</li>\n<li>能完成最好，实在完不成也不会过多责怪，关键是让他看到你在努力</li>\n<li><strong>真正被看中的是不推脱、不畏难、持续求解的姿态</strong>，而不是一上来就畏难、推脱、不自信</li>\n</ul>\n<h3>技巧⑥：大方展示加分项，构成不可替代性</h3>\n<ul>\n<li>把自己擅长或有微小成绩的领域坦荡展示出来</li>\n<li>虽然不是硬性要求，却能成为让你区别于众人的亮点</li>\n<li>让人觉得你是个能干实事的人</li>\n<li>案例：作者展示自己的抖音账号（平时写自我成长文字），老板两眼放光说\"将来会有前途\"</li>\n</ul>\n<h2>深层观点</h2>\n<h3>实操 &gt; 模仿</h3>\n<ul>\n<li>没有实操项目的学习都叫模仿，是<strong>镜中观月</strong>——你以为你会了、懂了、熟悉了，但看到的只是别人呈现的1%，背后还有99%看不到</li>\n<li>网上走马观花式观看没有用，必须去解决一个实际问题，在过程中不断碰到小问题、逐一解决，跑通整个链路才能真的长出能力</li>\n<li>不用一步登天，只要一直有阶段性突破，整体往好的方向发展就够了</li>\n</ul>\n<h3>找工作看缘分，但前提是做到极致</h3>\n<ul>\n<li>作者筛选了50多家公司，最后只留2家觉得值得去</li>\n<li>前一场准备很久的面试，当天早上突然决定不去（内心抗拒）；最后去的这家是突然通知、什么都没准备，反而成了</li>\n<li>把能力范围内所有可控的事做到极致，剩下的交给时间</li>\n<li>暂时找不到合适工作不一定是你不够好，可能是真正属于你的公司正在为你斩断其他退路</li>\n<li><strong>保持筛选标准，提高甄别能力，不要去烂公司消耗自己</strong></li>\n<li>那个真正和你磁场相合的地方，走进去那一刻你立马会感应到</li>\n</ul>\n<h2>对文雪求职的适用性</h2>\n<h3>直接可用</h3>\n<ul>\n<li><strong>技巧①</strong>：文雪有瑞幸咖啡师、教育项目助理等经历，面对供应链/采购岗位时，\"该会的技能都说会\"（用友U8+、Python/R/SPSS），先拿到面试机会</li>\n<li><strong>技巧②</strong>：文雪当前目的是\"秋招求职+考研并行\"，求职端优先济南及周边外企/央国企子公司，目的清晰，选择不动摇</li>\n<li><strong>技巧③</strong>：面试中如果遇到突发情况（如临时加试、材料缺失），主动补救而非空等</li>\n<li><strong>技巧⑤</strong>：面试官问\"能不能胜任\"\"有没有信心\"时，毫不犹豫说可以</li>\n<li><strong>技巧⑥</strong>：文雪的百川智库（个人知识库+AI工具体系）本身就是极强的加分项，面试时可大方展示</li>\n</ul>\n<h3>需警惕</h3>\n<ul>\n<li><strong>技巧④</strong>：文雪求职期遇到老板画饼（如\"未来有晋升空间\"\"项目分红\"）时，保持清醒，以合同和实际待遇为准</li>\n<li><strong>自我介绍反面教材</strong>：作者自我介绍摆烂是反面案例，文雪面试时必须好好准备自我介绍，展示优势</li>\n<li><strong>\"先说会\"的边界</strong>：可以说\"会基础，愿意深入学\"，不要在完全不懂的领域硬说精通，入职后露馅更糟</li>\n</ul>\n<h3>与求职知识库的关联</h3>\n<ul>\n<li>与 面试表达思路与临场状态十面九过方法论_2026-09-03 互补：那篇讲表达框架，这篇讲临场应变和心态</li>\n<li>与 面试即行业调研与能力校准方法论_2026-09-03 呼应：作者等待时分析业务问题，正是\"把面试当行业调研\"的实践</li>\n<li>六个技巧可补充进 scm-interview-prep（Skill 4）的面试心态和应变模块</li>\n</ul>\n<h2>易混淆点 / 关键补充</h2>\n<ul>\n<li><strong>\"先说会\"≠\"撒谎\"</strong>：是态度上的积极争取，不是伪造经历；入职后要快速补上不会的部分</li>\n<li><strong>\"分析业务问题\"需要真材实料</strong>：作者能看出问题是因为有思考习惯和行业积累，不是凭空编，面试前研究业务是基础</li>\n<li><strong>\"临走前提问题\"有风险</strong>：如果老板不是愿意倾听的人，可能适得其反；但换个角度，不愿意倾听的老板也不值得效力</li>\n<li><strong>\"道层面的三点方法\"</strong>：文案提到他人分析了三个\"道\"层面的天然特质，但具体内容在视频画面中，文案未覆盖，需观看原视频</li>\n<li><strong>作者筛选50家留2家</strong>：说明大量投递+严格筛选是常态，不要因为几次被拒就自我否定</li>\n<li><strong>\"免试岗试用期\"是例外不是常态</strong>：作者的翻盘是极端案例，不要期望每次都这样，正常流程仍需按部就班</li>\n</ul>\n<hr />\n<blockquote>\n<p>💡 本文基于视频完整文案整理（纯干货版，含6个技巧+深层认知），\"道层面三点方法\"具体内容请观看原视频画面。</p>\n<p>相关：面试表达思路与临场状态十面九过方法论_2026-09-03、面试即行业调研与能力校准方法论_2026-09-03、面试反问技巧_2026-08-26、面试必看合集_猴猴肚肚/00_合集总览_2026-08-31</p>\n</blockquote>\n<h2>关联笔记</h2>\n<ul>\n<li>面试表达思路与临场状态十面九过方法论_2026-09-03</li>\n<li>面试即行业调研与能力校准方法论_2026-09-03</li>\n<li>面试反问技巧_2026-08-26</li>\n<li>面试必看合集_猴猴肚肚/00_合集总览_2026-08-31</li>\n</ul>"
+       "html": "<h1>应届生面试逆风翻盘：普通本科零经验战胜硕士的六个技巧</h1>\n<blockquote>\n<p>来源：抖音「应届生求职经验分享（纯干货版）」作者自述：普通本科零经验，与上海归来硕士竞争同一岗位，逆风翻盘当场拿 offer</p>\n</blockquote>\n<h2>速读（核心结论）</h2>\n<ul>\n<li><strong>背景</strong>：普通本科、零全职经验，与上海硕士+两年经验者竞争同一岗位，最终老板当场录用、免试岗试用期、底薪加码、甚至提出主管+20%分红</li>\n<li><strong>翻盘核心</strong>：不是靠简历硬实力，而是靠\"对目标业务的微型提案\"——等待时主动分析业务问题，临走前大胆讲给老板听，说到第二点老板就拿笔记本记了一整页</li>\n<li><strong>六个可复用技巧</strong>：① 不管会不会先说会 ② 目的先于选择 ③ 遇到变故主动补救不空等 ④ 别信老板画的饼 ⑤ 老板问信心大声说可以 ⑥ 大方展示加分项</li>\n<li><strong>深层认知</strong>：没有实操的学习都是镜中观月；找工作看缘分但前提是把可控的事做到极致；不要去烂公司消耗自己</li>\n</ul>\n<h2>面试过程关键节点复盘</h2>\n<table>\n<thead>\n<tr>\n<th>节点</th>\n<th>发生了什么</th>\n<th>关键动作</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>人事面</td>\n<td>零经验但岗位技能\"都会\"</td>\n<td>技巧①：先拿到机会</td>\n</tr>\n<tr>\n<td>等待40分钟</td>\n<td>人事让下楼逛商场</td>\n<td>没逛，坐一楼分析业务，看出不少问题</td>\n</tr>\n<tr>\n<td>等老板2小时</td>\n<td>十几人一起等，无人离开</td>\n<td>把思考的问题复盘整理，发微信对话框备用</td>\n</tr>\n<tr>\n<td>见老板</td>\n<td>自我介绍摆烂只说姓名年龄</td>\n<td>⚠️ 反面教材，不要学</td>\n</tr>\n<tr>\n<td>老板选硕士</td>\n<td>一秒选定上海硕士</td>\n<td>作者没戏了，但起身又坐下</td>\n</tr>\n<tr>\n<td>临走前提问题</td>\n<td>问老板愿不愿意听业务问题</td>\n<td>老板耐心听，第二点就喊停记笔记，记了一整页</td>\n</tr>\n<tr>\n<td>能力测试</td>\n<td>10分钟分析隔壁同行</td>\n<td>人事带错路→技巧③主动补救→写自己业务未来方向</td>\n</tr>\n<tr>\n<td>二次测试</td>\n<td>5分钟写出6个点</td>\n<td>老板当场录用，免试岗试用期，底薪加码</td>\n</tr>\n<tr>\n<td>意外加分</td>\n<td>老板翻聊天记录看到之前写的方向</td>\n<td>提出主管+20%分红+合伙人（技巧④别信饼）</td>\n</tr>\n<tr>\n<td>信心测试</td>\n<td>老板问有没有信心</td>\n<td>停顿0.5秒大喊\"有\"（技巧⑤）</td>\n</tr>\n<tr>\n<td>成熟度追问</td>\n<td>老板问为什么思想成熟</td>\n<td>展示抖音账号（平时写自我成长文字）（技巧⑥）</td>\n</tr>\n</tbody>\n</table>\n<h2>六个核心技巧</h2>\n<h3>技巧①：不管会不会，咱先说会</h3>\n<ul>\n<li>任何东西都可以学，不是非要会了才能胜任，恰恰是通过一个机会增长出原本没有的能力</li>\n<li><strong>做中学，学中做</strong>，先得到机会再说，不要被招聘条件吓住</li>\n<li>反向判断：越是要求明确、门槛清晰的岗位，公司越正规、工作越务实；对无经验小白\"可做\"的岗位反倒要警惕含金量低、可替代性强、甚至有陷阱</li>\n<li>求职要<strong>向上够</strong>，去触碰那些你暂时配不上的机会</li>\n</ul>\n<h3>技巧②：目的先于选择</h3>\n<p>找工作前必须厘清真实目标，不要觉得差不多就行：</p>\n<table>\n<thead>\n<tr>\n<th>你的目的</th>\n<th>选择策略</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>窥见完整商业链路、积累行业认知</td>\n<td>不用执着起步岗位，从打杂干起也愿意</td>\n</tr>\n<tr>\n<td>赚钱为核心</td>\n<td>大方追逐高薪</td>\n</tr>\n<tr>\n<td>优先身心舒适</td>\n<td>选通勤近、压力小、工时规律的</td>\n</tr>\n<tr>\n<td>长期发展+专业壁垒</td>\n<td>谨慎筛选，宁缺毋滥</td>\n</tr>\n</tbody>\n</table>\n<blockquote>\n<p>目的清晰，选择才不会动摇。</p>\n</blockquote>\n<h3>技巧③：遇到变故不要空等，用主动补救代替被动归因</h3>\n<ul>\n<li>当因客观原因无法完成交办任务时，绝不要坐等过期或归咎外界</li>\n<li>哪怕原任务无法推进，也必须给上级一个交代，让他看到你的努力和应变能力</li>\n<li><strong>先想补救措施，无法补救就立刻转做其他有价值的事</strong>，一定不要让自己处于被动空转状态</li>\n<li>案例：人事带错了同行地址，作者没有干等，而是写了自己业务的未来调整方向</li>\n</ul>\n<h3>技巧④：不要轻易相信老板画的饼</h3>\n<ul>\n<li>老板当场说\"20%分红\"\"合伙人\"\"当主管\"——这些话有画饼成分，可能是气氛到了的助兴词</li>\n<li>可能是因为他从没遇到过满意的人，急于宣泄赞赏</li>\n<li><strong>没有写进合同里的任何话都算不得数</strong></li>\n<li>听听就得了，不要被大饼冲昏头脑，时刻保持清醒</li>\n<li>但不管是不是饼，被赏识已达成阶段性目标</li>\n</ul>\n<h3>技巧⑤：老板问能不能做到/有没有信心，不管有没有都大声说可以</h3>\n<ul>\n<li>做不到100分就尽量做到80分，做不到80分就做到60分</li>\n<li>很多时候老板交代的任务他自己也不一定能完成，他只是把理想效果抛给你</li>\n<li>能完成最好，实在完不成也不会过多责怪，关键是让他看到你在努力</li>\n<li><strong>真正被看中的是不推脱、不畏难、持续求解的姿态</strong>，而不是一上来就畏难、推脱、不自信</li>\n</ul>\n<h3>技巧⑥：大方展示加分项，构成不可替代性</h3>\n<ul>\n<li>把自己擅长或有微小成绩的领域坦荡展示出来</li>\n<li>虽然不是硬性要求，却能成为让你区别于众人的亮点</li>\n<li>让人觉得你是个能干实事的人</li>\n<li>案例：作者展示自己的抖音账号（平时写自我成长文字），老板两眼放光说\"将来会有前途\"</li>\n</ul>\n<h2>深层观点</h2>\n<h3>实操 &gt; 模仿</h3>\n<ul>\n<li>没有实操项目的学习都叫模仿，是<strong>镜中观月</strong>——你以为你会了、懂了、熟悉了，但看到的只是别人呈现的1%，背后还有99%看不到</li>\n<li>网上走马观花式观看没有用，必须去解决一个实际问题，在过程中不断碰到小问题、逐一解决，跑通整个链路才能真的长出能力</li>\n<li>不用一步登天，只要一直有阶段性突破，整体往好的方向发展就够了</li>\n</ul>\n<h3>找工作看缘分，但前提是做到极致</h3>\n<ul>\n<li>作者筛选了50多家公司，最后只留2家觉得值得去</li>\n<li>前一场准备很久的面试，当天早上突然决定不去（内心抗拒）；最后去的这家是突然通知、什么都没准备，反而成了</li>\n<li>把能力范围内所有可控的事做到极致，剩下的交给时间</li>\n<li>暂时找不到合适工作不一定是你不够好，可能是真正属于你的公司正在为你斩断其他退路</li>\n<li><strong>保持筛选标准，提高甄别能力，不要去烂公司消耗自己</strong></li>\n<li>那个真正和你磁场相合的地方，走进去那一刻你立马会感应到</li>\n</ul>\n<h2>对文雪求职的适用性</h2>\n<h3>直接可用</h3>\n<ul>\n<li><strong>技巧①</strong>：文雪有瑞幸咖啡师、教育项目助理等经历，面对供应链/采购岗位时，\"该会的技能都说会\"（用友U8+、Python/R/SPSS），先拿到面试机会</li>\n<li><strong>技巧②</strong>：文雪当前目的是\"秋招求职为主，暂时不考虑考研\"，求职端优先济南及周边外企/央国企子公司，目的清晰，选择不动摇</li>\n<li><strong>技巧③</strong>：面试中如果遇到突发情况（如临时加试、材料缺失），主动补救而非空等</li>\n<li><strong>技巧⑤</strong>：面试官问\"能不能胜任\"\"有没有信心\"时，毫不犹豫说可以</li>\n<li><strong>技巧⑥</strong>：文雪的百川智库（个人知识库+AI工具体系）本身就是极强的加分项，面试时可大方展示</li>\n</ul>\n<h3>需警惕</h3>\n<ul>\n<li><strong>技巧④</strong>：文雪求职期遇到老板画饼（如\"未来有晋升空间\"\"项目分红\"）时，保持清醒，以合同和实际待遇为准</li>\n<li><strong>自我介绍反面教材</strong>：作者自我介绍摆烂是反面案例，文雪面试时必须好好准备自我介绍，展示优势</li>\n<li><strong>\"先说会\"的边界</strong>：可以说\"会基础，愿意深入学\"，不要在完全不懂的领域硬说精通，入职后露馅更糟</li>\n</ul>\n<h3>与求职知识库的关联</h3>\n<ul>\n<li>与 面试表达思路与临场状态十面九过方法论_2026-09-03 互补：那篇讲表达框架，这篇讲临场应变和心态</li>\n<li>与 面试即行业调研与能力校准方法论_2026-09-03 呼应：作者等待时分析业务问题，正是\"把面试当行业调研\"的实践</li>\n<li>六个技巧可补充进 scm-interview-prep（Skill 4）的面试心态和应变模块</li>\n</ul>\n<h2>易混淆点 / 关键补充</h2>\n<ul>\n<li><strong>\"先说会\"≠\"撒谎\"</strong>：是态度上的积极争取，不是伪造经历；入职后要快速补上不会的部分</li>\n<li><strong>\"分析业务问题\"需要真材实料</strong>：作者能看出问题是因为有思考习惯和行业积累，不是凭空编，面试前研究业务是基础</li>\n<li><strong>\"临走前提问题\"有风险</strong>：如果老板不是愿意倾听的人，可能适得其反；但换个角度，不愿意倾听的老板也不值得效力</li>\n<li><strong>\"道层面的三点方法\"</strong>：文案提到他人分析了三个\"道\"层面的天然特质，但具体内容在视频画面中，文案未覆盖，需观看原视频</li>\n<li><strong>作者筛选50家留2家</strong>：说明大量投递+严格筛选是常态，不要因为几次被拒就自我否定</li>\n<li><strong>\"免试岗试用期\"是例外不是常态</strong>：作者的翻盘是极端案例，不要期望每次都这样，正常流程仍需按部就班</li>\n</ul>\n<hr />\n<blockquote>\n<p>💡 本文基于视频完整文案整理（纯干货版，含6个技巧+深层认知），\"道层面三点方法\"具体内容请观看原视频画面。</p>\n<p>相关：面试表达思路与临场状态十面九过方法论_2026-09-03、面试即行业调研与能力校准方法论_2026-09-03、面试反问技巧_2026-08-26、面试必看合集_猴猴肚肚/00_合集总览_2026-08-31</p>\n</blockquote>\n<h2>关联笔记</h2>\n<ul>\n<li>面试表达思路与临场状态十面九过方法论_2026-09-03</li>\n<li>面试即行业调研与能力校准方法论_2026-09-03</li>\n<li>面试反问技巧_2026-08-26</li>\n<li>面试必看合集_猴猴肚肚/00_合集总览_2026-08-31</li>\n</ul>"
       },
       {
        "title": "求其上得其中求职目标设定与配得感_2026-08-28",
@@ -7621,7 +7666,7 @@ window.SITE_DATA = {
       {
        "title": "当你拥有的越多老天给你越多_损有余补不足与马太效应_2026-09-04",
        "icon": "📄",
-       "html": "<h1>当你拥有的越多，老天给你越多：损有余补不足与马太效应</h1>\n<blockquote>\n<p>来源：抖音「史蒂文不做牛马」07/03 短视频，金句类认知分享。</p>\n</blockquote>\n<h2>速读（核心结论）</h2>\n<ul>\n<li><strong>核心命题</strong>：当你拥有的越多，老天会给你越多（马太效应/强者愈强）</li>\n<li><strong>《道德经》第77章</strong>：\"天之道，损有余而补不足；人之道，损不足以奉有余\"</li>\n<li><strong>人之道的现实表现</strong>：掠夺本就不足的弱者，去供养本就富足有余的强者</li>\n<li><strong>破局关键</strong>：拥有更高更多的认知，资源会扑面而来——认知是打破\"损不足以奉有余\"的杠杆</li>\n</ul>\n<h2>视频原文（金句）</h2>\n<blockquote>\n<p>当你拥有的越多，老天会给你越多。人之道，损不足以奉有余：掠夺本就不足的弱者，去供养本就富足有余的强者。当你拥有更高更多的认知，你会发现更多的资源将扑面而来。</p>\n</blockquote>\n<h2>深度解读</h2>\n<h3>1. 马太效应（强者愈强）</h3>\n<p>\"凡有的，还要加倍给他叫他多余；没有的，连他所有的也要夺过来\"——《圣经·马太福音》第25章。</p>\n<ul>\n<li><strong>资源会向已有资源者聚集</strong>：钱、人脉、机会、注意力都符合这个规律</li>\n<li><strong>解释</strong>：资源拥有者能撬动更多资源（复利、杠杆、信任背书、试错资本）</li>\n<li><strong>现实例子</strong>：越有钱越容易投资获利、越有名越容易被推荐、越成功越容易获得机会</li>\n</ul>\n<h3>2. 道德经的\"天之道 vs 人之道\"</h3>\n<p>《道德经》第77章原文：</p>\n<blockquote>\n<p>\"天之道，其犹张弓与？高者抑之，下者举之；有余者损之，不足者补之。天之道，损有余而补不足，人之道则不然，损不足以奉有余。\"</p>\n</blockquote>\n<table>\n<thead>\n<tr>\n<th></th>\n<th>运行逻辑</th>\n<th>效果</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td><strong>天之道</strong></td>\n<td>损有余而补不足</td>\n<td>平衡、调节、公平（像拉弓：高了压低，低了抬高）</td>\n</tr>\n<tr>\n<td><strong>人之道</strong></td>\n<td>损不足以奉有余</td>\n<td>失衡、加剧、剥削（掠夺弱者供养强者）</td>\n</tr>\n</tbody>\n</table>\n<ul>\n<li><strong>天之道</strong>是自然的调节机制（能量守恒、生态平衡）</li>\n<li><strong>人之道</strong>是现实社会的运行逻辑（资本、权力、资源向强者集中）</li>\n</ul>\n<h3>3. 认知作为破局杠杆</h3>\n<p>视频的核心落点：<strong>认知是唯一能跳出\"损不足以奉有余\"循环的东西</strong>。</p>\n<ul>\n<li>资源会流向有认知的人，因为认知 = 判断力 = 能识别并抓住机会</li>\n<li>\"当你拥有更高更多的认知，你会发现更多的资源将扑面而来\"</li>\n<li>认知提升 → 看到别人看不到的机会 → 提前布局 → 获得资源 → 进一步验证和提升认知（正循环）</li>\n</ul>\n<h2>与求职/成长的关联（个人应用）</h2>\n<p>对正在秋招求职和考研并行的你：</p>\n<ul>\n<li><strong>求职视角</strong>：好学校/好实习/好作品是\"已有的\"，会让更多机会涌来（校招门槛、面试通过率、企业背书都符合马太效应）——所以要尽力把\"简历资产\"做厚</li>\n<li><strong>认知视角</strong>：面试中\"向高手借脑\"（前一条笔记《面试即行业调研》）、把每次面试当访谈复盘，就是在主动积累认知资本</li>\n<li><strong>警惕</strong>：资源不足时更要避免\"自我感动式努力\"（杠精台提示词里也有类似逻辑），方向错误时努力越多损失越大</li>\n</ul>\n<h2>易混淆点 / 关键补充</h2>\n<ul>\n<li><strong>\"损不足以奉有余\"不是宿命论</strong>：它描述的是\"人之道\"的现状，但认知提升可以改变个人处境</li>\n<li><strong>\"老天给你越多\"不是玄学</strong>：本质是复利+杠杆+资源聚集的客观规律，不是命运安排</li>\n<li><strong>天之道 vs 人之道的对举</strong>：老子是用天之道来反衬、批判人之道，提醒人要效法天道（补不足），而不是顺从人道的弱肉强食</li>\n<li><strong>注意尺度</strong>：这条视频是短视频金句，观点有冲击力但未展开论证，本质是马太效应+道德经的通俗化表达</li>\n<li><strong>认知≠知道很多</strong>：这里\"认知\"指判断力和行动力，不是信息量；知道但做不到不产生资源</li>\n</ul>\n<hr />\n<blockquote>\n<p>💡 本文基于视频完整文案整理，观点为作者原话+道德经原文对照解读，具体论证请观看原视频。</p>\n<p>相关：阿尔钦1950不确定性进化与经济理论解读_2026-09-03、南大教授刘嘉AI真相访谈_为什么不推荐下班学AI_2026-09-03、面试即行业调研与能力校准方法论_2026-09-03</p>\n</blockquote>\n<h2>关联笔记</h2>\n<ul>\n<li>阿尔钦1950不确定性进化与经济理论解读_2026-09-03</li>\n<li>南大教授刘嘉AI真相访谈_为什么不推荐下班学AI_2026-09-03</li>\n<li>面试即行业调研与能力校准方法论_2026-09-03</li>\n</ul>"
+       "html": "<h1>当你拥有的越多，老天给你越多：损有余补不足与马太效应</h1>\n<blockquote>\n<p>来源：抖音「史蒂文不做牛马」07/03 短视频，金句类认知分享。</p>\n</blockquote>\n<h2>速读（核心结论）</h2>\n<ul>\n<li><strong>核心命题</strong>：当你拥有的越多，老天会给你越多（马太效应/强者愈强）</li>\n<li><strong>《道德经》第77章</strong>：\"天之道，损有余而补不足；人之道，损不足以奉有余\"</li>\n<li><strong>人之道的现实表现</strong>：掠夺本就不足的弱者，去供养本就富足有余的强者</li>\n<li><strong>破局关键</strong>：拥有更高更多的认知，资源会扑面而来——认知是打破\"损不足以奉有余\"的杠杆</li>\n</ul>\n<h2>视频原文（金句）</h2>\n<blockquote>\n<p>当你拥有的越多，老天会给你越多。人之道，损不足以奉有余：掠夺本就不足的弱者，去供养本就富足有余的强者。当你拥有更高更多的认知，你会发现更多的资源将扑面而来。</p>\n</blockquote>\n<h2>深度解读</h2>\n<h3>1. 马太效应（强者愈强）</h3>\n<p>\"凡有的，还要加倍给他叫他多余；没有的，连他所有的也要夺过来\"——《圣经·马太福音》第25章。</p>\n<ul>\n<li><strong>资源会向已有资源者聚集</strong>：钱、人脉、机会、注意力都符合这个规律</li>\n<li><strong>解释</strong>：资源拥有者能撬动更多资源（复利、杠杆、信任背书、试错资本）</li>\n<li><strong>现实例子</strong>：越有钱越容易投资获利、越有名越容易被推荐、越成功越容易获得机会</li>\n</ul>\n<h3>2. 道德经的\"天之道 vs 人之道\"</h3>\n<p>《道德经》第77章原文：</p>\n<blockquote>\n<p>\"天之道，其犹张弓与？高者抑之，下者举之；有余者损之，不足者补之。天之道，损有余而补不足，人之道则不然，损不足以奉有余。\"</p>\n</blockquote>\n<table>\n<thead>\n<tr>\n<th></th>\n<th>运行逻辑</th>\n<th>效果</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td><strong>天之道</strong></td>\n<td>损有余而补不足</td>\n<td>平衡、调节、公平（像拉弓：高了压低，低了抬高）</td>\n</tr>\n<tr>\n<td><strong>人之道</strong></td>\n<td>损不足以奉有余</td>\n<td>失衡、加剧、剥削（掠夺弱者供养强者）</td>\n</tr>\n</tbody>\n</table>\n<ul>\n<li><strong>天之道</strong>是自然的调节机制（能量守恒、生态平衡）</li>\n<li><strong>人之道</strong>是现实社会的运行逻辑（资本、权力、资源向强者集中）</li>\n</ul>\n<h3>3. 认知作为破局杠杆</h3>\n<p>视频的核心落点：<strong>认知是唯一能跳出\"损不足以奉有余\"循环的东西</strong>。</p>\n<ul>\n<li>资源会流向有认知的人，因为认知 = 判断力 = 能识别并抓住机会</li>\n<li>\"当你拥有更高更多的认知，你会发现更多的资源将扑面而来\"</li>\n<li>认知提升 → 看到别人看不到的机会 → 提前布局 → 获得资源 → 进一步验证和提升认知（正循环）</li>\n</ul>\n<h2>与求职/成长的关联（个人应用）</h2>\n<p>对正在秋招求职（暂时不考虑考研）的你：</p>\n<ul>\n<li><strong>求职视角</strong>：好学校/好实习/好作品是\"已有的\"，会让更多机会涌来（校招门槛、面试通过率、企业背书都符合马太效应）——所以要尽力把\"简历资产\"做厚</li>\n<li><strong>认知视角</strong>：面试中\"向高手借脑\"（前一条笔记《面试即行业调研》）、把每次面试当访谈复盘，就是在主动积累认知资本</li>\n<li><strong>警惕</strong>：资源不足时更要避免\"自我感动式努力\"（杠精台提示词里也有类似逻辑），方向错误时努力越多损失越大</li>\n</ul>\n<h2>易混淆点 / 关键补充</h2>\n<ul>\n<li><strong>\"损不足以奉有余\"不是宿命论</strong>：它描述的是\"人之道\"的现状，但认知提升可以改变个人处境</li>\n<li><strong>\"老天给你越多\"不是玄学</strong>：本质是复利+杠杆+资源聚集的客观规律，不是命运安排</li>\n<li><strong>天之道 vs 人之道的对举</strong>：老子是用天之道来反衬、批判人之道，提醒人要效法天道（补不足），而不是顺从人道的弱肉强食</li>\n<li><strong>注意尺度</strong>：这条视频是短视频金句，观点有冲击力但未展开论证，本质是马太效应+道德经的通俗化表达</li>\n<li><strong>认知≠知道很多</strong>：这里\"认知\"指判断力和行动力，不是信息量；知道但做不到不产生资源</li>\n</ul>\n<hr />\n<blockquote>\n<p>💡 本文基于视频完整文案整理，观点为作者原话+道德经原文对照解读，具体论证请观看原视频。</p>\n<p>相关：阿尔钦1950不确定性进化与经济理论解读_2026-09-03、南大教授刘嘉AI真相访谈_为什么不推荐下班学AI_2026-09-03、面试即行业调研与能力校准方法论_2026-09-03</p>\n</blockquote>\n<h2>关联笔记</h2>\n<ul>\n<li>阿尔钦1950不确定性进化与经济理论解读_2026-09-03</li>\n<li>南大教授刘嘉AI真相访谈_为什么不推荐下班学AI_2026-09-03</li>\n<li>面试即行业调研与能力校准方法论_2026-09-03</li>\n</ul>"
       },
       {
        "title": "改变人生的30条人生经验_2026-08-26",
@@ -8878,7 +8923,7 @@ function loadMoney(){
     return d;
   }catch(e){ return JSON.parse(JSON.stringify(MONEY_DEFAULTS)); }
 }
-function saveMoney(data){ localStorage.setItem(MONEY_KEY, JSON.stringify(data)); }
+function saveMoney(data){ markLocalChange(); localStorage.setItem(MONEY_KEY, JSON.stringify(data)); }
 
 function getCycleRange(cycleStart){
   var now = new Date();
@@ -9309,7 +9354,7 @@ function loadHealth(){
     return d;
   }catch(e){ return JSON.parse(JSON.stringify(HEALTH_DEFAULTS)); }
 }
-function saveHealth(data){ localStorage.setItem(HEALTH_KEY, JSON.stringify(data)); }
+function saveHealth(data){ markLocalChange(); localStorage.setItem(HEALTH_KEY, JSON.stringify(data)); }
 
 function getWeekRange(){
   var now = new Date();
@@ -9659,7 +9704,7 @@ function loadDecision(){
     return d;
   }catch(e){ return JSON.parse(JSON.stringify(DECISION_DEFAULTS)); }
 }
-function saveDecision(data){ localStorage.setItem(DECISION_KEY, JSON.stringify(data)); }
+function saveDecision(data){ markLocalChange(); localStorage.setItem(DECISION_KEY, JSON.stringify(data)); }
 
 function initDecision(){
   var data = loadDecision();
@@ -9860,7 +9905,7 @@ function loadInspire(){
     return d;
   }catch(e){ return JSON.parse(JSON.stringify(INSPIRE_DEFAULTS)); }
 }
-function saveInspire(data){ localStorage.setItem(INSPIRE_KEY, JSON.stringify(data)); }
+function saveInspire(data){ markLocalChange(); localStorage.setItem(INSPIRE_KEY, JSON.stringify(data)); }
 
 function addInspire(){
   var input = document.getElementById("inspireInput");
@@ -10092,7 +10137,7 @@ function loadTodo(){
     return d;
   }catch(e){ return JSON.parse(JSON.stringify(TODO_DEFAULTS)); }
 }
-function saveTodo(data){ localStorage.setItem(TODO_KEY, JSON.stringify(data)); }
+function saveTodo(data){ markLocalChange(); localStorage.setItem(TODO_KEY, JSON.stringify(data)); }
 
 function addTodo(){
   var input = document.getElementById("todoInput");
@@ -10260,7 +10305,7 @@ function loadReport(){
     return d;
   }catch(e){ return JSON.parse(JSON.stringify(REPORT_DEFAULTS)); }
 }
-function saveReport(data){ localStorage.setItem(REPORT_KEY, JSON.stringify(data)); }
+function saveReport(data){ markLocalChange(); localStorage.setItem(REPORT_KEY, JSON.stringify(data)); }
 
 function selectReportType(type){
   var data = loadReport();
@@ -10508,7 +10553,7 @@ function loadDaily(){
     return d;
   }catch(e){ return JSON.parse(JSON.stringify(DAILY_DEFAULTS)); }
 }
-function saveDaily(data){
+function saveDaily(data){ markLocalChange();
   data.date = new Date().toISOString().slice(0,10);
   localStorage.setItem(DAILY_KEY, JSON.stringify(data));
 }
@@ -10763,7 +10808,7 @@ function loadSettings(){
     return s;
   }catch(e){ return JSON.parse(JSON.stringify(SETTINGS_DEFAULTS)); }
 }
-function saveSettings(s){ localStorage.setItem(SETTINGS_KEY, JSON.stringify(s)); }
+function saveSettings(s){ markLocalChange(); localStorage.setItem(SETTINGS_KEY, JSON.stringify(s)); }
 
 function switchSettingsTab(tab){
   document.querySelectorAll(".settings-nav-item").forEach(function(el){
@@ -10844,6 +10889,193 @@ function setFontSize(size){
   document.documentElement.style.fontSize = sizes[size] || "14px";
 }
 
+
+/* ========== Gist 云同步 ========== */
+var SYNC_CONFIG_KEY = "weh_sync_config_v1";
+var SYNC_META_KEY = "weh_sync_meta_v1";
+var SYNC_FILE = "weh-atelier-data.json";
+var _syncUploadTimer = null;
+
+function loadSyncConfig(){
+  try{ var c = JSON.parse(localStorage.getItem(SYNC_CONFIG_KEY)); return c && typeof c==="object" ? c : {}; }catch(e){ return {}; }
+}
+function loadSyncMeta(){
+  try{ var m = JSON.parse(localStorage.getItem(SYNC_META_KEY)); return m && typeof m==="object" ? m : {}; }catch(e){ return {}; }
+}
+function saveSyncMeta(m){ localStorage.setItem(SYNC_META_KEY, JSON.stringify(m)); }
+
+function readSyncInputs(){
+  var c = loadSyncConfig();
+  var t = document.getElementById("syncToken");
+  var g = document.getElementById("syncGistId");
+  var a = document.getElementById("syncAuto");
+  if(t) c.token = t.value.trim();
+  if(g) c.gistId = g.value.trim();
+  if(a) c.auto = !!a.checked;
+  return c;
+}
+
+function fmtSyncTime(ts){
+  var d = new Date(ts);
+  function p(n){ return (n<10?"0":"")+n; }
+  return (d.getMonth()+1)+"-"+p(d.getDate())+" "+p(d.getHours())+":"+p(d.getMinutes());
+}
+
+function renderSyncStatus(){
+  var c = loadSyncConfig();
+  var el = document.getElementById("syncStatus");
+  if(!el) return;
+  if(!c.token){ el.textContent = "未配置"; el.style.color = "var(--muted)"; return; }
+  if(!c.gistId){ el.textContent = "已填 Token，尚未连接（点“保存并连接”）"; el.style.color = "var(--muted)"; return; }
+  var parts = ["已连接 Gist " + c.gistId.slice(0,8) + "…"];
+  if(c.lastSync){ parts.push("上次同步 " + fmtSyncTime(c.lastSync)); }
+  el.textContent = parts.join(" · ");
+  el.style.color = c.auto ? "#2e7d32" : "var(--muted)";
+}
+
+function saveSyncConfig(){
+  var c = readSyncInputs();
+  localStorage.setItem(SYNC_CONFIG_KEY, JSON.stringify(c));
+  renderSyncStatus();
+  if(c.auto && c.token && c.gistId){ toast("自动同步已开启"); }
+}
+
+function markLocalChange(){
+  var m = loadSyncMeta();
+  m.lastLocalChange = Date.now();
+  saveSyncMeta(m);
+  var c = loadSyncConfig();
+  if(c.auto && c.token && c.gistId){
+    if(_syncUploadTimer) clearTimeout(_syncUploadTimer);
+    _syncUploadTimer = setTimeout(function(){ syncNow("upload", true); }, 3000);
+  }
+}
+
+function collectAllData(){
+  var data = {};
+  for(var key in DATA_KEYS){
+    try{
+      var val = localStorage.getItem(DATA_KEYS[key]);
+      if(val) data[key] = JSON.parse(val);
+    }catch(e){}
+  }
+  data.settings = loadSettings();
+  data.syncTime = Date.now();
+  return data;
+}
+
+function writeAllData(data){
+  for(var key in DATA_KEYS){
+    if(data[key] !== undefined){ localStorage.setItem(DATA_KEYS[key], JSON.stringify(data[key])); }
+  }
+  if(data.settings){ localStorage.setItem(SETTINGS_KEY, JSON.stringify(data.settings)); }
+}
+
+function syncNow(action, silent){
+  var c = readSyncInputs();
+  localStorage.setItem(SYNC_CONFIG_KEY, JSON.stringify(c));
+  if(!c.token){ toast("请先填写 GitHub Token"); switchSettingsTab("sync"); return; }
+  var btn = document.getElementById("syncBtn-" + action);
+  if(btn){ btn.disabled = true; btn.textContent = "同步中…"; }
+  var p = action === "upload" ? syncUpload(c, !!silent) : syncDownload(c, !!silent);
+  if(p && p.then){ p.then(function(){
+    if(btn){ btn.disabled = false; btn.textContent = action === "upload" ? "☁️ 上传" : "📥 下载"; }
+    renderSyncStatus();
+  }); }
+}
+
+function syncUpload(c, silent){
+  var data = collectAllData();
+  var body = { files: {} };
+  body.files[SYNC_FILE] = { content: JSON.stringify(data, null, 2) };
+  var url, method;
+  if(c.gistId){ url = "https://api.github.com/gists/" + c.gistId; method = "PATCH"; }
+  else { url = "https://api.github.com/gists"; method = "POST"; body.description = "Weh Atelier 数据同步"; body.public = false; }
+  return fetch(url, {
+    method: method,
+    headers: { "Authorization": "Bearer " + c.token, "Accept": "application/vnd.github+json" },
+    body: JSON.stringify(body)
+  }).then(function(r){ return r.json().then(function(j){ return {ok: r.ok, j: j}; }); })
+  .then(function(res){
+    if(!res.ok){ throw new Error((res.j && res.j.message) || ("HTTP " + (res.j && res.j.status || ""))); }
+    if(!c.gistId && res.j && res.j.id){
+      c.gistId = res.j.id;
+      localStorage.setItem(SYNC_CONFIG_KEY, JSON.stringify(c));
+      var g = document.getElementById("syncGistId");
+      if(g) g.value = c.gistId;
+      toast("已创建 Gist：" + c.gistId.slice(0,8) + "…");
+    }
+    c.lastSync = Date.now();
+    localStorage.setItem(SYNC_CONFIG_KEY, JSON.stringify(c));
+    var m = loadSyncMeta();
+    m.lastUpload = Date.now();
+    saveSyncMeta(m);
+    if(!silent){ toast("已上传到云端"); }
+    return true;
+  }).catch(function(e){
+    toast("上传失败：" + e.message);
+    console.error(e);
+    return false;
+  });
+}
+
+function syncDownload(c, silent){
+  if(!c.gistId){ toast("还没有 Gist，先点“保存并连接”"); return Promise.resolve(false); }
+  return fetch("https://api.github.com/gists/" + c.gistId, {
+    headers: { "Authorization": "Bearer " + c.token, "Accept": "application/vnd.github+json" }
+  }).then(function(r){ return r.json().then(function(j){ return {ok: r.ok, j: j}; }); })
+  .then(function(res){
+    if(!res.ok){ throw new Error((res.j && res.j.message) || "HTTP 错误"); }
+    var f = res.j && res.j.files && res.j.files[SYNC_FILE];
+    if(!f || !f.content){ throw new Error("云端没有数据文件"); }
+    var data = JSON.parse(f.content);
+    var m = loadSyncMeta();
+    var localTs = m.lastLocalChange || 0;
+    var cloudTs = data.syncTime || 0;
+    if(cloudTs < localTs){
+      if(!silent){ toast("本地数据比云端新，跳过下载"); }
+      return false;
+    }
+    writeAllData(data);
+    m.lastLocalChange = cloudTs;
+    m.lastDownload = Date.now();
+    saveSyncMeta(m);
+    var c2 = loadSyncConfig();
+    c2.lastSync = Date.now();
+    localStorage.setItem(SYNC_CONFIG_KEY, JSON.stringify(c2));
+    if(!silent){ toast("已从云端恢复数据，页面刷新"); }
+    setTimeout(function(){ location.reload(); }, 800);
+    return true;
+  }).catch(function(e){
+    if(!silent){ toast("下载失败：" + e.message); }
+    console.error(e);
+    return false;
+  });
+}
+
+function syncConnect(){
+  var c = readSyncInputs();
+  if(!c.token){ toast("请先填写 Token"); switchSettingsTab("sync"); return; }
+  localStorage.setItem(SYNC_CONFIG_KEY, JSON.stringify(c));
+  renderSyncStatus();
+  if(c.gistId){ syncNow("download", true); }
+  else { syncNow("upload", true); }
+}
+
+function syncInit(){
+  var c = loadSyncConfig();
+  var t = document.getElementById("syncToken");
+  var g = document.getElementById("syncGistId");
+  var a = document.getElementById("syncAuto");
+  if(t) t.value = c.token || "";
+  if(g) g.value = c.gistId || "";
+  if(a) a.checked = !!c.auto;
+  renderSyncStatus();
+  if(c.auto && c.token && c.gistId){
+    setTimeout(function(){ syncDownload(c, true); }, 1500);
+  }
+}
+
 function exportAllData(){
   var data = {};
   for(var key in DATA_KEYS){
@@ -10883,7 +11115,8 @@ function importAllData(event){
         if(data.settings){
           localStorage.setItem(SETTINGS_KEY, JSON.stringify(data.settings));
         }
-        toast("数据导入成功，页面即将刷新");
+        markLocalChange();
+  toast("数据导入成功，页面即将刷新");
         setTimeout(function(){ location.reload(); }, 1000);
       }catch(err){
         toast("导入失败：文件格式错误");
@@ -10903,7 +11136,8 @@ function clearModuleData(){
   showConfirm("确定清空「" + (moduleNames[module]||module) + "」的所有数据？此操作不可恢复！").then(function(ok){
     if(!ok) return;
     localStorage.removeItem(DATA_KEYS[module]);
-    toast("已清空，页面即将刷新");
+    markLocalChange();
+  toast("已清空，页面即将刷新");
     setTimeout(function(){ location.reload(); }, 1000);
   });
 }
@@ -10917,7 +11151,8 @@ function resetAllData(){
         localStorage.removeItem(DATA_KEYS[key]);
       }
       localStorage.removeItem(SETTINGS_KEY);
-      toast("已重置全部数据，页面即将刷新");
+      markLocalChange();
+  toast("已重置全部数据，页面即将刷新");
       setTimeout(function(){ location.reload(); }, 1000);
     });
   });
@@ -10970,6 +11205,7 @@ function loadPreference(){
 
 function initSettings(){
   loadPreference();
+  syncInit();
 }
 
 /* ---------- 全局搜索 ---------- */
@@ -11640,7 +11876,7 @@ function getCet6CheckinData(date){
   }
 }
 
-function saveCet6CheckinData(date, data){
+function saveCet6CheckinData(date, data){ markLocalChange();
   var key = getCet6CheckinKey(date);
   localStorage.setItem(key, JSON.stringify(data));
 }
@@ -11804,7 +12040,7 @@ function getCet6VocabWords(){
   }
 }
 
-function saveCet6VocabWords(words){
+function saveCet6VocabWords(words){ markLocalChange();
   localStorage.setItem(CET6_VOCAB_KEY, JSON.stringify(words));
 }
 
@@ -12058,7 +12294,7 @@ function getCet6Errors(){
   }
 }
 
-function saveCet6Errors(errors){
+function saveCet6Errors(errors){ markLocalChange();
   localStorage.setItem(CET6_ERROR_KEY, JSON.stringify(errors));
 }
 
@@ -12351,7 +12587,7 @@ function getCet6ListenRecords(){
   }
 }
 
-function saveCet6ListenRecords(records){
+function saveCet6ListenRecords(records){ markLocalChange();
   localStorage.setItem(CET6_LISTEN_KEY, JSON.stringify(records));
 }
 
@@ -12541,7 +12777,7 @@ function getCet6ReadRecords(){
   }
 }
 
-function saveCet6ReadRecords(records){
+function saveCet6ReadRecords(records){ markLocalChange();
   localStorage.setItem(CET6_READ_KEY, JSON.stringify(records));
 }
 
@@ -12729,7 +12965,7 @@ function getCet6WriteRecords(){
   }
 }
 
-function saveCet6WriteRecords(records){
+function saveCet6WriteRecords(records){ markLocalChange();
   localStorage.setItem(CET6_WRITE_KEY, JSON.stringify(records));
 }
 

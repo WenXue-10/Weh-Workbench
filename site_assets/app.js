@@ -428,7 +428,7 @@ function loadMoney(){
     return d;
   }catch(e){ return JSON.parse(JSON.stringify(MONEY_DEFAULTS)); }
 }
-function saveMoney(data){ localStorage.setItem(MONEY_KEY, JSON.stringify(data)); }
+function saveMoney(data){ markLocalChange(); localStorage.setItem(MONEY_KEY, JSON.stringify(data)); }
 
 function getCycleRange(cycleStart){
   var now = new Date();
@@ -859,7 +859,7 @@ function loadHealth(){
     return d;
   }catch(e){ return JSON.parse(JSON.stringify(HEALTH_DEFAULTS)); }
 }
-function saveHealth(data){ localStorage.setItem(HEALTH_KEY, JSON.stringify(data)); }
+function saveHealth(data){ markLocalChange(); localStorage.setItem(HEALTH_KEY, JSON.stringify(data)); }
 
 function getWeekRange(){
   var now = new Date();
@@ -1209,7 +1209,7 @@ function loadDecision(){
     return d;
   }catch(e){ return JSON.parse(JSON.stringify(DECISION_DEFAULTS)); }
 }
-function saveDecision(data){ localStorage.setItem(DECISION_KEY, JSON.stringify(data)); }
+function saveDecision(data){ markLocalChange(); localStorage.setItem(DECISION_KEY, JSON.stringify(data)); }
 
 function initDecision(){
   var data = loadDecision();
@@ -1410,7 +1410,7 @@ function loadInspire(){
     return d;
   }catch(e){ return JSON.parse(JSON.stringify(INSPIRE_DEFAULTS)); }
 }
-function saveInspire(data){ localStorage.setItem(INSPIRE_KEY, JSON.stringify(data)); }
+function saveInspire(data){ markLocalChange(); localStorage.setItem(INSPIRE_KEY, JSON.stringify(data)); }
 
 function addInspire(){
   var input = document.getElementById("inspireInput");
@@ -1642,7 +1642,7 @@ function loadTodo(){
     return d;
   }catch(e){ return JSON.parse(JSON.stringify(TODO_DEFAULTS)); }
 }
-function saveTodo(data){ localStorage.setItem(TODO_KEY, JSON.stringify(data)); }
+function saveTodo(data){ markLocalChange(); localStorage.setItem(TODO_KEY, JSON.stringify(data)); }
 
 function addTodo(){
   var input = document.getElementById("todoInput");
@@ -1810,7 +1810,7 @@ function loadReport(){
     return d;
   }catch(e){ return JSON.parse(JSON.stringify(REPORT_DEFAULTS)); }
 }
-function saveReport(data){ localStorage.setItem(REPORT_KEY, JSON.stringify(data)); }
+function saveReport(data){ markLocalChange(); localStorage.setItem(REPORT_KEY, JSON.stringify(data)); }
 
 function selectReportType(type){
   var data = loadReport();
@@ -2058,7 +2058,7 @@ function loadDaily(){
     return d;
   }catch(e){ return JSON.parse(JSON.stringify(DAILY_DEFAULTS)); }
 }
-function saveDaily(data){
+function saveDaily(data){ markLocalChange();
   data.date = new Date().toISOString().slice(0,10);
   localStorage.setItem(DAILY_KEY, JSON.stringify(data));
 }
@@ -2313,7 +2313,7 @@ function loadSettings(){
     return s;
   }catch(e){ return JSON.parse(JSON.stringify(SETTINGS_DEFAULTS)); }
 }
-function saveSettings(s){ localStorage.setItem(SETTINGS_KEY, JSON.stringify(s)); }
+function saveSettings(s){ markLocalChange(); localStorage.setItem(SETTINGS_KEY, JSON.stringify(s)); }
 
 function switchSettingsTab(tab){
   document.querySelectorAll(".settings-nav-item").forEach(function(el){
@@ -2394,6 +2394,193 @@ function setFontSize(size){
   document.documentElement.style.fontSize = sizes[size] || "14px";
 }
 
+
+/* ========== Gist 云同步 ========== */
+var SYNC_CONFIG_KEY = "weh_sync_config_v1";
+var SYNC_META_KEY = "weh_sync_meta_v1";
+var SYNC_FILE = "weh-atelier-data.json";
+var _syncUploadTimer = null;
+
+function loadSyncConfig(){
+  try{ var c = JSON.parse(localStorage.getItem(SYNC_CONFIG_KEY)); return c && typeof c==="object" ? c : {}; }catch(e){ return {}; }
+}
+function loadSyncMeta(){
+  try{ var m = JSON.parse(localStorage.getItem(SYNC_META_KEY)); return m && typeof m==="object" ? m : {}; }catch(e){ return {}; }
+}
+function saveSyncMeta(m){ localStorage.setItem(SYNC_META_KEY, JSON.stringify(m)); }
+
+function readSyncInputs(){
+  var c = loadSyncConfig();
+  var t = document.getElementById("syncToken");
+  var g = document.getElementById("syncGistId");
+  var a = document.getElementById("syncAuto");
+  if(t) c.token = t.value.trim();
+  if(g) c.gistId = g.value.trim();
+  if(a) c.auto = !!a.checked;
+  return c;
+}
+
+function fmtSyncTime(ts){
+  var d = new Date(ts);
+  function p(n){ return (n<10?"0":"")+n; }
+  return (d.getMonth()+1)+"-"+p(d.getDate())+" "+p(d.getHours())+":"+p(d.getMinutes());
+}
+
+function renderSyncStatus(){
+  var c = loadSyncConfig();
+  var el = document.getElementById("syncStatus");
+  if(!el) return;
+  if(!c.token){ el.textContent = "未配置"; el.style.color = "var(--muted)"; return; }
+  if(!c.gistId){ el.textContent = "已填 Token，尚未连接（点“保存并连接”）"; el.style.color = "var(--muted)"; return; }
+  var parts = ["已连接 Gist " + c.gistId.slice(0,8) + "…"];
+  if(c.lastSync){ parts.push("上次同步 " + fmtSyncTime(c.lastSync)); }
+  el.textContent = parts.join(" · ");
+  el.style.color = c.auto ? "#2e7d32" : "var(--muted)";
+}
+
+function saveSyncConfig(){
+  var c = readSyncInputs();
+  localStorage.setItem(SYNC_CONFIG_KEY, JSON.stringify(c));
+  renderSyncStatus();
+  if(c.auto && c.token && c.gistId){ toast("自动同步已开启"); }
+}
+
+function markLocalChange(){
+  var m = loadSyncMeta();
+  m.lastLocalChange = Date.now();
+  saveSyncMeta(m);
+  var c = loadSyncConfig();
+  if(c.auto && c.token && c.gistId){
+    if(_syncUploadTimer) clearTimeout(_syncUploadTimer);
+    _syncUploadTimer = setTimeout(function(){ syncNow("upload", true); }, 3000);
+  }
+}
+
+function collectAllData(){
+  var data = {};
+  for(var key in DATA_KEYS){
+    try{
+      var val = localStorage.getItem(DATA_KEYS[key]);
+      if(val) data[key] = JSON.parse(val);
+    }catch(e){}
+  }
+  data.settings = loadSettings();
+  data.syncTime = Date.now();
+  return data;
+}
+
+function writeAllData(data){
+  for(var key in DATA_KEYS){
+    if(data[key] !== undefined){ localStorage.setItem(DATA_KEYS[key], JSON.stringify(data[key])); }
+  }
+  if(data.settings){ localStorage.setItem(SETTINGS_KEY, JSON.stringify(data.settings)); }
+}
+
+function syncNow(action, silent){
+  var c = readSyncInputs();
+  localStorage.setItem(SYNC_CONFIG_KEY, JSON.stringify(c));
+  if(!c.token){ toast("请先填写 GitHub Token"); switchSettingsTab("sync"); return; }
+  var btn = document.getElementById("syncBtn-" + action);
+  if(btn){ btn.disabled = true; btn.textContent = "同步中…"; }
+  var p = action === "upload" ? syncUpload(c, !!silent) : syncDownload(c, !!silent);
+  if(p && p.then){ p.then(function(){
+    if(btn){ btn.disabled = false; btn.textContent = action === "upload" ? "☁️ 上传" : "📥 下载"; }
+    renderSyncStatus();
+  }); }
+}
+
+function syncUpload(c, silent){
+  var data = collectAllData();
+  var body = { files: {} };
+  body.files[SYNC_FILE] = { content: JSON.stringify(data, null, 2) };
+  var url, method;
+  if(c.gistId){ url = "https://api.github.com/gists/" + c.gistId; method = "PATCH"; }
+  else { url = "https://api.github.com/gists"; method = "POST"; body.description = "Weh Atelier 数据同步"; body.public = false; }
+  return fetch(url, {
+    method: method,
+    headers: { "Authorization": "Bearer " + c.token, "Accept": "application/vnd.github+json" },
+    body: JSON.stringify(body)
+  }).then(function(r){ return r.json().then(function(j){ return {ok: r.ok, j: j}; }); })
+  .then(function(res){
+    if(!res.ok){ throw new Error((res.j && res.j.message) || ("HTTP " + (res.j && res.j.status || ""))); }
+    if(!c.gistId && res.j && res.j.id){
+      c.gistId = res.j.id;
+      localStorage.setItem(SYNC_CONFIG_KEY, JSON.stringify(c));
+      var g = document.getElementById("syncGistId");
+      if(g) g.value = c.gistId;
+      toast("已创建 Gist：" + c.gistId.slice(0,8) + "…");
+    }
+    c.lastSync = Date.now();
+    localStorage.setItem(SYNC_CONFIG_KEY, JSON.stringify(c));
+    var m = loadSyncMeta();
+    m.lastUpload = Date.now();
+    saveSyncMeta(m);
+    if(!silent){ toast("已上传到云端"); }
+    return true;
+  }).catch(function(e){
+    toast("上传失败：" + e.message);
+    console.error(e);
+    return false;
+  });
+}
+
+function syncDownload(c, silent){
+  if(!c.gistId){ toast("还没有 Gist，先点“保存并连接”"); return Promise.resolve(false); }
+  return fetch("https://api.github.com/gists/" + c.gistId, {
+    headers: { "Authorization": "Bearer " + c.token, "Accept": "application/vnd.github+json" }
+  }).then(function(r){ return r.json().then(function(j){ return {ok: r.ok, j: j}; }); })
+  .then(function(res){
+    if(!res.ok){ throw new Error((res.j && res.j.message) || "HTTP 错误"); }
+    var f = res.j && res.j.files && res.j.files[SYNC_FILE];
+    if(!f || !f.content){ throw new Error("云端没有数据文件"); }
+    var data = JSON.parse(f.content);
+    var m = loadSyncMeta();
+    var localTs = m.lastLocalChange || 0;
+    var cloudTs = data.syncTime || 0;
+    if(cloudTs < localTs){
+      if(!silent){ toast("本地数据比云端新，跳过下载"); }
+      return false;
+    }
+    writeAllData(data);
+    m.lastLocalChange = cloudTs;
+    m.lastDownload = Date.now();
+    saveSyncMeta(m);
+    var c2 = loadSyncConfig();
+    c2.lastSync = Date.now();
+    localStorage.setItem(SYNC_CONFIG_KEY, JSON.stringify(c2));
+    if(!silent){ toast("已从云端恢复数据，页面刷新"); }
+    setTimeout(function(){ location.reload(); }, 800);
+    return true;
+  }).catch(function(e){
+    if(!silent){ toast("下载失败：" + e.message); }
+    console.error(e);
+    return false;
+  });
+}
+
+function syncConnect(){
+  var c = readSyncInputs();
+  if(!c.token){ toast("请先填写 Token"); switchSettingsTab("sync"); return; }
+  localStorage.setItem(SYNC_CONFIG_KEY, JSON.stringify(c));
+  renderSyncStatus();
+  if(c.gistId){ syncNow("download", true); }
+  else { syncNow("upload", true); }
+}
+
+function syncInit(){
+  var c = loadSyncConfig();
+  var t = document.getElementById("syncToken");
+  var g = document.getElementById("syncGistId");
+  var a = document.getElementById("syncAuto");
+  if(t) t.value = c.token || "";
+  if(g) g.value = c.gistId || "";
+  if(a) a.checked = !!c.auto;
+  renderSyncStatus();
+  if(c.auto && c.token && c.gistId){
+    setTimeout(function(){ syncDownload(c, true); }, 1500);
+  }
+}
+
 function exportAllData(){
   var data = {};
   for(var key in DATA_KEYS){
@@ -2433,7 +2620,8 @@ function importAllData(event){
         if(data.settings){
           localStorage.setItem(SETTINGS_KEY, JSON.stringify(data.settings));
         }
-        toast("数据导入成功，页面即将刷新");
+        markLocalChange();
+  toast("数据导入成功，页面即将刷新");
         setTimeout(function(){ location.reload(); }, 1000);
       }catch(err){
         toast("导入失败：文件格式错误");
@@ -2453,7 +2641,8 @@ function clearModuleData(){
   showConfirm("确定清空「" + (moduleNames[module]||module) + "」的所有数据？此操作不可恢复！").then(function(ok){
     if(!ok) return;
     localStorage.removeItem(DATA_KEYS[module]);
-    toast("已清空，页面即将刷新");
+    markLocalChange();
+  toast("已清空，页面即将刷新");
     setTimeout(function(){ location.reload(); }, 1000);
   });
 }
@@ -2467,7 +2656,8 @@ function resetAllData(){
         localStorage.removeItem(DATA_KEYS[key]);
       }
       localStorage.removeItem(SETTINGS_KEY);
-      toast("已重置全部数据，页面即将刷新");
+      markLocalChange();
+  toast("已重置全部数据，页面即将刷新");
       setTimeout(function(){ location.reload(); }, 1000);
     });
   });
@@ -2520,6 +2710,7 @@ function loadPreference(){
 
 function initSettings(){
   loadPreference();
+  syncInit();
 }
 
 /* ---------- 全局搜索 ---------- */
@@ -3190,7 +3381,7 @@ function getCet6CheckinData(date){
   }
 }
 
-function saveCet6CheckinData(date, data){
+function saveCet6CheckinData(date, data){ markLocalChange();
   var key = getCet6CheckinKey(date);
   localStorage.setItem(key, JSON.stringify(data));
 }
@@ -3354,7 +3545,7 @@ function getCet6VocabWords(){
   }
 }
 
-function saveCet6VocabWords(words){
+function saveCet6VocabWords(words){ markLocalChange();
   localStorage.setItem(CET6_VOCAB_KEY, JSON.stringify(words));
 }
 
@@ -3608,7 +3799,7 @@ function getCet6Errors(){
   }
 }
 
-function saveCet6Errors(errors){
+function saveCet6Errors(errors){ markLocalChange();
   localStorage.setItem(CET6_ERROR_KEY, JSON.stringify(errors));
 }
 
@@ -3901,7 +4092,7 @@ function getCet6ListenRecords(){
   }
 }
 
-function saveCet6ListenRecords(records){
+function saveCet6ListenRecords(records){ markLocalChange();
   localStorage.setItem(CET6_LISTEN_KEY, JSON.stringify(records));
 }
 
@@ -4091,7 +4282,7 @@ function getCet6ReadRecords(){
   }
 }
 
-function saveCet6ReadRecords(records){
+function saveCet6ReadRecords(records){ markLocalChange();
   localStorage.setItem(CET6_READ_KEY, JSON.stringify(records));
 }
 
@@ -4279,7 +4470,7 @@ function getCet6WriteRecords(){
   }
 }
 
-function saveCet6WriteRecords(records){
+function saveCet6WriteRecords(records){ markLocalChange();
   localStorage.setItem(CET6_WRITE_KEY, JSON.stringify(records));
 }
 
