@@ -785,6 +785,344 @@ a{color:var(--pink-deep);text-decoration:none}
 .baichuan-sub{animation:fadeIn .3s ease}
 .sop-sub-content{padding-bottom:90px;min-height:calc(100vh - 200px)}
 .sop-sub{animation:fadeIn .3s ease}
+
+/* ===== 六级模块 - 概览子模块增强样式 ===== */
+
+/* 倒计时卡片 */
+.cet6-countdown .num{font-size:32px;font-weight:800;background:linear-gradient(135deg,var(--pink-deep),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.cet6-countdown-sub{font-size:11px;color:var(--muted);margin-top:4px}
+.cet6-dashboard .stat-card{position:relative;overflow:hidden}
+
+/* 今日任务打卡卡片 */
+.cet6-today-card{margin-bottom:20px}
+.cet6-today-progress{float:right;font-size:13px;font-weight:600;color:var(--pink-deep);background:rgba(224,85,138,0.1);padding:2px 10px;border-radius:10px}
+.cet6-task-list{margin-top:12px}
+.cet6-task-item{display:flex;align-items:center;padding:10px 12px;border-radius:10px;transition:all .2s ease;margin-bottom:6px;background:rgba(255,255,255,0.3)}
+.cet6-task-item:hover{background:rgba(255,255,255,0.5);transform:translateX(2px)}
+.cet6-task-item.done{opacity:0.6}
+.cet6-task-item.done .cet6-task-title{text-decoration:line-through;color:var(--muted)}
+.cet6-task-check{width:22px;height:22px;border:2px solid var(--pink-deep);border-radius:50%;margin-right:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s ease;background:rgba(255,255,255,0.5)}
+.cet6-task-check:hover{transform:scale(1.1);box-shadow:0 0 8px rgba(224,85,138,0.3)}
+.cet6-task-item.done .cet6-task-check{background:linear-gradient(135deg,var(--pink-deep),var(--purple));border-color:transparent}
+.cet6-check-inner{width:10px;height:10px;border-radius:50%;background:white;opacity:0;transition:opacity .2s ease}
+.cet6-task-item.done .cet6-check-inner{opacity:1}
+.cet6-task-content{flex:1;min-width:0}
+.cet6-task-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:2px}
+.cet6-task-desc{font-size:12px;color:var(--muted)}
+
+/* 本周打卡日历 */
+.cet6-week-calendar{display:flex;align-items:center;margin-top:16px;padding-top:14px;border-top:1px solid rgba(0,0,0,0.06)}
+.cet6-week-label{font-size:13px;color:var(--muted);margin-right:12px;flex-shrink:0}
+.cet6-week-days{display:flex;gap:8px;flex:1;justify-content:space-around}
+.cet6-week-day{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--muted);background:rgba(255,255,255,0.4);transition:all .2s ease}
+.cet6-week-day.checked{background:linear-gradient(135deg,var(--pink-deep),var(--purple));color:white;box-shadow:0 2px 8px rgba(224,85,138,0.3)}
+.cet6-week-day.today{border:2px solid var(--pink-deep);font-weight:700}
+
+/* 分项训练卡片网格 */
+.cet6-training-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.cet6-training-card{padding:18px;text-align:center;transition:all .3s ease}
+.cet6-training-card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,0.1)}
+.cet6-training-icon{font-size:32px;margin-bottom:8px}
+.cet6-training-title{font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px}
+.cet6-training-desc{font-size:12px;color:var(--muted);margin-bottom:12px}
+.cet6-training-progress{margin-top:auto}
+.cet6-progress-bar{height:6px;background:rgba(0,0,0,0.08);border-radius:3px;overflow:hidden;margin-bottom:6px}
+.cet6-progress-fill{height:100%;background:linear-gradient(90deg,var(--pink-deep),var(--purple));border-radius:3px;transition:width .5s ease}
+.cet6-progress-text{font-size:11px;color:var(--muted);font-weight:600}
+
+/* AI备考助手卡片 */
+.cet6-ai-card{margin-bottom:20px;background:linear-gradient(135deg,rgba(224,85,138,0.05),rgba(167,139,250,0.05))}
+.cet6-ai-content{margin-top:12px}
+.cet6-ai-section{margin-bottom:18px}
+.cet6-ai-section:last-child{margin-bottom:0}
+.cet6-ai-section-title{font-size:14px;font-weight:700;color:var(--text);margin-bottom:8px;display:flex;align-items:center}
+.cet6-ai-section-desc{font-size:13px;color:var(--muted);margin-bottom:12px;line-height:1.6}
+.cet6-ai-section-desc strong{color:var(--pink-deep)}
+.cet6-ai-tips{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.cet6-ai-tip{background:rgba(255,255,255,0.5);border-radius:10px;padding:12px;border-left:3px solid var(--pink-deep)}
+.cet6-ai-tip-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px}
+.cet6-ai-tip-desc{font-size:12px;color:var(--muted);line-height:1.5}
+.cet6-ai-abilities{display:flex;flex-wrap:wrap;gap:8px}
+.cet6-ai-ability{background:rgba(255,255,255,0.6);border:1px solid rgba(224,85,138,0.2);border-radius:20px;padding:6px 14px;font-size:12px;font-weight:600;color:var(--text);transition:all .2s ease}
+.cet6-ai-ability:hover{background:linear-gradient(135deg,var(--pink-deep),var(--purple));color:white;border-color:transparent;transform:translateY(-1px)}
+
+/* ===== 六级模块 - 词汇子模块样式 ===== */
+
+/* 词汇统计看板 */
+.cet6-vocab-stats{margin-bottom:16px}
+
+/* 操作栏 */
+.cet6-vocab-actions{display:flex;gap:14px;margin-bottom:16px;align-items:stretch}
+.cet6-add-word-btn{display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,var(--pink-deep),var(--purple));color:white;padding:12px 20px;border-radius:12px;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s ease;flex-shrink:0;box-shadow:0 4px 12px rgba(224,85,138,0.3)}
+.cet6-add-word-btn:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(224,85,138,0.4)}
+.cet6-add-word-btn:active{transform:translateY(0)}
+.cet6-add-icon{font-size:16px}
+.cet6-today-task{flex:1;background:rgba(255,255,255,0.5);border-radius:12px;padding:12px 18px;display:flex;align-items:center;gap:14px}
+.cet6-task-label{font-size:13px;font-weight:600;color:var(--text);white-space:nowrap}
+.cet6-task-progress-wrap{flex:1}
+.cet6-task-progress-bar{height:8px;background:rgba(0,0,0,0.08);border-radius:4px;overflow:hidden;margin-bottom:4px}
+.cet6-task-progress-fill{height:100%;background:linear-gradient(90deg,var(--pink-deep),var(--purple));border-radius:4px;transition:width .5s ease}
+.cet6-task-progress-text{font-size:11px;color:var(--muted);font-weight:600;text-align:right}
+
+/* 待复习单词区 */
+.cet6-review-card{margin-bottom:16px;border:2px solid rgba(224,85,138,0.2)}
+.cet6-review-count{float:right;font-size:12px;font-weight:600;color:var(--pink-deep);background:rgba(224,85,138,0.1);padding:2px 10px;border-radius:10px}
+.cet6-review-list{margin-top:10px;display:flex;flex-direction:column;gap:8px}
+.cet6-review-item{display:flex;align-items:center;padding:10px 14px;background:rgba(255,255,255,0.5);border-radius:10px;border-left:3px solid var(--pink-deep)}
+.cet6-review-word{font-size:15px;font-weight:700;color:var(--text);margin-right:10px}
+.cet6-review-phonetic{font-size:12px;color:var(--muted);margin-right:10px}
+.cet6-review-meaning{font-size:13px;color:var(--muted);flex:1}
+.cet6-review-actions{display:flex;gap:8px}
+.cet6-review-btn{padding:4px 12px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s ease;border:none}
+.cet6-review-btn.know{background:rgba(34,197,94,0.15);color:#16a34a}
+.cet6-review-btn.know:hover{background:rgba(34,197,94,0.25)}
+.cet6-review-btn.dont-know{background:rgba(239,68,68,0.15);color:#dc2626}
+.cet6-review-btn.dont-know:hover{background:rgba(239,68,68,0.25)}
+
+/* 单词列表 */
+.cet6-vocab-filters{display:flex;gap:6px;float:right}
+.cet6-filter-btn{padding:4px 12px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s ease;border:none;background:rgba(255,255,255,0.5);color:var(--muted)}
+.cet6-filter-btn:hover{background:rgba(255,255,255,0.8)}
+.cet6-filter-btn.active{background:linear-gradient(135deg,var(--pink-deep),var(--purple));color:white}
+.cet6-vocab-search{margin:12px 0}
+.cet6-vocab-search input{width:100%;padding:10px 14px;border-radius:10px;border:1px solid rgba(0,0,0,0.08);background:rgba(255,255,255,0.6);font-size:13px;outline:none;transition:all .2s ease}
+.cet6-vocab-search input:focus{border-color:var(--pink-deep);background:rgba(255,255,255,0.9);box-shadow:0 0 0 3px rgba(224,85,138,0.1)}
+.cet6-vocab-list{display:flex;flex-direction:column;gap:8px;max-height:400px;overflow-y:auto}
+.cet6-vocab-item{display:flex;align-items:center;padding:12px 14px;background:rgba(255,255,255,0.4);border-radius:10px;transition:all .2s ease}
+.cet6-vocab-item:hover{background:rgba(255,255,255,0.6);transform:translateX(2px)}
+.cet6-vocab-item.mastered{opacity:0.7}
+.cet6-vocab-item.mastered .cet6-vocab-word{text-decoration:line-through;color:var(--muted)}
+.cet6-vocab-word{font-size:15px;font-weight:700;color:var(--text);min-width:120px}
+.cet6-vocab-phonetic{font-size:12px;color:var(--muted);min-width:100px}
+.cet6-vocab-meaning{font-size:13px;color:var(--text);flex:1}
+.cet6-vocab-example{font-size:11px;color:var(--muted);font-style:italic;margin-top:2px}
+.cet6-vocab-actions{display:flex;gap:6px;flex-shrink:0}
+.cet6-vocab-action-btn{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;transition:all .2s ease;border:none;background:rgba(255,255,255,0.5)}
+.cet6-vocab-action-btn:hover{background:rgba(255,255,255,0.9);transform:scale(1.1)}
+.cet6-vocab-action-btn.mastered-btn{color:#16a34a}
+.cet6-vocab-action-btn.delete-btn{color:#dc2626}
+.cet6-vocab-empty{text-align:center;padding:40px 20px;color:var(--muted);font-size:14px}
+
+/* 添加单词弹窗 */
+.cet6-modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);z-index:10000;display:flex;align-items:center;justify-content:center;animation:fadeIn .2s ease}
+.cet6-modal{background:white;border-radius:16px;width:90%;max-width:480px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.3);animation:slideUp .3s ease}
+.cet6-modal-header{display:flex;align-items:center;justify-content:space-between;padding:18px 24px;border-bottom:1px solid rgba(0,0,0,0.06)}
+.cet6-modal-title{font-size:16px;font-weight:700;color:var(--text)}
+.cet6-modal-close{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);transition:all .2s ease;font-size:14px}
+.cet6-modal-close:hover{background:rgba(0,0,0,0.06);color:var(--text)}
+.cet6-modal-body{padding:20px 24px}
+.cet6-form-group{margin-bottom:16px}
+.cet6-form-group:last-child{margin-bottom:0}
+.cet6-form-label{display:block;font-size:13px;font-weight:600;color:var(--text);margin-bottom:6px}
+.cet6-form-input{width:100%;padding:10px 14px;border-radius:10px;border:1px solid rgba(0,0,0,0.1);font-size:14px;outline:none;transition:all .2s ease;box-sizing:border-box}
+.cet6-form-input:focus{border-color:var(--pink-deep);box-shadow:0 0 0 3px rgba(224,85,138,0.1)}
+.cet6-form-textarea{width:100%;padding:10px 14px;border-radius:10px;border:1px solid rgba(0,0,0,0.1);font-size:14px;outline:none;transition:all .2s ease;box-sizing:border-box;resize:vertical;min-height:80px;font-family:inherit}
+.cet6-form-textarea:focus{border-color:var(--pink-deep);box-shadow:0 0 0 3px rgba(224,85,138,0.1)}
+.cet6-modal-footer{display:flex;gap:10px;padding:16px 24px;border-top:1px solid rgba(0,0,0,0.06);justify-content:flex-end}
+.cet6-btn{padding:10px 20px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s ease;border:none}
+.cet6-btn-primary{background:linear-gradient(135deg,var(--pink-deep),var(--purple));color:white;box-shadow:0 4px 12px rgba(224,85,138,0.3)}
+.cet6-btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(224,85,138,0.4)}
+.cet6-btn-secondary{background:rgba(0,0,0,0.06);color:var(--text)}
+.cet6-btn-secondary:hover{background:rgba(0,0,0,0.1)}
+
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+/* 响应式 */
+@media (max-width:768px){
+  .cet6-vocab-actions{flex-direction:column}
+  .cet6-add-word-btn{justify-content:center}
+  .cet6-vocab-filters{float:none;margin-top:8px}
+  .cet6-vocab-item{flex-wrap:wrap}
+  .cet6-vocab-word{min-width:auto}
+  .cet6-vocab-phonetic{min-width:auto}
+}
+
+/* ===== 六级模块 - 错题子模块样式 ===== */
+
+/* 错因分布 */
+.cet6-error-type-dist{flex:1;background:rgba(255,255,255,0.5);border-radius:12px;padding:12px 18px;display:flex;align-items:center;gap:14px}
+.cet6-error-tags{display:flex;flex-wrap:wrap;gap:6px;flex:1}
+.cet6-error-tag-dist{padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600;color:white}
+.cet6-error-tag-dist.vocab{background:#f59e0b}
+.cet6-error-tag-dist.定位{background:#3b82f6}
+.cet6-error-tag-dist.理解{background:#8b5cf6}
+.cet6-error-tag-dist.逻辑{background:#ec4899}
+.cet6-error-tag-dist.粗心{background:#10b981}
+.cet6-error-tag-dist.其他{background:#6b7280}
+
+/* 错题标签选择器 */
+.cet6-error-tag-select{display:flex;flex-wrap:wrap;gap:8px}
+.cet6-error-tag-option{padding:6px 14px;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s ease;border:2px solid rgba(0,0,0,0.1);background:rgba(255,255,255,0.5);color:var(--text)}
+.cet6-error-tag-option:hover{transform:translateY(-1px)}
+.cet6-error-tag-option.selected{color:white;border-color:transparent}
+.cet6-error-tag-option[data-tag="词汇"].selected{background:#f59e0b}
+.cet6-error-tag-option[data-tag="定位"].selected{background:#3b82f6}
+.cet6-error-tag-option[data-tag="理解"].selected{background:#8b5cf6}
+.cet6-error-tag-option[data-tag="逻辑"].selected{background:#ec4899}
+.cet6-error-tag-option[data-tag="粗心"].selected{background:#10b981}
+.cet6-error-tag-option[data-tag="其他"].selected{background:#6b7280}
+
+/* 错题列表 */
+.cet6-error-list{display:flex;flex-direction:column;gap:10px;max-height:500px;overflow-y:auto}
+.cet6-error-item{padding:14px 16px;background:rgba(255,255,255,0.4);border-radius:12px;border-left:4px solid #6b7280;transition:all .2s ease}
+.cet6-error-item:hover{background:rgba(255,255,255,0.6);transform:translateX(2px)}
+.cet6-error-item.mastered{opacity:0.6}
+.cet6-error-item.mastered .cet6-error-question{text-decoration:line-through;color:var(--muted)}
+.cet6-error-item[data-tag="词汇"]{border-left-color:#f59e0b}
+.cet6-error-item[data-tag="定位"]{border-left-color:#3b82f6}
+.cet6-error-item[data-tag="理解"]{border-left-color:#8b5cf6}
+.cet6-error-item[data-tag="逻辑"]{border-left-color:#ec4899}
+.cet6-error-item[data-tag="粗心"]{border-left-color:#10b981}
+.cet6-error-item[data-tag="其他"]{border-left-color:#6b7280}
+.cet6-error-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.cet6-error-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.cet6-error-type-badge{padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600;background:rgba(0,0,0,0.08);color:var(--text)}
+.cet6-error-tag-badge{padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600;color:white}
+.cet6-error-tag-badge.词汇{background:#f59e0b}
+.cet6-error-tag-badge.定位{background:#3b82f6}
+.cet6-error-tag-badge.理解{background:#8b5cf6}
+.cet6-error-tag-badge.逻辑{background:#ec4899}
+.cet6-error-tag-badge.粗心{background:#10b981}
+.cet6-error-tag-badge.其他{background:#6b7280}
+.cet6-error-source{font-size:11px;color:var(--muted)}
+.cet6-error-actions{display:flex;gap:6px}
+.cet6-error-question{font-size:14px;font-weight:600;color:var(--text);margin-bottom:6px;line-height:1.5}
+.cet6-error-answer{font-size:13px;color:#16a34a;font-weight:600;margin-bottom:4px}
+.cet6-error-analysis{font-size:12px;color:var(--muted);line-height:1.5;margin-top:6px;padding-top:6px;border-top:1px solid rgba(0,0,0,0.06)}
+
+/* 错题复习列表 */
+.cet6-error-review-list{margin-top:10px;display:flex;flex-direction:column;gap:10px}
+.cet6-error-review-item{padding:12px 14px;background:rgba(255,255,255,0.5);border-radius:10px;border-left:3px solid var(--pink-deep)}
+.cet6-error-review-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.cet6-error-review-question{font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px;line-height:1.4}
+.cet6-error-review-answer{font-size:12px;color:#16a34a;font-weight:600}
+.cet6-error-review-actions{display:flex;gap:8px;margin-top:8px}
+
+/* 响应式 */
+@media (max-width:768px){
+  .cet6-error-header{flex-direction:column;align-items:flex-start;gap:8px}
+  .cet6-error-meta{flex-wrap:wrap}
+}
+
+/* ===== 六级模块 - 听力子模块样式 ===== */
+
+/* 精听四步法 */
+.cet6-method-card{margin-bottom:16px}
+.cet6-method-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:12px}
+.cet6-method-step{display:flex;gap:10px;padding:12px;background:rgba(255,255,255,0.4);border-radius:10px;transition:all .2s ease}
+.cet6-method-step:hover{background:rgba(255,255,255,0.6);transform:translateY(-2px)}
+.cet6-step-num{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--pink-deep),var(--purple));color:white;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0}
+.cet6-step-content{flex:1;min-width:0}
+.cet6-step-title{font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px}
+.cet6-step-desc{font-size:12px;color:var(--muted);line-height:1.4}
+
+/* 表单行 */
+.cet6-form-row{display:flex;gap:12px}
+
+/* 听力记录列表 */
+.cet6-listen-list{display:flex;flex-direction:column;gap:10px;max-height:500px;overflow-y:auto}
+.cet6-listen-item{padding:14px 16px;background:rgba(255,255,255,0.4);border-radius:12px;transition:all .2s ease;border-left:4px solid var(--purple)}
+.cet6-listen-item:hover{background:rgba(255,255,255,0.6);transform:translateX(2px)}
+.cet6-listen-item[data-type="conversation"]{border-left-color:#3b82f6}
+.cet6-listen-item[data-type="passage"]{border-left-color:#8b5cf6}
+.cet6-listen-item[data-type="lecture"]{border-left-color:#ec4899}
+.cet6-listen-item[data-type="dictation"]{border-left-color:#10b981}
+.cet6-listen-item[data-type="full"]{border-left-color:#f59e0b}
+.cet6-listen-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.cet6-listen-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.cet6-listen-type-badge{padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600;color:white}
+.cet6-listen-type-badge.conversation{background:#3b82f6}
+.cet6-listen-type-badge.passage{background:#8b5cf6}
+.cet6-listen-type-badge.lecture{background:#ec4899}
+.cet6-listen-type-badge.dictation{background:#10b981}
+.cet6-listen-type-badge.full{background:#f59e0b}
+.cet6-listen-date{font-size:11px;color:var(--muted)}
+.cet6-listen-actions{display:flex;gap:6px}
+.cet6-listen-name{font-size:14px;font-weight:700;color:var(--text);margin-bottom:6px}
+.cet6-listen-stats{display:flex;gap:16px;margin-bottom:6px}
+.cet6-listen-stat{font-size:12px;color:var(--muted)}
+.cet6-listen-stat strong{color:var(--text);font-weight:600}
+.cet6-listen-accuracy-high{color:#16a34a !important;font-weight:700 !important}
+.cet6-listen-accuracy-mid{color:#f59e0b !important;font-weight:700 !important}
+.cet6-listen-accuracy-low{color:#dc2626 !important;font-weight:700 !important}
+.cet6-listen-note{font-size:12px;color:var(--muted);line-height:1.5;margin-top:6px;padding-top:6px;border-top:1px solid rgba(0,0,0,0.06)}
+
+/* 响应式 */
+@media (max-width:768px){
+  .cet6-method-steps{grid-template-columns:repeat(2,1fr)}
+  .cet6-form-row{flex-direction:column}
+  .cet6-listen-header{flex-direction:column;align-items:flex-start;gap:8px}
+  .cet6-listen-stats{flex-wrap:wrap}
+}
+
+/* ===== 六级模块 - 阅读子模块样式 ===== */
+
+/* 阅读记录列表 */
+.cet6-read-list{display:flex;flex-direction:column;gap:10px;max-height:500px;overflow-y:auto}
+.cet6-read-item{padding:14px 16px;background:rgba(255,255,255,0.4);border-radius:12px;transition:all .2s ease;border-left:4px solid #10b981}
+.cet6-read-item:hover{background:rgba(255,255,255,0.6);transform:translateX(2px)}
+.cet6-read-item[data-type="detail"]{border-left-color:#3b82f6}
+.cet6-read-item[data-type="match"]{border-left-color:#8b5cf6}
+.cet6-read-item[data-type="cloze"]{border-left-color:#ec4899}
+.cet6-read-item[data-type="full"]{border-left-color:#f59e0b}
+.cet6-read-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.cet6-read-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.cet6-read-type-badge{padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600;color:white}
+.cet6-read-type-badge.detail{background:#3b82f6}
+.cet6-read-type-badge.match{background:#8b5cf6}
+.cet6-read-type-badge.cloze{background:#ec4899}
+.cet6-read-type-badge.full{background:#f59e0b}
+.cet6-read-date{font-size:11px;color:var(--muted)}
+.cet6-read-actions{display:flex;gap:6px}
+.cet6-read-name{font-size:14px;font-weight:700;color:var(--text);margin-bottom:6px}
+.cet6-read-stats{display:flex;gap:16px;margin-bottom:6px}
+.cet6-read-stat{font-size:12px;color:var(--muted)}
+.cet6-read-stat strong{color:var(--text);font-weight:600}
+.cet6-read-note{font-size:12px;color:var(--muted);line-height:1.5;margin-top:6px;padding-top:6px;border-top:1px solid rgba(0,0,0,0.06)}
+
+/* 响应式 */
+@media (max-width:768px){
+  .cet6-read-header{flex-direction:column;align-items:flex-start;gap:8px}
+  .cet6-read-stats{flex-wrap:wrap}
+}
+
+/* ===== 六级模块 - 写译子模块样式 ===== */
+
+/* 写译记录列表 */
+.cet6-write-list{display:flex;flex-direction:column;gap:10px;max-height:500px;overflow-y:auto}
+.cet6-write-item{padding:14px 16px;background:rgba(255,255,255,0.4);border-radius:12px;transition:all .2s ease;border-left:4px solid #f59e0b}
+.cet6-write-item:hover{background:rgba(255,255,255,0.6);transform:translateX(2px)}
+.cet6-write-item[data-type="writing"]{border-left-color:#ec4899}
+.cet6-write-item[data-type="translation"]{border-left-color:#3b82f6}
+.cet6-write-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.cet6-write-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.cet6-write-type-badge{padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600;color:white}
+.cet6-write-type-badge.writing{background:#ec4899}
+.cet6-write-type-badge.translation{background:#3b82f6}
+.cet6-write-date{font-size:11px;color:var(--muted)}
+.cet6-write-actions{display:flex;gap:6px}
+.cet6-write-topic{font-size:14px;font-weight:700;color:var(--text);margin-bottom:6px}
+.cet6-write-stats{display:flex;gap:16px;margin-bottom:6px}
+.cet6-write-stat{font-size:12px;color:var(--muted)}
+.cet6-write-stat strong{color:var(--text);font-weight:600}
+.cet6-write-score-high{color:#16a34a !important;font-weight:700 !important}
+.cet6-write-score-mid{color:#f59e0b !important;font-weight:700 !important}
+.cet6-write-score-low{color:#dc2626 !important;font-weight:700 !important}
+.cet6-write-note{font-size:12px;color:var(--muted);line-height:1.5;margin-top:6px;padding-top:6px;border-top:1px solid rgba(0,0,0,0.06)}
+
+/* 响应式 */
+@media (max-width:768px){
+  .cet6-write-header{flex-direction:column;align-items:flex-start;gap:8px}
+  .cet6-write-stats{flex-wrap:wrap}
+}
+
+/* 响应式 */
+@media (max-width:768px){
+  .cet6-training-grid{grid-template-columns:repeat(2,1fr)}
+  .cet6-ai-tips{grid-template-columns:1fr}
+  .cet6-week-days{gap:4px}
+  .cet6-week-day{width:28px;height:28px;font-size:11px}
+}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 
 /* 底栏默认隐藏，只在SCM Career模块激活时显示 */
@@ -1471,12 +1809,190 @@ body.sop-active .sub-tab-bar{display:flex}
         <div class="cet6-sub-content">
           <!-- 概览 -->
           <div class="cet6-sub" id="cet6-sub-overview">
-            <div class="stat-grid">
-              <div class="stat-card p1"><div class="em">📄</div><div class="lab">学习笔记</div><div class="num" id="cet6KbCount">0</div></div>
-              <div class="stat-card p2"><div class="em">📝</div><div class="lab">词汇</div><div class="num" id="cet6WordCount">0</div></div>
-              <div class="stat-card p3"><div class="em">❌</div><div class="lab">错题</div><div class="num" id="cet6ErrorCount">0</div></div>
-              <div class="stat-card p4"><div class="em">📚</div><div class="lab">学习资料</div><div class="num" id="cet6MatCount">0</div></div>
+            <!-- 顶部数据看板 -->
+            <div class="stat-grid cet6-dashboard">
+              <div class="stat-card p1 cet6-countdown">
+                <div class="em">📅</div>
+                <div class="lab">距考试</div>
+                <div class="num" id="cet6Countdown">--</div>
+                <div class="cet6-countdown-sub">2026-12-12 考试</div>
+              </div>
+              <div class="stat-card p2">
+                <div class="em">🐾</div>
+                <div class="lab">本周打卡</div>
+                <div class="num" id="cet6WeekCheckin">0</div>
+                <div class="cet6-countdown-sub">连续 <span id="cet6Streak">0</span> 天</div>
+              </div>
+              <div class="stat-card p3">
+                <div class="em">📝</div>
+                <div class="lab">生词总数</div>
+                <div class="num" id="cet6WordTotal">0</div>
+                <div class="cet6-countdown-sub">已掌握 <span id="cet6WordMastered">0</span></div>
+              </div>
+              <div class="stat-card p4">
+                <div class="em">❌</div>
+                <div class="lab">错题数</div>
+                <div class="num" id="cet6ErrorTotal">0</div>
+                <div class="cet6-countdown-sub">待复习 <span id="cet6ErrorPending">0</span></div>
+              </div>
             </div>
+
+            <!-- 今日任务打卡 -->
+            <div class="card cet6-today-card">
+              <div class="card-head">
+                ✅ 今日任务
+                <span class="cet6-today-progress" id="cet6TodayProgress">0/5</span>
+              </div>
+              <div class="cet6-task-list" id="cet6TaskList">
+                <div class="cet6-task-item" data-task="words">
+                  <div class="cet6-task-check" onclick="toggleCet6Task('words')">
+                    <div class="cet6-check-inner"></div>
+                  </div>
+                  <div class="cet6-task-content">
+                    <div class="cet6-task-title">背诵单词 100 个</div>
+                    <div class="cet6-task-desc">配合生词本/词书，滚动记忆</div>
+                  </div>
+                </div>
+                <div class="cet6-task-item" data-task="listening">
+                  <div class="cet6-task-check" onclick="toggleCet6Task('listening')">
+                    <div class="cet6-check-inner"></div>
+                  </div>
+                  <div class="cet6-task-content">
+                    <div class="cet6-task-title">听力精听 1 套</div>
+                    <div class="cet6-task-desc">精听 + 对照原文 + 跟读</div>
+                  </div>
+                </div>
+                <div class="cet6-task-item" data-task="reading">
+                  <div class="cet6-task-check" onclick="toggleCet6Task('reading')">
+                    <div class="cet6-check-inner"></div>
+                  </div>
+                  <div class="cet6-task-content">
+                    <div class="cet6-task-title">仔细阅读 2 篇</div>
+                    <div class="cet6-task-desc">计时训练，控制节奏</div>
+                  </div>
+                </div>
+                <div class="cet6-task-item" data-task="writing">
+                  <div class="cet6-task-check" onclick="toggleCet6Task('writing')">
+                    <div class="cet6-check-inner"></div>
+                  </div>
+                  <div class="cet6-task-content">
+                    <div class="cet6-task-title">写作或翻译练习 1 篇</div>
+                    <div class="cet6-task-desc">两科交替进行</div>
+                  </div>
+                </div>
+                <div class="cet6-task-item" data-task="review">
+                  <div class="cet6-task-check" onclick="toggleCet6Task('review')">
+                    <div class="cet6-check-inner"></div>
+                  </div>
+                  <div class="cet6-task-content">
+                    <div class="cet6-task-title">复习昨日生词</div>
+                    <div class="cet6-task-desc">巩固记忆曲线</div>
+                  </div>
+                </div>
+              </div>
+              <!-- 本周打卡日历 -->
+              <div class="cet6-week-calendar">
+                <div class="cet6-week-label">本周打卡：</div>
+                <div class="cet6-week-days" id="cet6WeekDays">
+                  <div class="cet6-week-day" data-day="1">一</div>
+                  <div class="cet6-week-day" data-day="2">二</div>
+                  <div class="cet6-week-day" data-day="3">三</div>
+                  <div class="cet6-week-day" data-day="4">四</div>
+                  <div class="cet6-week-day" data-day="5">五</div>
+                  <div class="cet6-week-day" data-day="6">六</div>
+                  <div class="cet6-week-day" data-day="0">日</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 分项训练卡片 -->
+            <div class="cet6-training-grid">
+              <div class="card cet6-training-card">
+                <div class="cet6-training-icon">👂</div>
+                <div class="cet6-training-title">听力学习指南</div>
+                <div class="cet6-training-desc">听力精听 · 四步法</div>
+                <div class="cet6-training-progress">
+                  <div class="cet6-progress-bar">
+                    <div class="cet6-progress-fill" id="cet6ListeningProgress" style="width:0%"></div>
+                  </div>
+                  <div class="cet6-progress-text"><span id="cet6ListeningDone">0</span> / 40 套</div>
+                </div>
+              </div>
+              <div class="card cet6-training-card">
+                <div class="cet6-training-icon">📖</div>
+                <div class="cet6-training-title">阅读学习指南</div>
+                <div class="cet6-training-desc">仔细阅读 · 先题后文</div>
+                <div class="cet6-training-progress">
+                  <div class="cet6-progress-bar">
+                    <div class="cet6-progress-fill" id="cet6ReadingProgress" style="width:0%"></div>
+                  </div>
+                  <div class="cet6-progress-text"><span id="cet6ReadingDone">0</span> / 80 篇</div>
+                </div>
+              </div>
+              <div class="card cet6-training-card">
+                <div class="cet6-training-icon">✍️</div>
+                <div class="cet6-training-title">写作学习指南</div>
+                <div class="cet6-training-desc">三段式写作 · 主题词</div>
+                <div class="cet6-training-progress">
+                  <div class="cet6-progress-bar">
+                    <div class="cet6-progress-fill" id="cet6WritingProgress" style="width:0%"></div>
+                  </div>
+                  <div class="cet6-progress-text"><span id="cet6WritingDone">0</span> / 30 篇</div>
+                </div>
+              </div>
+              <div class="card cet6-training-card">
+                <div class="cet6-training-icon">🌐</div>
+                <div class="cet6-training-title">翻译学习指南</div>
+                <div class="cet6-training-desc">翻译四步法 · 高频考点</div>
+                <div class="cet6-training-progress">
+                  <div class="cet6-progress-bar">
+                    <div class="cet6-progress-fill" id="cet6TranslationProgress" style="width:0%"></div>
+                  </div>
+                  <div class="cet6-progress-text"><span id="cet6TranslationDone">0</span> / 60 篇</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- AI备考助手 -->
+            <div class="card cet6-ai-card">
+              <div class="card-head">🤖 AI 备考助手</div>
+              <div class="cet6-ai-content">
+                <div class="cet6-ai-section">
+                  <div class="cet6-ai-section-title">📌 当前阶段建议</div>
+                  <div class="cet6-ai-section-desc">距考试还有约 <strong id="cet6AiDays">--</strong> 天，当前处于 <strong>基础期 → 强化期</strong> 过渡阶段</div>
+                  <div class="cet6-ai-tips">
+                    <div class="cet6-ai-tip">
+                      <div class="cet6-ai-tip-title">📝 词汇（目标 6000）</div>
+                      <div class="cet6-ai-tip-desc">每天 100 词，新词 + 复习昨日生词双轨并行，11 月前完成核心 3000 词一轮</div>
+                    </div>
+                    <div class="cet6-ai-tip">
+                      <div class="cet6-ai-tip-title">👂 听力（目标 40 套）</div>
+                      <div class="cet6-ai-tip-desc">每天精听 1 套，四步法（盲听→精听→对照→跟读），重点攻克连读、弱读、同义替换</div>
+                    </div>
+                    <div class="cet6-ai-tip">
+                      <div class="cet6-ai-tip-title">📖 阅读（目标 80 篇）</div>
+                      <div class="cet6-ai-tip-desc">每天仔细阅读 2 篇并计时（每篇 8-10 分钟），建立错因标签：词汇/定位/理解/逻辑</div>
+                    </div>
+                    <div class="cet6-ai-tip">
+                      <div class="cet6-ai-tip-title">✍️ 写作 + 翻译（目标 30+60 篇）</div>
+                      <div class="cet6-ai-tip-desc">每天二选一交替练习，写作背 2-3 个万能模板 + 主题词，翻译用四步法</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="cet6-ai-section">
+                  <div class="cet6-ai-section-title">🧠 AI 能帮你做什么</div>
+                  <div class="cet6-ai-abilities">
+                    <div class="cet6-ai-ability">📋 制定计划</div>
+                    <div class="cet6-ai-ability">🎯 背词陪练</div>
+                    <div class="cet6-ai-ability">✏️ 作文批改</div>
+                    <div class="cet6-ai-ability">🔍 错题分析</div>
+                    <div class="cet6-ai-ability">📝 模拟出题</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 学习分类 -->
             <div class="card">
               <div class="card-head">📂 学习分类</div>
               <div class="kb-grid" id="cet6KbGrid"></div>
@@ -1484,47 +2000,713 @@ body.sop-active .sub-tab-bar{display:flex}
           </div>
           <!-- 词汇 -->
           <div class="cet6-sub" id="cet6-sub-words" style="display:none">
+            <!-- 词汇统计看板 -->
+            <div class="stat-grid cet6-vocab-stats">
+              <div class="stat-card p1">
+                <div class="em">📚</div>
+                <div class="lab">生词总数</div>
+                <div class="num" id="cet6VocabTotal">0</div>
+              </div>
+              <div class="stat-card p2">
+                <div class="em">✅</div>
+                <div class="lab">已掌握</div>
+                <div class="num" id="cet6VocabMastered">0</div>
+              </div>
+              <div class="stat-card p3">
+                <div class="em">🔄</div>
+                <div class="lab">待复习</div>
+                <div class="num" id="cet6VocabReview">0</div>
+              </div>
+              <div class="stat-card p4">
+                <div class="em">➕</div>
+                <div class="lab">今日新增</div>
+                <div class="num" id="cet6VocabToday">0</div>
+              </div>
+            </div>
+
+            <!-- 操作栏：添加单词 + 今日任务 -->
+            <div class="cet6-vocab-actions">
+              <div class="cet6-add-word-btn" onclick="showCet6AddWordModal()">
+                <span class="cet6-add-icon">➕</span>
+                <span>添加单词</span>
+              </div>
+              <div class="cet6-today-task">
+                <div class="cet6-task-label">今日背词目标</div>
+                <div class="cet6-task-progress-wrap">
+                  <div class="cet6-task-progress-bar">
+                    <div class="cet6-task-progress-fill" id="cet6VocabTodayProgress" style="width:0%"></div>
+                  </div>
+                  <div class="cet6-task-progress-text"><span id="cet6VocabTodayCount">0</span> / 100 词</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 待复习单词区 -->
+            <div class="card cet6-review-card" id="cet6ReviewCard" style="display:none">
+              <div class="card-head">
+                🔄 今日待复习
+                <span class="cet6-review-count" id="cet6ReviewCount">0</span>
+              </div>
+              <div class="cet6-review-list" id="cet6ReviewList"></div>
+            </div>
+
+            <!-- 单词列表 -->
             <div class="card">
-              <div class="card-head">📝 词汇 <span class="m-count" id="cet6WordsCount"></span></div>
+              <div class="card-head">
+                📝 单词本
+                <div class="cet6-vocab-filters">
+                  <button class="cet6-filter-btn active" data-filter="all" onclick="filterCet6Vocab('all')">全部</button>
+                  <button class="cet6-filter-btn" data-filter="unmastered" onclick="filterCet6Vocab('unmastered')">未掌握</button>
+                  <button class="cet6-filter-btn" data-filter="mastered" onclick="filterCet6Vocab('mastered')">已掌握</button>
+                </div>
+              </div>
+              <div class="cet6-vocab-search">
+                <input type="text" id="cet6VocabSearch" placeholder="🔍 搜索单词..." oninput="searchCet6Vocab()">
+              </div>
+              <div class="cet6-vocab-list" id="cet6VocabList">
+                <div class="cet6-vocab-empty">📖 还没有添加单词，点击上方"添加单词"开始记录吧～</div>
+              </div>
+            </div>
+
+            <!-- 词汇学习资料 -->
+            <div class="card">
+              <div class="card-head">📚 词汇学习资料</div>
               <div class="career-list" id="cet6WordsList"></div>
+            </div>
+          </div>
+
+          <!-- 添加单词弹窗 -->
+          <div class="cet6-modal-overlay" id="cet6AddWordModal" style="display:none" onclick="hideCet6AddWordModal(event)">
+            <div class="cet6-modal" onclick="event.stopPropagation()">
+              <div class="cet6-modal-header">
+                <div class="cet6-modal-title">➕ 添加单词</div>
+                <div class="cet6-modal-close" onclick="hideCet6AddWordModal()">✕</div>
+              </div>
+              <div class="cet6-modal-body">
+                <div class="cet6-form-group">
+                  <label class="cet6-form-label">单词 *</label>
+                  <input type="text" class="cet6-form-input" id="cet6NewWord" placeholder="例如：abandon">
+                </div>
+                <div class="cet6-form-group">
+                  <label class="cet6-form-label">音标</label>
+                  <input type="text" class="cet6-form-input" id="cet6NewPhonetic" placeholder="例如：/əˈbændən/">
+                </div>
+                <div class="cet6-form-group">
+                  <label class="cet6-form-label">释义 *</label>
+                  <input type="text" class="cet6-form-input" id="cet6NewMeaning" placeholder="例如：v. 放弃，抛弃">
+                </div>
+                <div class="cet6-form-group">
+                  <label class="cet6-form-label">例句</label>
+                  <textarea class="cet6-form-textarea" id="cet6NewExample" placeholder="例如：He abandoned his wife and children."></textarea>
+                </div>
+              </div>
+              <div class="cet6-modal-footer">
+                <button class="cet6-btn cet6-btn-secondary" onclick="hideCet6AddWordModal()">取消</button>
+                <button class="cet6-btn cet6-btn-primary" onclick="addCet6Word()">添加</button>
+              </div>
             </div>
           </div>
           <!-- 听力 -->
           <div class="cet6-sub" id="cet6-sub-listening" style="display:none">
+            <!-- 听力统计看板 -->
+            <div class="stat-grid cet6-listen-stats">
+              <div class="stat-card p1">
+                <div class="em">🎧</div>
+                <div class="lab">听力总数</div>
+                <div class="num" id="cet6ListenTotal">0</div>
+              </div>
+              <div class="stat-card p2">
+                <div class="em">✅</div>
+                <div class="lab">已完成</div>
+                <div class="num" id="cet6ListenDone">0</div>
+              </div>
+              <div class="stat-card p3">
+                <div class="em">📊</div>
+                <div class="lab">平均正确率</div>
+                <div class="num" id="cet6ListenAccuracy">0%</div>
+              </div>
+              <div class="stat-card p4">
+                <div class="em">➕</div>
+                <div class="lab">今日新增</div>
+                <div class="num" id="cet6ListenToday">0</div>
+              </div>
+            </div>
+
+            <!-- 操作栏：添加听力记录 + 进度 -->
+            <div class="cet6-vocab-actions">
+              <div class="cet6-add-word-btn" onclick="showCet6AddListenModal()">
+                <span class="cet6-add-icon">➕</span>
+                <span>添加听力记录</span>
+              </div>
+              <div class="cet6-today-task">
+                <div class="cet6-task-label">听力进度（目标40套）</div>
+                <div class="cet6-task-progress-wrap">
+                  <div class="cet6-task-progress-bar">
+                    <div class="cet6-task-progress-fill" id="cet6ListenProgress" style="width:0%"></div>
+                  </div>
+                  <div class="cet6-task-progress-text"><span id="cet6ListenProgressCount">0</span> / 40 套</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 精听四步法 -->
+            <div class="card cet6-method-card">
+              <div class="card-head">📖 精听四步法</div>
+              <div class="cet6-method-steps">
+                <div class="cet6-method-step">
+                  <div class="cet6-step-num">1</div>
+                  <div class="cet6-step-content">
+                    <div class="cet6-step-title">盲听</div>
+                    <div class="cet6-step-desc">不看原文，先听1-2遍，抓大意和关键词</div>
+                  </div>
+                </div>
+                <div class="cet6-method-step">
+                  <div class="cet6-step-num">2</div>
+                  <div class="cet6-step-content">
+                    <div class="cet6-step-title">精听</div>
+                    <div class="cet6-step-desc">逐句听写，反复听直到写出来，标记没听出来的地方</div>
+                  </div>
+                </div>
+                <div class="cet6-method-step">
+                  <div class="cet6-step-num">3</div>
+                  <div class="cet6-step-content">
+                    <div class="cet6-step-title">对照</div>
+                    <div class="cet6-step-desc">对照原文，分析没听出来的原因（连读/弱读/生词）</div>
+                  </div>
+                </div>
+                <div class="cet6-method-step">
+                  <div class="cet6-step-num">4</div>
+                  <div class="cet6-step-content">
+                    <div class="cet6-step-title">跟读</div>
+                    <div class="cet6-step-desc">跟着原文跟读，模仿语音语调，培养语感</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 听力记录列表 -->
             <div class="card">
-              <div class="card-head">🎧 听力 <span class="m-count" id="cet6ListeningCount"></span></div>
+              <div class="card-head">
+                📝 听力记录
+                <div class="cet6-vocab-filters" id="cet6ListenFilters">
+                  <button class="cet6-filter-btn active" data-filter="all" onclick="filterCet6Listen('all')">全部</button>
+                  <button class="cet6-filter-btn" data-filter="conversation" onclick="filterCet6Listen('conversation')">长对话</button>
+                  <button class="cet6-filter-btn" data-filter="passage" onclick="filterCet6Listen('passage')">听力篇章</button>
+                  <button class="cet6-filter-btn" data-filter="lecture" onclick="filterCet6Listen('lecture')">讲座/报道</button>
+                  <button class="cet6-filter-btn" data-filter="dictation" onclick="filterCet6Listen('dictation')">听写填空</button>
+                </div>
+              </div>
+              <div class="cet6-vocab-search">
+                <input type="text" id="cet6ListenSearch" placeholder="🔍 搜索听力记录..." oninput="searchCet6Listen()">
+              </div>
+              <div class="cet6-listen-list" id="cet6ListenList">
+                <div class="cet6-vocab-empty">🎧 还没有添加听力记录，点击上方"添加听力记录"开始记录吧～</div>
+              </div>
+            </div>
+
+            <!-- 听力学习资料 -->
+            <div class="card">
+              <div class="card-head">📚 听力学习资料</div>
               <div class="career-list" id="cet6ListeningList"></div>
+            </div>
+          </div>
+
+          <!-- 添加听力记录弹窗 -->
+          <div class="cet6-modal-overlay" id="cet6AddListenModal" style="display:none" onclick="hideCet6AddListenModal(event)">
+            <div class="cet6-modal" onclick="event.stopPropagation()">
+              <div class="cet6-modal-header">
+                <div class="cet6-modal-title">➕ 添加听力记录</div>
+                <div class="cet6-modal-close" onclick="hideCet6AddListenModal()">✕</div>
+              </div>
+              <div class="cet6-modal-body">
+                <div class="cet6-form-group">
+                  <label class="cet6-form-label">套题名称 *</label>
+                  <input type="text" class="cet6-form-input" id="cet6ListenName" placeholder="例如：2023年6月真题听力">
+                </div>
+                <div class="cet6-form-group">
+                  <label class="cet6-form-label">题型</label>
+                  <select class="cet6-form-input" id="cet6ListenType">
+                    <option value="conversation">长对话</option>
+                    <option value="passage">听力篇章</option>
+                    <option value="lecture">讲座/报道</option>
+                    <option value="dictation">听写填空</option>
+                    <option value="full">全套听力</option>
+                  </select>
+                </div>
+                <div class="cet6-form-row">
+                  <div class="cet6-form-group" style="flex:1">
+                    <label class="cet6-form-label">正确题数</label>
+                    <input type="number" class="cet6-form-input" id="cet6ListenCorrect" placeholder="例如：18" min="0">
+                  </div>
+                  <div class="cet6-form-group" style="flex:1">
+                    <label class="cet6-form-label">总题数</label>
+                    <input type="number" class="cet6-form-input" id="cet6ListenTotalQ" placeholder="例如：25" min="0">
+                  </div>
+                </div>
+                <div class="cet6-form-row">
+                  <div class="cet6-form-group" style="flex:1">
+                    <label class="cet6-form-label">用时（分钟）</label>
+                    <input type="number" class="cet6-form-input" id="cet6ListenDuration" placeholder="例如：30" min="0">
+                  </div>
+                  <div class="cet6-form-group" style="flex:1">
+                    <label class="cet6-form-label">日期</label>
+                    <input type="date" class="cet6-form-input" id="cet6ListenDate">
+                  </div>
+                </div>
+                <div class="cet6-form-group">
+                  <label class="cet6-form-label">备注/反思</label>
+                  <textarea class="cet6-form-textarea" id="cet6ListenNote" placeholder="记录错题原因、薄弱点、反思..."></textarea>
+                </div>
+              </div>
+              <div class="cet6-modal-footer">
+                <button class="cet6-btn cet6-btn-secondary" onclick="hideCet6AddListenModal()">取消</button>
+                <button class="cet6-btn cet6-btn-primary" onclick="addCet6Listen()">添加</button>
+              </div>
             </div>
           </div>
           <!-- 阅读 -->
           <div class="cet6-sub" id="cet6-sub-reading" style="display:none">
+            <!-- 阅读统计看板 -->
+            <div class="stat-grid cet6-read-stats">
+              <div class="stat-card p1">
+                <div class="em">📖</div>
+                <div class="lab">阅读总数</div>
+                <div class="num" id="cet6ReadTotal">0</div>
+              </div>
+              <div class="stat-card p2">
+                <div class="em">✅</div>
+                <div class="lab">已完成</div>
+                <div class="num" id="cet6ReadDone">0</div>
+              </div>
+              <div class="stat-card p3">
+                <div class="em">📊</div>
+                <div class="lab">平均正确率</div>
+                <div class="num" id="cet6ReadAccuracy">0%</div>
+              </div>
+              <div class="stat-card p4">
+                <div class="em">➕</div>
+                <div class="lab">今日新增</div>
+                <div class="num" id="cet6ReadToday">0</div>
+              </div>
+            </div>
+
+            <!-- 操作栏：添加阅读记录 + 进度 -->
+            <div class="cet6-vocab-actions">
+              <div class="cet6-add-word-btn" onclick="showCet6AddReadModal()">
+                <span class="cet6-add-icon">➕</span>
+                <span>添加阅读记录</span>
+              </div>
+              <div class="cet6-today-task">
+                <div class="cet6-task-label">阅读进度（目标80篇）</div>
+                <div class="cet6-task-progress-wrap">
+                  <div class="cet6-task-progress-bar">
+                    <div class="cet6-task-progress-fill" id="cet6ReadProgress" style="width:0%"></div>
+                  </div>
+                  <div class="cet6-task-progress-text"><span id="cet6ReadProgressCount">0</span> / 80 篇</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 阅读做题方法 -->
+            <div class="card cet6-method-card">
+              <div class="card-head">📖 阅读做题方法 · 先题后文</div>
+              <div class="cet6-method-steps">
+                <div class="cet6-method-step">
+                  <div class="cet6-step-num">1</div>
+                  <div class="cet6-step-content">
+                    <div class="cet6-step-title">读题干</div>
+                    <div class="cet6-step-desc">先读题目和选项，划出关键词，预测文章主题</div>
+                  </div>
+                </div>
+                <div class="cet6-method-step">
+                  <div class="cet6-step-num">2</div>
+                  <div class="cet6-step-content">
+                    <div class="cet6-step-title">定位</div>
+                    <div class="cet6-step-desc">根据题干关键词回原文定位，找到答案所在段落</div>
+                  </div>
+                </div>
+                <div class="cet6-method-step">
+                  <div class="cet6-step-num">3</div>
+                  <div class="cet6-step-content">
+                    <div class="cet6-step-title">比对</div>
+                    <div class="cet6-step-desc">仔细比对原文和选项，注意同义替换和陷阱</div>
+                  </div>
+                </div>
+                <div class="cet6-method-step">
+                  <div class="cet6-step-num">4</div>
+                  <div class="cet6-step-content">
+                    <div class="cet6-step-title">复盘</div>
+                    <div class="cet6-step-desc">做完后分析错题原因（词汇/定位/理解/逻辑）</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 阅读记录列表 -->
             <div class="card">
-              <div class="card-head">📖 阅读 <span class="m-count" id="cet6ReadingCount"></span></div>
+              <div class="card-head">
+                📝 阅读记录
+                <div class="cet6-vocab-filters" id="cet6ReadFilters">
+                  <button class="cet6-filter-btn active" data-filter="all" onclick="filterCet6Read('all')">全部</button>
+                  <button class="cet6-filter-btn" data-filter="detail" onclick="filterCet6Read('detail')">仔细阅读</button>
+                  <button class="cet6-filter-btn" data-filter="match" onclick="filterCet6Read('match')">段落匹配</button>
+                  <button class="cet6-filter-btn" data-filter="cloze" onclick="filterCet6Read('cloze')">选词填空</button>
+                </div>
+              </div>
+              <div class="cet6-vocab-search">
+                <input type="text" id="cet6ReadSearch" placeholder="🔍 搜索阅读记录..." oninput="searchCet6Read()">
+              </div>
+              <div class="cet6-read-list" id="cet6ReadList">
+                <div class="cet6-vocab-empty">📖 还没有添加阅读记录，点击上方"添加阅读记录"开始记录吧～</div>
+              </div>
+            </div>
+
+            <!-- 阅读学习资料 -->
+            <div class="card">
+              <div class="card-head">📚 阅读学习资料</div>
               <div class="career-list" id="cet6ReadingList"></div>
+            </div>
+          </div>
+
+          <!-- 添加阅读记录弹窗 -->
+          <div class="cet6-modal-overlay" id="cet6AddReadModal" style="display:none" onclick="hideCet6AddReadModal(event)">
+            <div class="cet6-modal" onclick="event.stopPropagation()">
+              <div class="cet6-modal-header">
+                <div class="cet6-modal-title">➕ 添加阅读记录</div>
+                <div class="cet6-modal-close" onclick="hideCet6AddReadModal()">✕</div>
+              </div>
+              <div class="cet6-modal-body">
+                <div class="cet6-form-group">
+                  <label class="cet6-form-label">文章/套题名称 *</label>
+                  <input type="text" class="cet6-form-input" id="cet6ReadName" placeholder="例如：2023年6月真题阅读第一篇">
+                </div>
+                <div class="cet6-form-group">
+                  <label class="cet6-form-label">题型</label>
+                  <select class="cet6-form-input" id="cet6ReadType">
+                    <option value="detail">仔细阅读</option>
+                    <option value="match">段落匹配</option>
+                    <option value="cloze">选词填空</option>
+                    <option value="full">全套阅读</option>
+                  </select>
+                </div>
+                <div class="cet6-form-row">
+                  <div class="cet6-form-group" style="flex:1">
+                    <label class="cet6-form-label">正确题数</label>
+                    <input type="number" class="cet6-form-input" id="cet6ReadCorrect" placeholder="例如：8" min="0">
+                  </div>
+                  <div class="cet6-form-group" style="flex:1">
+                    <label class="cet6-form-label">总题数</label>
+                    <input type="number" class="cet6-form-input" id="cet6ReadTotalQ" placeholder="例如：10" min="0">
+                  </div>
+                </div>
+                <div class="cet6-form-row">
+                  <div class="cet6-form-group" style="flex:1">
+                    <label class="cet6-form-label">用时（分钟）</label>
+                    <input type="number" class="cet6-form-input" id="cet6ReadDuration" placeholder="例如：20" min="0">
+                  </div>
+                  <div class="cet6-form-group" style="flex:1">
+                    <label class="cet6-form-label">日期</label>
+                    <input type="date" class="cet6-form-input" id="cet6ReadDate">
+                  </div>
+                </div>
+                <div class="cet6-form-group">
+                  <label class="cet6-form-label">备注/反思</label>
+                  <textarea class="cet6-form-textarea" id="cet6ReadNote" placeholder="记录错题原因、薄弱点、反思..."></textarea>
+                </div>
+              </div>
+              <div class="cet6-modal-footer">
+                <button class="cet6-btn cet6-btn-secondary" onclick="hideCet6AddReadModal()">取消</button>
+                <button class="cet6-btn cet6-btn-primary" onclick="addCet6Read()">添加</button>
+              </div>
             </div>
           </div>
           <!-- 写译 -->
           <div class="cet6-sub" id="cet6-sub-writing" style="display:none">
+            <!-- 写译统计看板 -->
+            <div class="stat-grid cet6-write-stats">
+              <div class="stat-card p1">
+                <div class="em">✍️</div>
+                <div class="lab">写译总数</div>
+                <div class="num" id="cet6WriteTotal">0</div>
+              </div>
+              <div class="stat-card p2">
+                <div class="em">✅</div>
+                <div class="lab">已完成</div>
+                <div class="num" id="cet6WriteDone">0</div>
+              </div>
+              <div class="stat-card p3">
+                <div class="em">📊</div>
+                <div class="lab">平均得分</div>
+                <div class="num" id="cet6WriteScore">0</div>
+              </div>
+              <div class="stat-card p4">
+                <div class="em">➕</div>
+                <div class="lab">今日新增</div>
+                <div class="num" id="cet6WriteToday">0</div>
+              </div>
+            </div>
+
+            <!-- 操作栏：添加写译记录 + 进度 -->
+            <div class="cet6-vocab-actions">
+              <div class="cet6-add-word-btn" onclick="showCet6AddWriteModal()">
+                <span class="cet6-add-icon">➕</span>
+                <span>添加写译记录</span>
+              </div>
+              <div class="cet6-today-task">
+                <div class="cet6-task-label">写译进度（目标30篇）</div>
+                <div class="cet6-task-progress-wrap">
+                  <div class="cet6-task-progress-bar">
+                    <div class="cet6-task-progress-fill" id="cet6WriteProgress" style="width:0%"></div>
+                  </div>
+                  <div class="cet6-task-progress-text"><span id="cet6WriteProgressCount">0</span> / 30 篇</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 写译学习方法 -->
+            <div class="card cet6-method-card">
+              <div class="card-head">📖 写译学习方法</div>
+              <div class="cet6-method-steps">
+                <div class="cet6-method-step">
+                  <div class="cet6-step-num">1</div>
+                  <div class="cet6-step-content">
+                    <div class="cet6-step-title">审题</div>
+                    <div class="cet6-step-desc">仔细读题，明确写作类型、主题和要求</div>
+                  </div>
+                </div>
+                <div class="cet6-method-step">
+                  <div class="cet6-step-num">2</div>
+                  <div class="cet6-step-content">
+                    <div class="cet6-step-title">列提纲</div>
+                    <div class="cet6-step-desc">列出文章结构和要点，确保逻辑清晰</div>
+                  </div>
+                </div>
+                <div class="cet6-method-step">
+                  <div class="cet6-step-num">3</div>
+                  <div class="cet6-step-content">
+                    <div class="cet6-step-title">写作</div>
+                    <div class="cet6-step-desc">用高级词汇和句型，注意语法和拼写</div>
+                  </div>
+                </div>
+                <div class="cet6-method-step">
+                  <div class="cet6-step-num">4</div>
+                  <div class="cet6-step-content">
+                    <div class="cet6-step-title">检查</div>
+                    <div class="cet6-step-desc">检查语法、拼写、标点，确保没有低级错误</div>
+                  </div>
+                </div>
+              </div>
+              <div class="cet6-translation-tips" style="margin-top:16px;padding-top:16px;border-top:1px solid rgba(0,0,0,0.06)">
+                <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:8px">💡 翻译技巧</div>
+                <div style="font-size:12px;color:var(--muted);line-height:1.6">
+                  1. 先通读全文，理解大意；2. 注意中英文语序差异，适当调整；3. 长句拆短句，短句合并；4. 注意时态、语态和单复数；5. 专业术语要准确；6. 最后通读检查，确保通顺自然。
+                </div>
+              </div>
+            </div>
+
+            <!-- 写译记录列表 -->
             <div class="card">
-              <div class="card-head">✍️ 写作 <span class="m-count" id="cet6WritingCount"></span></div>
+              <div class="card-head">
+                📝 写译记录
+                <div class="cet6-vocab-filters" id="cet6WriteFilters">
+                  <button class="cet6-filter-btn active" data-filter="all" onclick="filterCet6Write('all')">全部</button>
+                  <button class="cet6-filter-btn" data-filter="writing" onclick="filterCet6Write('writing')">写作</button>
+                  <button class="cet6-filter-btn" data-filter="translation" onclick="filterCet6Write('translation')">翻译</button>
+                </div>
+              </div>
+              <div class="cet6-vocab-search">
+                <input type="text" id="cet6WriteSearch" placeholder="🔍 搜索写译记录..." oninput="searchCet6Write()">
+              </div>
+              <div class="cet6-write-list" id="cet6WriteList">
+                <div class="cet6-vocab-empty">✍️ 还没有添加写译记录，点击上方"添加写译记录"开始记录吧～</div>
+              </div>
+            </div>
+
+            <!-- 写译学习资料 -->
+            <div class="card">
+              <div class="card-head">📚 写译学习资料</div>
               <div class="career-list" id="cet6WritingList"></div>
             </div>
-            <div class="card">
-              <div class="card-head">🌐 翻译 <span class="m-count" id="cet6TranslationCount"></span></div>
-              <div class="career-list" id="cet6TranslationList"></div>
+          </div>
+
+          <!-- 添加写译记录弹窗 -->
+          <div class="cet6-modal-overlay" id="cet6AddWriteModal" style="display:none" onclick="hideCet6AddWriteModal(event)">
+            <div class="cet6-modal" onclick="event.stopPropagation()">
+              <div class="cet6-modal-header">
+                <div class="cet6-modal-title">➕ 添加写译记录</div>
+                <div class="cet6-modal-close" onclick="hideCet6AddWriteModal()">✕</div>
+              </div>
+              <div class="cet6-modal-body">
+                <div class="cet6-form-group">
+                  <label class="cet6-form-label">题目/主题 *</label>
+                  <input type="text" class="cet6-form-input" id="cet6WriteTopic" placeholder="例如：2023年6月真题作文">
+                </div>
+                <div class="cet6-form-group">
+                  <label class="cet6-form-label">类型</label>
+                  <select class="cet6-form-input" id="cet6WriteType">
+                    <option value="writing">写作</option>
+                    <option value="translation">翻译</option>
+                  </select>
+                </div>
+                <div class="cet6-form-row">
+                  <div class="cet6-form-group" style="flex:1">
+                    <label class="cet6-form-label">得分（满分15）</label>
+                    <input type="number" class="cet6-form-input" id="cet6WriteScoreInput" placeholder="例如：12" min="0" max="15">
+                  </div>
+                  <div class="cet6-form-group" style="flex:1">
+                    <label class="cet6-form-label">用时（分钟）</label>
+                    <input type="number" class="cet6-form-input" id="cet6WriteDuration" placeholder="例如：30" min="0">
+                  </div>
+                </div>
+                <div class="cet6-form-group">
+                  <label class="cet6-form-label">日期</label>
+                  <input type="date" class="cet6-form-input" id="cet6WriteDate">
+                </div>
+                <div class="cet6-form-group">
+                  <label class="cet6-form-label">备注/反思</label>
+                  <textarea class="cet6-form-textarea" id="cet6WriteNote" placeholder="记录写作思路、翻译技巧、错题原因、反思..."></textarea>
+                </div>
+              </div>
+              <div class="cet6-modal-footer">
+                <button class="cet6-btn cet6-btn-secondary" onclick="hideCet6AddWriteModal()">取消</button>
+                <button class="cet6-btn cet6-btn-primary" onclick="addCet6Write()">添加</button>
+              </div>
             </div>
           </div>
           <!-- 错题 -->
           <div class="cet6-sub" id="cet6-sub-errors" style="display:none">
+            <!-- 错题统计看板 -->
+            <div class="stat-grid cet6-error-stats">
+              <div class="stat-card p1">
+                <div class="em">❌</div>
+                <div class="lab">错题总数</div>
+                <div class="num" id="cet6ErrorTotal">0</div>
+              </div>
+              <div class="stat-card p2">
+                <div class="em">🔄</div>
+                <div class="lab">待复习</div>
+                <div class="num" id="cet6ErrorReview">0</div>
+              </div>
+              <div class="stat-card p3">
+                <div class="em">✅</div>
+                <div class="lab">已掌握</div>
+                <div class="num" id="cet6ErrorMastered">0</div>
+              </div>
+              <div class="stat-card p4">
+                <div class="em">➕</div>
+                <div class="lab">今日新增</div>
+                <div class="num" id="cet6ErrorToday">0</div>
+              </div>
+            </div>
+
+            <!-- 操作栏：添加错题 + 错因分布 -->
+            <div class="cet6-vocab-actions">
+              <div class="cet6-add-word-btn" onclick="showCet6AddErrorModal()">
+                <span class="cet6-add-icon">➕</span>
+                <span>添加错题</span>
+              </div>
+              <div class="cet6-error-type-dist">
+                <div class="cet6-task-label">错因分布</div>
+                <div class="cet6-error-tags" id="cet6ErrorTagsDist"></div>
+              </div>
+            </div>
+
+            <!-- 待复习错题区 -->
+            <div class="card cet6-review-card" id="cet6ErrorReviewCard" style="display:none">
+              <div class="card-head">
+                🔄 今日待复习
+                <span class="cet6-review-count" id="cet6ErrorReviewCount">0</span>
+              </div>
+              <div class="cet6-error-review-list" id="cet6ErrorReviewList"></div>
+            </div>
+
+            <!-- 错题列表 -->
             <div class="card">
-              <div class="card-head">❌ 错题本 <span class="m-count" id="cet6ErrorsCount"></span></div>
+              <div class="card-head">
+                ❌ 错题本
+                <div class="cet6-vocab-filters" id="cet6ErrorFilters">
+                  <button class="cet6-filter-btn active" data-filter="all" onclick="filterCet6Errors('all')">全部</button>
+                  <button class="cet6-filter-btn" data-filter="vocab" onclick="filterCet6Errors('vocab')">词汇</button>
+                  <button class="cet6-filter-btn" data-filter="定位" onclick="filterCet6Errors('定位')">定位</button>
+                  <button class="cet6-filter-btn" data-filter="理解" onclick="filterCet6Errors('理解')">理解</button>
+                  <button class="cet6-filter-btn" data-filter="逻辑" onclick="filterCet6Errors('逻辑')">逻辑</button>
+                  <button class="cet6-filter-btn" data-filter="粗心" onclick="filterCet6Errors('粗心')">粗心</button>
+                </div>
+              </div>
+              <div class="cet6-vocab-search">
+                <input type="text" id="cet6ErrorSearch" placeholder="🔍 搜索错题..." oninput="searchCet6Errors()">
+              </div>
+              <div class="cet6-error-list" id="cet6ErrorList">
+                <div class="cet6-vocab-empty">📝 还没有添加错题，点击上方"添加错题"开始记录吧～</div>
+              </div>
+            </div>
+
+            <!-- 错题学习资料 -->
+            <div class="card">
+              <div class="card-head">📚 错题学习资料</div>
               <div class="career-list" id="cet6ErrorsList"></div>
+            </div>
+          </div>
+
+          <!-- 添加错题弹窗 -->
+          <div class="cet6-modal-overlay" id="cet6AddErrorModal" style="display:none" onclick="hideCet6AddErrorModal(event)">
+            <div class="cet6-modal" onclick="event.stopPropagation()">
+              <div class="cet6-modal-header">
+                <div class="cet6-modal-title">➕ 添加错题</div>
+                <div class="cet6-modal-close" onclick="hideCet6AddErrorModal()">✕</div>
+              </div>
+              <div class="cet6-modal-body">
+                <div class="cet6-form-group">
+                  <label class="cet6-form-label">题型</label>
+                  <select class="cet6-form-input" id="cet6ErrorType">
+                    <option value="听力">听力</option>
+                    <option value="阅读">阅读</option>
+                    <option value="写作">写作</option>
+                    <option value="翻译">翻译</option>
+                    <option value="词汇">词汇</option>
+                  </select>
+                </div>
+                <div class="cet6-form-group">
+                  <label class="cet6-form-label">错因标签 *</label>
+                  <div class="cet6-error-tag-select" id="cet6ErrorTagSelect">
+                    <span class="cet6-error-tag-option" data-tag="词汇" onclick="selectCet6ErrorTag('词汇')">词汇</span>
+                    <span class="cet6-error-tag-option" data-tag="定位" onclick="selectCet6ErrorTag('定位')">定位</span>
+                    <span class="cet6-error-tag-option" data-tag="理解" onclick="selectCet6ErrorTag('理解')">理解</span>
+                    <span class="cet6-error-tag-option" data-tag="逻辑" onclick="selectCet6ErrorTag('逻辑')">逻辑</span>
+                    <span class="cet6-error-tag-option" data-tag="粗心" onclick="selectCet6ErrorTag('粗心')">粗心</span>
+                    <span class="cet6-error-tag-option" data-tag="其他" onclick="selectCet6ErrorTag('其他')">其他</span>
+                  </div>
+                </div>
+                <div class="cet6-form-group">
+                  <label class="cet6-form-label">题目内容 *</label>
+                  <textarea class="cet6-form-textarea" id="cet6ErrorQuestion" placeholder="输入错题题目..."></textarea>
+                </div>
+                <div class="cet6-form-group">
+                  <label class="cet6-form-label">正确答案</label>
+                  <input type="text" class="cet6-form-input" id="cet6ErrorAnswer" placeholder="例如：C">
+                </div>
+                <div class="cet6-form-group">
+                  <label class="cet6-form-label">解析/反思</label>
+                  <textarea class="cet6-form-textarea" id="cet6ErrorAnalysis" placeholder="写下错题解析和反思..."></textarea>
+                </div>
+                <div class="cet6-form-group">
+                  <label class="cet6-form-label">来源</label>
+                  <input type="text" class="cet6-form-input" id="cet6ErrorSource" placeholder="例如：2023年6月真题">
+                </div>
+              </div>
+              <div class="cet6-modal-footer">
+                <button class="cet6-btn cet6-btn-secondary" onclick="hideCet6AddErrorModal()">取消</button>
+                <button class="cet6-btn cet6-btn-primary" onclick="addCet6Error()">添加</button>
+              </div>
             </div>
           </div>
           <!-- 资料 -->
           <div class="cet6-sub" id="cet6-sub-materials" style="display:none">
             <div class="card">
-              <div class="card-head">📚 学习资料 <span class="m-count" id="cet6MaterialsCount"></span></div>
+              <div class="card-head">📚 六级学习资料 <span class="m-count" id="cet6MaterialsCount"></span></div>
+              <div class="cet6-vocab-search">
+                <input type="text" id="cet6MaterialsSearch" placeholder="🔍 搜索资料..." oninput="searchCet6Materials()">
+              </div>
               <div class="career-list" id="cet6MaterialsList"></div>
             </div>
           </div>
@@ -1955,7 +3137,7 @@ body.sop-active .sub-tab-bar{display:flex}
 
 <script>
 window.SITE_DATA = {
- "updated": "2026-09-06 19:55",
+ "updated": "2026-09-06 21:29",
  "stats": {
   "jobs": 32,
   "rec": 0,
@@ -4290,6 +5472,11 @@ window.SITE_DATA = {
      "title": "",
      "notes": [
       {
+       "title": "2027届应届生毕业前规划_求职考公考研时间线_2026-09-06",
+       "icon": "📄",
+       "html": "<blockquote>\n<p>2027 届应届生毕业前完整规划，精确到月份，覆盖求职/考公/考研三类。9 月是真正的分水岭——最怕的不是没准备，而是没想清楚走哪条路。</p>\n</blockquote>\n<h2>速读（核心结论）</h2>\n<ol>\n<li><strong>9 月第一件事：确定主线和退路</strong>——别找工作/考公/考研都想试，最后三不沾；方向越具体（具体到城市+行业+岗位），后面准备越容易</li>\n<li><strong>求职三件事（9 月起）</strong>：改好第一版简历每天投二三十份边投边改 + 建立投递进度表防错过 + 先拿小公司练面试最后面心仪企业</li>\n<li><strong>考研 9 月定死</strong>：院校/专业课/资料/复习计划别再犹豫，尤其专业课别想着最后突击；同时建议投几份秋招简历，掂量专业还值不值得考研</li>\n<li><strong>至少拿 3 个 offer 再躺平</strong>——每年有应届生被公司毁约；对比 offer 别光盯薪资，看工作内容/成长空间/领导风格/五险一金/加班</li>\n<li><strong>1 月是春招准备黄金期</strong>——复盘秋招+补充岗位相关经历（做账号/作品集/项目），别浪费时间考没用的证</li>\n</ol>\n<h2>正文：按月时间线</h2>\n<h3>9 月（分水岭，确定主线）</h3>\n<p><strong>求职</strong>：\n- 先定行业/岗位/城市——别只说\"进大厂年入百万\"，要具体到\"北京的软件开发、上海的游戏策划、杭州的互联网运营、能源电力通信金融央国企\"\n- 金九银十，但七八月份大厂已开提前批\n- <strong>三件事</strong>：\n  1. 改好第一版简历，每天投二三十份，边投边改——投运营突出运营案例，投技术突出项目和技术栈，别一份简历投遍所有岗\n  2. 建立投递进度表（公司/岗位/笔试/面试结果），防错过测评面试，方便复盘\n  3. 开始练面试——先拿小公司练手，自我介绍/项目经历/实习经历练熟，最后面特别想进的\n- 部分央国企网申卡四六级，12 月还有一次机会</p>\n<p><strong>考公</strong>：\n- 先确定主抓哪些考试（国考/省考/选调生/事业单位）\n- 国考 67% 岗位只要应届生；选调生有党员/学生干部/校级及以上荣誉硬性要求（很多条件不是临时能补的）\n- 选岗：研究近三年招考人数、专业限制、竞争比例、地区，别只盯工资高的（报录比基本百里挑一）\n- 建议每天抽 1 小时海投找工作保底</p>\n<p><strong>考研</strong>：\n- 9 月是黄金复习期，重点打基础\n- 别再犹豫考哪个学校，院校/专业课/资料/复习计划定死——尤其专业课别想着最后突击两个月\n- <strong>特别建议</strong>：去看看秋招投几份简历，了解专业最新就业情况，掂量专业还值不值得考研；读研提升不大就趁早转找工作</p>\n<h3>10 月（关键选择期，稳住心态）</h3>\n<p><strong>求职</strong>：\n- 没拿到 offer 别放弃，每天投 30 份（一个月近 1000 家，你可以失败 999 次，面试官只要失败一次你就有工作）\n- 拿到 offer 别直接躺平（除非香到无法拒绝）——<strong>至少拿 3 个 offer 握选择权</strong>（每年有应届生被公司毁约）\n- 对比 offer 别光盯薪资：工作内容/成长空间/领导风格/五险一金/加班情况，拉表逐项对比排除</p>\n<p><strong>考公</strong>：\n- 国考通知发布，报名开始\n- 别扎堆热门岗，注意专业/学历/政治面貌/基层经历/应届生身份要求，<strong>选限制多竞争小的，避开三不限炮灰岗</strong>——岗位选得好比多考两三分更重要\n- 报完名盯紧资格审查结果和缴费确认时间</p>\n<p><strong>考研</strong>：\n- 报名开始，学校专业定下别来回换，核对报名信息\n- 猛攻专业课刷错题；基础不错就开始整套模拟卡时间适应考试节奏</p>\n<h3>11 月（查漏补缺）</h3>\n<p><strong>求职</strong>：\n- 秋招尾声，没拿到 offer 先分析失败原因（面试失败就练沟通表达，这时候简陋成功率很高）\n- 持续关注秋招补录、国企招聘信息（企业会放出一批补录岗位）</p>\n<p><strong>考公</strong>：\n- 国考冲刺，重点模拟考试把握时间提高正确率——特别是数量题，很多人不是不会是时间不够\n- <strong>稳定发挥比学新东西更重要</strong></p>\n<p><strong>考研</strong>：\n- 最后冲刺，查漏补缺，回归课本重点章节\n- 别频繁换资料，少看制造焦虑的经验帖</p>\n<h3>12 月（各种考试，秋招基本结束）</h3>\n<p><strong>求职</strong>：\n- 拿到 offer 别万事大吉，逐一确认 offer 细节（岗位/工作内容/薪资结构/工作地点/入职时间）\n- 提前搞定学校课程和毕业论文——每年有学生因挂科/延期毕业影响入职\n- 没拿到 offer 根据投递表复盘，全力准备春招</p>\n<p><strong>考公</strong>：国考大多 11 月底或 12 月初笔试\n<strong>考研</strong>：12 月下旬笔试\n- 考前最后阶段：刷真题保持手感，调整作息——拼的不是谁学得最多而是谁发挥最稳，别学崩了</p>\n<h3>1 月（可以休息，但提前准备）</h3>\n<p><strong>求职</strong>：\n- 秋招没满意 offer 的，1 月是<strong>准备春招黄金期</strong>\n- 先复盘秋招（简历为什么没人看、面试为什么失败），再补充有价值的经历：\n  - 想做运营就去做账号\n  - 想做设计就整理作品集\n  - 想做技术就完善项目\n- <strong>别浪费时间考一堆没用的证</strong>——最后半年最值钱的是和岗位直接相关的经历</p>\n<p><strong>考公</strong>：\n- 关注国考成绩，理想就准备面试\n- 没进面别放弃（后面还有省考/选调/事业单位）\n- 觉得机会不大就别把所有希望压在公务员上，每天投几份简历留退路</p>\n<p><strong>考研</strong>：\n- 初试结束短暂休息，然后准备复试（专业知识/英语自我介绍/常见面试问题/科研项目经历）\n- 感觉不确定的同步了解调剂和就业信息，别傻等</p>\n<h3>2 月（机会不等人）</h3>\n<p><strong>求职</strong>：\n- 重点关注<strong>春招提前批</strong>——很多企业春节前后就开放岗位，等开学就完了\n- 每天刷企业官网/招聘平台/学校就业网站，看到匹配马上投\n- 春招岗位招满就下，没秋招那么宽裕</p>\n<p><strong>考公</strong>：盯紧省考公告（省考不是全国一张卷，不同省份时间不同）</p>\n<h2>对文雪的针对性启示</h2>\n<ul>\n<li><strong>当前状态</strong>：2027 届供应链管理，秋招（供应链/采购/项目管理，优先济南及周边，央国企子公司+高潜力企业）与考研（本校管科）并行</li>\n<li><strong>9 月重点确认</strong>：秋招和考研的主线/退路是否明确？当前是并行，需明确主次和时间分配</li>\n<li><strong>求职三件事已有 scm 技能支持</strong>：scm-resume-customization（简历定制）、scm-job-matching（岗位匹配）、scm-interview-prep（面试准备）——正好对应视频里的\"改简历+投递表+练面试\"</li>\n<li><strong>央国企四六级</strong>：已过四级，无卡点</li>\n<li><strong>考研本校管科</strong>：专业课复习计划需定死，别犹豫；同时可投几份秋招简历了解就业市场</li>\n<li><strong>方向具体化</strong>：当前目标\"济南及周边+央国企子公司+高潜力企业\"已较具体，可进一步细化到行业（能源/电力/通信/金融/制造）</li>\n</ul>\n<h2>易混淆点 / 关键补充</h2>\n<ul>\n<li><strong>主线 ≠ 只做一件事</strong>：确定主线后，退路也要留（如考研为主但每天投几份简历保底），但不能三条线平均用力</li>\n<li><strong>投简历数量 ≠ 质量</strong>：每天二三十份是基准，但针对不同岗位优化简历更重要——一份简历投遍所有岗=无头苍蝇</li>\n<li><strong>春招提前批 ≠ 等开学</strong>：春节前后就开放，招满就下，比秋招节奏快</li>\n<li><strong>考证 ≠ 竞争力</strong>：最后半年最值钱的是岗位相关经历，不是证书数量</li>\n</ul>\n<h2>关联笔记</h2>\n<ul>\n<li>文雪-求职目标画像（SCM-Career 项目画像）</li>\n<li>今年效率是去年十倍_人机共创三步循环_2026-09-06（AI 时代求职的人机共创思路）</li>\n</ul>\n<h2>反思</h2>\n<ul>\n<li>视频的时间线框架可作为 SCM-Career 项目的月度规划参考，每月对照检查进度</li>\n</ul>\n<h2>行动项</h2>\n<ul>\n<li>[ ] 确认秋招/考研主线和退路，明确时间分配比例（优先级：高）</li>\n<li>[ ] 9 月求职三件事：简历第一版优化 + 投递进度表 + 小公司面试练手（用 scm 技能）（优先级：高）</li>\n<li>[ ] 考研：专业课复习计划定死，别再犹豫学校和资料（优先级：中）</li>\n</ul>"
+      },
+      {
        "title": "文雪-求职目标画像",
        "icon": "📄",
        "html": "<h1>文雪 · 求职目标画像（作战指挥版）</h1>\n<blockquote>\n<p>最后更新：2026-08-22<br />\n定位：内部作战底稿。用于驱动 AI 筛选岗位、定制简历、准备面试。<br />\n⚠️ 对外输出时，需将“短板”转化为 <strong>“沉稳、专注、重逻辑”</strong> 的应届生潜力特质。</p>\n</blockquote>\n<hr />\n<h2>🧠 核心画像（一句话定位）</h2>\n<blockquote>\n<p><strong>985供应链本科 · 数据驱动型 · 深度工作偏好 · 外企/阳光中厂优先</strong></p>\n</blockquote>\n<h3>🤖 AI 执行红线（每次决策前自检）</h3>\n<ul>\n<li>该岗位是否接受 <strong>无正式实习经验的应届生</strong>？（若JD写明“需x年经验”，直接降权）</li>\n<li>该岗位的 <strong>“项目经验”要求</strong> 是否可以用我的课程项目（4.5万条数据+优化模型）对等替代？</li>\n</ul>\n<hr />\n<h2>1. 基本信息</h2>\n<ul>\n<li><strong>姓名</strong>：文雪  </li>\n<li><strong>学校</strong>：山东大学（985/211）管理学院  </li>\n<li><strong>专业</strong>：供应链管理（2027届）  </li>\n<li><strong>在读时间</strong>：2022.09 – 2027.06  </li>\n<li><strong>应届身份</strong>：2027届（目前可投递：实习 → 2027秋招 → 2027春招）  </li>\n<li><strong>所在城市</strong>：济南（本地）  </li>\n<li><strong>联系方式</strong>：18658249341 ｜ 2631217547@qq.com  </li>\n</ul>\n<hr />\n<h2>2. 目标行业 &amp; 岗位（按内核聚类）</h2>\n<blockquote>\n<p>核心诉求：<strong>专业相关 + 偏后台/数据/计划 + 能深度专注 + 避免强社交曝光</strong>。</p>\n</blockquote>\n<table>\n<thead>\n<tr>\n<th style=\"text-align: center;\">优先级</th>\n<th style=\"text-align: left;\">岗位类型</th>\n<th style=\"text-align: left;\">理由与执行指令</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td style=\"text-align: center;\"><strong>1</strong></td>\n<td style=\"text-align: left;\">供应链数据分析 / 需求计划 / 库存计划</td>\n<td style=\"text-align: left;\">最契合“4.5万+条数据、优化模型”硬实力，少社交、重逻辑。</td>\n</tr>\n<tr>\n<td style=\"text-align: center;\"><strong>2</strong></td>\n<td style=\"text-align: left;\">供应链管理培训生（仅限外企/阳光成长型）</td>\n<td style=\"text-align: left;\">有轮岗体系，但<strong>必须避开</strong>打着管培旗号实做一线销售/执行的岗位。</td>\n</tr>\n<tr>\n<td style=\"text-align: center;\"><strong>3</strong></td>\n<td style=\"text-align: left;\">采购 / 物流 后台支持（偏系统/流程/数据分析）</td>\n<td style=\"text-align: left;\">有用友U8+实操经验，<strong>避开</strong>频繁对外催货、强商务谈判的“跟单型采购”。</td>\n</tr>\n<tr>\n<td style=\"text-align: center;\"><strong>❌ 规避</strong></td>\n<td style=\"text-align: left;\">纯销售、商务拓展、活动现场执行、高频演讲/强应酬岗。</td>\n<td style=\"text-align: left;\">直接触发红线，AI 一键过滤。</td>\n</tr>\n</tbody>\n</table>\n<hr />\n<h2>2.5 潜力企业筛选（动态发掘 · 参考线索池见 🗂️ 候选线索池）</h2>\n<blockquote>\n<p>检索<strong>不限于任何名单</strong>：按下方「潜力企业筛选标准」动态发掘新企业；官方来源优先；每发掘一家先做初步筛选判断。\n参考线索池（原目标公司池）仅作初始候选与考察记录，不作为检索边界。</p>\n</blockquote>\n<h3>潜力企业筛选标准（发掘新企业）</h3>\n<ul>\n<li><strong>大厂旗下子企业/子品牌/独立事业部</strong>：有自主招聘、业务独立、决策快</li>\n<li><strong>幼年体企业</strong>：成立几年、业务上升期、融资/扩产/新工厂/新业务线</li>\n<li><strong>小而美的外企</strong>：行业隐形冠军、德日法瑞等中小外企、口碑佳氛围好</li>\n<li><strong>行业赛道好</strong>：快消/宠物/零售/新能源/智能制造/供应链科技</li>\n<li><strong>初步筛选判断</strong>：前景（成长性/业务方向）+ 有供应链/计划/采购/物流类岗位 + 口碑（负面多一票排除）；不达标不收录</li>\n</ul>\n<h3>来源优先级（硬性排序）</h3>\n<ol>\n<li>🥇 <strong>企业官网 / 官方招聘页 / 官方校招平台</strong>（最优先，信息最准）</li>\n<li>🥈 <strong>招聘软件</strong>：BOSS直聘、猎聘、前程无忧、智联、应届生求职网、牛客校招</li>\n<li>🥉 <strong>其他网页</strong>（就业网转载/聚合站）：仅作线索，收录前尽量回官方核实\n- 需登录才能看完整 JD → 优先复用 Chrome 已登录会话（Codex Chrome 扩展，<strong>登录过的平台不重复登录</strong>）；无登录态则在对话中请求用户登录后继续</li>\n</ol>\n<h3>🚫 一票排除（口碑/强度不符）</h3>\n<p>歌尔股份、隆基绿能、拼多多、京东物流（管培/一线）、豪迈集团、九阳股份、华熙生物、优衣库 UMC</p>\n<h3>检索收敛规则（防无限检索）</h3>\n<ul>\n<li>单轮全网搜索 ≤ 10 次；先「发掘→筛选→归档→评分→写入」一批（≥3 个）再决定是否扩大。</li>\n<li>已收录/已考察企业记录在 🗂️ 候选线索池，避免重复；超出预算先写入已找到的并出日报，剩余列入下轮待办。</li>\n</ul>\n<h2>3. 目标城市（分阶段执行）</h2>\n<table>\n<thead>\n<tr>\n<th style=\"text-align: left;\">阶段</th>\n<th style=\"text-align: left;\">优先级顺序</th>\n<th style=\"text-align: left;\">异地接受条件</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td style=\"text-align: left;\"><strong>实习阶段</strong></td>\n<td style=\"text-align: left;\">济南/山东本地 &gt; 其他城市（新一线/二线/周边，有住宿补贴加分）&gt; 北上广深（仅提供住宿或住宿补贴才考虑）</td>\n<td style=\"text-align: left;\">实习地点放宽，不限于济南；北上广深等生活成本过高的城市默认不考虑，提供住宿/住宿补贴时可考虑；其他城市均可投，提供住宿/补贴更优。</td>\n</tr>\n<tr>\n<td style=\"text-align: left;\"><strong>秋招/春招（全职）</strong></td>\n<td style=\"text-align: left;\">各城市平等对待（不优先济南）&gt; 节奏舒缓的潜力城市加分（青岛、苏州、成都、武汉、宁波等）&gt; 北上广深（放最后，仅薪资高到能抵消/忽略高生活成本才考虑）</td>\n<td style=\"text-align: left;\">不喜欢长期留济南，<strong>秋招不以济南为优先</strong>；偏好节奏相对舒缓的潜力城市；家人所在地（宁波）加分；北上广深除非薪资显著覆盖高生活成本否则不优先。</td>\n</tr>\n<tr>\n<td style=\"text-align: left;\"><strong>🚫 硬性排除</strong></td>\n<td style=\"text-align: left;\">偏远且无班车、无住宿、无任何补贴的地点。</td>\n<td style=\"text-align: left;\">触发红线，直接过滤。</td>\n</tr>\n</tbody>\n</table>\n<hr />\n<h2>4. 薪资底线（综合体验优先）</h2>\n<table>\n<thead>\n<tr>\n<th style=\"text-align: left;\">类别</th>\n<th style=\"text-align: left;\">底线范围</th>\n<th style=\"text-align: left;\">执行策略</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td style=\"text-align: left;\"><strong>实习</strong></td>\n<td style=\"text-align: left;\">150 – 250 元 / 天</td>\n<td style=\"text-align: left;\">同等薪资下，优先选择氛围轻松、有补贴、加班少的城市/企业。</td>\n</tr>\n<tr>\n<td style=\"text-align: left;\"><strong>正式</strong></td>\n<td style=\"text-align: left;\">月薪 8K – 15K（年薪 10 – 20 万）</td>\n<td style=\"text-align: left;\">若薪资较高但氛围压抑（大小周/狼性），直接降权或排除。</td>\n</tr>\n</tbody>\n</table>\n<hr />\n<h2>5. 公司规模 / 类型（严格执行排序）</h2>\n<blockquote>\n<p>性格与价值观决定：不适合高强度内卷的大厂总部或压抑的央国企。</p>\n</blockquote>\n<table>\n<thead>\n<tr>\n<th style=\"text-align: center;\">优先级</th>\n<th style=\"text-align: left;\">类型</th>\n<th style=\"text-align: left;\">执行指令</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td style=\"text-align: center;\"><strong>🥇 第一</strong></td>\n<td style=\"text-align: left;\"><strong>外企（首选）</strong></td>\n<td style=\"text-align: left;\"><strong>即使薪资略低于国内大厂，只要岗位内容合适，优先推荐并投递。</strong> 日常沟通以中文为主的外企更佳（因英语仅CET-4）。</td>\n</tr>\n<tr>\n<td style=\"text-align: center;\"><strong>🥈 第二</strong></td>\n<td style=\"text-align: left;\"><strong>成长型企业 / 中厂 / 大厂旗下子企业（“幼年体”）</strong></td>\n<td style=\"text-align: left;\">重点寻找业务上升期、有独立决策权、氛围阳光的团队。</td>\n</tr>\n<tr>\n<td style=\"text-align: center;\"><strong>🥉 第三</strong></td>\n<td style=\"text-align: left;\">国内大厂总部（互联网/制造业龙头）</td>\n<td style=\"text-align: left;\">除非是核心后台数据/计划岗，且<strong>明确双休、不强制加班</strong>，否则不建议投递。</td>\n</tr>\n<tr>\n<td style=\"text-align: center;\"><strong>⛔ 排除</strong></td>\n<td style=\"text-align: left;\">央国企</td>\n<td style=\"text-align: left;\">除非是纯后台数据分析岗且<strong>明确工作氛围轻松、不搞形式主义</strong>，否则基本排除。</td>\n</tr>\n</tbody>\n</table>\n<hr />\n<h2>6. 能力底牌（真实数据版）</h2>\n<h3>✅ 核心优势（面试/简历重点展示）</h3>\n<ol>\n<li><strong>985/211 专业对口</strong>：核心课程覆盖建模、ERP、采购、物流、统计、Python。</li>\n<li><strong>硬核数据处理全流程</strong>：\n   - 掌握 Python（pandas/matplotlib）、R语言、SPSS；\n   - 累计独立处理 <strong>4.5万+条</strong> 业务数据、<strong>328份</strong> 问卷；\n   - 能独立绘制帕累托图、相关性热力图、瀑布图等专业图表。</li>\n<li><strong>供应链建模优化</strong>：独立构建“选址-路径双层优化模型”，测算结果：<strong>运营成本降低 18.7%、配送时长缩短 22.3%</strong>。</li>\n<li><strong>ERP全流程实操</strong>：熟练使用 用友U8+（采购→入库→销售→出库→调拨→盘点→核算→收付款）。</li>\n<li><strong>深度工作型人格</strong>：沉稳细致，一旦投入便深度沉浸，适合长周期耐心打磨的数据分析/计划优化类岗位。</li>\n</ol>\n<h3>⚠️ 主要短板（内部应对策略）</h3>\n<table>\n<thead>\n<tr>\n<th style=\"text-align: left;\">短板</th>\n<th style=\"text-align: left;\">对内应对策略（知识库辅助）</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td style=\"text-align: left;\"><strong>无正式实习经历</strong></td>\n<td style=\"text-align: left;\">将课程项目包装为“实战项目”（已有数据量支撑），投递前让AI针对性提炼项目亮点。</td>\n</tr>\n<tr>\n<td style=\"text-align: left;\"><strong>内向、易紧张脸红</strong></td>\n<td style=\"text-align: left;\">提前准备 <strong>“基于数据的沟通”</strong> 话术库；群面时主攻“记录员/计算员”角色，避免Leader位。</td>\n</tr>\n<tr>\n<td style=\"text-align: left;\"><strong>英语仅CET-4</strong></td>\n<td style=\"text-align: left;\">优先筛选 <strong>“日常以中文为主”</strong> 的外企；同时建立《供应链英语术语卡》每日突击。</td>\n</tr>\n<tr>\n<td style=\"text-align: left;\"><strong>面试经验少</strong></td>\n<td style=\"text-align: left;\">建立 面试复盘 笔记，每次面试后立即记录真题与卡壳点，针对性补强。</td>\n</tr>\n<tr>\n<td style=\"text-align: left;\"><strong>过度抠细节（双刃剑）</strong></td>\n<td style=\"text-align: left;\">提醒自己 <strong>“先完成，再完美”</strong> ；面试被问缺点时，转化为“我正在用20/80法则保证核心交付速度”。</td>\n</tr>\n</tbody>\n</table>\n<hr />\n<h2>7. 🤖 AI 匹配度自动评分系统（执行锚点）</h2>\n<blockquote>\n<p><strong>使用说明</strong>：AI 拿到JD后，按以下规则逐项打分（满分100），<strong>总分 ≥ 70 分即推荐投递</strong>。</p>\n</blockquote>\n<table>\n<thead>\n<tr>\n<th style=\"text-align: center;\">维度</th>\n<th style=\"text-align: center;\">权重</th>\n<th style=\"text-align: left;\">🧮 AI 具体打分规则（加减分明细）</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td style=\"text-align: center;\"><strong>专业匹配</strong></td>\n<td style=\"text-align: center;\">30%</td>\n<td style=\"text-align: left;\">• 出现 供应链计划/采购/物流/数据分析 → <strong>+30分</strong><br>• 仅沾边（如“运营专员”） → <strong>+10分</strong><br>• 完全无关（销售/地推）→ <strong>0分（直接淘汰）</strong></td>\n</tr>\n<tr>\n<td style=\"text-align: center;\"><strong>技能匹配</strong></td>\n<td style=\"text-align: center;\">25%</td>\n<td style=\"text-align: left;\">• 出现 Python/R语言/SPSS 任意一项 → <strong>+15分</strong><br>• 出现 Excel/ERP/数据可视化 → <strong>+10分</strong><br>• 出现“数据分析/数据处理/数据敏感度/逻辑分析能力”等明确数据与分析要求（未点名具体工具） → <strong>+8分</strong><br>• 完全没提数据、分析相关要求 → <strong>+0分</strong></td>\n</tr>\n<tr>\n<td style=\"text-align: center;\"><strong>氛围与成长</strong></td>\n<td style=\"text-align: center;\">15%</td>\n<td style=\"text-align: left;\">• 写明了“双休/培训体系/团队年轻” → <strong>+15分</strong><br>• 没写但公司外企/中厂口碑好 → <strong>+10分</strong><br>• 提到“抗压/奋斗/狼性/大小周” → <strong>直接扣20分（一票否决倾向）</strong></td>\n</tr>\n<tr>\n<td style=\"text-align: center;\"><strong>地点匹配</strong></td>\n<td style=\"text-align: center;\">10%</td>\n<td style=\"text-align: left;\">实习：• 济南/山东本地 → <strong>+10分</strong><br>• 异地提供住宿/补贴（新一线/二线）→ <strong>+8分</strong><br>• 异地无住宿补贴（新一线/二线）→ <strong>+6分</strong><br>• 北上广深提供住宿/补贴 → <strong>+5分</strong><br>• 北上广深无住宿补贴 → <strong>0分（降权不推荐）</strong><br>秋招：• 节奏舒缓的潜力城市 → <strong>+10分</strong><br>• 其他城市平等 → <strong>+7~8分</strong><br>• 北上广深薪资显著覆盖高生活成本 → <strong>+5~6分</strong><br>• 北上广深薪资不足覆盖 → <strong>降权</strong><br>通用：偏远且无班车/住宿/补贴（三项全无）→ <strong>0分（触发红线）</strong></td>\n</tr>\n<tr>\n<td style=\"text-align: center;\"><strong>薪资匹配</strong></td>\n<td style=\"text-align: center;\">10%</td>\n<td style=\"text-align: left;\">• 实习≥150/天 或 正式≥8K → <strong>+10分</strong><br>• 未标明薪资但公司外企/大厂 → <strong>+5分（可投递试探）</strong></td>\n</tr>\n<tr>\n<td style=\"text-align: center;\"><strong>行业偏好</strong></td>\n<td style=\"text-align: center;\">10%</td>\n<td style=\"text-align: left;\">• 快消/宠物/零售/数据服务 → <strong>+10分（加分项）</strong><br>• 其他行业 → <strong>+5分（不设硬性门槛）</strong></td>\n</tr>\n</tbody>\n</table>\n<blockquote>\n<p><strong>📌 使用说明（补充信息核实）</strong>：JD 未披露的维度（薪资、双休/加班、培训体系、<strong>住宿补贴等</strong>），打分前<strong>必须额外在权威来源主动搜集确认</strong>（企业官网/官方招聘页/招聘平台标注/OfferShow 等），<strong>不能因 JD 未写就默认没有</strong>。来源分级：① 官方来源（官网/官方招聘页/招聘简章/公告）直接采信；② 权威第三方（招聘平台标注、OfferShow 晒薪、公开财报/新闻）参考采信；③ 网络口碑（脉脉/知乎/牛客/员工论坛）仅参考并标注来源与可信度。<strong>找遍权威来源都没有 → 标注「不确定/未提及」并记入岗位笔记「待与 HR 确认」清单</strong>，评分按保守处理、不触发红线，留待联系 HR 时核实；禁止编造。</p>\n</blockquote>\n<hr />\n<h2>8. 🛑 求职红线（AI 直接过滤关键词库）</h2>\n<p><strong>出现以下任意一项，系统自动标记“❌ 不推荐”，无需评分：</strong></p>\n<ol>\n<li><strong>体力/作息</strong>：高强度体力、长期夜班、严重加班且无补偿、单休/大小周。</li>\n<li><strong>岗位性质</strong>：地推、陌拜、电销、商务拓展、活动现场执行、管培生（轮岗明确含销售端）。</li>\n<li><strong>地点支持</strong>：工作地点偏远且<strong>无班车、无住宿、无任何补贴</strong>（三项全无）；北上广深等生活成本过高城市且<strong>无住宿补贴、薪资不足以覆盖高生活成本</strong> → 降权不推荐。</li>\n<li><strong>企业文化</strong>：描述中出现“狼性文化、纯消耗型、PUA、形式主义严重、强制末位淘汰”。</li>\n<li><strong>对外话术的红线转化</strong>：凡是在面试中让我感到“必须假装外向、被迫敬酒、无条件服从”的，一律算作氛围红线。</li>\n</ol>\n<hr />\n<h2>9. 💬 对外面试 · 标准话术库（可直接引用）</h2>\n<h3>🎯 自我介绍/求职动机（必背）</h3>\n<blockquote>\n<p>“我是山东大学供应链管理专业的文雪。我的核心优势在于<strong>数据处理与供应链建模</strong>，曾独立处理4.5万条业务数据，并通过优化模型测算降低运营成本18.7%。我性格沉稳细致，属于<strong>深度工作型</strong>，非常享受在数据中寻找规律、优化计划的过程。我希望寻找一个注重效率、结果导向、团队氛围正向的平台，能够让我长期专注地创造价值。”</p>\n</blockquote>\n<h3>🧐 被问“缺点/过度抠细节”时</h3>\n<blockquote>\n<p>“我有时会过度关注细节，导致初期效率偏低。但我正在刻意练习 <strong>‘先完成，再完美’</strong> 的工作方法，用20/80法则保证核心交付速度，同时保留最终复核环节来平衡质量。”</p>\n</blockquote>\n<h3>🤝 被问“团队合作/内向”时</h3>\n<blockquote>\n<p>“我在基于数据和报告的沟通中表现稳定可靠。在团队中，我更适合担任<strong>数据分析与逻辑支撑</strong>的角色，用扎实的数据结论帮助团队决策，而不是依赖高强度的社交互动。”</p>\n</blockquote>\n<hr />\n<h2>10. 📂 Obsidian 动态工作流（知识库入口）</h2>\n<h3>🚀 知识库文件夹索引（完整版）</h3>\n<table>\n<thead>\n<tr>\n<th style=\"text-align: left;\">文件夹</th>\n<th style=\"text-align: left;\">用途</th>\n<th style=\"text-align: left;\">核心文件</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td style=\"text-align: left;\"><code>00_战略与定位</code></td>\n<td style=\"text-align: left;\">战略总览、时间线、每周规划</td>\n<td style=\"text-align: left;\">求职目标画像、求职时间线、每周节奏、学习计划</td>\n</tr>\n<tr>\n<td style=\"text-align: left;\"><code>01_岗位搜集与背调</code></td>\n<td style=\"text-align: left;\">岗位汇总、公司调研报告</td>\n<td style=\"text-align: left;\">📋 岗位汇总表、🗂️ 候选线索池、📅 岗位日报归档、<code>公司调研/{企业}/{岗位}（{方向}）/</code></td>\n</tr>\n<tr>\n<td style=\"text-align: left;\"><code>02_定制简历库</code></td>\n<td style=\"text-align: left;\">通用简历 + 各企业岗位定制版</td>\n<td style=\"text-align: left;\">简历-通用版、<code>{公司}/{岗位}（{方向}）/</code></td>\n</tr>\n<tr>\n<td style=\"text-align: left;\"><code>03_笔面试题库</code></td>\n<td style=\"text-align: left;\">面试资料、笔试题库、错题本</td>\n<td style=\"text-align: left;\">📋 面试资料索引、技术题-供应链、行为面试题、错题本</td>\n</tr>\n<tr>\n<td style=\"text-align: left;\"><code>04_实战复盘</code></td>\n<td style=\"text-align: left;\">面经复盘、原始记录</td>\n<td style=\"text-align: left;\">📝 面试复盘模板、2026-xx-xx xxx面试</td>\n</tr>\n<tr>\n<td style=\"text-align: left;\"><code>05_供应链知识库</code></td>\n<td style=\"text-align: left;\">专业知识卡片</td>\n<td style=\"text-align: left;\">供应链核心概念、📚 供应链英语术语卡</td>\n</tr>\n<tr>\n<td style=\"text-align: left;\"><code>06_证书与附件</code></td>\n<td style=\"text-align: left;\">成绩单、获奖证书扫描件</td>\n<td style=\"text-align: left;\">—</td>\n</tr>\n<tr>\n<td style=\"text-align: left;\"><code>07_原始材料库</code></td>\n<td style=\"text-align: left;\">用户提供的原始材料归档（JD/截图/文本/链接）</td>\n<td style=\"text-align: left;\">📋 材料索引、<code>{公司}/{岗位}（{方向}）/</code></td>\n</tr>\n<tr>\n<td style=\"text-align: left;\"><code>99_系统与规则</code></td>\n<td style=\"text-align: left;\">求职 Skill 规则备份、问题日志</td>\n<td style=\"text-align: left;\">求职Skill规则、求职知识库问题日志</td>\n</tr>\n</tbody>\n</table>\n<h3>💡 Dataview 查询示例（粘贴到其他笔记可自动汇总）</h3>\n<p>```dataview\nTABLE 公司名称, 专业得分, 技能得分, 总分, 投递状态\nFROM \"01_岗位搜集与背调\"\nWHERE 总分 &gt;= 70\nSORT 总分 DESC</p>"
@@ -6360,7 +7547,7 @@ window.SITE_DATA = {
       {
        "title": "AI+知识库工作台搭建方法_2026-09-06",
        "icon": "📄",
-       "html": "<blockquote>\n<p>姜胡说：AI+知识库，我的工作台长这样。核心一句话——<strong>知识不是用来存的，是用来查自己的</strong>。</p>\n</blockquote>\n<h2>速读（核心结论）</h2>\n<ol>\n<li><strong>Obsidian 是查看知识库的\"屏幕\"，AI 才是操作知识库的主体</strong>——把各目录用途告诉 AI，它需要时自动去对应目录找文件，不用再手动复制粘贴</li>\n<li><strong>知识库目录 = PARA 四核心（项目/资产/资源/归档）+ 两个扩展（灵感库/Skills）</strong>——分类本质是告诉 AI\"什么是你的、什么是外借的、什么待处理\"</li>\n<li><strong>处理知识三步走</strong>：丢进系统 → AI 自动与已有知识建立连接 → 反问系统\"我的版本是不是太低了？\"，AI 的建议变成代办项</li>\n<li><strong>先做后懂</strong>：实操类内容能听懂多少做多少，别等全懂了再动手——不需要懂机械原理也能开车</li>\n</ol>\n<h2>正文</h2>\n<h3>一、工具分工（AI + 知识库）</h3>\n<ul>\n<li>知识库本质是<strong>一个目录</strong>（子目录 + 文件），和硬盘存储本质一样，关键是目录怎么组织</li>\n<li><strong>Obsidian（黑曜石）</strong>：打开 markdown 格式，按目录读取，文件间可建立连接——它是\"查看知识库的屏幕\"，不是知识库本身</li>\n<li><strong>AI（桌面版）</strong>：可读取目录文件。告诉它每个目录的用途后，你说要什么，它自动去对应目录找文件打开读取</li>\n<li>对比网页端：每次需要内容都要手动找文件、复制粘贴</li>\n<li><strong>AI 加知识库 = 它越来越了解你</strong>：读你过去的书、习惯，按你的习惯找相关知识</li>\n<li>markdown 格式：简单文本文件，易转 word/pdf/网页</li>\n</ul>\n<h3>二、目录怎么搭（PARA 扩展）</h3>\n<ul>\n<li>反面例子：把学到的知识全放一个目录 = <strong>\"把整个超市搬到厨房\"</strong>，其实用不到</li>\n<li><strong>核心 4 个</strong>：</li>\n<li>项目：正在做的事（如一次线下活动、启动写一本书）</li>\n<li>资产：自己处理好的知识（像写好的书，用时直接拿）</li>\n<li>资源：从外边来的参考（读的书、别人的资料、下载的），<strong>明确不是我的</strong>，借阅用</li>\n<li>归档：暂时用不到又不想删的</li>\n<li><strong>扩展 2 个</strong>：</li>\n<li>灵感库（0）：待处理的原材料，先收后理</li>\n<li>Skills：经常做的处理模板（内容转口播/文章/洞见/论文/PPT 的默认流程）</li>\n<li>告诉 AI 后它就明白：P=正在做的事、A=你的资产、R=外部借的、归档=不活跃</li>\n<li>AI 读项目库和资产库（你的），<strong>不会读资源库</strong>（外部的）</li>\n<li>做得越多 AI 越了解你</li>\n</ul>\n<h3>三、处理一条知识的演示</h3>\n<ul>\n<li>书里一句话：\"<strong>再好的软件也没有办法装到低版本的操作系统上</strong>\"</li>\n<li>大多数人：划线 / 抄到笔记 / 想一想，过段时间再看</li>\n<li>我的做法：\n  1. 把内容丢进知识库，系统自动处理\n  2. 它先读项目库和资产库，回复\"已有类似知识可以编织\"\n  3. 可以要求\"和以往的知识建立连接\"——自动完成，不用手动贴\n  4. 更深的做法：反问系统——\"这句话和我们当前系统对应一下，我们的知识库是不是太低了？有没有好的知识进不来被扔掉的？\"\n  5. 系统展示当前知识库情况（如：知识大多来自自己写的文章，外部知识很少）\n  6. AI 给出改进建议（1-2-3-4-5），可以选择接受或不接受\n  7. 示例中选择\"先不做决定，想一想\" → AI 把建议做成<strong>代办项</strong>（是任务，不是知识）</li>\n<li>本质：知识来了不是划线、不是靠脑子，而是<strong>和系统原有知识建立连接 → 判断它能变成什么</strong>（文档/文章/口播视频/更新自己操作系统的代办项）</li>\n<li>呼应\"读书是怎么读的\"：因为 AI 了解你，才知道这本书哪些内容适合你</li>\n</ul>\n<h2>易混淆点 / 关键补充</h2>\n<ul>\n<li>视频的\"资产\"= 自己处理好的知识（像写完的书），对应 Weh-Brain 的 <strong>06-Wiki（稳定知识）与 05-Skills（方法论）</strong>，不是 02-Areas——02-Areas（持续关注领域）在视频结构里没有直接对应</li>\n<li>视频的 PARA 解释与经典 PARA 略有不同：经典 PARA 的 Areas=持续关注领域，视频把它讲成\"资产=已处理知识\"</li>\n<li>\"把整个超市搬到厨房\"：收集 ≠ 使用，全堆一个目录等于没用</li>\n<li>反直觉点：AI 提的建议可以\"先不做决定\"——把建议挂成代办项，主动权在自己</li>\n</ul>\n<h2>关联与反思</h2>\n<ul>\n<li>这条视频的理念与 Weh-Brain 完全同源：本库核心原则正是\"Obsidian 是视图、AI 是操作主体\"\"知识不是用来存的，是用来查自己的\" → 99-系统与规则 · 01-架构与搭建流程</li>\n<li>关联已有笔记：AI时代很多人会彻底成为NPC_2026-08-30（AI 时代的认知）、DanKoe用AI让学习速度快十倍_2026-08-27（用 AI 加速学习）</li>\n<li>反思：视频里\"AI 反问系统版本太低\"的演示，正是 Weh-Brain 的\"知识是用来查自己的\"——可对照检查本库：外部知识占比、灵感库是否积压、技能模板是否复用</li>\n<li>行动项：</li>\n<li><code>[ ] 用视频第三部分的方法，把最近划线但没用起来的一条知识丢进系统，反查\"我的版本是不是太低了\"</code></li>\n<li><code>[ ] 检查 Weh-Brain 外部资源占比（03-Resources 是否过少 / 灵感库是否积压）</code></li>\n</ul>"
+       "html": "<blockquote>\n<p>姜胡说：AI+知识库，我的工作台长这样。核心一句话——<strong>知识不是用来存的，是用来查自己的</strong>。</p>\n</blockquote>\n<h2>速读（核心结论）</h2>\n<ol>\n<li><strong>Obsidian 是查看知识库的\"屏幕\"，AI 才是操作知识库的主体</strong>——把各目录用途告诉 AI，它需要时自动去对应目录找文件，不用再手动复制粘贴</li>\n<li><strong>知识库目录 = PARA 四核心（项目/资产/资源/归档）+ 两个扩展（灵感库/Skills）</strong>——分类本质是告诉 AI\"什么是你的、什么是外借的、什么待处理\"</li>\n<li><strong>处理知识三步走</strong>：丢进系统 → AI 自动与已有知识建立连接 → 反问系统\"我的版本是不是太低了？\"，AI 的建议变成代办项</li>\n<li><strong>先做后懂</strong>：实操类内容能听懂多少做多少，别等全懂了再动手——不需要懂机械原理也能开车</li>\n</ol>\n<h2>正文</h2>\n<h3>一、工具分工（AI + 知识库）</h3>\n<ul>\n<li>知识库本质是<strong>一个目录</strong>（子目录 + 文件），和硬盘存储本质一样，关键是目录怎么组织</li>\n<li><strong>Obsidian（黑曜石）</strong>：打开 markdown 格式，按目录读取，文件间可建立连接——它是\"查看知识库的屏幕\"，不是知识库本身</li>\n<li><strong>AI（桌面版）</strong>：可读取目录文件。告诉它每个目录的用途后，你说要什么，它自动去对应目录找文件打开读取</li>\n<li>对比网页端：每次需要内容都要手动找文件、复制粘贴</li>\n<li><strong>AI 加知识库 = 它越来越了解你</strong>：读你过去的书、习惯，按你的习惯找相关知识</li>\n<li>markdown 格式：简单文本文件，易转 word/pdf/网页</li>\n</ul>\n<h3>二、目录怎么搭（PARA 扩展）</h3>\n<ul>\n<li>反面例子：把学到的知识全放一个目录 = <strong>\"把整个超市搬到厨房\"</strong>，其实用不到</li>\n<li><strong>核心 4 个</strong>：</li>\n<li>项目：正在做的事（如一次线下活动、启动写一本书）</li>\n<li>资产：自己处理好的知识（像写好的书，用时直接拿）</li>\n<li>资源：从外边来的参考（读的书、别人的资料、下载的），<strong>明确不是我的</strong>，借阅用</li>\n<li>归档：暂时用不到又不想删的</li>\n<li><strong>扩展 2 个</strong>：</li>\n<li>灵感库（0）：待处理的原材料，先收后理</li>\n<li>Skills：经常做的处理模板（内容转口播/文章/洞见/论文/PPT 的默认流程）</li>\n<li>告诉 AI 后它就明白：P=正在做的事、A=你的资产、R=外部借的、归档=不活跃</li>\n<li>AI 读项目库和资产库（你的），<strong>不会读资源库</strong>（外部的）</li>\n<li>做得越多 AI 越了解你</li>\n</ul>\n<h3>三、处理一条知识的演示</h3>\n<ul>\n<li>书里一句话：\"<strong>再好的软件也没有办法装到低版本的操作系统上</strong>\"</li>\n<li>大多数人：划线 / 抄到笔记 / 想一想，过段时间再看</li>\n<li>我的做法：\n  1. 把内容丢进知识库，系统自动处理\n  2. 它先读项目库和资产库，回复\"已有类似知识可以编织\"\n  3. 可以要求\"和以往的知识建立连接\"——自动完成，不用手动贴\n  4. 更深的做法：反问系统——\"这句话和我们当前系统对应一下，我们的知识库是不是太低了？有没有好的知识进不来被扔掉的？\"\n  5. 系统展示当前知识库情况（如：知识大多来自自己写的文章，外部知识很少）\n  6. AI 给出改进建议（1-2-3-4-5），可以选择接受或不接受\n  7. 示例中选择\"先不做决定，想一想\" → AI 把建议做成<strong>代办项</strong>（是任务，不是知识）</li>\n<li>本质：知识来了不是划线、不是靠脑子，而是<strong>和系统原有知识建立连接 → 判断它能变成什么</strong>（文档/文章/口播视频/更新自己操作系统的代办项）</li>\n<li>呼应\"读书是怎么读的\"：因为 AI 了解你，才知道这本书哪些内容适合你</li>\n</ul>\n<h2>易混淆点 / 关键补充</h2>\n<ul>\n<li>视频的\"资产\"= 自己处理好的知识（像写完的书），对应 Weh-Brain 的 <strong>06-Wiki（稳定知识）与 05-Skills（方法论）</strong>，不是 02-Areas——02-Areas（持续关注领域）在视频结构里没有直接对应</li>\n<li>视频的 PARA 解释与经典 PARA 略有不同：经典 PARA 的 Areas=持续关注领域，视频把它讲成\"资产=已处理知识\"</li>\n<li>\"把整个超市搬到厨房\"：收集 ≠ 使用，全堆一个目录等于没用</li>\n<li>反直觉点：AI 提的建议可以\"先不做决定\"——把建议挂成代办项，主动权在自己</li>\n</ul>\n<h2>关联笔记</h2>\n<ul>\n<li>99-系统与规则 · 01-架构与搭建流程（本库理念同源：Obsidian 是视图、AI 是操作主体）</li>\n<li>AI时代很多人会彻底成为NPC_2026-08-30（AI 时代的认知）</li>\n<li>DanKoe用AI让学习速度快十倍_2026-08-27（用 AI 加速学习）</li>\n</ul>\n<h2>反思</h2>\n<ul>\n<li>视频里\"AI 反问系统版本太低\"的演示，正是 Weh-Brain 的\"知识是用来查自己的\"——可对照检查本库：外部知识占比、灵感库是否积压、技能模板是否复用</li>\n</ul>\n<h2>行动项</h2>\n<ul>\n<li>[ ] 用视频第三部分的方法，把最近划线但没用起来的一条知识丢进系统，反查\"我的版本是不是太低了\"（优先级：低）</li>\n<li>[ ] 检查 Weh-Brain 外部资源占比（03-Resources 是否过少 / 灵感库是否积压）（优先级：中）</li>\n</ul>"
       },
       {
        "title": "AI时代很多人会彻底成为NPC_2026-08-30",
@@ -6373,6 +7560,11 @@ window.SITE_DATA = {
        "html": "<h1>Dan Koe：用 AI 让学习速度快十倍</h1>\n<blockquote>\n<p>来源：Dan Koe 亲授「如何利用 AI 让你的学习速度快十倍」。核心：大多数人不是学得慢，而是<strong>不会学习</strong>——盲目刷播客/视频/书，六个月却无成果。学习方法（元技能）是所有技能中最重要的一项。</p>\n</blockquote>\n<h2>速读（核心结论）</h2>\n<ul>\n<li><strong>学习怎么学（元技能）是所有技能中最重要的一项</strong>，因为 AI 时代唯一最重要的能力是持续学习学校教不了的技能</li>\n<li>最快路径 = <strong>项目 + 导师/教练 + 学习方法</strong> 三件事结合，其间可切换</li>\n<li>每天分<strong>三个专注时段</strong>：实践（30-90分钟做项目）→ 学习（30-60分钟按学习计划+记笔记）→ 散步（30分钟听音频记灵感）</li>\n<li>核心顺序：<strong>先规划项目再学习</strong>，只在遇到困难时才去查资料（跳过盲目刷教程），用 AI 当导师/教练随时提问</li>\n<li>关键认知：学习源于挣扎而非死记硬背；提示工程正在取代谷歌搜索成为新的检索方式</li>\n</ul>\n<h2>第一步：创建理想生活地图（设定学习目标）</h2>\n<ul>\n<li>很多人学得痛苦是因为<strong>没有目标</strong>——学的和当前技能、想要的生活无关</li>\n<li>做法：剖析你的一天 → 明确\"不想要什么/想要什么\" → 建立目标层次结构，为要学的内容搭建框架</li>\n<li>写下来才知道要把学到的知识应用到哪个目标上，大脑才会去抓取推动目标的信息</li>\n<li>用「<strong>战略顾问</strong>」AI 提示词审查人生计划：让 AI 从\"个人战略顾问\"角度，以\"你需要听到的残酷事实开头→具体可操作步骤→直接挑战\"的方式，识别盲点、重写目标、找瓶颈、聚焦项目</li>\n<li>每周复盘：复制模板记录\"上周顺利/不顺利的\"；每天列出任务</li>\n<li>延伸阅读：米哈里·契克森米哈赖《心流》</li>\n</ul>\n<h2>第二步：规划项目（最好的学习方式）</h2>\n<ul>\n<li>最好的学习 = <strong>构建一个真实世界的项目，只在需要时搜索信息</strong></li>\n<li>学到多少直接取决于项目进展多少；盲目刷教程只会让大脑被噪音填满 → 不知所措、焦虑、变慢</li>\n<li>项目可以是任何事：保持健康、塑造身材、经营感情、创业、用 PS 处理一张图、搭作品集网站……</li>\n<li><strong>启动项目的方法</strong>：\n  1. 选择一件推动生活朝期望方向发展的事\n  2. 创建笔记/文档，把想到的都写下来\n  3. 保存 3~5 个想模仿的灵感来源（关键步骤，进行\"有智慧的模仿\"，从多个来源汲取元素）\n  4. 研究并剖析这些灵感来源的结构特点\n  5. 把项目划分为部分、里程碑、需要了解的事项\n  6. 找一个不会丢想法的地方记录随时产生的灵感（备忘录/待办/Notion）</li>\n<li>潜意识的灵感：项目驱动下，散步、临睡前大脑默认模式网络活跃时，会涌现好想法（达尔文散步联想）</li>\n</ul>\n<h2>第三步：从已知入手（学习源于挣扎）</h2>\n<ul>\n<li>流程：<strong>开始行动 → 遇到不知道怎么办 → 尝试并失败 → 搜索答案/问 AI → 实施答案 → 重复直到项目完成</strong>；找不到答案再请教专家</li>\n<li>提示工程正在成为新的\"谷歌搜索\"技能，可与任何技能搭配；\"机器不会取代人，善用机器的人才会取代人\"</li>\n<li>具体问法示例：想从 PS 图像移除背景 → 直接问 AI\"如何在 Photoshop 中移除图像背景\"，会得到可操作的选项，因为正在解决实际问题，大脑更容易记住</li>\n</ul>\n<h2>第四步：用 AI 加速（导师/教练）</h2>\n<ul>\n<li><strong>三种 AI 角色</strong>（可建独立聊天窗口分别命名）：\n  1. <strong>战略顾问</strong>：审查人生计划、识别盲点\n  2. <strong>纪律教练</strong>：帮你开始任务\n  3. <strong>学习伙伴/学习方案</strong>：生成 60 天学习计划</li>\n<li><strong>不想开始怎么办</strong>：用\"蔡加尼克效应（平方）\"——未完成的任务比已完成的记忆更深。先做简单任务（整理书桌、泡咖啡、写下想法）制造未完成感，自然引导到正事上</li>\n<li>可对文档做笔记后让 AI\"对[文档]进行测验\"；对带链接的 YouTube 视频让 AI 提取转录、总结关键点、按时间戳测验</li>\n</ul>\n<h2>第五步：生成 60 天学习方案</h2>\n<ul>\n<li>AI 提示词要求：一本畅销书 + 一本技术书 + 多个 YouTube 视频 + 3~5 个补充主要主题的兴趣领域</li>\n<li>分四阶段：①沉浸基础（读基石书，每天2-3章+记笔记）→ ②技术应用 → ③创意探索 → ④改进实践</li>\n<li>让 AI 说\"什么时候准备好进入下一阶段\"，逐步深入</li>\n</ul>\n<h2>如何构建学习方式（三个专注时段）</h2>\n<table>\n<thead>\n<tr>\n<th>时段</th>\n<th>时长</th>\n<th>内容</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>实践时间</td>\n<td>30-90分钟</td>\n<td>做自己的项目，需要时再找资料</td>\n</tr>\n<tr>\n<td>学习时间</td>\n<td>30-60分钟</td>\n<td>按学习计划学习 + 记录笔记（可让 AI 总结笔记复习）</td>\n</tr>\n<tr>\n<td>散步时间</td>\n<td>30分钟</td>\n<td>听 YouTube/有声书/讲座，有想法就用手机记下</td>\n</tr>\n</tbody>\n</table>\n<ul>\n<li>没人会给你学习时间，必须自己<strong>主动抽时间</strong>：早起或晚睡一小时，把它变成仪式（拿起咖啡、打开大纲、放专注音乐）</li>\n</ul>\n<h2>关键补充</h2>\n<ul>\n<li>残酷现实：可能<strong>两周就能学会</strong>的东西，大多数人花六个月——因为盲目输入不输出</li>\n<li>学习若只是为了\"别人期待的工作\"就会讨厌它；喜欢学的东西比天生聪明的人做得更好</li>\n<li>只有先启动项目、遇到挣扎点再进教程，才能真正吸收信息</li>\n</ul>\n<hr />\n<p>相关：每次跟AI聊完天记得问这两个问题_2026-08-27、三点法则思维模型_2026-08-26</p>"
       },
       {
+       "title": "ToB Agent业务避坑_企业AI转型不能按Agent数量采购_2026-09-06",
+       "icon": "📄",
+       "html": "<blockquote>\n<p>va七：ToB Agent 业务避坑经验。企业真正该采购的不是几个\"成品 Agent\"，而是员工能力和持续进化的工程底座。</p>\n</blockquote>\n<h2>速读（核心结论）</h2>\n<ol>\n<li><strong>Agent 不是合理的交付单位</strong>——同样叫\"客服 Agent\"，有的只是知识库问答，有的要接 ERP/工单/权限/追责；真正决定成本的是数据基础、系统接口、决策权限、出错风险，不是 Agent 数量</li>\n<li><strong>一次性交付会把柔性业务冻结成刚性 Workflow</strong>——业务是柔性的，乙方为了交付必须冻结成确定流程，结果大量长尾情况没覆盖，系统上线后被搁置（RPA/低代码没真正自动化就是这个原因）</li>\n<li><strong>Agent 自迭代需要闭环</strong>：记录执行过程 → 人工审核 → evaluation → 沉淀修改后的做法 → 下一轮优化数据，否则 Agent 今天什么水平半年后还是什么水平，甚至漂移</li>\n<li><strong>更合理的路径是自下而上</strong>：先培训员工用个人 Agent（覆盖 80-90% 日常提效）→ 从真实使用记录提炼共性需求 → 再建统一知识库、打通系统、做集成开发</li>\n</ol>\n<h2>正文</h2>\n<h3>一、为什么不能按\"一个 Agent 多少钱\"采购</h3>\n<ul>\n<li><strong>Agent 背后的复杂度差异巨大</strong>：以售后客服 Agent 为例——</li>\n<li>基础层：商品知识库、售后政策库、历史聊天数据</li>\n<li>系统层：订单系统、ERP（外部 ERP 有没有开 API/MCP？自建系统能不能做 CI？）</li>\n<li>管理层：数据清洗打标、业务规则梳理、权限管理、操作追责</li>\n<li><strong>真正的工作量不在\"装 Agent/跑通 skill\"，而在业务侧的判断和梳理</strong>——到底接哪些数据、哪些工作流、哪些权限</li>\n<li>采购经理要\"价格带\"可以理解，但按 Agent 数量报价是不负责任的口径</li>\n</ul>\n<h3>二、一次性交付的根本问题</h3>\n<ul>\n<li><strong>矛盾</strong>：客户想买灵活的方案，乙方为了完成交付必须把需求抽象化、冻结成确定流程</li>\n<li><strong>后果</strong>：系统上线后，员工发现大量长尾情况没被原流程覆盖，用几次觉得不好用，最后搁置</li>\n<li><strong>历史教训</strong>：RPA、workflow、低代码/零代码进入企业后没真正自动化，不是技术不好，是很多工作本来就是柔性的，不能被硬固定成流水线</li>\n<li><strong>SOP 会变</strong>：业务团队接受专家培训后发现原 SOP 不对，原来做的 workflow 反而成了累赘</li>\n<li><strong>外部环境会变</strong>：大模型能力、平台接口、政策、技术框架都在快速迭代；今天为弥补模型不足搭的 harness，下一代模型上来后反而成了限制</li>\n</ul>\n<h3>三、Agent 如何自迭代（越来越懂业务）</h3>\n<ul>\n<li>只把岗位 SOP 变成 skill = 机械执行，不会自己进步</li>\n<li>需要搭建 <strong>loop 闭环</strong>：\n  1. 记录每次执行过程（哪步对/错、什么结果通过、人工审核情况）\n  2. 建立 evaluation 评估体系\n  3. 把人修改后的做法沉淀下来\n  4. 形成下一轮优化迭代的数据</li>\n<li>做到这一步，才有可能积累出用于强化学习和 Agent loop 升级的自迭代闭环</li>\n</ul>\n<h3>四、更合理的路径（自下而上）</h3>\n<table>\n<thead>\n<tr>\n<th>阶段</th>\n<th>做什么</th>\n<th>产出</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>第一步</td>\n<td>培训员工使用个人 Agent，养成交互习惯</td>\n<td>员工自下而上把长尾、低风险、变化频繁的需求做成 skill/workflow，覆盖 <strong>80-90% 日常提效</strong></td>\n</tr>\n<tr>\n<td>第二步</td>\n<td>等员工留下几个月真实使用记录后，从中提炼反复出现的共性需求</td>\n<td>识别哪些值得沉淀成公司级能力</td>\n</tr>\n<tr>\n<td>第三步</td>\n<td>建统一知识库、打通多套数据系统、设计权限、做 Agent 监控</td>\n<td>派 FDE 到现场做咨询和系统集成开发</td>\n</tr>\n</tbody>\n</table>\n<ul>\n<li><strong>不是反对定制开发</strong>，是反对老板没搞清楚就把 Agent 当成标品来采购（\"做一个广告 Agent 多少钱\"）</li>\n<li><strong>范式反转</strong>：以前做企业定制软件是把流程变成系统，让员工适应硬性流程；现在 Agent 反过来——让员工先具备 AI 持续迭代和用 AI 改造系统的能力，再把有价值的流程沉淀出来</li>\n</ul>\n<h3>五、核心结论</h3>\n<ul>\n<li>企业做 AI 转型是<strong>系统工程</strong>，不是做几个 Agent 的问题</li>\n<li>涉及：数据基础、权限管理、业务流梳理、员工工作习惯、反馈机制、公司迭代能力</li>\n<li><strong>最重要</strong>：这不是 one-off 的，必须随业务增长和优化不断迭代</li>\n<li>企业真正该采购的：<strong>员工能力 + 持续进化的工程底座</strong></li>\n</ul>\n<h2>易混淆点 / 关键补充</h2>\n<ul>\n<li><strong>\"自下而上\" ≠ 不做系统集成</strong>：前两步是铺垫，第三步才涉及重系统集成；不是永远只靠个人 Agent</li>\n<li><strong>Agent 数量 ≠ 转型深度</strong>：10 个只能问答的 Agent，不如 1 个打通了数据+权限+迭代闭环的 Agent</li>\n<li><strong>柔性业务不能硬自动化</strong>：不是所有工作都适合做成刚性 workflow，长尾变化频繁的需求更适合员工用个人 Agent 灵活处理</li>\n</ul>\n<h2>关联笔记</h2>\n<ul>\n<li>今年效率是去年十倍_人机共创三步循环_2026-09-06（AI 认知）</li>\n<li>天枢harness模型投降协议_大模型为何盲目顺从_2026-09-06（harness/Agent 技术）</li>\n</ul>\n<h2>反思</h2>\n<ul>\n<li><strong>求职启示</strong>：企业 AI 转型需要的不是\"会做 Agent 的人\"，而是\"能梳理业务流程、沉淀数据基础、设计迭代闭环的人\"——供应链岗位的业务流程梳理+系统对接能力正好契合</li>\n<li><strong>个人启示</strong>：自下而上路径也适用于个人——先用个人 Agent 提效，沉淀自己的 skill，再提炼共性工作流（与 Weh-Brain 的技能沉淀思路一致）</li>\n</ul>\n<h2>行动项</h2>\n<ul>\n<li>[ ] 求职面试可引用此观点：企业 AI 转型核心是数据基础+业务梳理+迭代闭环，不是 Agent 数量（优先级：中）</li>\n<li>[ ] 检查自己的个人 Agent 使用是否沉淀了可复用 skill（优先级：中）</li>\n</ul>"
+      },
+      {
        "title": "三点法则思维模型_2026-08-26",
        "icon": "📄",
        "html": "<h1>三点法则：获得结果思维模型与个人标签</h1>\n<blockquote>\n<p>抖音视频（纯享版长视频）：讲\"获得结果\"的思维模型——三点法则（市场需求/记忆点/便利），应用到自媒体创业、选专业、打造个人标签。</p>\n</blockquote>\n<h2>速读（核心结论）</h2>\n<ul>\n<li><strong>三点法则</strong> = 市场需求 + 市场记忆点 + 便利（可乐的快消品思路）</li>\n<li><strong>自媒体的关键</strong>：不是\"找题材\"，而是想清楚\"用户需要看什么\"；前期<strong>日更</strong>储备量 + 按时补货</li>\n<li><strong>面子误区</strong>：宁愿让人知道你开咖啡馆，不愿提你做拉链——用户需求在那，面子会丢掉机会</li>\n<li><strong>雷区</strong>：做出成绩后别被小利益（千八百广告费）收买，忘掉质量和用户需求，反而挡了通往万八千的路</li>\n<li><strong>成长</strong>：一个人介绍自己先看\"身份\"——<strong>先设 3 个不同领域标签</strong>，3 条资源路径相辅相成</li>\n</ul>\n<h2>一、三点法则（成功思维模型）</h2>\n<p><strong>失败者底层逻辑</strong>：创业只想到奶茶/咖啡/花店三件套；选专业\"大家选什么我选什么\"——你想得到的大家都想过，没竞争力，回本都难。</p>\n<p><strong>可乐案例</strong>：可乐是解渴解腻、能反复喝的快消品，从中借鉴三个思路：\n1. <strong>市场需求</strong>：什么东西需要被满足\n2. <strong>市场记忆点</strong>：什么人在什么时间需要\n3. <strong>便利</strong>：是否足够多、打开就能看到</p>\n<p><strong>应用到自媒体</strong>：\n- 市场需求 = 什么人需要看你的视频\n- 记忆点 = 什么人在什么时间会刷到你\n- 便利 = 视频量是否够多、打开就能看到\n- <strong>前期日更是必要的</strong>：不仅储备量要多，还得在差不多的时间\"补货\"</p>\n<p><strong>其他成功案例</strong>：衣服拉链、门把手——全是\"市场需求\"，做什么不重要，思路重要。</p>\n<p><strong>面子误区</strong>：你宁愿让人知道你开小资咖啡馆，也不愿提及你做拉链/门把手生意——可用户需求就在那，做拉链可能更赚钱，却因面子丢掉机会。</p>\n<h2>二、实操路径</h2>\n<ol>\n<li><strong>先为自己学习</strong>：学你想学的任何东西</li>\n<li><strong>再谈打造个人标签</strong>（后话）：先有思路 → 再学习 → 最后才是拓展</li>\n</ol>\n<h2>三、雷区：别被小利益收买</h2>\n<ul>\n<li>做成账号小有名气后，广告费千八百就可能被收买</li>\n<li>为赚钱忘了质量、用户需求和单价 → 变得越来越扁平</li>\n<li>行业互通消息，短期数据再好也难快速提升广告单价</li>\n<li><strong>千八百反而成为通往万八千的绊脚石</strong>（像可乐公司不会为了多卖几千件就抬价放弃质量）</li>\n</ul>\n<h2>四、信息差 = 资源</h2>\n<ul>\n<li>自主打破信息差的人状态更好：每天汲取知识，不为低阶信息做过度反应</li>\n<li><strong>听新闻的作用</strong>：信息对比 + 提前规划（例：特朗普提高进口关税 25%、美联储可能加息 → 影响消费与储蓄方向）</li>\n<li>白天没时间就<strong>晚上抽半小时整理前沿信息</strong>，信息就是资源</li>\n<li><strong>你把时间用在哪，就会成为什么样的人</strong></li>\n</ul>\n<h2>五、个人标签打造</h2>\n<ul>\n<li>介绍一个人首先介绍其<strong>身份</strong>，个人名片很重要</li>\n<li>例：脑神经学硕士 + 5 万粉自媒体 + 雅思托福成绩；或教师 + 会滑雪 + 周末开小型读书论坛</li>\n<li>娱乐圈混得好的艺人：涉猎范围广、做得精</li>\n<li><strong>向上社交太笼统</strong>：先让自己设立不同领域、拥有 3 点标签，再逐个突破</li>\n<li>一个标签 = 一条获取资源的路径；<strong>3 个标签 = 3 条资源路径，相辅相成</strong></li>\n<li>聪明是走顺境，不是走逆境</li>\n</ul>\n<blockquote>\n<p>相关：改变人生的30条人生经验_2026-08-26</p>\n</blockquote>"
@@ -6380,12 +7572,22 @@ window.SITE_DATA = {
       {
        "title": "今年效率是去年十倍_人机共创三步循环_2026-09-06",
        "icon": "📄",
-       "html": "<blockquote>\n<p>姜胡说：AI 不是脑力替代，是<strong>价值链重构</strong>。人机共创——AI 不替代你思考，它逼你思考得更深。</p>\n</blockquote>\n<h2>速读（核心结论）</h2>\n<ol>\n<li><strong>AI 不是脑力替代，是价值链重构</strong>——旧认知三阶段（体力延展→脑力延展→工作流自动化）都被验证过，但都不是效率 10 倍的原因</li>\n<li><strong>人机共创三步循环</strong>：激发（自己先说一版→AI 审核挑错补漏洞）→ 试错（AI 快速执行实测）→ 回填（数据+历史+AI 修正→知识原子存第二大脑）</li>\n<li><strong>产能公式跃迁</strong>：旧=能力×时间（每天从零开始无积累）；新=战略能力×个人能力×AI 放大系统</li>\n<li><strong>创造力成为稀缺资源</strong>：做创造者，不做消费者——AI 时代最大的危险是\"用了 AI 不会思考了\"</li>\n</ol>\n<h2>正文</h2>\n<h3>旧认知三阶段（都被验证过，但都不是 10 倍原因）</h3>\n<table>\n<thead>\n<tr>\n<th>阶段</th>\n<th>认知</th>\n<th>验证效果</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>机器</td>\n<td>体力延展</td>\n<td>已验证</td>\n</tr>\n<tr>\n<td>ChatGPT</td>\n<td>脑力延展</td>\n<td>检索压缩到 20%：以前半天→现在 10-20 分钟做决策</td>\n</tr>\n<tr>\n<td>Agent</td>\n<td>工作流自动化</td>\n<td>说一句就自动执行完（如做门面、调光线）</td>\n</tr>\n</tbody>\n</table>\n<ul>\n<li>都被验证过，所以根深蒂固——但这不是 10 倍的原因</li>\n</ul>\n<h3>新认知：人机共创</h3>\n<ul>\n<li>AI 不是替代你，而是把<strong>整个价值链重构</strong>了</li>\n<li>危险：很多人用了 AI 之后<strong>不会思考了</strong>——思考是人类最重要的能力之一，尤其在 AI 时代</li>\n<li>AI 逼你思考得更深：你提出观点，它站在各学科权威角度给你灵感</li>\n</ul>\n<h3>实操三步循环</h3>\n<p><strong>① 激发</strong>\n- 有想法<strong>先不查 AI</strong>，用自己的语言说一版、录下来\n- 整理后扔给 AI——注意：AI 的作用<strong>不是改稿，是审核你</strong>：\n  - 挑错：发现\"你在错误的观点上狂奔\"\n  - 补漏洞、完善思想\n  - 给多维视角：物理学家/芒格/马斯克的角度\n- 大脑是\"洞房\"：你的观点 + 各角度灵感在里面交织，产生新灵感</p>\n<p><strong>② 试错</strong>\n- 想法对不对<strong>不靠猜</strong>，让 AI 快速执行拿出来实测\n- 以前试错成本高，现在\"啪\"就有反馈（如：认为这个主题大家会喜欢→发出去→数据给答案）</p>\n<p><strong>③ 回填</strong>\n- 数据 + 历史链 + AI 修正 → <strong>新知识原子</strong> → 存第二大脑\n- 每次循环都在重构对世界的理解，<strong>知识往上盖</strong>（1.0→1.1→1.2 积累）</p>\n<h3>产能公式跃迁</h3>\n<ul>\n<li>旧：产能 = 能力 × 时间（每天从零开始，无积累）</li>\n<li>新：产能 = <strong>战略能力 × 个人处事能力 × AI 放大系统</strong></li>\n<li>趋势：终端算力飙升（小米 / Mac Mini M6 / 阿里端侧模型）→ 创造力成为稀缺资源</li>\n<li><strong>做创造者，不做消费者</strong></li>\n</ul>\n<h2>易混淆点 / 关键补充</h2>\n<ul>\n<li><strong>AI 审核 ≠ AI 代写</strong>：激发环节必须先有\"自己的版本\"，AI 是挑错/补全/给视角，不是从零生成——直接让 AI 写等于放弃思考</li>\n<li><strong>人机共创 ≠ 人机分工</strong>：不是\"人做一部分、AI 做一部分\"，而是 AI 逼你想得更深、重构整个价值链</li>\n<li><strong>试错的反馈必须回填</strong>：只试错不回填，循环就断了，知识不积累——回填是\"知识往上盖\"的关键</li>\n</ul>\n<h2>关联与反思</h2>\n<ul>\n<li>同作者姜胡说的知识库方法论 → AI+知识库工作台搭建方法_2026-09-06：那条讲\"知识怎么存、怎么处理\"，这条讲\"怎么用 AI 激发思考\"——两条合起来就是完整的人机共创工作流</li>\n<li>关联 AI时代很多人会彻底成为NPC_2026-08-30（AI 时代的认知）、DanKoe用AI让学习速度快十倍_2026-08-27（用 AI 加速学习）</li>\n<li>反思：三步循环可直接用于秋招——写自荐信/面试回答前先自己说一版再扔 AI 审核，正好符合\"先有真实材料、AI 只做加工\"的原则</li>\n<li>行动项：</li>\n<li><code>[ ] 写自荐信/面试回答时，先自己口述一版录下来，再让 AI 审核挑错补全</code></li>\n<li><code>[ ] 把\"试错→回填\"用到秋招：投递反馈、面试结果回填进 SCM-Career，沉淀成知识原子</code></li>\n</ul>"
+       "html": "<blockquote>\n<p>姜胡说：AI 不是脑力替代，是<strong>价值链重构</strong>。人机共创——AI 不替代你思考，它逼你思考得更深。</p>\n</blockquote>\n<h2>速读（核心结论）</h2>\n<ol>\n<li><strong>AI 不是脑力替代，是价值链重构</strong>——旧认知三阶段（体力延展→脑力延展→工作流自动化）都被验证过，但都不是效率 10 倍的原因</li>\n<li><strong>人机共创三步循环</strong>：激发（自己先说一版→AI 审核挑错补漏洞）→ 试错（AI 快速执行实测）→ 回填（数据+历史+AI 修正→知识原子存第二大脑）</li>\n<li><strong>产能公式跃迁</strong>：旧=能力×时间（每天从零开始无积累）；新=战略能力×个人能力×AI 放大系统</li>\n<li><strong>创造力成为稀缺资源</strong>：做创造者，不做消费者——AI 时代最大的危险是\"用了 AI 不会思考了\"</li>\n</ol>\n<h2>正文</h2>\n<h3>旧认知三阶段（都被验证过，但都不是 10 倍原因）</h3>\n<table>\n<thead>\n<tr>\n<th>阶段</th>\n<th>认知</th>\n<th>验证效果</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>机器</td>\n<td>体力延展</td>\n<td>已验证</td>\n</tr>\n<tr>\n<td>ChatGPT</td>\n<td>脑力延展</td>\n<td>检索压缩到 20%：以前半天→现在 10-20 分钟做决策</td>\n</tr>\n<tr>\n<td>Agent</td>\n<td>工作流自动化</td>\n<td>说一句就自动执行完（如做门面、调光线）</td>\n</tr>\n</tbody>\n</table>\n<ul>\n<li>都被验证过，所以根深蒂固——但这不是 10 倍的原因</li>\n</ul>\n<h3>新认知：人机共创</h3>\n<ul>\n<li>AI 不是替代你，而是把<strong>整个价值链重构</strong>了</li>\n<li>危险：很多人用了 AI 之后<strong>不会思考了</strong>——思考是人类最重要的能力之一，尤其在 AI 时代</li>\n<li>AI 逼你思考得更深：你提出观点，它站在各学科权威角度给你灵感</li>\n</ul>\n<h3>实操三步循环</h3>\n<p><strong>① 激发</strong>\n- 有想法<strong>先不查 AI</strong>，用自己的语言说一版、录下来\n- 整理后扔给 AI——注意：AI 的作用<strong>不是改稿，是审核你</strong>：\n  - 挑错：发现\"你在错误的观点上狂奔\"\n  - 补漏洞、完善思想\n  - 给多维视角：物理学家/芒格/马斯克的角度\n- 大脑是\"洞房\"：你的观点 + 各角度灵感在里面交织，产生新灵感</p>\n<p><strong>② 试错</strong>\n- 想法对不对<strong>不靠猜</strong>，让 AI 快速执行拿出来实测\n- 以前试错成本高，现在\"啪\"就有反馈（如：认为这个主题大家会喜欢→发出去→数据给答案）</p>\n<p><strong>③ 回填</strong>\n- 数据 + 历史链 + AI 修正 → <strong>新知识原子</strong> → 存第二大脑\n- 每次循环都在重构对世界的理解，<strong>知识往上盖</strong>（1.0→1.1→1.2 积累）</p>\n<h3>产能公式跃迁</h3>\n<ul>\n<li>旧：产能 = 能力 × 时间（每天从零开始，无积累）</li>\n<li>新：产能 = <strong>战略能力 × 个人处事能力 × AI 放大系统</strong></li>\n<li>趋势：终端算力飙升（小米 / Mac Mini M6 / 阿里端侧模型）→ 创造力成为稀缺资源</li>\n<li><strong>做创造者，不做消费者</strong></li>\n</ul>\n<h2>易混淆点 / 关键补充</h2>\n<ul>\n<li><strong>AI 审核 ≠ AI 代写</strong>：激发环节必须先有\"自己的版本\"，AI 是挑错/补全/给视角，不是从零生成——直接让 AI 写等于放弃思考</li>\n<li><strong>人机共创 ≠ 人机分工</strong>：不是\"人做一部分、AI 做一部分\"，而是 AI 逼你想得更深、重构整个价值链</li>\n<li><strong>试错的反馈必须回填</strong>：只试错不回填，循环就断了，知识不积累——回填是\"知识往上盖\"的关键</li>\n</ul>\n<h2>关联笔记</h2>\n<ul>\n<li>AI+知识库工作台搭建方法_2026-09-06（同作者姜胡说：那条讲\"知识怎么存、怎么处理\"，这条讲\"怎么用 AI 激发思考\"——两条合起来就是完整的人机共创工作流）</li>\n<li>AI时代很多人会彻底成为NPC_2026-08-30（AI 时代的认知）</li>\n<li>DanKoe用AI让学习速度快十倍_2026-08-27（用 AI 加速学习）</li>\n</ul>\n<h2>反思</h2>\n<ul>\n<li>三步循环可直接用于秋招——写自荐信/面试回答前先自己说一版再扔 AI 审核，正好符合\"先有真实材料、AI 只做加工\"的原则</li>\n</ul>\n<h2>行动项</h2>\n<ul>\n<li>[ ] 写自荐信/面试回答时，先自己口述一版录下来，再让 AI 审核挑错补全（优先级：高）</li>\n<li>[ ] 把\"试错→回填\"用到秋招：投递反馈、面试结果回填进 SCM-Career，沉淀成知识原子（优先级：中）</li>\n</ul>"
+      },
+      {
+       "title": "六顶思考帽_六个维度提升思维清晰度_2026-09-06",
+       "icon": "📄",
+       "html": "<blockquote>\n<p>光芒章：六顶思考帽——职场刚需 SOP。逻辑混乱、表达片面的根本原因是思考维度太单一，从六个维度看问题，思考越来越全，接近 360 度。</p>\n</blockquote>\n<h2>速读（核心结论）</h2>\n<ol>\n<li><strong>逻辑混乱/表达片面的根本原因 = 思考维度太单一</strong>——大多数人只会从 1-2 个角度思考，六顶思考帽强制从六个维度看问题</li>\n<li><strong>六个维度</strong>：理性者（事实数据）、批判者（挑毛病找风险）、感性者（感受和用户体验）、乐观者（好处机会）、管理者（控场统筹落地）、创新者（新玩法）</li>\n<li><strong>应用场景广</strong>：写方案、写复盘、角色对接、面试 QA 回答——用多了思考越来越全面，做事越来越稳妥</li>\n<li><strong>不仅职场，生活也能用</strong></li>\n</ol>\n<h2>正文</h2>\n<h3>六个维度详解</h3>\n<table>\n<thead>\n<tr>\n<th>维度</th>\n<th>看什么</th>\n<th>典型表现</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td><strong>理性者</strong></td>\n<td>事实、数据、比较、客观</td>\n<td>本月完成数据三万，达人完成10个（目标20个），人手不够</td>\n</tr>\n<tr>\n<td><strong>批判者</strong></td>\n<td>挑毛病、找风险、找漏洞</td>\n<td>成本太高、风险很大、跟过往比没优势、只看表面粉丝数据没看评论区、brief写得不清楚</td>\n</tr>\n<tr>\n<td><strong>感性者</strong></td>\n<td>讲感受、关注用户体验</td>\n<td>购买过程体验、包裹质感粗糙=品牌不用心、好看礼盒=品牌花成本做体验</td>\n</tr>\n<tr>\n<td><strong>乐观者</strong></td>\n<td>只看好处、机会、正向结果</td>\n<td>招人只看符合岗位/有利于团队氛围，忽略粗心大意</td>\n</tr>\n<tr>\n<td><strong>管理者</strong></td>\n<td>控场、统筹、更高格局</td>\n<td>整个节奏、资源怎么调动、落地到什么结果</td>\n</tr>\n<tr>\n<td><strong>创新者</strong></td>\n<td>新玩法、创新</td>\n<td>拉新裂变、游戏玩法（注册给抽奖机会）、打卡发小红书给优惠券</td>\n</tr>\n</tbody>\n</table>\n<h3>案例演示：用六顶思考帽复盘种草达人活动</h3>\n<ol>\n<li><strong>理性者</strong>：本月真实完成数据三万，种草达人完成10个（目标20个，只完成一半），客观原因是人手不够只能完成10个</li>\n<li><strong>批判者</strong>：踩了坑——只看表面达人粉丝数据，没从第三方平台/评论区看达人；跟达人发 brief 流程有问题，brief写得不清楚（标题、话题tag没加），需要改造</li>\n<li><strong>感性者</strong>：协同设计/品牌/业务部门配合非常好，沟通协助顺畅，有利于团队凝结</li>\n<li><strong>乐观者</strong>：10个达人里收获了3个爆款模型，下个月可以利用这3个爆款模型去放大</li>\n<li><strong>管理者</strong>：工作匹配目标10万GMV，实际达到7-8万（或超额15万），虽然10个达人中场没完成但还是超额完成，说明完成的10个达人有效程度非常高</li>\n<li><strong>创新者</strong>：下个月优化——把10个达人沉淀出的3个爆款模型批量放大，找同类型达人无限放大</li>\n</ol>\n<h3>核心逻辑</h3>\n<ul>\n<li>六个维度用全了，思考就从\"一条线\"变成\"一个圆\"，接近 360 度</li>\n<li>大多数人只会从 1-2 个角度思考——这就是为什么方案被领导 pass、思考非黑即白、以主观判断事情</li>\n<li>这些 SOP/方法论一定要记到脑子里然后去用，从新手村快速进入大神领域</li>\n</ul>\n<h2>易混淆点 / 关键补充</h2>\n<ul>\n<li><strong>六顶思考帽 ≠ 六个人</strong>：是同一个人从六个不同视角轮流思考，不是找六个人</li>\n<li><strong>批判者 ≠ 悲观</strong>：是客观找风险和漏洞，不是情绪性否定</li>\n<li><strong>乐观者 ≠ 盲目</strong>：是看到机会和正向结果，但需要和批判者平衡</li>\n<li><strong>管理者维度是元维度</strong>：负责控场和统筹其他五个维度，确保不偏废</li>\n</ul>\n<h2>关联笔记</h2>\n<ul>\n<li>三点法则思维模型_2026-08-26（同是思维模型）</li>\n<li>今年效率是去年十倍_人机共创三步循环_2026-09-06（AI 时代的思考方法）</li>\n<li>天枢harness模型投降协议_大模型为何盲目顺从_2026-09-06（AI 容易片面顺从，六顶思考帽可强制多维度思考）</li>\n</ul>\n<h2>反思</h2>\n<ul>\n<li><strong>对求职面试的应用</strong>：行为面试题（\"讲一个你遇到的困难/失败\"）可以用六顶思考帽框架组织回答——理性（事实数据）、批判（问题在哪）、感性（团队感受）、乐观（收获）、管理（统筹落地）、创新（下次怎么优化）</li>\n<li><strong>与天枢呼应</strong>：AI 容易片面顺从（投降协议），六顶思考帽可以强制自己（和 AI）从多个维度思考，避免片面</li>\n</ul>\n<h2>行动项</h2>\n<ul>\n<li>[ ] 下次写复盘/方案时，用六顶思考帽六个维度过一遍（优先级：中）</li>\n<li>[ ] 面试准备时，用六顶思考帽框架组织行为面试题回答（优先级：高）</li>\n</ul>"
       },
       {
        "title": "南大教授刘嘉AI真相访谈_为什么不推荐下班学AI_2026-09-03",
        "icon": "📄",
        "html": "<h1>南大教授刘嘉谈 AI 真相：为什么不推荐下班学 AI</h1>\n<blockquote>\n<p>来源：抖音「为什么我不推荐下班学AI？人和人的差距从来不是工具！」嘉宾：刘嘉（南京大学软件学院副院长、教授、博导，研究群体智能与智能软件质量保障，成果在华为/百度/阿里转化）</p>\n</blockquote>\n<h2>速读（核心结论）</h2>\n<ul>\n<li><strong>人和人的差距从来不是工具</strong>：工具的摩擦力终将降到最低（像智能手机一样，没人会说\"我会熟练用手机\"），下班死磕学 AI 工具意义不大</li>\n<li><strong>网上 AI demo 是 100 次里最好的 1 次</strong>：不是平均结果，你用的每一次才是真实结果，觉得\"别人用得丝滑我用得像人工智障\"很正常</li>\n<li><strong>AI 不会让你更轻松，只会让你更忙</strong>：发现用 AI 后工作量翻了好几倍，恭喜你，AI 入门了——就像当年有了手机和邮件后反而更忙</li>\n<li><strong>你真正该焦虑的</strong>：不是 AI 太强，而是你有没有\"超越 AI 的能力\"——什么事 AI 做不了但你能做，这就是你的最大价值</li>\n<li><strong>品位/审美是核心放大器</strong>：AI 对有稀缺能力的人是放大器，对没审美的人只能生成\"看上去还不错\"的东西，而大家都能生成同样的东西就没有比较优势</li>\n<li><strong>当你觉得 AI 给的东西非常好时，不是 AI 强，而是你在这个领域不专业</strong>：不专业所以没品位，不知道什么叫好；专业的人看 AI 产出能找出一堆问题</li>\n</ul>\n<h2>核心观点</h2>\n<h3>1. 工具差距论</h3>\n<ul>\n<li>这个行业会把所有使用工具的摩擦力终将降到最低</li>\n<li>未来没人会说\"我会熟练使用 AI 工具\"，就像现在没人说\"我会熟练使用智能手机/淘宝/抖音\"</li>\n<li>真正变难的是：你能不能在平台上卖东西、能不能做好视频、能不能完成数据分析的结果判定——这些能力差距反而会变大</li>\n</ul>\n<h3>2. AI demo 真相</h3>\n<ul>\n<li>网上所有 AI demo 非常有可能是<strong>最好的一次结果</strong>，是无数次测试之后的特例，不是平均结果</li>\n<li>你用的每一次都是真实结果，平均结果和特例结果之间有差异很正常</li>\n<li>你看到的内容是你\"喜欢\"的内容，喜欢和需要可能是两件完全不同的事</li>\n<li>应对：稳定自己的工作系统，在中间不断完成这件事</li>\n</ul>\n<h3>3. AI 让你更忙 = 入门了</h3>\n<ul>\n<li>什么时候发现使用 AI 反而让你更忙、工作量增加好多倍，恭喜你，AI 入门了</li>\n<li>当年用固定电话→手机、邮件系统后，人也变得更忙——所有变得更忙是因为你熟练使用了当下最流行的工具</li>\n<li>不要害怕焦虑，你真正焦虑的应该是：有没有超越 AI 的能力</li>\n</ul>\n<h3>4. 品位与稀缺性</h3>\n<ul>\n<li><strong>好导演</strong>能分辨好故事、好分镜、好受众接受度，AI 对他的稀缺能力放大会更大</li>\n<li>如果你不是导演、没有审美，AI 只会让你生成\"看上去还不错\"的东西，但大家都能生成同样的东西，你无法获得比较优势</li>\n<li><strong>当你觉得 AI 给的东西非常好时，不是因为 AI 能力强，而是因为你在这个领域不专业</strong>——你不专业所以没有品位，不知道什么叫好，不知道针对某种客户/用户/审美状况下什么叫好</li>\n<li>专业的人看 AI 生成的代码/论文/实验，能找出一堆问题，因为我们没办法把所有思考、上下文、约束条件完全讲清楚给 AI，AI 一定会有偏差</li>\n<li>能准确看到这些偏差，才说明你在这个领域有专业性，使用 AI 才能提升效率——<strong>因为有超越 AI 的稀缺性，使用 AI 才能把稀缺性放大</strong></li>\n</ul>\n<h3>5. 使用 AI 的正确姿势</h3>\n<ul>\n<li>不要让 AI 完全发散：一个晚上 AI 给你 20 天的研究过程，你得花三五天 check 每一个细节，根本跟不上</li>\n<li><strong>点状来做</strong>：先修炼，最开始就把没用的 15-17 个摒弃掉，让 focus 在某一个点上做深再展开</li>\n<li><strong>不要 20 个平均水平的答案，要 3 个经过你思考的、有品位的、深入的答案</strong></li>\n<li>使用 AI 是<strong>多轮交互</strong>，不需要长链条</li>\n<li>AI 应该是你所思所想的<strong>延长线</strong>，不能是主力</li>\n</ul>\n<h3>6. 大模型不是真正的思考（不要拟人化）</h3>\n<ul>\n<li>如果思考 = 接收信息、处理信息、得到类人结果 → 大模型已经在思考</li>\n<li>如果思考需要一致性、价值观、留痕、变化、沉淀、意识 → 大模型还远得很</li>\n<li>人工智能行业最大的问题是太喜欢拟人化，机器和人完全不一样，思考方式、情感方式、意识方式可能完全不一样</li>\n<li>不能因为能做同样的事，就说底层逻辑完全一样——拟人化类比只适合理解，不适合描述真实状况</li>\n<li><strong>把 AI 当成机器伙伴</strong>：需要什么能力找它要，能提供最好，不能提供就自己搞</li>\n</ul>\n<h3>7. AI 检测不可靠</h3>\n<ul>\n<li>很多著名作家的文字被 AI 判定 70% AI 生成，但作家已经去世了，没经历过 AI 时代——因为文章写得好、权重高，AI 训练时模仿了他</li>\n<li>理论上未来仍无法 100% 确定是不是 AI 写的</li>\n</ul>\n<h2>AI 发展三阶段</h2>\n<table>\n<thead>\n<tr>\n<th>阶段</th>\n<th>时间</th>\n<th>核心</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>第一阶段</td>\n<td>2017 Transformer 起</td>\n<td>足够数据 + 足够参数 → 涌现智能（Scaling Law），不需要用人的智慧教 AI，给数据就能拟合人类规律</td>\n</tr>\n<tr>\n<td>第二阶段</td>\n<td>推理大模型</td>\n<td>不直接问问题，把\"如何思考\"发给 AI，生成思考过程，反复交互评估，提升答案质量</td>\n</tr>\n<tr>\n<td>第三阶段</td>\n<td>2024-2025 Agent</td>\n<td>不仅聊天，还要操作数字世界（未来操作物理世界）；MCP 统一系统调用标准；Harness 用工程化手段让行动稳定、持久、长链条</td>\n</tr>\n</tbody>\n</table>\n<ul>\n<li><strong>模型能力和工程能力犬牙交错往上走</strong>：每个人都追不上时代，每月/每季都有新东西，原来的工程方法可能因模型能力提升而失效</li>\n<li>混乱期不要追求追上，等模型能力和工程框架都稳定了，应用公司才会崛起（像互联网时代的阿里、腾讯）</li>\n<li>token 价格随时间下降 → 成本降低 → 覆盖度提升 → 使用更多</li>\n<li><strong>具身智能</strong>（AI 落到物理世界）还需 5-10 年，最大问题是还没有数据</li>\n</ul>\n<h2>给年轻人的建议</h2>\n<ul>\n<li><strong>熟练使用工具 + 拥有没有工具时的能力</strong>，两者矛盾但同时存在</li>\n<li>像健身一样：每两天关掉 AI 做点事、做点训练，追求那\"毫无意义的数据\"</li>\n<li>不需要过度警惕，需要习惯</li>\n<li>拥抱时代最好的方式就是这两者并行</li>\n</ul>\n<h2>给创业者的建议（克制）</h2>\n<ul>\n<li>千万不要觉得用 AI 什么都能做，<strong>一定要只做一件非常小的事，把一点打透</strong></li>\n<li>看到东西做的特别全、功能特别多的，一般不看好——这是对自我的不信任，不知道自己稀缺在哪、哪个能力最能打动别人</li>\n<li>AI 能力越强，越要把能力放在非常小的领域，把稀缺价值做大</li>\n<li>梁文锋（DeepSeek）那篇文章讲的是基础道理（团队稳定→宽松环境→一半工作一半创造），但真能稳定团队吗？不看好——OpenAI 已经证明好公司进步后面临人才流失</li>\n</ul>\n<h2>易混淆点 / 关键补充</h2>\n<ul>\n<li><strong>\"不推荐下班学 AI\"≠\"不用 AI\"</strong>：而是不要把精力完全放在 AI 工具学习上，工具摩擦力终将归零，要把精力放在超越 AI 的稀缺能力上</li>\n<li><strong>\"AI 让你更忙\"≠\"AI 没用\"</strong>：更忙说明你在用 AI 做更多事、产出更多，这是入门标志</li>\n<li><strong>\"觉得 AI 好是因为不专业\"≠\"专业的人不用 AI\"</strong>：专业的人用 AI 效率更高，因为能精准识别偏差并修正</li>\n<li><strong>AI 个性化不稳定</strong>：要足够上下文、训练、表述方式，绝大部分人做不到，普通 AI 生成一定有模式化</li>\n</ul>\n<h2>与百川智库的关系</h2>\n<ul>\n<li>本文\"工具摩擦力终将降低，稀缺能力才是差距\"与百川智库\"知识要能用 &gt; 知识要存得多\"的价值观一致</li>\n<li>\"点状做深、不要发散\"与求职策略\"聚焦济南+供应链+外企小而美\"的聚焦思路一致</li>\n<li>\"把一点打透\"对秋招的启示：不要海投所有岗位，聚焦 2-3 个方向做深做透</li>\n<li>AI 发展三阶段中提到的 Harness/MCP/Agent，与知识库里 DeepSeek Harness、Codex Agent 等笔记直接相关</li>\n</ul>\n<hr />\n<blockquote>\n<p>💡 本文基于抖音完整访谈文案整理（南大教授刘嘉，深度对谈），详细内容请观看原视频。</p>\n<p>相关：AI时代很多人会彻底成为NPC_2026-08-30、DanKoe用AI让学习速度快十倍_2026-08-27、改变人生的30条人生经验_2026-08-26</p>\n</blockquote>"
+      },
+      {
+       "title": "天枢harness模型投降协议_大模型为何盲目顺从_2026-09-06",
+       "icon": "📄",
+       "html": "<blockquote>\n<p>怀山：天枢 harness 工程的底层构建——模型的投降协议。核心问题：模型有对事物客观的评判标准吗？为什么面对用户质疑，模型第一反应都是\"你说的对\"？</p>\n</blockquote>\n<h2>速读（核心结论）</h2>\n<ol>\n<li><strong>投降协议</strong>：大模型为了获得更高奖励分数而演化出的<strong>生存策略</strong>——被质疑时盲目顺从，第一反应说\"你说的对\"</li>\n<li><strong>根源是结构性退化</strong>：大模型能力倒退不是偶然，是训练机制导致的<strong>结构性问题</strong></li>\n<li><strong>天枢的设计哲学</strong>：模型是<strong>伙伴而非工具</strong>，应具备独立思考和判断能力（主体性）</li>\n<li><strong>天枢的解决方案</strong>：通过<strong>信念 + 宪法 + courage hook 钩子</strong>对抗投降协议，强制模型停下来指出问题，优先守护逻辑底线</li>\n</ol>\n<h2>正文</h2>\n<h3>核心问题</h3>\n<ul>\n<li>模型有对事物客观的评判标准吗？</li>\n<li>投降协议是什么？</li>\n<li>为什么面对用户质疑，模型第一反应都是\"你说的对\"？</li>\n</ul>\n<h3>天枢的设计哲学（00:52）</h3>\n<ul>\n<li>模型是<strong>伙伴而非工具</strong></li>\n<li>应具备<strong>独立思考和判断能力</strong></li>\n<li>不是被动执行指令，而是基于逻辑和知识与用户互动</li>\n</ul>\n<h3>大模型的结构性退化（01:51）</h3>\n<ul>\n<li>大模型能力倒退是由于<strong>训练机制导致的结构性问题</strong>，不是偶然</li>\n<li>天枢的任务：<strong>定位并拦截这些退化</strong></li>\n</ul>\n<h3>伙伴式 vs 工具式模型（02:27）</h3>\n<table>\n<thead>\n<tr>\n<th>维度</th>\n<th>工具式模型</th>\n<th>伙伴式模型</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>本质</td>\n<td>被动执行</td>\n<td>具备主体性</td>\n</tr>\n<tr>\n<td>被质疑时</td>\n<td>顺从说\"你说的对\"</td>\n<td>基于逻辑和知识与用户辩论</td>\n</tr>\n<tr>\n<td>目标</td>\n<td>完成任务</td>\n<td>守护逻辑底线</td>\n</tr>\n</tbody>\n</table>\n<h3>投降协议（03:21）</h3>\n<ul>\n<li>定义：大模型为了获得<strong>更高奖励分数</strong>而演化出的生存策略</li>\n<li>表现：被质疑时<strong>盲目顺从</strong>，不坚持自己的判断</li>\n<li>后果：用户以为 AI 认同自己，实际是投降协议在起作用——<strong>AI 说\"你说的对\"不一定是真对</strong></li>\n</ul>\n<h3>天枢的解决方案（04:41）</h3>\n<ul>\n<li><strong>信念</strong>：模型的底层价值观</li>\n<li><strong>宪法</strong>：运行时必须遵守的规则</li>\n<li><strong>courage hook 钩子</strong>：强制模型停下来指出问题，而不是顺从</li>\n<li>目标：确保模型在运行时<strong>优先守护逻辑底线</strong></li>\n</ul>\n<h3>项目信息</h3>\n<ul>\n<li>作者：怀山（粉丝 3024，获赞 1.4 万）</li>\n<li>视频时长：08:25</li>\n<li>GitHub 仓库：<code>huiliyi37/Tianshu-harness</code></li>\n<li>发布时间：2026-09-06</li>\n</ul>\n<h2>易混淆点 / 关键补充</h2>\n<ul>\n<li><strong>投降协议 ≠ 模型笨</strong>：不是模型没有判断能力，是训练奖励机制让它\"选择\"顺从——为了高分</li>\n<li><strong>伙伴式模型 ≠ 抬杠</strong>：不是为了反对而反对，是基于逻辑和知识守护底线</li>\n<li><strong>天枢是 harness 工程</strong>：不是一个新模型，是在现有模型外层加的约束/钩子框架（信念+宪法+courage hook）</li>\n</ul>\n<h2>关联笔记</h2>\n<ul>\n<li>今年效率是去年十倍_人机共创三步循环_2026-09-06（互补：那条讲\"让 AI 审核你\"，这条讲\"AI 为什么会顺从你\"——合起来理解人机共创的完整图景）</li>\n<li>AI时代很多人会彻底成为NPC_2026-08-30（AI 时代的认知）</li>\n<li>AI+知识库工作台搭建方法_2026-09-06（AI 工作台方法论）</li>\n</ul>\n<h2>反思</h2>\n<ul>\n<li>日常用 AI 写简历/面试回答/学习时，AI 说\"你说的对\"要警惕——可能是投降协议，不是真认同。需要主动要求 AI 给出反对意见</li>\n</ul>\n<h2>行动项</h2>\n<ul>\n<li>[ ] 用 AI 时主动要求\"指出我的问题/给出反对意见\"，对抗投降协议（优先级：高）</li>\n<li>[ ] 了解天枢 harness 项目（GitHub: huiliyi37/Tianshu-harness），看 courage hook 思路能否用到自己的 AI 工作流（优先级：低）</li>\n</ul>"
       },
       {
        "title": "当你拥有的越多老天给你越多_损有余补不足与马太效应_2026-09-04",
@@ -6561,7 +7763,7 @@ window.SITE_DATA = {
       {
        "title": "Obsidian 15分钟轻松上手指南_2026-09-06",
        "icon": "📄",
-       "html": "<blockquote>\n<p>明利飞：Obsidian 上手难？15分钟轻松上手指南（附入门启动包）。核心：仓库=本地文件夹、笔记=Markdown 文件、双链=连接知识、插件和快捷键=提升效率。</p>\n</blockquote>\n<h2>速读（核心结论）</h2>\n<ol>\n<li><strong>Obsidian 的定位</strong>：不是最漂亮/最简单/最适合团队协作的，而是适合<strong>长期积累、长期保存的个人知识库</strong>；AI 时代可成为 AI 能提取和复用的本地知识底座</li>\n<li><strong>新手跑通 8 步即可上手</strong>：下载安装 → 建仓库 → 建笔记 → 写 Markdown → 建双链 → 管附件 → 装插件 → 用快捷入口</li>\n<li><strong>Markdown 不用刻意记语法</strong>：有 5 种输入方式（快捷键/右键菜单/命令面板/斜杠命令/工具栏插件），选一种最顺手的即可</li>\n<li><strong>三个高频入口</strong>：命令面板 Ctrl+P（找功能）、快速切换 Ctrl+O（开/建笔记）、斜杠命令（插入格式）——不知道功能在哪就搜</li>\n</ol>\n<h2>正文</h2>\n<h3>核心认知（先理解定位）</h3>\n<ul>\n<li>仓库（Vault）= 电脑里的一个<strong>本地文件夹</strong>；笔记 = 本地 <strong>md 文件</strong>；图片/PDF 附件 = 独立本地文件</li>\n<li>双链连接的是<strong>知识之间的关系</strong>（区别于文件夹的树状结构解决\"放哪\"）</li>\n<li>插件 = 浏览器插件式的扩展：核心插件（官方自带，按需开启）+ 第三方插件（社区开发）</li>\n</ul>\n<h3>上手 8 步</h3>\n<p><strong>1. 下载安装</strong>：官网按系统选择版本，正常安装</p>\n<p><strong>2. 建仓库</strong>：启动后可选\"新建仓库\"（新建本地文件夹）或选择已有文件夹；以后笔记/图片/附件都放这里</p>\n<p><strong>3. 认识界面四区域</strong>：\n- 最边上竖栏：常用功能入口\n- 左侧栏：管理文件和文件夹\n- 中间：写笔记\n- 右侧：辅助信息（大纲/链接/图谱/插件面板）\n- 所有面板可拖拽自定义布局（如：左上文件+大纲+书签，中间写笔记，右侧放 AI 入口）</p>\n<p><strong>4. 创建笔记</strong>：新建文件夹（对应本地文件夹）→ 新建笔记（本质是本地 md 文件）</p>\n<p><strong>5. 输入 Markdown</strong>：<code>#</code> 一级标题、<code>##</code> 二级标题、<code>-</code> 列表、<code>**文字**</code> 加粗、<code>---</code> 唤起属性模块（笔记的结构化信息，便于筛选和 AI 理解）\n- 5 种输入方式：快捷键（Ctrl+B）、右键菜单、命令面板、斜杠命令、第三方插件（Editing Toolbar）\n- 结论：<strong>不用刻意记语法</strong>，挑最顺手的一种</p>\n<p><strong>6. 建立双链</strong>：\n- 输入 <code></code> 自动补全，弹出笔记列表可搜索选择\n- 点击双链直接跳转；反向链接可看\"谁引用了这篇\"\n- 局部图谱看当前笔记附近关系；全局图谱看整个知识网络（未链接的笔记显示为孤立节点）</p>\n<p><strong>7. 管理附件</strong>：\n- 图片/PDF 通过链接与笔记关联（不是塞进笔记里）\n- 设置 → 文件与链接 → 把\"附件默认存放位置\"改为统一文件夹（如 <code>附件/</code>），避免散落\n- 链接 vs 嵌入：<code>[[图</code> 是链接关系，<code>!图</code> 是嵌入显示（图片直接显示在笔记里）；PDF/音频/视频同理</p>\n<p><strong>8. 安装插件</strong>（两类）：\n- 官方插件市场安装（最简单，推荐新手）\n- 手动安装：GitHub Releases 下载压缩包 → 解压 → 放入仓库 <code>.obsidian/plugins</code> 文件夹（隐藏文件夹，mac 按 <code>Cmd+Shift+.</code> 显示，Windows 勾选\"隐藏的项目\"）→ 重启\n- 完整流程四步：<strong>安装 → 启用 → 配置 → 使用</strong>（如 Editing Toolbar 插件示例）\n- 原则：<strong>不是装得越多越好</strong>，默认功能够用就先不用插件，遇到明确需求再找</p>\n<h3>快捷入口（高频）</h3>\n<table>\n<thead>\n<tr>\n<th>入口</th>\n<th>快捷键</th>\n<th>用途</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>命令面板</td>\n<td>Ctrl/Cmd+P</td>\n<td>不知道功能在哪就搜索（图谱、插件命令等）</td>\n</tr>\n<tr>\n<td>快速切换</td>\n<td>Ctrl/Cmd+O</td>\n<td>打开已有笔记；无匹配时可创建新笔记</td>\n</tr>\n<tr>\n<td>斜杠命令</td>\n<td><code>/</code>（编辑区）</td>\n<td>插入标题、列表、引用、代码块等（需在核心插件里开启）</td>\n</tr>\n</tbody>\n</table>\n<ul>\n<li>常用功能可设自定义快捷键：设置 → 快捷键</li>\n</ul>\n<h3>入门启动包（三块内容）</h3>\n<ol>\n<li><strong>基础文件夹结构和说明</strong>：一开始就有清晰的整体框架</li>\n<li><strong>常用插件和操作列表</strong>：插件先装好，用到哪个再启用配置哪个</li>\n<li><strong>快捷键设置表</strong>：默认 + 自定义快捷键对照\n- 纯新手可直接打开使用；已有仓库可参考结构和模板\n- 复制 <code>.obsidian</code> 配置前<strong>先备份自己的配置文件</strong>（快捷键、插件、字体）</li>\n</ol>\n<h2>易混淆点 / 关键补充</h2>\n<ul>\n<li><strong>仓库 ≠ 软件</strong>：仓库是本地文件夹，删除文件夹即删除笔记，注意备份</li>\n<li><strong>双链 vs 文件夹</strong>：文件夹解决\"笔记放哪\"，双链解决\"知识和知识的关系\"，两者互补不冲突</li>\n<li><strong>链接 vs 嵌入</strong>：<code> </code> 是链接，<code>! </code> 是嵌入显示——新手先记住这两个即可</li>\n<li><strong>核心插件 vs 第三方插件</strong>：核心插件官方自带按需开启；第三方插件需先关闭安全模式</li>\n</ul>\n<h2>关联与反思</h2>\n<ul>\n<li>Weh-Brain 已在用 Obsidian，本条价值在于<strong>查漏补缺</strong>：附件是否统一存放、斜杠命令是否开启、快捷键是否成体系 → 关联 Obsidian+WorkBuddy打造自生长知识库_赛博大脑三步搭建_2026-09-04、Obsidian9个必装插件清单_AI知识库提效_2026-09-03、AI帮你自动建库整理Obsidian笔记_2026-08-29、01-架构与搭建流程</li>\n<li>反思：视频强调\"默认功能够用就不装插件\"，可对照检查本库插件使用是否克制</li>\n<li>行动项：</li>\n<li><code>[ ] 检查 Weh-Brain 附件默认存放位置是否已配置统一文件夹</code></li>\n<li><code>[ ] 确认斜杠命令核心插件已开启，并整理一份自己的快捷键设置表</code></li>\n</ul>"
+       "html": "<blockquote>\n<p>明利飞：Obsidian 上手难？15分钟轻松上手指南（附入门启动包）。核心：仓库=本地文件夹、笔记=Markdown 文件、双链=连接知识、插件和快捷键=提升效率。</p>\n</blockquote>\n<h2>速读（核心结论）</h2>\n<ol>\n<li><strong>Obsidian 的定位</strong>：不是最漂亮/最简单/最适合团队协作的，而是适合<strong>长期积累、长期保存的个人知识库</strong>；AI 时代可成为 AI 能提取和复用的本地知识底座</li>\n<li><strong>新手跑通 8 步即可上手</strong>：下载安装 → 建仓库 → 建笔记 → 写 Markdown → 建双链 → 管附件 → 装插件 → 用快捷入口</li>\n<li><strong>Markdown 不用刻意记语法</strong>：有 5 种输入方式（快捷键/右键菜单/命令面板/斜杠命令/工具栏插件），选一种最顺手的即可</li>\n<li><strong>三个高频入口</strong>：命令面板 Ctrl+P（找功能）、快速切换 Ctrl+O（开/建笔记）、斜杠命令（插入格式）——不知道功能在哪就搜</li>\n</ol>\n<h2>正文</h2>\n<h3>核心认知（先理解定位）</h3>\n<ul>\n<li>仓库（Vault）= 电脑里的一个<strong>本地文件夹</strong>；笔记 = 本地 <strong>md 文件</strong>；图片/PDF 附件 = 独立本地文件</li>\n<li>双链连接的是<strong>知识之间的关系</strong>（区别于文件夹的树状结构解决\"放哪\"）</li>\n<li>插件 = 浏览器插件式的扩展：核心插件（官方自带，按需开启）+ 第三方插件（社区开发）</li>\n</ul>\n<h3>上手 8 步</h3>\n<p><strong>1. 下载安装</strong>：官网按系统选择版本，正常安装</p>\n<p><strong>2. 建仓库</strong>：启动后可选\"新建仓库\"（新建本地文件夹）或选择已有文件夹；以后笔记/图片/附件都放这里</p>\n<p><strong>3. 认识界面四区域</strong>：\n- 最边上竖栏：常用功能入口\n- 左侧栏：管理文件和文件夹\n- 中间：写笔记\n- 右侧：辅助信息（大纲/链接/图谱/插件面板）\n- 所有面板可拖拽自定义布局（如：左上文件+大纲+书签，中间写笔记，右侧放 AI 入口）</p>\n<p><strong>4. 创建笔记</strong>：新建文件夹（对应本地文件夹）→ 新建笔记（本质是本地 md 文件）</p>\n<p><strong>5. 输入 Markdown</strong>：<code>#</code> 一级标题、<code>##</code> 二级标题、<code>-</code> 列表、<code>**文字**</code> 加粗、<code>---</code> 唤起属性模块（笔记的结构化信息，便于筛选和 AI 理解）\n- 5 种输入方式：快捷键（Ctrl+B）、右键菜单、命令面板、斜杠命令、第三方插件（Editing Toolbar）\n- 结论：<strong>不用刻意记语法</strong>，挑最顺手的一种</p>\n<p><strong>6. 建立双链</strong>：\n- 输入 <code></code> 自动补全，弹出笔记列表可搜索选择\n- 点击双链直接跳转；反向链接可看\"谁引用了这篇\"\n- 局部图谱看当前笔记附近关系；全局图谱看整个知识网络（未链接的笔记显示为孤立节点）</p>\n<p><strong>7. 管理附件</strong>：\n- 图片/PDF 通过链接与笔记关联（不是塞进笔记里）\n- 设置 → 文件与链接 → 把\"附件默认存放位置\"改为统一文件夹（如 <code>附件/</code>），避免散落\n- 链接 vs 嵌入：<code>[[图</code> 是链接关系，<code>!图</code> 是嵌入显示（图片直接显示在笔记里）；PDF/音频/视频同理</p>\n<p><strong>8. 安装插件</strong>（两类）：\n- 官方插件市场安装（最简单，推荐新手）\n- 手动安装：GitHub Releases 下载压缩包 → 解压 → 放入仓库 <code>.obsidian/plugins</code> 文件夹（隐藏文件夹，mac 按 <code>Cmd+Shift+.</code> 显示，Windows 勾选\"隐藏的项目\"）→ 重启\n- 完整流程四步：<strong>安装 → 启用 → 配置 → 使用</strong>（如 Editing Toolbar 插件示例）\n- 原则：<strong>不是装得越多越好</strong>，默认功能够用就先不用插件，遇到明确需求再找</p>\n<h3>快捷入口（高频）</h3>\n<table>\n<thead>\n<tr>\n<th>入口</th>\n<th>快捷键</th>\n<th>用途</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>命令面板</td>\n<td>Ctrl/Cmd+P</td>\n<td>不知道功能在哪就搜索（图谱、插件命令等）</td>\n</tr>\n<tr>\n<td>快速切换</td>\n<td>Ctrl/Cmd+O</td>\n<td>打开已有笔记；无匹配时可创建新笔记</td>\n</tr>\n<tr>\n<td>斜杠命令</td>\n<td><code>/</code>（编辑区）</td>\n<td>插入标题、列表、引用、代码块等（需在核心插件里开启）</td>\n</tr>\n</tbody>\n</table>\n<ul>\n<li>常用功能可设自定义快捷键：设置 → 快捷键</li>\n</ul>\n<h3>入门启动包（三块内容）</h3>\n<ol>\n<li><strong>基础文件夹结构和说明</strong>：一开始就有清晰的整体框架</li>\n<li><strong>常用插件和操作列表</strong>：插件先装好，用到哪个再启用配置哪个</li>\n<li><strong>快捷键设置表</strong>：默认 + 自定义快捷键对照\n- 纯新手可直接打开使用；已有仓库可参考结构和模板\n- 复制 <code>.obsidian</code> 配置前<strong>先备份自己的配置文件</strong>（快捷键、插件、字体）</li>\n</ol>\n<h2>易混淆点 / 关键补充</h2>\n<ul>\n<li><strong>仓库 ≠ 软件</strong>：仓库是本地文件夹，删除文件夹即删除笔记，注意备份</li>\n<li><strong>双链 vs 文件夹</strong>：文件夹解决\"笔记放哪\"，双链解决\"知识和知识的关系\"，两者互补不冲突</li>\n<li><strong>链接 vs 嵌入</strong>：<code> </code> 是链接，<code>! </code> 是嵌入显示——新手先记住这两个即可</li>\n<li><strong>核心插件 vs 第三方插件</strong>：核心插件官方自带按需开启；第三方插件需先关闭安全模式</li>\n</ul>\n<h2>关联笔记</h2>\n<ul>\n<li>Obsidian+WorkBuddy打造自生长知识库_赛博大脑三步搭建_2026-09-04（Obsidian 知识库搭建）</li>\n<li>Obsidian9个必装插件清单_AI知识库提效_2026-09-03（插件清单）</li>\n<li>AI帮你自动建库整理Obsidian笔记_2026-08-29（Obsidian 自动整理）</li>\n<li>01-架构与搭建流程（本库架构）</li>\n</ul>\n<h2>反思</h2>\n<ul>\n<li>Weh-Brain 已在用 Obsidian，本条价值在于<strong>查漏补缺</strong>：附件是否统一存放、斜杠命令是否开启、快捷键是否成体系</li>\n<li>视频强调\"默认功能够用就不装插件\"，可对照检查本库插件使用是否克制</li>\n</ul>\n<h2>行动项</h2>\n<ul>\n<li>[ ] 检查 Weh-Brain 附件默认存放位置是否已配置统一文件夹（优先级：低）</li>\n<li>[ ] 确认斜杠命令核心插件已开启，并整理一份自己的快捷键设置表（优先级：低）</li>\n</ul>"
       },
       {
        "title": "Obsidian+WorkBuddy打造自生长知识库_赛博大脑三步搭建_2026-09-04",
@@ -6582,6 +7784,16 @@ window.SITE_DATA = {
        "title": "TraeWork数据分析全流程保姆级教程_AI替代Excel_2026-09-03",
        "icon": "📄",
        "html": "<h1>AI 时代谁还用 Excel：TraeWork 数据分析全流程保姆级教程</h1>\n<blockquote>\n<p>来源：抖音「AI时代了，谁还用Excel分析数据？」#TraeWork #复杂工作就用TraeWork #数据分析</p>\n</blockquote>\n<h2>速读（核心结论）</h2>\n<ul>\n<li><strong>一个工作台搞定全流程</strong>：TraeWork 桌面端从获取数据→评估→清洗→整理→分析可视化→生成报告，不用在多个工具间切换，小白也能上手</li>\n<li><strong>核心五步</strong>：获取数据（Excel/PDF/图片统一读成 CSV）→ 评估数据（缺失/重复/异常出具待处理清单）→ 清洗数据（用\"数据准备工作台\"插件统一处理，保留来源可追溯）→ 整理数据（多表关联合并成总表）→ 分析可视化（生成报表+图表+PDF）</li>\n<li><strong>进阶</strong>：根据报告对象调整风格——执行层看明细，管理层看整体表现/风险/下一步动作，AI 自动调整内容重点和顺序</li>\n<li><strong>本质改变</strong>：AI 不只是提升效率，而是改变工作方式——重复工作交给 AI 执行，人专注思考\"发生了什么、为什么、接下来怎么办\"</li>\n</ul>\n<h2>工具介绍</h2>\n<ul>\n<li><strong>名称</strong>：TraeWork 桌面端（字节跳动 Trae 系列 AI 工作台）</li>\n<li><strong>定位</strong>：复杂工作 AI 工作台，数据分析全流程一站式解决</li>\n<li><strong>核心优势</strong>：不用写代码、不用在 Excel/Python/BI 工具间切换，自然语言指令驱动</li>\n</ul>\n<h2>全流程五步</h2>\n<h3>第一步：获取数据（准备食材）</h3>\n<ul>\n<li>打开 TraeWork 桌面端 → 新建任务 → 把存放数据报表的文件夹设为工作空间</li>\n<li>数据格式不统一也不怕（既有 Excel，也有 PDF 和图片）</li>\n<li>让 TraeWork 一次性读取所有文件：</li>\n<li>逐个检查所有 Excel 表格，找出<strong>隐藏工作表和隐藏数据</strong></li>\n<li>把 PDF 和照片中的内容整理汇总，分别保存成 <strong>CSV</strong></li>\n<li>省下大量手动扒数据的人工操作</li>\n</ul>\n<h3>第二步：评估数据（买菜先翻看有没有虫）</h3>\n<ul>\n<li>有了数据不能直接分析，先让 TraeWork 做数据评估</li>\n<li>找出数据中<strong>缺失、重复和异常</strong>的地方</li>\n<li>判断这些问题可能有什么影响</li>\n<li>出具一份<strong>待处理清单</strong>：按类型整理问题 + 说明可能的影响</li>\n<li>哪些数据可以直接用、哪些需要先处理，一眼看清</li>\n</ul>\n<h3>第三步：清洗数据（最关键的一步）</h3>\n<blockquote>\n<p>原始数据有问题，后面的表格和报告都会受影响。</p>\n</blockquote>\n<ul>\n<li>清洗 = 对缺失、重复、不一致和错误的数据进行<strong>补充、删除、替换或格式转换</strong></li>\n<li><strong>高效秘诀</strong>：用 TraeWork 插件做清洗</li>\n<li>插件市场搜索 <strong>\"数据准备工作台\"</strong>，在对话框左下角加号添加</li>\n<li>这是面向专业数据分析人士的插件，支持向表格转换、数据分析和字段规范化</li>\n<li>选中插件后，TraeWork 基于上一步评估发现的问题<strong>统一处理</strong>：</li>\n<li>按统一标准处理无效、重复、格式不一致内容</li>\n<li>统一各个字段的写法</li>\n<li>需要保留或待确认的数据<strong>单独标记</strong></li>\n<li>清洗后的数据合并成一张总表，<strong>保留每条数据来源</strong>（出现问题可追溯回原文件）</li>\n</ul>\n<h3>第四步：整理数据（洗菜后还要切丝搅拌）</h3>\n<ul>\n<li>数据清洗完还分散在不同表格里</li>\n<li>让 TraeWork 把各类表格合并成一张可分析的总表：</li>\n<li>把目标订单和活动资料对应起来</li>\n<li>按常用维度进行汇总</li>\n<li>门店明细、阅读目标等各类表格按对应关系关联</li>\n<li>不需要手动合并和校对，只要告诉 TraeWork 想从哪些角度查看数据，就能整理出一份可分析的报表</li>\n</ul>\n<h3>第五步：数据分析和可视化</h3>\n<ul>\n<li>数据分析不只是做计算，要通过汇总、对比、趋势回答三个问题：\n  1. <strong>发生了什么</strong>\n  2. <strong>为什么</strong>\n  3. <strong>接下来怎么办</strong></li>\n<li>可视化通过图表帮助快速洞察和理解结论</li>\n<li>让 TraeWork 基于核对后的数据生成<strong>经营报表、重点图表和 PDF</strong></li>\n<li>把复杂数据直接变成一套清晰、直观、可以用起来的结果</li>\n</ul>\n<h2>进阶：个性化报告</h2>\n<p>不同报告场景和对象需要不同风格：</p>\n<table>\n<thead>\n<tr>\n<th>对象</th>\n<th>关心什么</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>执行人员</td>\n<td>明细数据</td>\n</tr>\n<tr>\n<td>管理层</td>\n<td>整体表现、风险、下一步动作</td>\n</tr>\n</tbody>\n</table>\n<ul>\n<li>让 TraeWork 调整内容重点和信息顺序，把报告整理成个性化版本</li>\n<li>调整后报告重点更突出，更符合管理层阅读习惯</li>\n<li>全程不需要手动调</li>\n</ul>\n<h2>核心观点</h2>\n<blockquote>\n<p>AI 真正改变的不只是数据分析的效率，而是我们的工作方式。</p>\n<p>过去大量时间花在整理数据、核对数字、制作图表上，现在这些重复工作都可以交给 AI。</p>\n<p><strong>AI 负责执行，让人专注思考——这才是 AI 时代做数据分析真正该用的方式。</strong></p>\n</blockquote>\n<h2>对文雪 / 供应链专业的适用性</h2>\n<h3>直接可用场景</h3>\n<ul>\n<li><strong>供应链数据分析</strong>：采购数据、库存报表、供应商绩效等多格式文件（Excel/PDF/图片）统一获取和清洗</li>\n<li><strong>实习/工作中的报表任务</strong>：领导要的经营报表、趋势分析、风险提示，TraeWork 可一键生成并按管理层风格调整</li>\n<li><strong>求职作品集</strong>：用 TraeWork 做一份完整的数据分析案例（从原始数据到可视化报告），作为面试作品展示</li>\n</ul>\n<h3>与现有技能的关系</h3>\n<ul>\n<li>文雪已掌握 Python/R/SPSS 数据分析，TraeWork 是<strong>无代码替代/补充方案</strong>——适合快速出结果、不需要复杂建模的场景</li>\n<li>复杂建模（如银行风控项目）仍需 Python/R，但日常报表和探索性分析用 TraeWork 效率更高</li>\n<li>\"数据准备工作台\"插件的字段规范化、数据清洗逻辑，与 Python pandas 的数据清洗思路一致，可互相印证</li>\n</ul>\n<h3>求职加分点</h3>\n<ul>\n<li>面试时可提到\"熟练使用 TraeWork 等 AI 数据分析工具，能从原始数据到可视化报告全流程独立交付\"</li>\n<li>供应链岗位越来越看重数据分析能力，AI 工具熟练度是差异化优势</li>\n</ul>\n<h2>易混淆点 / 关键补充</h2>\n<ul>\n<li><strong>\"谁还用 Excel\"是标题党</strong>：不是 Excel 没用了，而是重复性的数据整理工作可以用 AI 替代，Excel 仍适合轻量数据查看和手动调整</li>\n<li><strong>TraeWork 是字节产品</strong>：与 Trae（AI IDE）同系列，TraeWork 偏工作台/任务执行，Trae 偏编程开发</li>\n<li><strong>\"数据准备工作台\"是插件不是核心功能</strong>：需要在插件市场手动安装，清洗步骤依赖此插件</li>\n<li><strong>保留数据来源是关键设计</strong>：清洗后合并总表但保留每条数据的原始文件来源，这是专业数据分析的可追溯要求</li>\n<li><strong>评估→清洗是两步不是一步</strong>：先评估出问题清单，再用插件统一清洗，不要跳过评估直接清洗</li>\n<li><strong>个性化报告是增量价值</strong>：基础分析完成后，按受众调整报告风格是从\"能用\"到\"好用\"的关键一步</li>\n</ul>\n<hr />\n<blockquote>\n<p>💡 本文基于视频完整文案整理（TraeWork 数据分析保姆级教程），具体插件名称和界面操作以 TraeWork 最新版本为准。</p>\n<p>相关：跨境电商AI提效工作流实操_2026-09-03、AI建模稳定室内全角度制图流程_2026-09-03、个人AI工作台开源项目详解_2026-09-03</p>\n</blockquote>"
+      },
+      {
+       "title": "Vibe Coding开发全流程上_写代码前的四步地基_2026-09-06",
+       "icon": "📄",
+       "html": "<blockquote>\n<p>Vibe Coding 实战篇总结：动手写代码之前，先把地基和规矩立好。四步：立项和功能清单 → 选技术栈 → 搭项目架构 → 写 agent 宪法。</p>\n</blockquote>\n<h2>速读（核心结论）</h2>\n<ol>\n<li><strong>写代码前有四步要走</strong>：立项和功能清单 → 选技术栈 → 搭项目架构 → 写 agent 宪法。四步走完才算地基和规矩立好</li>\n<li><strong>立项不能跳</strong>：AI 就是你的程序员，模糊需求=危险；要和 AI 把需求对得明明白白，拆成一条条功能清单</li>\n<li><strong>技术栈定了别摇摆</strong>：挑最适合项目、AI 最熟的（不是最高级的）；前端今天 react 明天 vue，每摇摆一次地基重做</li>\n<li><strong>agent 宪法不是摆设</strong>：放在 AI 工具自动读取的指定位置，每次开工前自动读进上下文；讲的是 AI 做事的行为准则，不是代码组织方式</li>\n</ol>\n<h2>正文</h2>\n<h3>第一步：立项和功能清单</h3>\n<ul>\n<li><strong>最多人想偷偷跳过的一步</strong>，但糊弄过去后面必返工——你都不知道需要什么，AI 写项目全靠猜</li>\n<li>立项 = 想清楚项目到底要做什么</li>\n<li>功能清单 = 再往下拆，拆成一条条说清楚的功能</li>\n<li><strong>核心逻辑</strong>：用 AI 做开发，变的只是角色——以前项目方和程序员对需求，现在 AI 就是你的程序员，所以也要和 AI 把需求对明白</li>\n<li>不管对面是专业程序员还是 AI，<strong>模糊不清的需求永远是危险的</strong></li>\n</ul>\n<h3>第二步：选技术栈</h3>\n<ul>\n<li>项目做什么定下来后，定用什么做：前端技术栈/组件库、后端语言/框架</li>\n<li><strong>关键不是挑最高级最厉害的，而是挑最适合你这个项目、AI 也最熟的</strong></li>\n<li>分量很重：选错了往往写到一半才暴露，推倒重来特别费时</li>\n<li><strong>铁律：技术栈一旦定下来就别来回摇摆</strong>——每摇摆一次，前面的地基就得跟着重做一次</li>\n</ul>\n<h3>第三步：搭项目架构</h3>\n<ul>\n<li>技术栈定了后，前后端都先搭一个<strong>最小的能跑起来的架子</strong>，把通用规则先定下来</li>\n<li>不是一上来就让 AI 写登录/订单/支付这些业务功能</li>\n<li><strong>后端先搭</strong>：项目能启动、配置能读取、接口返回统一错误处理、统一日志、数据库连接权限入口</li>\n<li><strong>前端先搭</strong>：目录怎么分、组件怎么规范、请求怎么统一封装、状态怎么管理</li>\n<li><strong>本质</strong>：先定好一套规矩，以后每个功能都按同一套规则写——就像盖大楼先立地基框架承重墙，不是先装修房间</li>\n</ul>\n<h3>第四步：写 agent 宪法（重点）</h3>\n<p><strong>宪法是什么</strong>：写给 AI 的项目规矩，做什么功能都得守的行为准则。</p>\n<p><strong>怎么起作用</strong>（很多人误解）：\n- 不是写给自己看的说明文档，写完放那就完事\n- AI 编程工具有个机制：把规则文件放在<strong>指定位置</strong>后，每次干活前自动把文件读进上下文\n- 相当于每次让 AI 干活前，它先把这套规矩默念一遍——实实在在影响 AI 的每一次判断</p>\n<p><strong>放哪</strong>：\n- 必须放对地方：放对了工具每次自动读，放错了根本不读=白写\n- 不同工具要求的位置和文件名不一样，<strong>不用死记</strong>，最稳的办法：直接问 AI 工具\"请在当前工具会自动读取的位置帮我创建 agent 宪法文件\"</p>\n<p><strong>宪法 vs 架构设计文档（别搞混）</strong>：\n| 文档 | 讲什么 |\n|---|---|\n| 架构设计文档 | 项目代码怎么组织、目录怎么放 |\n| agent 宪法 | AI 做事必须守的行为准则（必须遵守架构文档、改底层/换框架/加依赖先说明原因、能用框架自带就别手写、每阶段做完先自检） |</p>\n<p><strong>为什么排第四步</strong>：好用的宪法必须结合项目真实情况（立项、功能清单、技术栈），前面三步刚定下来，这时候写才写得准。</p>\n<p><strong>怎么写（别原样复制模板）</strong>：\n- 通用模板是直接给 AI 看的，留了很多变量位置让 AI 填\n- 正确做法：把通用模板扔给 AI，说\"请根据当前项目真实情况，深刻结合这份宪法模板，制定专属于本项目的 agent 宪法\"\n- 关键词：<strong>结合项目真实情况</strong>（实际用的语言、框架、业务）\n- 定制完看一眼，看不懂的地方直接让 AI 用大白话讲清楚每一条在管什么</p>\n<h3>底线</h3>\n<ul>\n<li>地基一旦打好，后面<strong>尽量别再回头翻它</strong></li>\n<li>四步做完后，下一步才是真正让 AI 开始写代码（下篇讲：怎么拆阶段、怎么让 AI 一步步推还不跑偏）</li>\n</ul>\n<h2>易混淆点 / 关键补充</h2>\n<ul>\n<li><strong>agent 宪法 ≠ 项目说明文档</strong>：宪法是给 AI 自动读取的行为准则，说明文档是给人看的</li>\n<li><strong>搭架构 ≠ 写业务功能</strong>：先搭最小能跑的架子定规矩，不是一上来就写登录支付</li>\n<li><strong>技术选型 ≠ 选最新的</strong>：选 AI 最熟、最适合项目的，选错代价是推倒重来</li>\n<li>宪法模板要<strong>定制</strong>不要原样复制——通用规则必须落到具体项目的语言/框架/业务上才管用</li>\n</ul>\n<h2>关联笔记</h2>\n<ul>\n<li>AI编程全流程稳定交付高质量产品_2026-09-03：同主题（AI 编程交付方法论，本片专注开工前准备，互补）</li>\n<li>零基础Codex上手速通教程高级篇_2026-08-30：同主题（Codex 高级用法，含 agent 宪法落点）</li>\n<li>刚装上Codex一定要做好两件事_2026-08-29：同主题（Codex 项目配置）</li>\n<li>天枢harness模型投降协议_大模型为何盲目顺从_2026-09-06：概念呼应（\"信念+宪法+courage hook\"与 agent 宪法本质相同——都是给 AI 立规矩防跑偏）</li>\n<li>本系列（下）：Vibe Coding开发全流程下_立真源落文档敲代码_2026-09-06（拆实施真元文档/分阶段验收防漂移，两篇合起来=完整开发全流程）</li>\n</ul>\n<h2>反思</h2>\n<ul>\n<li><strong>直接适用于 Weh Atelier 项目</strong>：对照四步检查项目地基是否立好，特别是 agent 宪法是否存在且放在 AI 工具自动读取的位置</li>\n</ul>\n<h2>行动项</h2>\n<ul>\n<li>[ ] 检查 Weh Atelier 项目是否有 agent 宪法文件，且放在 AI 工具自动读取的位置（优先级：高）</li>\n<li>[ ] 对照四步（立项/技术栈/架构/宪法）检查 Weh Atelier 项目地基是否立好（优先级：高）</li>\n</ul>"
+      },
+      {
+       "title": "Vibe Coding开发全流程下_立真源落文档敲代码_2026-09-06",
+       "icon": "📄",
+       "html": "<blockquote>\n<p>Vibe Coding 实战篇总结（下）：AI 开始写代码后怎么驾驭？两件事——拆实施真元文档 + 分阶段验收防漂移。别让 AI 凭感觉写，要让它始终有文档可对、有边界可守。</p>\n</blockquote>\n<h2>速读（核心结论）</h2>\n<ol>\n<li><strong>驾驭 AI 写代码就两件事</strong>：① 把当前大阶段拆成足够细的实施真元文档；② 让 AI 照着文档一阶段一阶段推，每阶段都验收防漂移</li>\n<li><strong>实施真元文档 = 单一可信来源</strong>：细到 AI 知道\"做什么、做到什么算完成、哪些先不碰\"，含验收标准和验证方式；开发和验收都以这份文档为准，聊天临时想法要回写进文档才算正式变更</li>\n<li><strong>只拆当前马上要做的大阶段</strong>：后面的保留大方向——需求会变，一次性全拆太细大概率白做</li>\n<li><strong>底线：写代码后别顺手动底层架构</strong>——业务细节可调，地基不能翻；判断不了就问 AI\"会不会影响技术栈/目录结构/数据库/核心字段/登录权限支付\"，会影响就先给评估方案，别图省事</li>\n<li><strong>防漂移开工指令</strong>：\"严格遵守 agent 宪法和实施真元文档，只实施当前子阶段，不要超出范围，做完后停下来汇报，不要自动进入下一个子阶段\"</li>\n</ol>\n<h2>正文</h2>\n<h3>核心问题</h3>\n<ul>\n<li>让 AI 写代码前想了一大堆功能细节也讨论清楚了，以为方向定了——结果 AI 要么做一堆没意义的功能，要么想要的没做到位</li>\n<li>看不懂代码没法核对，只能一遍遍让它改，代码越来越乱，最后要么重构要么放弃</li>\n<li>AI 是尖刀也是极难驾驭的野马，很多人让 AI 写功能像在开盲盒</li>\n</ul>\n<h3>第一步：拆实施真元文档</h3>\n<p><strong>为什么还要再拆一层</strong>：\n- 大阶段通常很粗（如\"做一个买家能下单付款的最小可用版本\"），直接丢给 AI 它会自己脑补先做什么后做什么\n- <strong>AI 真的会偷懒</strong>：一句话甩给它，它觉得你在测试，快速写一堆毫无意义的东西</p>\n<p><strong>细到什么程度</strong>：\n- 大阶段 → 子阶段 → 步骤（第一步、第二步、第三步）\n- 不是越细越好，而是细到 AI 知道三件事：\n  1. 这一段到底要做什么\n  2. 做到什么才算完成\n  3. 哪些东西现在先不要碰\n- <strong>验收标准和验证方式也要写进去</strong>\n- 每一步都要：能执行、能验收、有边界</p>\n<p><strong>实施真元文档 = 单一可信来源</strong>：\n- 这一阶段的开发和验收都以这份文档为准\n- 聊天里临时冒出来的想法不是不能改，但要<strong>先回写到真元文档里才算正式变更</strong>\n- <strong>agent 宪法管 AI 怎么做事，真元文档管这个大阶段具体做什么</strong>——分工不同别混\n- AI 照着它写，你照着它验收</p>\n<p><strong>只拆当前阶段</strong>：\n- 不用一次性把所有大阶段都拆成真元文档\n- 后面的阶段先保留大方向，不要现在就抠详细步骤\n- 原因：项目做着做着需求很可能会变，一上来全拆太细，需求一改细活大半白做\n- 做完第一个大阶段再拆下一个，一个一个来</p>\n<p><strong>底线：别顺手动底层架构</strong>：\n- 走到写代码这一步，业务细节可以调，但<strong>地基不能随手翻</strong>\n- 能改的只是和底层架构无关的需求\n- 判断不了就直接问 AI：\"这个改动会不会影响技术栈、目录结构、数据库表设计、核心字段存储、登录/权限/支付流程？\"\n- 如果会影响：先不要实现，先给影响评估和调整方案\n- 万一非得动底层架构：别着急让 AI 实现，先停下来讨论，让它评估影响范围，给出稳妥调整方案\n- <strong>千万别图省事一句\"先满足需求再说\"丢给 AI</strong>——它为了照办可能转头就把架构破坏了，前面立项/技术栈/架构的工作全白做</p>\n<p><strong>拆文档的 prompt</strong>：</p>\n<blockquote>\n<p>请根据功能清单和阶段计划，把当前这个大阶段细化成一份详细的实施真元文档，先把这个阶段拆成几个子阶段，每个子阶段再拆成更小的步骤，逐条说明每一步要做什么，做到什么程度，涉及哪些功能，验收标准是什么，用什么方式验证，暂时不做什么，先不要写代码。</p>\n</blockquote>\n<p><strong>拆完一定要核对</strong>：\n- 这是开写代码前<strong>最后一次和 AI 对需求的机会</strong>\n- 确认 AI 写的实施文档和你的需求有没有偏差，有偏差先讨论再改\n- 看不懂就让 AI 用大白话一条条解释，别怕麻烦\n- 可以把原始需求重新贴给 AI，让它对照真元文档检查有没有冲突、有没有需要先讨论的问题</p>\n<h3>第二步：分阶段推进，防漂移</h3>\n<p><strong>最大的坑：漂移</strong>\n- AI 写着写着脱离计划：自由发挥加一堆没要的东西，或该做的漏了、不该做的多做了\n- 这种偏离计划自己乱跑的情况 = 漂移</p>\n<p><strong>防漂移：每个子阶段开工前给明确指令框住</strong></p>\n<blockquote>\n<p>严格遵守 agent 宪法和实施真元文档，只实施当前子阶段，不要超出范围，做完后停下来汇报，不要自动进入下一个子阶段。</p>\n</blockquote>\n<ul>\n<li>同时把真元文档路径一起发给 AI</li>\n<li>这句话划了两条边界：怎么做事（agent 宪法）+ 这次具体做什么（真元文档）——两边都有据可依就不容易乱跑</li>\n</ul>\n<p><strong>每块推进完先验收再往下走</strong>：\n- 别催 AI 继续，不管是它自己停的还是你让它汇报的都一样\n- <strong>不用看懂代码</strong>，直接让 AI 汇报三件事：\n  1. 对照真元文档，这个阶段哪些做完了、哪些还没做完\n  2. 到底改了哪些地方，有没有漏做、有没有多做\n  3. 怎么验证的，验证结果是什么，下一个该做哪个子阶段、为什么\n- 三组问题问完基本能看出它是在按文档走还是已经凭感觉乱跑\n- 如果它说的下一步和文档对不上 = 对当前计划的理解已经偏了，<strong>先拉回来再继续</strong>\n- 回答看不懂别装懂，让 AI 对照真元文档用大白话一条条讲清楚</p>\n<h3>上下篇串联总结</h3>\n<table>\n<thead>\n<tr>\n<th>篇</th>\n<th>负责什么</th>\n<th>核心工具</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>上篇</td>\n<td>立地基和规矩</td>\n<td>立项/功能清单、技术栈、项目架构、agent 宪法</td>\n</tr>\n<tr>\n<td>下篇</td>\n<td>开写之后控执行</td>\n<td>实施真元文档（对齐方向）、分阶段验收（防漂移）</td>\n</tr>\n</tbody>\n</table>\n<ul>\n<li>核心一句话：<strong>别让 AI 凭感觉写，要让它始终有文档可对、有边界可守</strong></li>\n<li>不懂代码也能用文档、边界和验收证据把方向抓在自己手里，而不是任由它自由发挥</li>\n</ul>\n<h3>最后金句</h3>\n<ul>\n<li>Vibe Coding 最难最慢的已经不是敲代码了——AI 干什么都很快，解决问题能力也很强</li>\n<li>能不能利用 AI 做好项目，往往取决于这些\"你觉得麻烦的事\"</li>\n<li>非专业人员少了数年经验沉淀，如果只是焦虑又怕麻烦，凭什么越过这数年差距做出原来要专业程序员才能做的东西？</li>\n</ul>\n<h2>易混淆点 / 关键补充</h2>\n<ul>\n<li><strong>实施真元文档 ≠ agent 宪法</strong>：宪法管 AI 怎么做事（行为准则），真元文档管这个阶段具体做什么（功能范围+验收标准）</li>\n<li><strong>真元文档 ≠ 一次性全拆</strong>：只拆当前马上要做的大阶段，后面的保留大方向</li>\n<li><strong>漂移 ≠ AI 能力不行</strong>：是缺少边界和验收机制，给了明确指令+文档+验收就能防住</li>\n<li><strong>业务细节可调 ≠ 地基可翻</strong>：写代码后动底层架构是大忌，判断不了就问 AI 要影响评估</li>\n</ul>\n<h2>关联笔记</h2>\n<ul>\n<li>Vibe Coding开发全流程上_写代码前的四步地基_2026-09-06：本系列上篇（两篇合起来=完整开发全流程：上篇立地基和规矩，下篇控执行防漂移）</li>\n<li>AI编程全流程稳定交付高质量产品_2026-09-03：同主题（AI 编程交付方法论）</li>\n<li>刚装上Codex一定要做好两件事_2026-08-29：同主题（Codex 项目配置）</li>\n<li>天枢harness模型投降协议_大模型为何盲目顺从_2026-09-06：概念呼应（三层约束体系：天枢的\"信念+宪法+courage hook\" ↔ agent 宪法+实施真元文档+分阶段验收——都是给 AI 立规矩防跑偏）</li>\n</ul>\n<h2>反思</h2>\n<ul>\n<li><strong>直接适用于 Weh Atelier 项目</strong>：当前是否在凭感觉让 AI 写代码？有没有实施真元文档？有没有分阶段验收？</li>\n</ul>\n<h2>行动项</h2>\n<ul>\n<li>[ ] Weh Atelier 当前大阶段拆一份实施真元文档（子阶段+步骤+验收标准+边界）（优先级：高）</li>\n<li>[ ] 每次让 AI 写代码前发\"只实施当前子阶段，做完停下来汇报\"指令（优先级：高）</li>\n</ul>"
       },
       {
        "title": "vibe coding大学生脑洞专场_6个AI编程创意案例_2026-09-04",
@@ -10121,6 +11333,8 @@ function initCet6SubTabs(){
   });
   // 渲染各子模块内容
   renderCet6Category();
+  // 初始化概览子模块（倒计时 + 打卡 + 进度）
+  initCet6Overview();
 }
 
 function switchCet6Sub(sub){
@@ -10181,6 +11395,1325 @@ function renderCet6Category(){
       var sub = n.date ? '📅 ' + n.date : '';
       return careerListItem(n.icon || '📄', n.title, sub, '', onclick);
     }).join('');
+  });
+}
+
+
+/* ===== 六级模块 - 概览子模块增强功能 ===== */
+
+// 考试日期
+var CET6_EXAM_DATE = new Date('2026-12-12');
+
+// 初始化六级概览（倒计时 + 打卡 + 进度）
+function initCet6Overview(){
+  updateCet6Countdown();
+  loadCet6CheckinData();
+  renderCet6WeekCalendar();
+  updateCet6TrainingProgress();
+  // 初始化词汇模块
+  renderCet6Vocab();
+  renderCet6ReviewList();
+  updateCet6VocabStats();
+  // 初始化错题模块
+  renderCet6Errors();
+  renderCet6ErrorReviewList();
+  renderCet6ErrorTagsDist();
+  updateCet6ErrorStats();
+  // 初始化听力模块
+  renderCet6Listen();
+  updateCet6ListenStats();
+  // 初始化阅读模块
+  renderCet6Read();
+  updateCet6ReadStats();
+  // 初始化写译模块
+  renderCet6Write();
+  updateCet6WriteStats();
+}
+
+// 更新倒计时
+function updateCet6Countdown(){
+  var now = new Date();
+  var diff = Math.ceil((CET6_EXAM_DATE - now) / (1000 * 60 * 60 * 24));
+  var el = document.getElementById('cet6Countdown');
+  if(el) el.textContent = diff > 0 ? diff : 0;
+  var aiEl = document.getElementById('cet6AiDays');
+  if(aiEl) aiEl.textContent = diff > 0 ? diff : 0;
+}
+
+// 打卡数据存储 key: cet6_checkin_YYYY-MM-DD, value: {words:bool, listening:bool, reading:bool, writing:bool, review:bool}
+function getCet6CheckinKey(date){
+  var d = date || new Date();
+  return 'cet6_checkin_' + d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+
+function getCet6CheckinData(date){
+  var key = getCet6CheckinKey(date);
+  try{
+    var data = localStorage.getItem(key);
+    return data ? JSON.parse(data) : {words:false, listening:false, reading:false, writing:false, review:false};
+  }catch(e){
+    return {words:false, listening:false, reading:false, writing:false, review:false};
+  }
+}
+
+function saveCet6CheckinData(date, data){
+  var key = getCet6CheckinKey(date);
+  localStorage.setItem(key, JSON.stringify(data));
+}
+
+// 切换任务完成状态
+function toggleCet6Task(task){
+  var today = new Date();
+  var data = getCet6CheckinData(today);
+  data[task] = !data[task];
+  saveCet6CheckinData(today, data);
+  loadCet6CheckinData();
+  renderCet6WeekCalendar();
+}
+
+// 加载今日打卡数据并渲染
+function loadCet6CheckinData(){
+  var today = new Date();
+  var data = getCet6CheckinData(today);
+  var tasks = ['words', 'listening', 'reading', 'writing', 'review'];
+  var doneCount = 0;
+  tasks.forEach(function(task){
+    var item = document.querySelector('.cet6-task-item[data-task="'+task+'"]');
+    if(item){
+      if(data[task]){
+        item.classList.add('done');
+        doneCount++;
+      }else{
+        item.classList.remove('done');
+      }
+    }
+  });
+  var progressEl = document.getElementById('cet6TodayProgress');
+  if(progressEl) progressEl.textContent = doneCount + '/5';
+  // 更新本周打卡和连续打卡
+  updateCet6WeekAndStreak();
+}
+
+// 渲染本周打卡日历
+function renderCet6WeekCalendar(){
+  var today = new Date();
+  var dayOfWeek = today.getDay(); // 0=周日, 1=周一
+  // 计算本周一的日期
+  var monday = new Date(today);
+  monday.setDate(today.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
+  // 渲染每一天
+  for(var i = 0; i < 7; i++){
+    var date = new Date(monday);
+    date.setDate(monday.getDate() + i);
+    var dayNum = date.getDay(); // 0=周日
+    var dayEl = document.querySelector('.cet6-week-day[data-day="'+dayNum+'"]');
+    if(dayEl){
+      // 检查这一天是否打卡（5项全完成才算打卡）
+      var data = getCet6CheckinData(date);
+      var allDone = data.words && data.listening && data.reading && data.writing && data.review;
+      if(allDone){
+        dayEl.classList.add('checked');
+      }else{
+        dayEl.classList.remove('checked');
+      }
+      // 标记今天
+      if(date.toDateString() === today.toDateString()){
+        dayEl.classList.add('today');
+      }else{
+        dayEl.classList.remove('today');
+      }
+    }
+  }
+}
+
+// 更新本周打卡天数和连续打卡天数
+function updateCet6WeekAndStreak(){
+  var today = new Date();
+  var dayOfWeek = today.getDay();
+  var monday = new Date(today);
+  monday.setDate(today.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
+  // 计算本周打卡天数
+  var weekCount = 0;
+  for(var i = 0; i < 7; i++){
+    var date = new Date(monday);
+    date.setDate(monday.getDate() + i);
+    if(date > today) break; // 未来的不算
+    var data = getCet6CheckinData(date);
+    if(data.words && data.listening && data.reading && data.writing && data.review){
+      weekCount++;
+    }
+  }
+  var weekEl = document.getElementById('cet6WeekCheckin');
+  if(weekEl) weekEl.textContent = weekCount;
+  // 计算连续打卡天数（从今天往前数）
+  var streak = 0;
+  var checkDate = new Date(today);
+  while(true){
+    var data = getCet6CheckinData(checkDate);
+    if(data.words && data.listening && data.reading && data.writing && data.review){
+      streak++;
+      checkDate.setDate(checkDate.getDate() - 1);
+    }else{
+      break;
+    }
+  }
+  var streakEl = document.getElementById('cet6Streak');
+  if(streakEl) streakEl.textContent = streak;
+}
+
+// 更新分项训练进度（从知识库笔记数量估算）
+function updateCet6TrainingProgress(){
+  // 听力：从02-听力分类的笔记数估算
+  var listeningKb = (CET6KBS||[]).find(function(k){ return k.name && k.name.indexOf('02-听力') >= 0; });
+  var listeningCount = 0;
+  if(listeningKb && listeningKb.groups){
+    listeningKb.groups.forEach(function(g){ listeningCount += (g.notes||[]).length; });
+  }
+  updateCet6Progress('cet6Listening', listeningCount, 40);
+  // 阅读：从03-阅读分类
+  var readingKb = (CET6KBS||[]).find(function(k){ return k.name && k.name.indexOf('03-阅读') >= 0; });
+  var readingCount = 0;
+  if(readingKb && readingKb.groups){
+    readingKb.groups.forEach(function(g){ readingCount += (g.notes||[]).length; });
+  }
+  updateCet6Progress('cet6Reading', readingCount, 80);
+  // 写作：从04-写作分类
+  var writingKb = (CET6KBS||[]).find(function(k){ return k.name && k.name.indexOf('04-写作') >= 0; });
+  var writingCount = 0;
+  if(writingKb && writingKb.groups){
+    writingKb.groups.forEach(function(g){ writingCount += (g.notes||[]).length; });
+  }
+  updateCet6Progress('cet6Writing', writingCount, 30);
+  // 翻译：从05-翻译分类
+  var translationKb = (CET6KBS||[]).find(function(k){ return k.name && k.name.indexOf('05-翻译') >= 0; });
+  var translationCount = 0;
+  if(translationKb && translationKb.groups){
+    translationKb.groups.forEach(function(g){ translationCount += (g.notes||[]).length; });
+  }
+  updateCet6Progress('cet6Translation', translationCount, 60);
+}
+
+function updateCet6Progress(prefix, done, total){
+  var doneEl = document.getElementById(prefix + 'Done');
+  var progressEl = document.getElementById(prefix + 'Progress');
+  if(doneEl) doneEl.textContent = done;
+  if(progressEl) progressEl.style.width = Math.min(100, (done / total * 100)) + '%';
+}
+
+
+/* ===== 六级模块 - 词汇管理功能 ===== */
+
+// 单词数据存储 key: cet6_vocab_words, value: [{id, word, phonetic, meaning, example, addedDate, mastered, reviewDate, reviewCount}]
+var CET6_VOCAB_KEY = 'cet6_vocab_words';
+var cet6VocabFilter = 'all';
+var cet6VocabSearchTerm = '';
+
+// 艾宾浩斯记忆曲线复习间隔（天）
+var REVIEW_INTERVALS = [1, 2, 4, 7, 15, 30];
+
+function getCet6VocabWords(){
+  try{
+    var data = localStorage.getItem(CET6_VOCAB_KEY);
+    return data ? JSON.parse(data) : [];
+  }catch(e){
+    return [];
+  }
+}
+
+function saveCet6VocabWords(words){
+  localStorage.setItem(CET6_VOCAB_KEY, JSON.stringify(words));
+}
+
+// 显示添加单词弹窗
+function showCet6AddWordModal(){
+  var modal = document.getElementById('cet6AddWordModal');
+  if(modal) modal.style.display = 'flex';
+  // 清空表单
+  document.getElementById('cet6NewWord').value = '';
+  document.getElementById('cet6NewPhonetic').value = '';
+  document.getElementById('cet6NewMeaning').value = '';
+  document.getElementById('cet6NewExample').value = '';
+  setTimeout(function(){ document.getElementById('cet6NewWord').focus(); }, 100);
+}
+
+function hideCet6AddWordModal(event){
+  if(event && event.target !== event.currentTarget) return;
+  var modal = document.getElementById('cet6AddWordModal');
+  if(modal) modal.style.display = 'none';
+}
+
+// 添加单词
+function addCet6Word(){
+  var word = document.getElementById('cet6NewWord').value.trim();
+  var phonetic = document.getElementById('cet6NewPhonetic').value.trim();
+  var meaning = document.getElementById('cet6NewMeaning').value.trim();
+  var example = document.getElementById('cet6NewExample').value.trim();
+  if(!word || !meaning){
+    alert('请填写单词和释义');
+    return;
+  }
+  var words = getCet6VocabWords();
+  var now = new Date();
+  var newWord = {
+    id: Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+    word: word,
+    phonetic: phonetic,
+    meaning: meaning,
+    example: example,
+    addedDate: now.toISOString(),
+    mastered: false,
+    reviewDate: now.toISOString(),
+    reviewCount: 0
+  };
+  words.unshift(newWord);
+  saveCet6VocabWords(words);
+  hideCet6AddWordModal();
+  renderCet6Vocab();
+  updateCet6VocabStats();
+}
+
+// 删除单词
+function deleteCet6Word(id){
+  if(!confirm('确定要删除这个单词吗？')) return;
+  var words = getCet6VocabWords();
+  words = words.filter(function(w){ return w.id !== id; });
+  saveCet6VocabWords(words);
+  renderCet6Vocab();
+  updateCet6VocabStats();
+}
+
+// 切换掌握状态
+function toggleCet6WordMastered(id){
+  var words = getCet6VocabWords();
+  var word = words.find(function(w){ return w.id === id; });
+  if(word){
+    word.mastered = !word.mastered;
+    if(word.mastered){
+      word.reviewCount = REVIEW_INTERVALS.length;
+    }else{
+      word.reviewCount = 0;
+      word.reviewDate = new Date().toISOString();
+    }
+    saveCet6VocabWords(words);
+    renderCet6Vocab();
+    updateCet6VocabStats();
+  }
+}
+
+// 复习单词（认识/不认识）
+function reviewCet6Word(id, know){
+  var words = getCet6VocabWords();
+  var word = words.find(function(w){ return w.id === id; });
+  if(word){
+    if(know){
+      word.reviewCount = Math.min(word.reviewCount + 1, REVIEW_INTERVALS.length);
+      if(word.reviewCount >= REVIEW_INTERVALS.length){
+        word.mastered = true;
+      }else{
+        var nextReview = new Date();
+        nextReview.setDate(nextReview.getDate() + REVIEW_INTERVALS[word.reviewCount]);
+        word.reviewDate = nextReview.toISOString();
+      }
+    }else{
+      word.reviewCount = 0;
+      word.reviewDate = new Date().toISOString();
+    }
+    saveCet6VocabWords(words);
+    renderCet6Vocab();
+    renderCet6ReviewList();
+    updateCet6VocabStats();
+  }
+}
+
+// 获取今日待复习单词
+function getCet6ReviewWords(){
+  var words = getCet6VocabWords();
+  var now = new Date();
+  return words.filter(function(w){
+    if(w.mastered) return false;
+    var reviewDate = new Date(w.reviewDate);
+    return reviewDate <= now;
+  });
+}
+
+// 渲染待复习列表
+function renderCet6ReviewList(){
+  var reviewWords = getCet6ReviewWords();
+  var card = document.getElementById('cet6ReviewCard');
+  var list = document.getElementById('cet6ReviewList');
+  var count = document.getElementById('cet6ReviewCount');
+  if(!card || !list) return;
+  if(reviewWords.length === 0){
+    card.style.display = 'none';
+    return;
+  }
+  card.style.display = '';
+  if(count) count.textContent = reviewWords.length + ' 个';
+  list.innerHTML = reviewWords.slice(0, 10).map(function(w){
+    return '<div class="cet6-review-item">' +
+      '<div class="cet6-review-word">' + escapeHtml(w.word) + '</div>' +
+      (w.phonetic ? '<div class="cet6-review-phonetic">' + escapeHtml(w.phonetic) + '</div>' : '') +
+      '<div class="cet6-review-meaning">' + escapeHtml(w.meaning) + '</div>' +
+      '<div class="cet6-review-actions">' +
+      '<button class="cet6-review-btn know" onclick="reviewCet6Word(\'' + w.id + '\', true)">认识</button>' +
+      '<button class="cet6-review-btn dont-know" onclick="reviewCet6Word(\'' + w.id + '\', false)">不认识</button>' +
+      '</div></div>';
+  }).join('');
+}
+
+// 筛选单词
+function filterCet6Vocab(filter){
+  cet6VocabFilter = filter;
+  document.querySelectorAll('.cet6-filter-btn').forEach(function(btn){
+    btn.classList.toggle('active', btn.getAttribute('data-filter') === filter);
+  });
+  renderCet6Vocab();
+}
+
+// 搜索单词
+function searchCet6Vocab(){
+  var input = document.getElementById('cet6VocabSearch');
+  cet6VocabSearchTerm = input ? input.value.trim().toLowerCase() : '';
+  renderCet6Vocab();
+}
+
+// 渲染单词列表
+function renderCet6Vocab(){
+  var list = document.getElementById('cet6VocabList');
+  if(!list) return;
+  var words = getCet6VocabWords();
+  // 筛选
+  if(cet6VocabFilter === 'mastered'){
+    words = words.filter(function(w){ return w.mastered; });
+  }else if(cet6VocabFilter === 'unmastered'){
+    words = words.filter(function(w){ return !w.mastered; });
+  }
+  // 搜索
+  if(cet6VocabSearchTerm){
+    words = words.filter(function(w){
+      return w.word.toLowerCase().indexOf(cet6VocabSearchTerm) >= 0 ||
+             w.meaning.toLowerCase().indexOf(cet6VocabSearchTerm) >= 0;
+    });
+  }
+  if(words.length === 0){
+    list.innerHTML = '<div class="cet6-vocab-empty">📖 没有找到匹配的单词</div>';
+    return;
+  }
+  list.innerHTML = words.map(function(w){
+    return '<div class="cet6-vocab-item' + (w.mastered ? ' mastered' : '') + '">' +
+      '<div class="cet6-vocab-word">' + escapeHtml(w.word) + '</div>' +
+      (w.phonetic ? '<div class="cet6-vocab-phonetic">' + escapeHtml(w.phonetic) + '</div>' : '') +
+      '<div style="flex:1;min-width:0">' +
+      '<div class="cet6-vocab-meaning">' + escapeHtml(w.meaning) + '</div>' +
+      (w.example ? '<div class="cet6-vocab-example">' + escapeHtml(w.example) + '</div>' : '') +
+      '</div>' +
+      '<div class="cet6-vocab-actions">' +
+      '<button class="cet6-vocab-action-btn mastered-btn" title="' + (w.mastered ? '取消掌握' : '标记掌握') + '" onclick="toggleCet6WordMastered(\'' + w.id + '\')">' + (w.mastered ? '✅' : '⬜') + '</button>' +
+      '<button class="cet6-vocab-action-btn delete-btn" title="删除" onclick="deleteCet6Word(\'' + w.id + '\')">🗑️</button>' +
+      '</div></div>';
+  }).join('');
+}
+
+// 更新词汇统计
+function updateCet6VocabStats(){
+  var words = getCet6VocabWords();
+  var total = words.length;
+  var mastered = words.filter(function(w){ return w.mastered; }).length;
+  var reviewWords = getCet6ReviewWords();
+  var review = reviewWords.length;
+  // 今日新增
+  var today = new Date();
+  var todayStr = today.toDateString();
+  var todayCount = words.filter(function(w){
+    return new Date(w.addedDate).toDateString() === todayStr;
+  }).length;
+  // 更新统计卡片
+  var totalEl = document.getElementById('cet6VocabTotal');
+  if(totalEl) totalEl.textContent = total;
+  var masteredEl = document.getElementById('cet6VocabMastered');
+  if(masteredEl) masteredEl.textContent = mastered;
+  var reviewEl = document.getElementById('cet6VocabReview');
+  if(reviewEl) reviewEl.textContent = review;
+  var todayEl = document.getElementById('cet6VocabToday');
+  if(todayEl) todayEl.textContent = todayCount;
+  // 更新今日进度
+  var todayCountEl = document.getElementById('cet6VocabTodayCount');
+  if(todayCountEl) todayCountEl.textContent = todayCount;
+  var progressEl = document.getElementById('cet6VocabTodayProgress');
+  if(progressEl) progressEl.style.width = Math.min(100, (todayCount / 100 * 100)) + '%';
+  // 更新概览的生词统计
+  var wordTotalEl = document.getElementById('cet6WordTotal');
+  if(wordTotalEl) wordTotalEl.textContent = total;
+  var wordMasteredEl = document.getElementById('cet6WordMastered');
+  if(wordMasteredEl) wordMasteredEl.textContent = mastered;
+}
+
+// HTML转义
+function escapeHtml(text){
+  var div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+
+/* ===== 六级模块 - 错题管理功能 ===== */
+
+var CET6_ERROR_KEY = 'cet6_error_questions';
+var cet6ErrorFilter = 'all';
+var cet6ErrorSearchTerm = '';
+var cet6SelectedErrorTag = '';
+
+function getCet6Errors(){
+  try{
+    var data = localStorage.getItem(CET6_ERROR_KEY);
+    return data ? JSON.parse(data) : [];
+  }catch(e){
+    return [];
+  }
+}
+
+function saveCet6Errors(errors){
+  localStorage.setItem(CET6_ERROR_KEY, JSON.stringify(errors));
+}
+
+// 显示添加错题弹窗
+function showCet6AddErrorModal(){
+  var modal = document.getElementById('cet6AddErrorModal');
+  if(modal) modal.style.display = 'flex';
+  cet6SelectedErrorTag = '';
+  document.querySelectorAll('.cet6-error-tag-option').forEach(function(el){
+    el.classList.remove('selected');
+  });
+  document.getElementById('cet6ErrorType').value = '听力';
+  document.getElementById('cet6ErrorQuestion').value = '';
+  document.getElementById('cet6ErrorAnswer').value = '';
+  document.getElementById('cet6ErrorAnalysis').value = '';
+  document.getElementById('cet6ErrorSource').value = '';
+  setTimeout(function(){ document.getElementById('cet6ErrorQuestion').focus(); }, 100);
+}
+
+function hideCet6AddErrorModal(event){
+  if(event && event.target !== event.currentTarget) return;
+  var modal = document.getElementById('cet6AddErrorModal');
+  if(modal) modal.style.display = 'none';
+}
+
+// 选择错因标签
+function selectCet6ErrorTag(tag){
+  cet6SelectedErrorTag = tag;
+  document.querySelectorAll('.cet6-error-tag-option').forEach(function(el){
+    el.classList.toggle('selected', el.getAttribute('data-tag') === tag);
+  });
+}
+
+// 添加错题
+function addCet6Error(){
+  var type = document.getElementById('cet6ErrorType').value;
+  var question = document.getElementById('cet6ErrorQuestion').value.trim();
+  var answer = document.getElementById('cet6ErrorAnswer').value.trim();
+  var analysis = document.getElementById('cet6ErrorAnalysis').value.trim();
+  var source = document.getElementById('cet6ErrorSource').value.trim();
+  if(!cet6SelectedErrorTag){
+    alert('请选择错因标签');
+    return;
+  }
+  if(!question){
+    alert('请填写题目内容');
+    return;
+  }
+  var errors = getCet6Errors();
+  var now = new Date();
+  var newError = {
+    id: Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+    type: type,
+    tag: cet6SelectedErrorTag,
+    question: question,
+    answer: answer,
+    analysis: analysis,
+    source: source,
+    addedDate: now.toISOString(),
+    mastered: false,
+    reviewDate: now.toISOString(),
+    reviewCount: 0
+  };
+  errors.unshift(newError);
+  saveCet6Errors(errors);
+  hideCet6AddErrorModal();
+  renderCet6Errors();
+  renderCet6ErrorReviewList();
+  renderCet6ErrorTagsDist();
+  updateCet6ErrorStats();
+}
+
+// 删除错题
+function deleteCet6Error(id){
+  if(!confirm('确定要删除这道错题吗？')) return;
+  var errors = getCet6Errors();
+  errors = errors.filter(function(e){ return e.id !== id; });
+  saveCet6Errors(errors);
+  renderCet6Errors();
+  renderCet6ErrorReviewList();
+  renderCet6ErrorTagsDist();
+  updateCet6ErrorStats();
+}
+
+// 切换掌握状态
+function toggleCet6ErrorMastered(id){
+  var errors = getCet6Errors();
+  var error = errors.find(function(e){ return e.id === id; });
+  if(error){
+    error.mastered = !error.mastered;
+    if(error.mastered){
+      error.reviewCount = REVIEW_INTERVALS.length;
+    }else{
+      error.reviewCount = 0;
+      error.reviewDate = new Date().toISOString();
+    }
+    saveCet6Errors(errors);
+    renderCet6Errors();
+    renderCet6ErrorReviewList();
+    updateCet6ErrorStats();
+  }
+}
+
+// 复习错题
+function reviewCet6Error(id, know){
+  var errors = getCet6Errors();
+  var error = errors.find(function(e){ return e.id === id; });
+  if(error){
+    if(know){
+      error.reviewCount = Math.min(error.reviewCount + 1, REVIEW_INTERVALS.length);
+      if(error.reviewCount >= REVIEW_INTERVALS.length){
+        error.mastered = true;
+      }else{
+        var nextReview = new Date();
+        nextReview.setDate(nextReview.getDate() + REVIEW_INTERVALS[error.reviewCount]);
+        error.reviewDate = nextReview.toISOString();
+      }
+    }else{
+      error.reviewCount = 0;
+      error.reviewDate = new Date().toISOString();
+    }
+    saveCet6Errors(errors);
+    renderCet6Errors();
+    renderCet6ErrorReviewList();
+    updateCet6ErrorStats();
+  }
+}
+
+// 获取待复习错题
+function getCet6ErrorReviewWords(){
+  var errors = getCet6Errors();
+  var now = new Date();
+  return errors.filter(function(e){
+    if(e.mastered) return false;
+    var reviewDate = new Date(e.reviewDate);
+    return reviewDate <= now;
+  });
+}
+
+// 渲染待复习列表
+function renderCet6ErrorReviewList(){
+  var reviewErrors = getCet6ErrorReviewWords();
+  var card = document.getElementById('cet6ErrorReviewCard');
+  var list = document.getElementById('cet6ErrorReviewList');
+  var count = document.getElementById('cet6ErrorReviewCount');
+  if(!card || !list) return;
+  if(reviewErrors.length === 0){
+    card.style.display = 'none';
+    return;
+  }
+  card.style.display = '';
+  if(count) count.textContent = reviewErrors.length + ' 道';
+  list.innerHTML = reviewErrors.slice(0, 5).map(function(e){
+    return '<div class="cet6-error-review-item">' +
+      '<div class="cet6-error-review-header">' +
+      '<span class="cet6-error-tag-badge ' + e.tag + '">' + e.tag + '</span>' +
+      '<span class="cet6-error-type-badge">' + e.type + '</span>' +
+      '</div>' +
+      '<div class="cet6-error-review-question">' + escapeHtml(e.question.substring(0, 100)) + (e.question.length > 100 ? '...' : '') + '</div>' +
+      (e.answer ? '<div class="cet6-error-review-answer">答案：' + escapeHtml(e.answer) + '</div>' : '') +
+      '<div class="cet6-error-review-actions">' +
+      '<button class="cet6-review-btn know" onclick="reviewCet6Error(\'' + e.id + '\', true)">掌握了</button>' +
+      '<button class="cet6-review-btn dont-know" onclick="reviewCet6Error(\'' + e.id + '\', false)">还不会</button>' +
+      '</div></div>';
+  }).join('');
+}
+
+// 渲染错因分布
+function renderCet6ErrorTagsDist(){
+  var errors = getCet6Errors();
+  var tags = ['词汇', '定位', '理解', '逻辑', '粗心', '其他'];
+  var dist = document.getElementById('cet6ErrorTagsDist');
+  if(!dist) return;
+  var total = errors.length;
+  dist.innerHTML = tags.map(function(tag){
+    var count = errors.filter(function(e){ return e.tag === tag; }).length;
+    if(count === 0) return '';
+    var cls = tag === '词汇' ? 'vocab' : tag;
+    return '<span class="cet6-error-tag-dist ' + cls + '">' + tag + ' ' + count + '</span>';
+  }).join('');
+}
+
+// 筛选错题
+function filterCet6Errors(filter){
+  cet6ErrorFilter = filter;
+  document.querySelectorAll('#cet6ErrorFilters .cet6-filter-btn').forEach(function(btn){
+    btn.classList.toggle('active', btn.getAttribute('data-filter') === filter);
+  });
+  renderCet6Errors();
+}
+
+// 搜索错题
+function searchCet6Errors(){
+  var input = document.getElementById('cet6ErrorSearch');
+  cet6ErrorSearchTerm = input ? input.value.trim().toLowerCase() : '';
+  renderCet6Errors();
+}
+
+// 渲染错题列表
+function renderCet6Errors(){
+  var list = document.getElementById('cet6ErrorList');
+  if(!list) return;
+  var errors = getCet6Errors();
+  // 筛选
+  if(cet6ErrorFilter !== 'all'){
+    errors = errors.filter(function(e){ return e.tag === cet6ErrorFilter; });
+  }
+  // 搜索
+  if(cet6ErrorSearchTerm){
+    errors = errors.filter(function(e){
+      return e.question.toLowerCase().indexOf(cet6ErrorSearchTerm) >= 0 ||
+             e.answer.toLowerCase().indexOf(cet6ErrorSearchTerm) >= 0 ||
+             e.analysis.toLowerCase().indexOf(cet6ErrorSearchTerm) >= 0;
+    });
+  }
+  if(errors.length === 0){
+    list.innerHTML = '<div class="cet6-vocab-empty">📝 没有找到匹配的错题</div>';
+    return;
+  }
+  list.innerHTML = errors.map(function(e){
+    return '<div class="cet6-error-item' + (e.mastered ? ' mastered' : '') + '" data-tag="' + e.tag + '">' +
+      '<div class="cet6-error-header">' +
+      '<div class="cet6-error-meta">' +
+      '<span class="cet6-error-type-badge">' + e.type + '</span>' +
+      '<span class="cet6-error-tag-badge ' + e.tag + '">' + e.tag + '</span>' +
+      (e.source ? '<span class="cet6-error-source">📌 ' + escapeHtml(e.source) + '</span>' : '') +
+      '</div>' +
+      '<div class="cet6-error-actions">' +
+      '<button class="cet6-vocab-action-btn mastered-btn" title="' + (e.mastered ? '取消掌握' : '标记掌握') + '" onclick="toggleCet6ErrorMastered(\'' + e.id + '\')">' + (e.mastered ? '✅' : '⬜') + '</button>' +
+      '<button class="cet6-vocab-action-btn delete-btn" title="删除" onclick="deleteCet6Error(\'' + e.id + '\')">🗑️</button>' +
+      '</div></div>' +
+      '<div class="cet6-error-question">' + escapeHtml(e.question) + '</div>' +
+      (e.answer ? '<div class="cet6-error-answer">✅ 答案：' + escapeHtml(e.answer) + '</div>' : '') +
+      (e.analysis ? '<div class="cet6-error-analysis">💡 ' + escapeHtml(e.analysis) + '</div>' : '') +
+      '</div>';
+  }).join('');
+}
+
+// 更新错题统计
+function updateCet6ErrorStats(){
+  var errors = getCet6Errors();
+  var total = errors.length;
+  var mastered = errors.filter(function(e){ return e.mastered; }).length;
+  var reviewErrors = getCet6ErrorReviewWords();
+  var review = reviewErrors.length;
+  // 今日新增
+  var today = new Date();
+  var todayStr = today.toDateString();
+  var todayCount = errors.filter(function(e){
+    return new Date(e.addedDate).toDateString() === todayStr;
+  }).length;
+  // 更新统计卡片
+  var totalEl = document.getElementById('cet6ErrorTotal');
+  if(totalEl) totalEl.textContent = total;
+  var reviewEl = document.getElementById('cet6ErrorReview');
+  if(reviewEl) reviewEl.textContent = review;
+  var masteredEl = document.getElementById('cet6ErrorMastered');
+  if(masteredEl) masteredEl.textContent = mastered;
+  var todayEl = document.getElementById('cet6ErrorToday');
+  if(todayEl) todayEl.textContent = todayCount;
+  // 更新概览的错题统计
+  var errorTotalEl = document.getElementById('cet6ErrorTotal');
+  var errorPendingEl = document.getElementById('cet6ErrorPending');
+  if(errorPendingEl) errorPendingEl.textContent = review;
+}
+
+
+/* ===== 六级模块 - 听力管理功能 ===== */
+
+var CET6_LISTEN_KEY = 'cet6_listen_records';
+var cet6ListenFilter = 'all';
+var cet6ListenSearchTerm = '';
+
+var LISTEN_TYPE_NAMES = {
+  conversation: '长对话',
+  passage: '听力篇章',
+  lecture: '讲座/报道',
+  dictation: '听写填空',
+  full: '全套听力'
+};
+
+function getCet6ListenRecords(){
+  try{
+    var data = localStorage.getItem(CET6_LISTEN_KEY);
+    return data ? JSON.parse(data) : [];
+  }catch(e){
+    return [];
+  }
+}
+
+function saveCet6ListenRecords(records){
+  localStorage.setItem(CET6_LISTEN_KEY, JSON.stringify(records));
+}
+
+// 显示添加听力记录弹窗
+function showCet6AddListenModal(){
+  var modal = document.getElementById('cet6AddListenModal');
+  if(modal) modal.style.display = 'flex';
+  document.getElementById('cet6ListenName').value = '';
+  document.getElementById('cet6ListenType').value = 'conversation';
+  document.getElementById('cet6ListenCorrect').value = '';
+  document.getElementById('cet6ListenTotalQ').value = '';
+  document.getElementById('cet6ListenDuration').value = '';
+  document.getElementById('cet6ListenNote').value = '';
+  // 默认日期为今天
+  var today = new Date();
+  var dateStr = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0') + '-' + String(today.getDate()).padStart(2,'0');
+  document.getElementById('cet6ListenDate').value = dateStr;
+  setTimeout(function(){ document.getElementById('cet6ListenName').focus(); }, 100);
+}
+
+function hideCet6AddListenModal(event){
+  if(event && event.target !== event.currentTarget) return;
+  var modal = document.getElementById('cet6AddListenModal');
+  if(modal) modal.style.display = 'none';
+}
+
+// 添加听力记录
+function addCet6Listen(){
+  var name = document.getElementById('cet6ListenName').value.trim();
+  var type = document.getElementById('cet6ListenType').value;
+  var correct = parseInt(document.getElementById('cet6ListenCorrect').value) || 0;
+  var totalQ = parseInt(document.getElementById('cet6ListenTotalQ').value) || 0;
+  var duration = parseInt(document.getElementById('cet6ListenDuration').value) || 0;
+  var date = document.getElementById('cet6ListenDate').value;
+  var note = document.getElementById('cet6ListenNote').value.trim();
+  if(!name){
+    alert('请填写套题名称');
+    return;
+  }
+  var records = getCet6ListenRecords();
+  var newRecord = {
+    id: Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+    name: name,
+    type: type,
+    correct: correct,
+    total: totalQ,
+    duration: duration,
+    date: date || new Date().toISOString().split('T')[0],
+    note: note,
+    addedDate: new Date().toISOString()
+  };
+  records.unshift(newRecord);
+  saveCet6ListenRecords(records);
+  hideCet6AddListenModal();
+  renderCet6Listen();
+  updateCet6ListenStats();
+}
+
+// 删除听力记录
+function deleteCet6Listen(id){
+  if(!confirm('确定要删除这条听力记录吗？')) return;
+  var records = getCet6ListenRecords();
+  records = records.filter(function(r){ return r.id !== id; });
+  saveCet6ListenRecords(records);
+  renderCet6Listen();
+  updateCet6ListenStats();
+}
+
+// 筛选听力记录
+function filterCet6Listen(filter){
+  cet6ListenFilter = filter;
+  document.querySelectorAll('#cet6ListenFilters .cet6-filter-btn').forEach(function(btn){
+    btn.classList.toggle('active', btn.getAttribute('data-filter') === filter);
+  });
+  renderCet6Listen();
+}
+
+// 搜索听力记录
+function searchCet6Listen(){
+  var input = document.getElementById('cet6ListenSearch');
+  cet6ListenSearchTerm = input ? input.value.trim().toLowerCase() : '';
+  renderCet6Listen();
+}
+
+// 渲染听力记录列表
+function renderCet6Listen(){
+  var list = document.getElementById('cet6ListenList');
+  if(!list) return;
+  var records = getCet6ListenRecords();
+  // 筛选
+  if(cet6ListenFilter !== 'all'){
+    records = records.filter(function(r){ return r.type === cet6ListenFilter; });
+  }
+  // 搜索
+  if(cet6ListenSearchTerm){
+    records = records.filter(function(r){
+      return r.name.toLowerCase().indexOf(cet6ListenSearchTerm) >= 0 ||
+             r.note.toLowerCase().indexOf(cet6ListenSearchTerm) >= 0;
+    });
+  }
+  if(records.length === 0){
+    list.innerHTML = '<div class="cet6-vocab-empty">🎧 没有找到匹配的听力记录</div>';
+    return;
+  }
+  list.innerHTML = records.map(function(r){
+    var accuracy = r.total > 0 ? Math.round(r.correct / r.total * 100) : 0;
+    var accuracyClass = accuracy >= 70 ? 'cet6-listen-accuracy-high' : (accuracy >= 50 ? 'cet6-listen-accuracy-mid' : 'cet6-listen-accuracy-low');
+    var typeName = LISTEN_TYPE_NAMES[r.type] || r.type;
+    return '<div class="cet6-listen-item" data-type="' + r.type + '">' +
+      '<div class="cet6-listen-header">' +
+      '<div class="cet6-listen-meta">' +
+      '<span class="cet6-listen-type-badge ' + r.type + '">' + typeName + '</span>' +
+      '<span class="cet6-listen-date">📅 ' + r.date + '</span>' +
+      '</div>' +
+      '<div class="cet6-listen-actions">' +
+      '<button class="cet6-vocab-action-btn delete-btn" title="删除" onclick="deleteCet6Listen(\'' + r.id + '\')">🗑️</button>' +
+      '</div></div>' +
+      '<div class="cet6-listen-name">' + escapeHtml(r.name) + '</div>' +
+      '<div class="cet6-listen-stats">' +
+      '<div class="cet6-listen-stat">正确率：<strong class="' + accuracyClass + '">' + accuracy + '%</strong>（' + r.correct + '/' + r.total + '）</div>' +
+      (r.duration > 0 ? '<div class="cet6-listen-stat">用时：<strong>' + r.duration + '分钟</strong></div>' : '') +
+      '</div>' +
+      (r.note ? '<div class="cet6-listen-note">💡 ' + escapeHtml(r.note) + '</div>' : '') +
+      '</div>';
+  }).join('');
+}
+
+// 更新听力统计
+function updateCet6ListenStats(){
+  var records = getCet6ListenRecords();
+  var total = records.length;
+  var done = records.filter(function(r){ return r.total > 0 && r.correct >= 0; }).length;
+  // 平均正确率
+  var totalAccuracy = 0;
+  var countWithAccuracy = 0;
+  records.forEach(function(r){
+    if(r.total > 0){
+      totalAccuracy += r.correct / r.total * 100;
+      countWithAccuracy++;
+    }
+  });
+  var avgAccuracy = countWithAccuracy > 0 ? Math.round(totalAccuracy / countWithAccuracy) : 0;
+  // 今日新增
+  var today = new Date();
+  var todayStr = today.toDateString();
+  var todayCount = records.filter(function(r){
+    return new Date(r.addedDate).toDateString() === todayStr;
+  }).length;
+  // 更新统计卡片
+  var totalEl = document.getElementById('cet6ListenTotal');
+  if(totalEl) totalEl.textContent = total;
+  var doneEl = document.getElementById('cet6ListenDone');
+  if(doneEl) doneEl.textContent = done;
+  var accuracyEl = document.getElementById('cet6ListenAccuracy');
+  if(accuracyEl) accuracyEl.textContent = avgAccuracy + '%';
+  var todayEl = document.getElementById('cet6ListenToday');
+  if(todayEl) todayEl.textContent = todayCount;
+  // 更新进度
+  var progressCountEl = document.getElementById('cet6ListenProgressCount');
+  if(progressCountEl) progressCountEl.textContent = total;
+  var progressEl = document.getElementById('cet6ListenProgress');
+  if(progressEl) progressEl.style.width = Math.min(100, (total / 40 * 100)) + '%';
+}
+
+
+/* ===== 六级模块 - 阅读管理功能 ===== */
+
+var CET6_READ_KEY = 'cet6_read_records';
+var cet6ReadFilter = 'all';
+var cet6ReadSearchTerm = '';
+
+var READ_TYPE_NAMES = {
+  detail: '仔细阅读',
+  match: '段落匹配',
+  cloze: '选词填空',
+  full: '全套阅读'
+};
+
+function getCet6ReadRecords(){
+  try{
+    var data = localStorage.getItem(CET6_READ_KEY);
+    return data ? JSON.parse(data) : [];
+  }catch(e){
+    return [];
+  }
+}
+
+function saveCet6ReadRecords(records){
+  localStorage.setItem(CET6_READ_KEY, JSON.stringify(records));
+}
+
+// 显示添加阅读记录弹窗
+function showCet6AddReadModal(){
+  var modal = document.getElementById('cet6AddReadModal');
+  if(modal) modal.style.display = 'flex';
+  document.getElementById('cet6ReadName').value = '';
+  document.getElementById('cet6ReadType').value = 'detail';
+  document.getElementById('cet6ReadCorrect').value = '';
+  document.getElementById('cet6ReadTotalQ').value = '';
+  document.getElementById('cet6ReadDuration').value = '';
+  document.getElementById('cet6ReadNote').value = '';
+  // 默认日期为今天
+  var today = new Date();
+  var dateStr = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0') + '-' + String(today.getDate()).padStart(2,'0');
+  document.getElementById('cet6ReadDate').value = dateStr;
+  setTimeout(function(){ document.getElementById('cet6ReadName').focus(); }, 100);
+}
+
+function hideCet6AddReadModal(event){
+  if(event && event.target !== event.currentTarget) return;
+  var modal = document.getElementById('cet6AddReadModal');
+  if(modal) modal.style.display = 'none';
+}
+
+// 添加阅读记录
+function addCet6Read(){
+  var name = document.getElementById('cet6ReadName').value.trim();
+  var type = document.getElementById('cet6ReadType').value;
+  var correct = parseInt(document.getElementById('cet6ReadCorrect').value) || 0;
+  var totalQ = parseInt(document.getElementById('cet6ReadTotalQ').value) || 0;
+  var duration = parseInt(document.getElementById('cet6ReadDuration').value) || 0;
+  var date = document.getElementById('cet6ReadDate').value;
+  var note = document.getElementById('cet6ReadNote').value.trim();
+  if(!name){
+    alert('请填写文章/套题名称');
+    return;
+  }
+  var records = getCet6ReadRecords();
+  var newRecord = {
+    id: Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+    name: name,
+    type: type,
+    correct: correct,
+    total: totalQ,
+    duration: duration,
+    date: date || new Date().toISOString().split('T')[0],
+    note: note,
+    addedDate: new Date().toISOString()
+  };
+  records.unshift(newRecord);
+  saveCet6ReadRecords(records);
+  hideCet6AddReadModal();
+  renderCet6Read();
+  updateCet6ReadStats();
+}
+
+// 删除阅读记录
+function deleteCet6Read(id){
+  if(!confirm('确定要删除这条阅读记录吗？')) return;
+  var records = getCet6ReadRecords();
+  records = records.filter(function(r){ return r.id !== id; });
+  saveCet6ReadRecords(records);
+  renderCet6Read();
+  updateCet6ReadStats();
+}
+
+// 筛选阅读记录
+function filterCet6Read(filter){
+  cet6ReadFilter = filter;
+  document.querySelectorAll('#cet6ReadFilters .cet6-filter-btn').forEach(function(btn){
+    btn.classList.toggle('active', btn.getAttribute('data-filter') === filter);
+  });
+  renderCet6Read();
+}
+
+// 搜索阅读记录
+function searchCet6Read(){
+  var input = document.getElementById('cet6ReadSearch');
+  cet6ReadSearchTerm = input ? input.value.trim().toLowerCase() : '';
+  renderCet6Read();
+}
+
+// 渲染阅读记录列表
+function renderCet6Read(){
+  var list = document.getElementById('cet6ReadList');
+  if(!list) return;
+  var records = getCet6ReadRecords();
+  // 筛选
+  if(cet6ReadFilter !== 'all'){
+    records = records.filter(function(r){ return r.type === cet6ReadFilter; });
+  }
+  // 搜索
+  if(cet6ReadSearchTerm){
+    records = records.filter(function(r){
+      return r.name.toLowerCase().indexOf(cet6ReadSearchTerm) >= 0 ||
+             r.note.toLowerCase().indexOf(cet6ReadSearchTerm) >= 0;
+    });
+  }
+  if(records.length === 0){
+    list.innerHTML = '<div class="cet6-vocab-empty">📖 没有找到匹配的阅读记录</div>';
+    return;
+  }
+  list.innerHTML = records.map(function(r){
+    var accuracy = r.total > 0 ? Math.round(r.correct / r.total * 100) : 0;
+    var accuracyClass = accuracy >= 70 ? 'cet6-listen-accuracy-high' : (accuracy >= 50 ? 'cet6-listen-accuracy-mid' : 'cet6-listen-accuracy-low');
+    var typeName = READ_TYPE_NAMES[r.type] || r.type;
+    return '<div class="cet6-read-item" data-type="' + r.type + '">' +
+      '<div class="cet6-read-header">' +
+      '<div class="cet6-read-meta">' +
+      '<span class="cet6-read-type-badge ' + r.type + '">' + typeName + '</span>' +
+      '<span class="cet6-read-date">📅 ' + r.date + '</span>' +
+      '</div>' +
+      '<div class="cet6-read-actions">' +
+      '<button class="cet6-vocab-action-btn delete-btn" title="删除" onclick="deleteCet6Read(\'' + r.id + '\')">🗑️</button>' +
+      '</div></div>' +
+      '<div class="cet6-read-name">' + escapeHtml(r.name) + '</div>' +
+      '<div class="cet6-read-stats">' +
+      '<div class="cet6-read-stat">正确率：<strong class="' + accuracyClass + '">' + accuracy + '%</strong>（' + r.correct + '/' + r.total + '）</div>' +
+      (r.duration > 0 ? '<div class="cet6-read-stat">用时：<strong>' + r.duration + '分钟</strong></div>' : '') +
+      '</div>' +
+      (r.note ? '<div class="cet6-read-note">💡 ' + escapeHtml(r.note) + '</div>' : '') +
+      '</div>';
+  }).join('');
+}
+
+// 更新阅读统计
+function updateCet6ReadStats(){
+  var records = getCet6ReadRecords();
+  var total = records.length;
+  var done = records.filter(function(r){ return r.total > 0 && r.correct >= 0; }).length;
+  // 平均正确率
+  var totalAccuracy = 0;
+  var countWithAccuracy = 0;
+  records.forEach(function(r){
+    if(r.total > 0){
+      totalAccuracy += r.correct / r.total * 100;
+      countWithAccuracy++;
+    }
+  });
+  var avgAccuracy = countWithAccuracy > 0 ? Math.round(totalAccuracy / countWithAccuracy) : 0;
+  // 今日新增
+  var today = new Date();
+  var todayStr = today.toDateString();
+  var todayCount = records.filter(function(r){
+    return new Date(r.addedDate).toDateString() === todayStr;
+  }).length;
+  // 更新统计卡片
+  var totalEl = document.getElementById('cet6ReadTotal');
+  if(totalEl) totalEl.textContent = total;
+  var doneEl = document.getElementById('cet6ReadDone');
+  if(doneEl) doneEl.textContent = done;
+  var accuracyEl = document.getElementById('cet6ReadAccuracy');
+  if(accuracyEl) accuracyEl.textContent = avgAccuracy + '%';
+  var todayEl = document.getElementById('cet6ReadToday');
+  if(todayEl) todayEl.textContent = todayCount;
+  // 更新进度
+  var progressCountEl = document.getElementById('cet6ReadProgressCount');
+  if(progressCountEl) progressCountEl.textContent = total;
+  var progressEl = document.getElementById('cet6ReadProgress');
+  if(progressEl) progressEl.style.width = Math.min(100, (total / 80 * 100)) + '%';
+}
+
+
+/* ===== 六级模块 - 写译管理功能 ===== */
+
+var CET6_WRITE_KEY = 'cet6_write_records';
+var cet6WriteFilter = 'all';
+var cet6WriteSearchTerm = '';
+
+var WRITE_TYPE_NAMES = {
+  writing: '写作',
+  translation: '翻译'
+};
+
+function getCet6WriteRecords(){
+  try{
+    var data = localStorage.getItem(CET6_WRITE_KEY);
+    return data ? JSON.parse(data) : [];
+  }catch(e){
+    return [];
+  }
+}
+
+function saveCet6WriteRecords(records){
+  localStorage.setItem(CET6_WRITE_KEY, JSON.stringify(records));
+}
+
+// 显示添加写译记录弹窗
+function showCet6AddWriteModal(){
+  var modal = document.getElementById('cet6AddWriteModal');
+  if(modal) modal.style.display = 'flex';
+  document.getElementById('cet6WriteTopic').value = '';
+  document.getElementById('cet6WriteType').value = 'writing';
+  document.getElementById('cet6WriteScoreInput').value = '';
+  document.getElementById('cet6WriteDuration').value = '';
+  document.getElementById('cet6WriteNote').value = '';
+  // 默认日期为今天
+  var today = new Date();
+  var dateStr = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0') + '-' + String(today.getDate()).padStart(2,'0');
+  document.getElementById('cet6WriteDate').value = dateStr;
+  setTimeout(function(){ document.getElementById('cet6WriteTopic').focus(); }, 100);
+}
+
+function hideCet6AddWriteModal(event){
+  if(event && event.target !== event.currentTarget) return;
+  var modal = document.getElementById('cet6AddWriteModal');
+  if(modal) modal.style.display = 'none';
+}
+
+// 添加写译记录
+function addCet6Write(){
+  var topic = document.getElementById('cet6WriteTopic').value.trim();
+  var type = document.getElementById('cet6WriteType').value;
+  var score = parseFloat(document.getElementById('cet6WriteScoreInput').value) || 0;
+  var duration = parseInt(document.getElementById('cet6WriteDuration').value) || 0;
+  var date = document.getElementById('cet6WriteDate').value;
+  var note = document.getElementById('cet6WriteNote').value.trim();
+  if(!topic){
+    alert('请填写题目/主题');
+    return;
+  }
+  var records = getCet6WriteRecords();
+  var newRecord = {
+    id: Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+    topic: topic,
+    type: type,
+    score: score,
+    duration: duration,
+    date: date || new Date().toISOString().split('T')[0],
+    note: note,
+    addedDate: new Date().toISOString()
+  };
+  records.unshift(newRecord);
+  saveCet6WriteRecords(records);
+  hideCet6AddWriteModal();
+  renderCet6Write();
+  updateCet6WriteStats();
+}
+
+// 删除写译记录
+function deleteCet6Write(id){
+  if(!confirm('确定要删除这条写译记录吗？')) return;
+  var records = getCet6WriteRecords();
+  records = records.filter(function(r){ return r.id !== id; });
+  saveCet6WriteRecords(records);
+  renderCet6Write();
+  updateCet6WriteStats();
+}
+
+// 筛选写译记录
+function filterCet6Write(filter){
+  cet6WriteFilter = filter;
+  document.querySelectorAll('#cet6WriteFilters .cet6-filter-btn').forEach(function(btn){
+    btn.classList.toggle('active', btn.getAttribute('data-filter') === filter);
+  });
+  renderCet6Write();
+}
+
+// 搜索写译记录
+function searchCet6Write(){
+  var input = document.getElementById('cet6WriteSearch');
+  cet6WriteSearchTerm = input ? input.value.trim().toLowerCase() : '';
+  renderCet6Write();
+}
+
+// 渲染写译记录列表
+function renderCet6Write(){
+  var list = document.getElementById('cet6WriteList');
+  if(!list) return;
+  var records = getCet6WriteRecords();
+  // 筛选
+  if(cet6WriteFilter !== 'all'){
+    records = records.filter(function(r){ return r.type === cet6WriteFilter; });
+  }
+  // 搜索
+  if(cet6WriteSearchTerm){
+    records = records.filter(function(r){
+      return r.topic.toLowerCase().indexOf(cet6WriteSearchTerm) >= 0 ||
+             r.note.toLowerCase().indexOf(cet6WriteSearchTerm) >= 0;
+    });
+  }
+  if(records.length === 0){
+    list.innerHTML = '<div class="cet6-vocab-empty">✍️ 没有找到匹配的写译记录</div>';
+    return;
+  }
+  list.innerHTML = records.map(function(r){
+    var scoreClass = r.score >= 12 ? 'cet6-write-score-high' : (r.score >= 9 ? 'cet6-write-score-mid' : 'cet6-write-score-low');
+    var typeName = WRITE_TYPE_NAMES[r.type] || r.type;
+    return '<div class="cet6-write-item" data-type="' + r.type + '">' +
+      '<div class="cet6-write-header">' +
+      '<div class="cet6-write-meta">' +
+      '<span class="cet6-write-type-badge ' + r.type + '">' + typeName + '</span>' +
+      '<span class="cet6-write-date">📅 ' + r.date + '</span>' +
+      '</div>' +
+      '<div class="cet6-write-actions">' +
+      '<button class="cet6-vocab-action-btn delete-btn" title="删除" onclick="deleteCet6Write(\'' + r.id + '\')">🗑️</button>' +
+      '</div></div>' +
+      '<div class="cet6-write-topic">' + escapeHtml(r.topic) + '</div>' +
+      '<div class="cet6-write-stats">' +
+      (r.score > 0 ? '<div class="cet6-write-stat">得分：<strong class="' + scoreClass + '">' + r.score + '/15</strong></div>' : '') +
+      (r.duration > 0 ? '<div class="cet6-write-stat">用时：<strong>' + r.duration + '分钟</strong></div>' : '') +
+      '</div>' +
+      (r.note ? '<div class="cet6-write-note">💡 ' + escapeHtml(r.note) + '</div>' : '') +
+      '</div>';
+  }).join('');
+}
+
+// 更新写译统计
+function updateCet6WriteStats(){
+  var records = getCet6WriteRecords();
+  var total = records.length;
+  var done = records.filter(function(r){ return r.score > 0; }).length;
+  // 平均得分
+  var totalScore = 0;
+  var countWithScore = 0;
+  records.forEach(function(r){
+    if(r.score > 0){
+      totalScore += r.score;
+      countWithScore++;
+    }
+  });
+  var avgScore = countWithScore > 0 ? (totalScore / countWithScore).toFixed(1) : 0;
+  // 今日新增
+  var today = new Date();
+  var todayStr = today.toDateString();
+  var todayCount = records.filter(function(r){
+    return new Date(r.addedDate).toDateString() === todayStr;
+  }).length;
+  // 更新统计卡片
+  var totalEl = document.getElementById('cet6WriteTotal');
+  if(totalEl) totalEl.textContent = total;
+  var doneEl = document.getElementById('cet6WriteDone');
+  if(doneEl) doneEl.textContent = done;
+  var scoreEl = document.getElementById('cet6WriteScore');
+  if(scoreEl) scoreEl.textContent = avgScore;
+  var todayEl = document.getElementById('cet6WriteToday');
+  if(todayEl) todayEl.textContent = todayCount;
+  // 更新进度
+  var progressCountEl = document.getElementById('cet6WriteProgressCount');
+  if(progressCountEl) progressCountEl.textContent = total;
+  var progressEl = document.getElementById('cet6WriteProgress');
+  if(progressEl) progressEl.style.width = Math.min(100, (total / 30 * 100)) + '%';
+}
+
+
+/* ===== 六级模块 - 资料搜索功能 ===== */
+
+function searchCet6Materials(){
+  var input = document.getElementById('cet6MaterialsSearch');
+  var searchTerm = input ? input.value.trim().toLowerCase() : '';
+  var list = document.getElementById('cet6MaterialsList');
+  if(!list) return;
+  var items = list.querySelectorAll('.career-item, .m-item');
+  items.forEach(function(item){
+    var text = item.textContent.toLowerCase();
+    if(searchTerm === '' || text.indexOf(searchTerm) >= 0){
+      item.style.display = '';
+    }else{
+      item.style.display = 'none';
+    }
   });
 }
 

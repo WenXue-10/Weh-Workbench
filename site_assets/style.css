@@ -775,6 +775,344 @@ a{color:var(--pink-deep);text-decoration:none}
 .baichuan-sub{animation:fadeIn .3s ease}
 .sop-sub-content{padding-bottom:90px;min-height:calc(100vh - 200px)}
 .sop-sub{animation:fadeIn .3s ease}
+
+/* ===== 六级模块 - 概览子模块增强样式 ===== */
+
+/* 倒计时卡片 */
+.cet6-countdown .num{font-size:32px;font-weight:800;background:linear-gradient(135deg,var(--pink-deep),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.cet6-countdown-sub{font-size:11px;color:var(--muted);margin-top:4px}
+.cet6-dashboard .stat-card{position:relative;overflow:hidden}
+
+/* 今日任务打卡卡片 */
+.cet6-today-card{margin-bottom:20px}
+.cet6-today-progress{float:right;font-size:13px;font-weight:600;color:var(--pink-deep);background:rgba(224,85,138,0.1);padding:2px 10px;border-radius:10px}
+.cet6-task-list{margin-top:12px}
+.cet6-task-item{display:flex;align-items:center;padding:10px 12px;border-radius:10px;transition:all .2s ease;margin-bottom:6px;background:rgba(255,255,255,0.3)}
+.cet6-task-item:hover{background:rgba(255,255,255,0.5);transform:translateX(2px)}
+.cet6-task-item.done{opacity:0.6}
+.cet6-task-item.done .cet6-task-title{text-decoration:line-through;color:var(--muted)}
+.cet6-task-check{width:22px;height:22px;border:2px solid var(--pink-deep);border-radius:50%;margin-right:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s ease;background:rgba(255,255,255,0.5)}
+.cet6-task-check:hover{transform:scale(1.1);box-shadow:0 0 8px rgba(224,85,138,0.3)}
+.cet6-task-item.done .cet6-task-check{background:linear-gradient(135deg,var(--pink-deep),var(--purple));border-color:transparent}
+.cet6-check-inner{width:10px;height:10px;border-radius:50%;background:white;opacity:0;transition:opacity .2s ease}
+.cet6-task-item.done .cet6-check-inner{opacity:1}
+.cet6-task-content{flex:1;min-width:0}
+.cet6-task-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:2px}
+.cet6-task-desc{font-size:12px;color:var(--muted)}
+
+/* 本周打卡日历 */
+.cet6-week-calendar{display:flex;align-items:center;margin-top:16px;padding-top:14px;border-top:1px solid rgba(0,0,0,0.06)}
+.cet6-week-label{font-size:13px;color:var(--muted);margin-right:12px;flex-shrink:0}
+.cet6-week-days{display:flex;gap:8px;flex:1;justify-content:space-around}
+.cet6-week-day{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--muted);background:rgba(255,255,255,0.4);transition:all .2s ease}
+.cet6-week-day.checked{background:linear-gradient(135deg,var(--pink-deep),var(--purple));color:white;box-shadow:0 2px 8px rgba(224,85,138,0.3)}
+.cet6-week-day.today{border:2px solid var(--pink-deep);font-weight:700}
+
+/* 分项训练卡片网格 */
+.cet6-training-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.cet6-training-card{padding:18px;text-align:center;transition:all .3s ease}
+.cet6-training-card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,0.1)}
+.cet6-training-icon{font-size:32px;margin-bottom:8px}
+.cet6-training-title{font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px}
+.cet6-training-desc{font-size:12px;color:var(--muted);margin-bottom:12px}
+.cet6-training-progress{margin-top:auto}
+.cet6-progress-bar{height:6px;background:rgba(0,0,0,0.08);border-radius:3px;overflow:hidden;margin-bottom:6px}
+.cet6-progress-fill{height:100%;background:linear-gradient(90deg,var(--pink-deep),var(--purple));border-radius:3px;transition:width .5s ease}
+.cet6-progress-text{font-size:11px;color:var(--muted);font-weight:600}
+
+/* AI备考助手卡片 */
+.cet6-ai-card{margin-bottom:20px;background:linear-gradient(135deg,rgba(224,85,138,0.05),rgba(167,139,250,0.05))}
+.cet6-ai-content{margin-top:12px}
+.cet6-ai-section{margin-bottom:18px}
+.cet6-ai-section:last-child{margin-bottom:0}
+.cet6-ai-section-title{font-size:14px;font-weight:700;color:var(--text);margin-bottom:8px;display:flex;align-items:center}
+.cet6-ai-section-desc{font-size:13px;color:var(--muted);margin-bottom:12px;line-height:1.6}
+.cet6-ai-section-desc strong{color:var(--pink-deep)}
+.cet6-ai-tips{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.cet6-ai-tip{background:rgba(255,255,255,0.5);border-radius:10px;padding:12px;border-left:3px solid var(--pink-deep)}
+.cet6-ai-tip-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px}
+.cet6-ai-tip-desc{font-size:12px;color:var(--muted);line-height:1.5}
+.cet6-ai-abilities{display:flex;flex-wrap:wrap;gap:8px}
+.cet6-ai-ability{background:rgba(255,255,255,0.6);border:1px solid rgba(224,85,138,0.2);border-radius:20px;padding:6px 14px;font-size:12px;font-weight:600;color:var(--text);transition:all .2s ease}
+.cet6-ai-ability:hover{background:linear-gradient(135deg,var(--pink-deep),var(--purple));color:white;border-color:transparent;transform:translateY(-1px)}
+
+/* ===== 六级模块 - 词汇子模块样式 ===== */
+
+/* 词汇统计看板 */
+.cet6-vocab-stats{margin-bottom:16px}
+
+/* 操作栏 */
+.cet6-vocab-actions{display:flex;gap:14px;margin-bottom:16px;align-items:stretch}
+.cet6-add-word-btn{display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,var(--pink-deep),var(--purple));color:white;padding:12px 20px;border-radius:12px;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s ease;flex-shrink:0;box-shadow:0 4px 12px rgba(224,85,138,0.3)}
+.cet6-add-word-btn:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(224,85,138,0.4)}
+.cet6-add-word-btn:active{transform:translateY(0)}
+.cet6-add-icon{font-size:16px}
+.cet6-today-task{flex:1;background:rgba(255,255,255,0.5);border-radius:12px;padding:12px 18px;display:flex;align-items:center;gap:14px}
+.cet6-task-label{font-size:13px;font-weight:600;color:var(--text);white-space:nowrap}
+.cet6-task-progress-wrap{flex:1}
+.cet6-task-progress-bar{height:8px;background:rgba(0,0,0,0.08);border-radius:4px;overflow:hidden;margin-bottom:4px}
+.cet6-task-progress-fill{height:100%;background:linear-gradient(90deg,var(--pink-deep),var(--purple));border-radius:4px;transition:width .5s ease}
+.cet6-task-progress-text{font-size:11px;color:var(--muted);font-weight:600;text-align:right}
+
+/* 待复习单词区 */
+.cet6-review-card{margin-bottom:16px;border:2px solid rgba(224,85,138,0.2)}
+.cet6-review-count{float:right;font-size:12px;font-weight:600;color:var(--pink-deep);background:rgba(224,85,138,0.1);padding:2px 10px;border-radius:10px}
+.cet6-review-list{margin-top:10px;display:flex;flex-direction:column;gap:8px}
+.cet6-review-item{display:flex;align-items:center;padding:10px 14px;background:rgba(255,255,255,0.5);border-radius:10px;border-left:3px solid var(--pink-deep)}
+.cet6-review-word{font-size:15px;font-weight:700;color:var(--text);margin-right:10px}
+.cet6-review-phonetic{font-size:12px;color:var(--muted);margin-right:10px}
+.cet6-review-meaning{font-size:13px;color:var(--muted);flex:1}
+.cet6-review-actions{display:flex;gap:8px}
+.cet6-review-btn{padding:4px 12px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s ease;border:none}
+.cet6-review-btn.know{background:rgba(34,197,94,0.15);color:#16a34a}
+.cet6-review-btn.know:hover{background:rgba(34,197,94,0.25)}
+.cet6-review-btn.dont-know{background:rgba(239,68,68,0.15);color:#dc2626}
+.cet6-review-btn.dont-know:hover{background:rgba(239,68,68,0.25)}
+
+/* 单词列表 */
+.cet6-vocab-filters{display:flex;gap:6px;float:right}
+.cet6-filter-btn{padding:4px 12px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s ease;border:none;background:rgba(255,255,255,0.5);color:var(--muted)}
+.cet6-filter-btn:hover{background:rgba(255,255,255,0.8)}
+.cet6-filter-btn.active{background:linear-gradient(135deg,var(--pink-deep),var(--purple));color:white}
+.cet6-vocab-search{margin:12px 0}
+.cet6-vocab-search input{width:100%;padding:10px 14px;border-radius:10px;border:1px solid rgba(0,0,0,0.08);background:rgba(255,255,255,0.6);font-size:13px;outline:none;transition:all .2s ease}
+.cet6-vocab-search input:focus{border-color:var(--pink-deep);background:rgba(255,255,255,0.9);box-shadow:0 0 0 3px rgba(224,85,138,0.1)}
+.cet6-vocab-list{display:flex;flex-direction:column;gap:8px;max-height:400px;overflow-y:auto}
+.cet6-vocab-item{display:flex;align-items:center;padding:12px 14px;background:rgba(255,255,255,0.4);border-radius:10px;transition:all .2s ease}
+.cet6-vocab-item:hover{background:rgba(255,255,255,0.6);transform:translateX(2px)}
+.cet6-vocab-item.mastered{opacity:0.7}
+.cet6-vocab-item.mastered .cet6-vocab-word{text-decoration:line-through;color:var(--muted)}
+.cet6-vocab-word{font-size:15px;font-weight:700;color:var(--text);min-width:120px}
+.cet6-vocab-phonetic{font-size:12px;color:var(--muted);min-width:100px}
+.cet6-vocab-meaning{font-size:13px;color:var(--text);flex:1}
+.cet6-vocab-example{font-size:11px;color:var(--muted);font-style:italic;margin-top:2px}
+.cet6-vocab-actions{display:flex;gap:6px;flex-shrink:0}
+.cet6-vocab-action-btn{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;transition:all .2s ease;border:none;background:rgba(255,255,255,0.5)}
+.cet6-vocab-action-btn:hover{background:rgba(255,255,255,0.9);transform:scale(1.1)}
+.cet6-vocab-action-btn.mastered-btn{color:#16a34a}
+.cet6-vocab-action-btn.delete-btn{color:#dc2626}
+.cet6-vocab-empty{text-align:center;padding:40px 20px;color:var(--muted);font-size:14px}
+
+/* 添加单词弹窗 */
+.cet6-modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);z-index:10000;display:flex;align-items:center;justify-content:center;animation:fadeIn .2s ease}
+.cet6-modal{background:white;border-radius:16px;width:90%;max-width:480px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.3);animation:slideUp .3s ease}
+.cet6-modal-header{display:flex;align-items:center;justify-content:space-between;padding:18px 24px;border-bottom:1px solid rgba(0,0,0,0.06)}
+.cet6-modal-title{font-size:16px;font-weight:700;color:var(--text)}
+.cet6-modal-close{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);transition:all .2s ease;font-size:14px}
+.cet6-modal-close:hover{background:rgba(0,0,0,0.06);color:var(--text)}
+.cet6-modal-body{padding:20px 24px}
+.cet6-form-group{margin-bottom:16px}
+.cet6-form-group:last-child{margin-bottom:0}
+.cet6-form-label{display:block;font-size:13px;font-weight:600;color:var(--text);margin-bottom:6px}
+.cet6-form-input{width:100%;padding:10px 14px;border-radius:10px;border:1px solid rgba(0,0,0,0.1);font-size:14px;outline:none;transition:all .2s ease;box-sizing:border-box}
+.cet6-form-input:focus{border-color:var(--pink-deep);box-shadow:0 0 0 3px rgba(224,85,138,0.1)}
+.cet6-form-textarea{width:100%;padding:10px 14px;border-radius:10px;border:1px solid rgba(0,0,0,0.1);font-size:14px;outline:none;transition:all .2s ease;box-sizing:border-box;resize:vertical;min-height:80px;font-family:inherit}
+.cet6-form-textarea:focus{border-color:var(--pink-deep);box-shadow:0 0 0 3px rgba(224,85,138,0.1)}
+.cet6-modal-footer{display:flex;gap:10px;padding:16px 24px;border-top:1px solid rgba(0,0,0,0.06);justify-content:flex-end}
+.cet6-btn{padding:10px 20px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s ease;border:none}
+.cet6-btn-primary{background:linear-gradient(135deg,var(--pink-deep),var(--purple));color:white;box-shadow:0 4px 12px rgba(224,85,138,0.3)}
+.cet6-btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(224,85,138,0.4)}
+.cet6-btn-secondary{background:rgba(0,0,0,0.06);color:var(--text)}
+.cet6-btn-secondary:hover{background:rgba(0,0,0,0.1)}
+
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+/* 响应式 */
+@media (max-width:768px){
+  .cet6-vocab-actions{flex-direction:column}
+  .cet6-add-word-btn{justify-content:center}
+  .cet6-vocab-filters{float:none;margin-top:8px}
+  .cet6-vocab-item{flex-wrap:wrap}
+  .cet6-vocab-word{min-width:auto}
+  .cet6-vocab-phonetic{min-width:auto}
+}
+
+/* ===== 六级模块 - 错题子模块样式 ===== */
+
+/* 错因分布 */
+.cet6-error-type-dist{flex:1;background:rgba(255,255,255,0.5);border-radius:12px;padding:12px 18px;display:flex;align-items:center;gap:14px}
+.cet6-error-tags{display:flex;flex-wrap:wrap;gap:6px;flex:1}
+.cet6-error-tag-dist{padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600;color:white}
+.cet6-error-tag-dist.vocab{background:#f59e0b}
+.cet6-error-tag-dist.定位{background:#3b82f6}
+.cet6-error-tag-dist.理解{background:#8b5cf6}
+.cet6-error-tag-dist.逻辑{background:#ec4899}
+.cet6-error-tag-dist.粗心{background:#10b981}
+.cet6-error-tag-dist.其他{background:#6b7280}
+
+/* 错题标签选择器 */
+.cet6-error-tag-select{display:flex;flex-wrap:wrap;gap:8px}
+.cet6-error-tag-option{padding:6px 14px;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s ease;border:2px solid rgba(0,0,0,0.1);background:rgba(255,255,255,0.5);color:var(--text)}
+.cet6-error-tag-option:hover{transform:translateY(-1px)}
+.cet6-error-tag-option.selected{color:white;border-color:transparent}
+.cet6-error-tag-option[data-tag="词汇"].selected{background:#f59e0b}
+.cet6-error-tag-option[data-tag="定位"].selected{background:#3b82f6}
+.cet6-error-tag-option[data-tag="理解"].selected{background:#8b5cf6}
+.cet6-error-tag-option[data-tag="逻辑"].selected{background:#ec4899}
+.cet6-error-tag-option[data-tag="粗心"].selected{background:#10b981}
+.cet6-error-tag-option[data-tag="其他"].selected{background:#6b7280}
+
+/* 错题列表 */
+.cet6-error-list{display:flex;flex-direction:column;gap:10px;max-height:500px;overflow-y:auto}
+.cet6-error-item{padding:14px 16px;background:rgba(255,255,255,0.4);border-radius:12px;border-left:4px solid #6b7280;transition:all .2s ease}
+.cet6-error-item:hover{background:rgba(255,255,255,0.6);transform:translateX(2px)}
+.cet6-error-item.mastered{opacity:0.6}
+.cet6-error-item.mastered .cet6-error-question{text-decoration:line-through;color:var(--muted)}
+.cet6-error-item[data-tag="词汇"]{border-left-color:#f59e0b}
+.cet6-error-item[data-tag="定位"]{border-left-color:#3b82f6}
+.cet6-error-item[data-tag="理解"]{border-left-color:#8b5cf6}
+.cet6-error-item[data-tag="逻辑"]{border-left-color:#ec4899}
+.cet6-error-item[data-tag="粗心"]{border-left-color:#10b981}
+.cet6-error-item[data-tag="其他"]{border-left-color:#6b7280}
+.cet6-error-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.cet6-error-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.cet6-error-type-badge{padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600;background:rgba(0,0,0,0.08);color:var(--text)}
+.cet6-error-tag-badge{padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600;color:white}
+.cet6-error-tag-badge.词汇{background:#f59e0b}
+.cet6-error-tag-badge.定位{background:#3b82f6}
+.cet6-error-tag-badge.理解{background:#8b5cf6}
+.cet6-error-tag-badge.逻辑{background:#ec4899}
+.cet6-error-tag-badge.粗心{background:#10b981}
+.cet6-error-tag-badge.其他{background:#6b7280}
+.cet6-error-source{font-size:11px;color:var(--muted)}
+.cet6-error-actions{display:flex;gap:6px}
+.cet6-error-question{font-size:14px;font-weight:600;color:var(--text);margin-bottom:6px;line-height:1.5}
+.cet6-error-answer{font-size:13px;color:#16a34a;font-weight:600;margin-bottom:4px}
+.cet6-error-analysis{font-size:12px;color:var(--muted);line-height:1.5;margin-top:6px;padding-top:6px;border-top:1px solid rgba(0,0,0,0.06)}
+
+/* 错题复习列表 */
+.cet6-error-review-list{margin-top:10px;display:flex;flex-direction:column;gap:10px}
+.cet6-error-review-item{padding:12px 14px;background:rgba(255,255,255,0.5);border-radius:10px;border-left:3px solid var(--pink-deep)}
+.cet6-error-review-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.cet6-error-review-question{font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px;line-height:1.4}
+.cet6-error-review-answer{font-size:12px;color:#16a34a;font-weight:600}
+.cet6-error-review-actions{display:flex;gap:8px;margin-top:8px}
+
+/* 响应式 */
+@media (max-width:768px){
+  .cet6-error-header{flex-direction:column;align-items:flex-start;gap:8px}
+  .cet6-error-meta{flex-wrap:wrap}
+}
+
+/* ===== 六级模块 - 听力子模块样式 ===== */
+
+/* 精听四步法 */
+.cet6-method-card{margin-bottom:16px}
+.cet6-method-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:12px}
+.cet6-method-step{display:flex;gap:10px;padding:12px;background:rgba(255,255,255,0.4);border-radius:10px;transition:all .2s ease}
+.cet6-method-step:hover{background:rgba(255,255,255,0.6);transform:translateY(-2px)}
+.cet6-step-num{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--pink-deep),var(--purple));color:white;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0}
+.cet6-step-content{flex:1;min-width:0}
+.cet6-step-title{font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px}
+.cet6-step-desc{font-size:12px;color:var(--muted);line-height:1.4}
+
+/* 表单行 */
+.cet6-form-row{display:flex;gap:12px}
+
+/* 听力记录列表 */
+.cet6-listen-list{display:flex;flex-direction:column;gap:10px;max-height:500px;overflow-y:auto}
+.cet6-listen-item{padding:14px 16px;background:rgba(255,255,255,0.4);border-radius:12px;transition:all .2s ease;border-left:4px solid var(--purple)}
+.cet6-listen-item:hover{background:rgba(255,255,255,0.6);transform:translateX(2px)}
+.cet6-listen-item[data-type="conversation"]{border-left-color:#3b82f6}
+.cet6-listen-item[data-type="passage"]{border-left-color:#8b5cf6}
+.cet6-listen-item[data-type="lecture"]{border-left-color:#ec4899}
+.cet6-listen-item[data-type="dictation"]{border-left-color:#10b981}
+.cet6-listen-item[data-type="full"]{border-left-color:#f59e0b}
+.cet6-listen-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.cet6-listen-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.cet6-listen-type-badge{padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600;color:white}
+.cet6-listen-type-badge.conversation{background:#3b82f6}
+.cet6-listen-type-badge.passage{background:#8b5cf6}
+.cet6-listen-type-badge.lecture{background:#ec4899}
+.cet6-listen-type-badge.dictation{background:#10b981}
+.cet6-listen-type-badge.full{background:#f59e0b}
+.cet6-listen-date{font-size:11px;color:var(--muted)}
+.cet6-listen-actions{display:flex;gap:6px}
+.cet6-listen-name{font-size:14px;font-weight:700;color:var(--text);margin-bottom:6px}
+.cet6-listen-stats{display:flex;gap:16px;margin-bottom:6px}
+.cet6-listen-stat{font-size:12px;color:var(--muted)}
+.cet6-listen-stat strong{color:var(--text);font-weight:600}
+.cet6-listen-accuracy-high{color:#16a34a !important;font-weight:700 !important}
+.cet6-listen-accuracy-mid{color:#f59e0b !important;font-weight:700 !important}
+.cet6-listen-accuracy-low{color:#dc2626 !important;font-weight:700 !important}
+.cet6-listen-note{font-size:12px;color:var(--muted);line-height:1.5;margin-top:6px;padding-top:6px;border-top:1px solid rgba(0,0,0,0.06)}
+
+/* 响应式 */
+@media (max-width:768px){
+  .cet6-method-steps{grid-template-columns:repeat(2,1fr)}
+  .cet6-form-row{flex-direction:column}
+  .cet6-listen-header{flex-direction:column;align-items:flex-start;gap:8px}
+  .cet6-listen-stats{flex-wrap:wrap}
+}
+
+/* ===== 六级模块 - 阅读子模块样式 ===== */
+
+/* 阅读记录列表 */
+.cet6-read-list{display:flex;flex-direction:column;gap:10px;max-height:500px;overflow-y:auto}
+.cet6-read-item{padding:14px 16px;background:rgba(255,255,255,0.4);border-radius:12px;transition:all .2s ease;border-left:4px solid #10b981}
+.cet6-read-item:hover{background:rgba(255,255,255,0.6);transform:translateX(2px)}
+.cet6-read-item[data-type="detail"]{border-left-color:#3b82f6}
+.cet6-read-item[data-type="match"]{border-left-color:#8b5cf6}
+.cet6-read-item[data-type="cloze"]{border-left-color:#ec4899}
+.cet6-read-item[data-type="full"]{border-left-color:#f59e0b}
+.cet6-read-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.cet6-read-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.cet6-read-type-badge{padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600;color:white}
+.cet6-read-type-badge.detail{background:#3b82f6}
+.cet6-read-type-badge.match{background:#8b5cf6}
+.cet6-read-type-badge.cloze{background:#ec4899}
+.cet6-read-type-badge.full{background:#f59e0b}
+.cet6-read-date{font-size:11px;color:var(--muted)}
+.cet6-read-actions{display:flex;gap:6px}
+.cet6-read-name{font-size:14px;font-weight:700;color:var(--text);margin-bottom:6px}
+.cet6-read-stats{display:flex;gap:16px;margin-bottom:6px}
+.cet6-read-stat{font-size:12px;color:var(--muted)}
+.cet6-read-stat strong{color:var(--text);font-weight:600}
+.cet6-read-note{font-size:12px;color:var(--muted);line-height:1.5;margin-top:6px;padding-top:6px;border-top:1px solid rgba(0,0,0,0.06)}
+
+/* 响应式 */
+@media (max-width:768px){
+  .cet6-read-header{flex-direction:column;align-items:flex-start;gap:8px}
+  .cet6-read-stats{flex-wrap:wrap}
+}
+
+/* ===== 六级模块 - 写译子模块样式 ===== */
+
+/* 写译记录列表 */
+.cet6-write-list{display:flex;flex-direction:column;gap:10px;max-height:500px;overflow-y:auto}
+.cet6-write-item{padding:14px 16px;background:rgba(255,255,255,0.4);border-radius:12px;transition:all .2s ease;border-left:4px solid #f59e0b}
+.cet6-write-item:hover{background:rgba(255,255,255,0.6);transform:translateX(2px)}
+.cet6-write-item[data-type="writing"]{border-left-color:#ec4899}
+.cet6-write-item[data-type="translation"]{border-left-color:#3b82f6}
+.cet6-write-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.cet6-write-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.cet6-write-type-badge{padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600;color:white}
+.cet6-write-type-badge.writing{background:#ec4899}
+.cet6-write-type-badge.translation{background:#3b82f6}
+.cet6-write-date{font-size:11px;color:var(--muted)}
+.cet6-write-actions{display:flex;gap:6px}
+.cet6-write-topic{font-size:14px;font-weight:700;color:var(--text);margin-bottom:6px}
+.cet6-write-stats{display:flex;gap:16px;margin-bottom:6px}
+.cet6-write-stat{font-size:12px;color:var(--muted)}
+.cet6-write-stat strong{color:var(--text);font-weight:600}
+.cet6-write-score-high{color:#16a34a !important;font-weight:700 !important}
+.cet6-write-score-mid{color:#f59e0b !important;font-weight:700 !important}
+.cet6-write-score-low{color:#dc2626 !important;font-weight:700 !important}
+.cet6-write-note{font-size:12px;color:var(--muted);line-height:1.5;margin-top:6px;padding-top:6px;border-top:1px solid rgba(0,0,0,0.06)}
+
+/* 响应式 */
+@media (max-width:768px){
+  .cet6-write-header{flex-direction:column;align-items:flex-start;gap:8px}
+  .cet6-write-stats{flex-wrap:wrap}
+}
+
+/* 响应式 */
+@media (max-width:768px){
+  .cet6-training-grid{grid-template-columns:repeat(2,1fr)}
+  .cet6-ai-tips{grid-template-columns:1fr}
+  .cet6-week-days{gap:4px}
+  .cet6-week-day{width:28px;height:28px;font-size:11px}
+}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 
 /* 底栏默认隐藏，只在SCM Career模块激活时显示 */

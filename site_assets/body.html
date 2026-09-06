@@ -548,12 +548,190 @@
         <div class="cet6-sub-content">
           <!-- 概览 -->
           <div class="cet6-sub" id="cet6-sub-overview">
-            <div class="stat-grid">
-              <div class="stat-card p1"><div class="em">📄</div><div class="lab">学习笔记</div><div class="num" id="cet6KbCount">0</div></div>
-              <div class="stat-card p2"><div class="em">📝</div><div class="lab">词汇</div><div class="num" id="cet6WordCount">0</div></div>
-              <div class="stat-card p3"><div class="em">❌</div><div class="lab">错题</div><div class="num" id="cet6ErrorCount">0</div></div>
-              <div class="stat-card p4"><div class="em">📚</div><div class="lab">学习资料</div><div class="num" id="cet6MatCount">0</div></div>
+            <!-- 顶部数据看板 -->
+            <div class="stat-grid cet6-dashboard">
+              <div class="stat-card p1 cet6-countdown">
+                <div class="em">📅</div>
+                <div class="lab">距考试</div>
+                <div class="num" id="cet6Countdown">--</div>
+                <div class="cet6-countdown-sub">2026-12-12 考试</div>
+              </div>
+              <div class="stat-card p2">
+                <div class="em">🐾</div>
+                <div class="lab">本周打卡</div>
+                <div class="num" id="cet6WeekCheckin">0</div>
+                <div class="cet6-countdown-sub">连续 <span id="cet6Streak">0</span> 天</div>
+              </div>
+              <div class="stat-card p3">
+                <div class="em">📝</div>
+                <div class="lab">生词总数</div>
+                <div class="num" id="cet6WordTotal">0</div>
+                <div class="cet6-countdown-sub">已掌握 <span id="cet6WordMastered">0</span></div>
+              </div>
+              <div class="stat-card p4">
+                <div class="em">❌</div>
+                <div class="lab">错题数</div>
+                <div class="num" id="cet6ErrorTotal">0</div>
+                <div class="cet6-countdown-sub">待复习 <span id="cet6ErrorPending">0</span></div>
+              </div>
             </div>
+
+            <!-- 今日任务打卡 -->
+            <div class="card cet6-today-card">
+              <div class="card-head">
+                ✅ 今日任务
+                <span class="cet6-today-progress" id="cet6TodayProgress">0/5</span>
+              </div>
+              <div class="cet6-task-list" id="cet6TaskList">
+                <div class="cet6-task-item" data-task="words">
+                  <div class="cet6-task-check" onclick="toggleCet6Task('words')">
+                    <div class="cet6-check-inner"></div>
+                  </div>
+                  <div class="cet6-task-content">
+                    <div class="cet6-task-title">背诵单词 100 个</div>
+                    <div class="cet6-task-desc">配合生词本/词书，滚动记忆</div>
+                  </div>
+                </div>
+                <div class="cet6-task-item" data-task="listening">
+                  <div class="cet6-task-check" onclick="toggleCet6Task('listening')">
+                    <div class="cet6-check-inner"></div>
+                  </div>
+                  <div class="cet6-task-content">
+                    <div class="cet6-task-title">听力精听 1 套</div>
+                    <div class="cet6-task-desc">精听 + 对照原文 + 跟读</div>
+                  </div>
+                </div>
+                <div class="cet6-task-item" data-task="reading">
+                  <div class="cet6-task-check" onclick="toggleCet6Task('reading')">
+                    <div class="cet6-check-inner"></div>
+                  </div>
+                  <div class="cet6-task-content">
+                    <div class="cet6-task-title">仔细阅读 2 篇</div>
+                    <div class="cet6-task-desc">计时训练，控制节奏</div>
+                  </div>
+                </div>
+                <div class="cet6-task-item" data-task="writing">
+                  <div class="cet6-task-check" onclick="toggleCet6Task('writing')">
+                    <div class="cet6-check-inner"></div>
+                  </div>
+                  <div class="cet6-task-content">
+                    <div class="cet6-task-title">写作或翻译练习 1 篇</div>
+                    <div class="cet6-task-desc">两科交替进行</div>
+                  </div>
+                </div>
+                <div class="cet6-task-item" data-task="review">
+                  <div class="cet6-task-check" onclick="toggleCet6Task('review')">
+                    <div class="cet6-check-inner"></div>
+                  </div>
+                  <div class="cet6-task-content">
+                    <div class="cet6-task-title">复习昨日生词</div>
+                    <div class="cet6-task-desc">巩固记忆曲线</div>
+                  </div>
+                </div>
+              </div>
+              <!-- 本周打卡日历 -->
+              <div class="cet6-week-calendar">
+                <div class="cet6-week-label">本周打卡：</div>
+                <div class="cet6-week-days" id="cet6WeekDays">
+                  <div class="cet6-week-day" data-day="1">一</div>
+                  <div class="cet6-week-day" data-day="2">二</div>
+                  <div class="cet6-week-day" data-day="3">三</div>
+                  <div class="cet6-week-day" data-day="4">四</div>
+                  <div class="cet6-week-day" data-day="5">五</div>
+                  <div class="cet6-week-day" data-day="6">六</div>
+                  <div class="cet6-week-day" data-day="0">日</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 分项训练卡片 -->
+            <div class="cet6-training-grid">
+              <div class="card cet6-training-card">
+                <div class="cet6-training-icon">👂</div>
+                <div class="cet6-training-title">听力学习指南</div>
+                <div class="cet6-training-desc">听力精听 · 四步法</div>
+                <div class="cet6-training-progress">
+                  <div class="cet6-progress-bar">
+                    <div class="cet6-progress-fill" id="cet6ListeningProgress" style="width:0%"></div>
+                  </div>
+                  <div class="cet6-progress-text"><span id="cet6ListeningDone">0</span> / 40 套</div>
+                </div>
+              </div>
+              <div class="card cet6-training-card">
+                <div class="cet6-training-icon">📖</div>
+                <div class="cet6-training-title">阅读学习指南</div>
+                <div class="cet6-training-desc">仔细阅读 · 先题后文</div>
+                <div class="cet6-training-progress">
+                  <div class="cet6-progress-bar">
+                    <div class="cet6-progress-fill" id="cet6ReadingProgress" style="width:0%"></div>
+                  </div>
+                  <div class="cet6-progress-text"><span id="cet6ReadingDone">0</span> / 80 篇</div>
+                </div>
+              </div>
+              <div class="card cet6-training-card">
+                <div class="cet6-training-icon">✍️</div>
+                <div class="cet6-training-title">写作学习指南</div>
+                <div class="cet6-training-desc">三段式写作 · 主题词</div>
+                <div class="cet6-training-progress">
+                  <div class="cet6-progress-bar">
+                    <div class="cet6-progress-fill" id="cet6WritingProgress" style="width:0%"></div>
+                  </div>
+                  <div class="cet6-progress-text"><span id="cet6WritingDone">0</span> / 30 篇</div>
+                </div>
+              </div>
+              <div class="card cet6-training-card">
+                <div class="cet6-training-icon">🌐</div>
+                <div class="cet6-training-title">翻译学习指南</div>
+                <div class="cet6-training-desc">翻译四步法 · 高频考点</div>
+                <div class="cet6-training-progress">
+                  <div class="cet6-progress-bar">
+                    <div class="cet6-progress-fill" id="cet6TranslationProgress" style="width:0%"></div>
+                  </div>
+                  <div class="cet6-progress-text"><span id="cet6TranslationDone">0</span> / 60 篇</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- AI备考助手 -->
+            <div class="card cet6-ai-card">
+              <div class="card-head">🤖 AI 备考助手</div>
+              <div class="cet6-ai-content">
+                <div class="cet6-ai-section">
+                  <div class="cet6-ai-section-title">📌 当前阶段建议</div>
+                  <div class="cet6-ai-section-desc">距考试还有约 <strong id="cet6AiDays">--</strong> 天，当前处于 <strong>基础期 → 强化期</strong> 过渡阶段</div>
+                  <div class="cet6-ai-tips">
+                    <div class="cet6-ai-tip">
+                      <div class="cet6-ai-tip-title">📝 词汇（目标 6000）</div>
+                      <div class="cet6-ai-tip-desc">每天 100 词，新词 + 复习昨日生词双轨并行，11 月前完成核心 3000 词一轮</div>
+                    </div>
+                    <div class="cet6-ai-tip">
+                      <div class="cet6-ai-tip-title">👂 听力（目标 40 套）</div>
+                      <div class="cet6-ai-tip-desc">每天精听 1 套，四步法（盲听→精听→对照→跟读），重点攻克连读、弱读、同义替换</div>
+                    </div>
+                    <div class="cet6-ai-tip">
+                      <div class="cet6-ai-tip-title">📖 阅读（目标 80 篇）</div>
+                      <div class="cet6-ai-tip-desc">每天仔细阅读 2 篇并计时（每篇 8-10 分钟），建立错因标签：词汇/定位/理解/逻辑</div>
+                    </div>
+                    <div class="cet6-ai-tip">
+                      <div class="cet6-ai-tip-title">✍️ 写作 + 翻译（目标 30+60 篇）</div>
+                      <div class="cet6-ai-tip-desc">每天二选一交替练习，写作背 2-3 个万能模板 + 主题词，翻译用四步法</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="cet6-ai-section">
+                  <div class="cet6-ai-section-title">🧠 AI 能帮你做什么</div>
+                  <div class="cet6-ai-abilities">
+                    <div class="cet6-ai-ability">📋 制定计划</div>
+                    <div class="cet6-ai-ability">🎯 背词陪练</div>
+                    <div class="cet6-ai-ability">✏️ 作文批改</div>
+                    <div class="cet6-ai-ability">🔍 错题分析</div>
+                    <div class="cet6-ai-ability">📝 模拟出题</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 学习分类 -->
             <div class="card">
               <div class="card-head">📂 学习分类</div>
               <div class="kb-grid" id="cet6KbGrid"></div>
@@ -561,47 +739,713 @@
           </div>
           <!-- 词汇 -->
           <div class="cet6-sub" id="cet6-sub-words" style="display:none">
+            <!-- 词汇统计看板 -->
+            <div class="stat-grid cet6-vocab-stats">
+              <div class="stat-card p1">
+                <div class="em">📚</div>
+                <div class="lab">生词总数</div>
+                <div class="num" id="cet6VocabTotal">0</div>
+              </div>
+              <div class="stat-card p2">
+                <div class="em">✅</div>
+                <div class="lab">已掌握</div>
+                <div class="num" id="cet6VocabMastered">0</div>
+              </div>
+              <div class="stat-card p3">
+                <div class="em">🔄</div>
+                <div class="lab">待复习</div>
+                <div class="num" id="cet6VocabReview">0</div>
+              </div>
+              <div class="stat-card p4">
+                <div class="em">➕</div>
+                <div class="lab">今日新增</div>
+                <div class="num" id="cet6VocabToday">0</div>
+              </div>
+            </div>
+
+            <!-- 操作栏：添加单词 + 今日任务 -->
+            <div class="cet6-vocab-actions">
+              <div class="cet6-add-word-btn" onclick="showCet6AddWordModal()">
+                <span class="cet6-add-icon">➕</span>
+                <span>添加单词</span>
+              </div>
+              <div class="cet6-today-task">
+                <div class="cet6-task-label">今日背词目标</div>
+                <div class="cet6-task-progress-wrap">
+                  <div class="cet6-task-progress-bar">
+                    <div class="cet6-task-progress-fill" id="cet6VocabTodayProgress" style="width:0%"></div>
+                  </div>
+                  <div class="cet6-task-progress-text"><span id="cet6VocabTodayCount">0</span> / 100 词</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 待复习单词区 -->
+            <div class="card cet6-review-card" id="cet6ReviewCard" style="display:none">
+              <div class="card-head">
+                🔄 今日待复习
+                <span class="cet6-review-count" id="cet6ReviewCount">0</span>
+              </div>
+              <div class="cet6-review-list" id="cet6ReviewList"></div>
+            </div>
+
+            <!-- 单词列表 -->
             <div class="card">
-              <div class="card-head">📝 词汇 <span class="m-count" id="cet6WordsCount"></span></div>
+              <div class="card-head">
+                📝 单词本
+                <div class="cet6-vocab-filters">
+                  <button class="cet6-filter-btn active" data-filter="all" onclick="filterCet6Vocab('all')">全部</button>
+                  <button class="cet6-filter-btn" data-filter="unmastered" onclick="filterCet6Vocab('unmastered')">未掌握</button>
+                  <button class="cet6-filter-btn" data-filter="mastered" onclick="filterCet6Vocab('mastered')">已掌握</button>
+                </div>
+              </div>
+              <div class="cet6-vocab-search">
+                <input type="text" id="cet6VocabSearch" placeholder="🔍 搜索单词..." oninput="searchCet6Vocab()">
+              </div>
+              <div class="cet6-vocab-list" id="cet6VocabList">
+                <div class="cet6-vocab-empty">📖 还没有添加单词，点击上方"添加单词"开始记录吧～</div>
+              </div>
+            </div>
+
+            <!-- 词汇学习资料 -->
+            <div class="card">
+              <div class="card-head">📚 词汇学习资料</div>
               <div class="career-list" id="cet6WordsList"></div>
+            </div>
+          </div>
+
+          <!-- 添加单词弹窗 -->
+          <div class="cet6-modal-overlay" id="cet6AddWordModal" style="display:none" onclick="hideCet6AddWordModal(event)">
+            <div class="cet6-modal" onclick="event.stopPropagation()">
+              <div class="cet6-modal-header">
+                <div class="cet6-modal-title">➕ 添加单词</div>
+                <div class="cet6-modal-close" onclick="hideCet6AddWordModal()">✕</div>
+              </div>
+              <div class="cet6-modal-body">
+                <div class="cet6-form-group">
+                  <label class="cet6-form-label">单词 *</label>
+                  <input type="text" class="cet6-form-input" id="cet6NewWord" placeholder="例如：abandon">
+                </div>
+                <div class="cet6-form-group">
+                  <label class="cet6-form-label">音标</label>
+                  <input type="text" class="cet6-form-input" id="cet6NewPhonetic" placeholder="例如：/əˈbændən/">
+                </div>
+                <div class="cet6-form-group">
+                  <label class="cet6-form-label">释义 *</label>
+                  <input type="text" class="cet6-form-input" id="cet6NewMeaning" placeholder="例如：v. 放弃，抛弃">
+                </div>
+                <div class="cet6-form-group">
+                  <label class="cet6-form-label">例句</label>
+                  <textarea class="cet6-form-textarea" id="cet6NewExample" placeholder="例如：He abandoned his wife and children."></textarea>
+                </div>
+              </div>
+              <div class="cet6-modal-footer">
+                <button class="cet6-btn cet6-btn-secondary" onclick="hideCet6AddWordModal()">取消</button>
+                <button class="cet6-btn cet6-btn-primary" onclick="addCet6Word()">添加</button>
+              </div>
             </div>
           </div>
           <!-- 听力 -->
           <div class="cet6-sub" id="cet6-sub-listening" style="display:none">
+            <!-- 听力统计看板 -->
+            <div class="stat-grid cet6-listen-stats">
+              <div class="stat-card p1">
+                <div class="em">🎧</div>
+                <div class="lab">听力总数</div>
+                <div class="num" id="cet6ListenTotal">0</div>
+              </div>
+              <div class="stat-card p2">
+                <div class="em">✅</div>
+                <div class="lab">已完成</div>
+                <div class="num" id="cet6ListenDone">0</div>
+              </div>
+              <div class="stat-card p3">
+                <div class="em">📊</div>
+                <div class="lab">平均正确率</div>
+                <div class="num" id="cet6ListenAccuracy">0%</div>
+              </div>
+              <div class="stat-card p4">
+                <div class="em">➕</div>
+                <div class="lab">今日新增</div>
+                <div class="num" id="cet6ListenToday">0</div>
+              </div>
+            </div>
+
+            <!-- 操作栏：添加听力记录 + 进度 -->
+            <div class="cet6-vocab-actions">
+              <div class="cet6-add-word-btn" onclick="showCet6AddListenModal()">
+                <span class="cet6-add-icon">➕</span>
+                <span>添加听力记录</span>
+              </div>
+              <div class="cet6-today-task">
+                <div class="cet6-task-label">听力进度（目标40套）</div>
+                <div class="cet6-task-progress-wrap">
+                  <div class="cet6-task-progress-bar">
+                    <div class="cet6-task-progress-fill" id="cet6ListenProgress" style="width:0%"></div>
+                  </div>
+                  <div class="cet6-task-progress-text"><span id="cet6ListenProgressCount">0</span> / 40 套</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 精听四步法 -->
+            <div class="card cet6-method-card">
+              <div class="card-head">📖 精听四步法</div>
+              <div class="cet6-method-steps">
+                <div class="cet6-method-step">
+                  <div class="cet6-step-num">1</div>
+                  <div class="cet6-step-content">
+                    <div class="cet6-step-title">盲听</div>
+                    <div class="cet6-step-desc">不看原文，先听1-2遍，抓大意和关键词</div>
+                  </div>
+                </div>
+                <div class="cet6-method-step">
+                  <div class="cet6-step-num">2</div>
+                  <div class="cet6-step-content">
+                    <div class="cet6-step-title">精听</div>
+                    <div class="cet6-step-desc">逐句听写，反复听直到写出来，标记没听出来的地方</div>
+                  </div>
+                </div>
+                <div class="cet6-method-step">
+                  <div class="cet6-step-num">3</div>
+                  <div class="cet6-step-content">
+                    <div class="cet6-step-title">对照</div>
+                    <div class="cet6-step-desc">对照原文，分析没听出来的原因（连读/弱读/生词）</div>
+                  </div>
+                </div>
+                <div class="cet6-method-step">
+                  <div class="cet6-step-num">4</div>
+                  <div class="cet6-step-content">
+                    <div class="cet6-step-title">跟读</div>
+                    <div class="cet6-step-desc">跟着原文跟读，模仿语音语调，培养语感</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 听力记录列表 -->
             <div class="card">
-              <div class="card-head">🎧 听力 <span class="m-count" id="cet6ListeningCount"></span></div>
+              <div class="card-head">
+                📝 听力记录
+                <div class="cet6-vocab-filters" id="cet6ListenFilters">
+                  <button class="cet6-filter-btn active" data-filter="all" onclick="filterCet6Listen('all')">全部</button>
+                  <button class="cet6-filter-btn" data-filter="conversation" onclick="filterCet6Listen('conversation')">长对话</button>
+                  <button class="cet6-filter-btn" data-filter="passage" onclick="filterCet6Listen('passage')">听力篇章</button>
+                  <button class="cet6-filter-btn" data-filter="lecture" onclick="filterCet6Listen('lecture')">讲座/报道</button>
+                  <button class="cet6-filter-btn" data-filter="dictation" onclick="filterCet6Listen('dictation')">听写填空</button>
+                </div>
+              </div>
+              <div class="cet6-vocab-search">
+                <input type="text" id="cet6ListenSearch" placeholder="🔍 搜索听力记录..." oninput="searchCet6Listen()">
+              </div>
+              <div class="cet6-listen-list" id="cet6ListenList">
+                <div class="cet6-vocab-empty">🎧 还没有添加听力记录，点击上方"添加听力记录"开始记录吧～</div>
+              </div>
+            </div>
+
+            <!-- 听力学习资料 -->
+            <div class="card">
+              <div class="card-head">📚 听力学习资料</div>
               <div class="career-list" id="cet6ListeningList"></div>
+            </div>
+          </div>
+
+          <!-- 添加听力记录弹窗 -->
+          <div class="cet6-modal-overlay" id="cet6AddListenModal" style="display:none" onclick="hideCet6AddListenModal(event)">
+            <div class="cet6-modal" onclick="event.stopPropagation()">
+              <div class="cet6-modal-header">
+                <div class="cet6-modal-title">➕ 添加听力记录</div>
+                <div class="cet6-modal-close" onclick="hideCet6AddListenModal()">✕</div>
+              </div>
+              <div class="cet6-modal-body">
+                <div class="cet6-form-group">
+                  <label class="cet6-form-label">套题名称 *</label>
+                  <input type="text" class="cet6-form-input" id="cet6ListenName" placeholder="例如：2023年6月真题听力">
+                </div>
+                <div class="cet6-form-group">
+                  <label class="cet6-form-label">题型</label>
+                  <select class="cet6-form-input" id="cet6ListenType">
+                    <option value="conversation">长对话</option>
+                    <option value="passage">听力篇章</option>
+                    <option value="lecture">讲座/报道</option>
+                    <option value="dictation">听写填空</option>
+                    <option value="full">全套听力</option>
+                  </select>
+                </div>
+                <div class="cet6-form-row">
+                  <div class="cet6-form-group" style="flex:1">
+                    <label class="cet6-form-label">正确题数</label>
+                    <input type="number" class="cet6-form-input" id="cet6ListenCorrect" placeholder="例如：18" min="0">
+                  </div>
+                  <div class="cet6-form-group" style="flex:1">
+                    <label class="cet6-form-label">总题数</label>
+                    <input type="number" class="cet6-form-input" id="cet6ListenTotalQ" placeholder="例如：25" min="0">
+                  </div>
+                </div>
+                <div class="cet6-form-row">
+                  <div class="cet6-form-group" style="flex:1">
+                    <label class="cet6-form-label">用时（分钟）</label>
+                    <input type="number" class="cet6-form-input" id="cet6ListenDuration" placeholder="例如：30" min="0">
+                  </div>
+                  <div class="cet6-form-group" style="flex:1">
+                    <label class="cet6-form-label">日期</label>
+                    <input type="date" class="cet6-form-input" id="cet6ListenDate">
+                  </div>
+                </div>
+                <div class="cet6-form-group">
+                  <label class="cet6-form-label">备注/反思</label>
+                  <textarea class="cet6-form-textarea" id="cet6ListenNote" placeholder="记录错题原因、薄弱点、反思..."></textarea>
+                </div>
+              </div>
+              <div class="cet6-modal-footer">
+                <button class="cet6-btn cet6-btn-secondary" onclick="hideCet6AddListenModal()">取消</button>
+                <button class="cet6-btn cet6-btn-primary" onclick="addCet6Listen()">添加</button>
+              </div>
             </div>
           </div>
           <!-- 阅读 -->
           <div class="cet6-sub" id="cet6-sub-reading" style="display:none">
+            <!-- 阅读统计看板 -->
+            <div class="stat-grid cet6-read-stats">
+              <div class="stat-card p1">
+                <div class="em">📖</div>
+                <div class="lab">阅读总数</div>
+                <div class="num" id="cet6ReadTotal">0</div>
+              </div>
+              <div class="stat-card p2">
+                <div class="em">✅</div>
+                <div class="lab">已完成</div>
+                <div class="num" id="cet6ReadDone">0</div>
+              </div>
+              <div class="stat-card p3">
+                <div class="em">📊</div>
+                <div class="lab">平均正确率</div>
+                <div class="num" id="cet6ReadAccuracy">0%</div>
+              </div>
+              <div class="stat-card p4">
+                <div class="em">➕</div>
+                <div class="lab">今日新增</div>
+                <div class="num" id="cet6ReadToday">0</div>
+              </div>
+            </div>
+
+            <!-- 操作栏：添加阅读记录 + 进度 -->
+            <div class="cet6-vocab-actions">
+              <div class="cet6-add-word-btn" onclick="showCet6AddReadModal()">
+                <span class="cet6-add-icon">➕</span>
+                <span>添加阅读记录</span>
+              </div>
+              <div class="cet6-today-task">
+                <div class="cet6-task-label">阅读进度（目标80篇）</div>
+                <div class="cet6-task-progress-wrap">
+                  <div class="cet6-task-progress-bar">
+                    <div class="cet6-task-progress-fill" id="cet6ReadProgress" style="width:0%"></div>
+                  </div>
+                  <div class="cet6-task-progress-text"><span id="cet6ReadProgressCount">0</span> / 80 篇</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 阅读做题方法 -->
+            <div class="card cet6-method-card">
+              <div class="card-head">📖 阅读做题方法 · 先题后文</div>
+              <div class="cet6-method-steps">
+                <div class="cet6-method-step">
+                  <div class="cet6-step-num">1</div>
+                  <div class="cet6-step-content">
+                    <div class="cet6-step-title">读题干</div>
+                    <div class="cet6-step-desc">先读题目和选项，划出关键词，预测文章主题</div>
+                  </div>
+                </div>
+                <div class="cet6-method-step">
+                  <div class="cet6-step-num">2</div>
+                  <div class="cet6-step-content">
+                    <div class="cet6-step-title">定位</div>
+                    <div class="cet6-step-desc">根据题干关键词回原文定位，找到答案所在段落</div>
+                  </div>
+                </div>
+                <div class="cet6-method-step">
+                  <div class="cet6-step-num">3</div>
+                  <div class="cet6-step-content">
+                    <div class="cet6-step-title">比对</div>
+                    <div class="cet6-step-desc">仔细比对原文和选项，注意同义替换和陷阱</div>
+                  </div>
+                </div>
+                <div class="cet6-method-step">
+                  <div class="cet6-step-num">4</div>
+                  <div class="cet6-step-content">
+                    <div class="cet6-step-title">复盘</div>
+                    <div class="cet6-step-desc">做完后分析错题原因（词汇/定位/理解/逻辑）</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 阅读记录列表 -->
             <div class="card">
-              <div class="card-head">📖 阅读 <span class="m-count" id="cet6ReadingCount"></span></div>
+              <div class="card-head">
+                📝 阅读记录
+                <div class="cet6-vocab-filters" id="cet6ReadFilters">
+                  <button class="cet6-filter-btn active" data-filter="all" onclick="filterCet6Read('all')">全部</button>
+                  <button class="cet6-filter-btn" data-filter="detail" onclick="filterCet6Read('detail')">仔细阅读</button>
+                  <button class="cet6-filter-btn" data-filter="match" onclick="filterCet6Read('match')">段落匹配</button>
+                  <button class="cet6-filter-btn" data-filter="cloze" onclick="filterCet6Read('cloze')">选词填空</button>
+                </div>
+              </div>
+              <div class="cet6-vocab-search">
+                <input type="text" id="cet6ReadSearch" placeholder="🔍 搜索阅读记录..." oninput="searchCet6Read()">
+              </div>
+              <div class="cet6-read-list" id="cet6ReadList">
+                <div class="cet6-vocab-empty">📖 还没有添加阅读记录，点击上方"添加阅读记录"开始记录吧～</div>
+              </div>
+            </div>
+
+            <!-- 阅读学习资料 -->
+            <div class="card">
+              <div class="card-head">📚 阅读学习资料</div>
               <div class="career-list" id="cet6ReadingList"></div>
+            </div>
+          </div>
+
+          <!-- 添加阅读记录弹窗 -->
+          <div class="cet6-modal-overlay" id="cet6AddReadModal" style="display:none" onclick="hideCet6AddReadModal(event)">
+            <div class="cet6-modal" onclick="event.stopPropagation()">
+              <div class="cet6-modal-header">
+                <div class="cet6-modal-title">➕ 添加阅读记录</div>
+                <div class="cet6-modal-close" onclick="hideCet6AddReadModal()">✕</div>
+              </div>
+              <div class="cet6-modal-body">
+                <div class="cet6-form-group">
+                  <label class="cet6-form-label">文章/套题名称 *</label>
+                  <input type="text" class="cet6-form-input" id="cet6ReadName" placeholder="例如：2023年6月真题阅读第一篇">
+                </div>
+                <div class="cet6-form-group">
+                  <label class="cet6-form-label">题型</label>
+                  <select class="cet6-form-input" id="cet6ReadType">
+                    <option value="detail">仔细阅读</option>
+                    <option value="match">段落匹配</option>
+                    <option value="cloze">选词填空</option>
+                    <option value="full">全套阅读</option>
+                  </select>
+                </div>
+                <div class="cet6-form-row">
+                  <div class="cet6-form-group" style="flex:1">
+                    <label class="cet6-form-label">正确题数</label>
+                    <input type="number" class="cet6-form-input" id="cet6ReadCorrect" placeholder="例如：8" min="0">
+                  </div>
+                  <div class="cet6-form-group" style="flex:1">
+                    <label class="cet6-form-label">总题数</label>
+                    <input type="number" class="cet6-form-input" id="cet6ReadTotalQ" placeholder="例如：10" min="0">
+                  </div>
+                </div>
+                <div class="cet6-form-row">
+                  <div class="cet6-form-group" style="flex:1">
+                    <label class="cet6-form-label">用时（分钟）</label>
+                    <input type="number" class="cet6-form-input" id="cet6ReadDuration" placeholder="例如：20" min="0">
+                  </div>
+                  <div class="cet6-form-group" style="flex:1">
+                    <label class="cet6-form-label">日期</label>
+                    <input type="date" class="cet6-form-input" id="cet6ReadDate">
+                  </div>
+                </div>
+                <div class="cet6-form-group">
+                  <label class="cet6-form-label">备注/反思</label>
+                  <textarea class="cet6-form-textarea" id="cet6ReadNote" placeholder="记录错题原因、薄弱点、反思..."></textarea>
+                </div>
+              </div>
+              <div class="cet6-modal-footer">
+                <button class="cet6-btn cet6-btn-secondary" onclick="hideCet6AddReadModal()">取消</button>
+                <button class="cet6-btn cet6-btn-primary" onclick="addCet6Read()">添加</button>
+              </div>
             </div>
           </div>
           <!-- 写译 -->
           <div class="cet6-sub" id="cet6-sub-writing" style="display:none">
+            <!-- 写译统计看板 -->
+            <div class="stat-grid cet6-write-stats">
+              <div class="stat-card p1">
+                <div class="em">✍️</div>
+                <div class="lab">写译总数</div>
+                <div class="num" id="cet6WriteTotal">0</div>
+              </div>
+              <div class="stat-card p2">
+                <div class="em">✅</div>
+                <div class="lab">已完成</div>
+                <div class="num" id="cet6WriteDone">0</div>
+              </div>
+              <div class="stat-card p3">
+                <div class="em">📊</div>
+                <div class="lab">平均得分</div>
+                <div class="num" id="cet6WriteScore">0</div>
+              </div>
+              <div class="stat-card p4">
+                <div class="em">➕</div>
+                <div class="lab">今日新增</div>
+                <div class="num" id="cet6WriteToday">0</div>
+              </div>
+            </div>
+
+            <!-- 操作栏：添加写译记录 + 进度 -->
+            <div class="cet6-vocab-actions">
+              <div class="cet6-add-word-btn" onclick="showCet6AddWriteModal()">
+                <span class="cet6-add-icon">➕</span>
+                <span>添加写译记录</span>
+              </div>
+              <div class="cet6-today-task">
+                <div class="cet6-task-label">写译进度（目标30篇）</div>
+                <div class="cet6-task-progress-wrap">
+                  <div class="cet6-task-progress-bar">
+                    <div class="cet6-task-progress-fill" id="cet6WriteProgress" style="width:0%"></div>
+                  </div>
+                  <div class="cet6-task-progress-text"><span id="cet6WriteProgressCount">0</span> / 30 篇</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 写译学习方法 -->
+            <div class="card cet6-method-card">
+              <div class="card-head">📖 写译学习方法</div>
+              <div class="cet6-method-steps">
+                <div class="cet6-method-step">
+                  <div class="cet6-step-num">1</div>
+                  <div class="cet6-step-content">
+                    <div class="cet6-step-title">审题</div>
+                    <div class="cet6-step-desc">仔细读题，明确写作类型、主题和要求</div>
+                  </div>
+                </div>
+                <div class="cet6-method-step">
+                  <div class="cet6-step-num">2</div>
+                  <div class="cet6-step-content">
+                    <div class="cet6-step-title">列提纲</div>
+                    <div class="cet6-step-desc">列出文章结构和要点，确保逻辑清晰</div>
+                  </div>
+                </div>
+                <div class="cet6-method-step">
+                  <div class="cet6-step-num">3</div>
+                  <div class="cet6-step-content">
+                    <div class="cet6-step-title">写作</div>
+                    <div class="cet6-step-desc">用高级词汇和句型，注意语法和拼写</div>
+                  </div>
+                </div>
+                <div class="cet6-method-step">
+                  <div class="cet6-step-num">4</div>
+                  <div class="cet6-step-content">
+                    <div class="cet6-step-title">检查</div>
+                    <div class="cet6-step-desc">检查语法、拼写、标点，确保没有低级错误</div>
+                  </div>
+                </div>
+              </div>
+              <div class="cet6-translation-tips" style="margin-top:16px;padding-top:16px;border-top:1px solid rgba(0,0,0,0.06)">
+                <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:8px">💡 翻译技巧</div>
+                <div style="font-size:12px;color:var(--muted);line-height:1.6">
+                  1. 先通读全文，理解大意；2. 注意中英文语序差异，适当调整；3. 长句拆短句，短句合并；4. 注意时态、语态和单复数；5. 专业术语要准确；6. 最后通读检查，确保通顺自然。
+                </div>
+              </div>
+            </div>
+
+            <!-- 写译记录列表 -->
             <div class="card">
-              <div class="card-head">✍️ 写作 <span class="m-count" id="cet6WritingCount"></span></div>
+              <div class="card-head">
+                📝 写译记录
+                <div class="cet6-vocab-filters" id="cet6WriteFilters">
+                  <button class="cet6-filter-btn active" data-filter="all" onclick="filterCet6Write('all')">全部</button>
+                  <button class="cet6-filter-btn" data-filter="writing" onclick="filterCet6Write('writing')">写作</button>
+                  <button class="cet6-filter-btn" data-filter="translation" onclick="filterCet6Write('translation')">翻译</button>
+                </div>
+              </div>
+              <div class="cet6-vocab-search">
+                <input type="text" id="cet6WriteSearch" placeholder="🔍 搜索写译记录..." oninput="searchCet6Write()">
+              </div>
+              <div class="cet6-write-list" id="cet6WriteList">
+                <div class="cet6-vocab-empty">✍️ 还没有添加写译记录，点击上方"添加写译记录"开始记录吧～</div>
+              </div>
+            </div>
+
+            <!-- 写译学习资料 -->
+            <div class="card">
+              <div class="card-head">📚 写译学习资料</div>
               <div class="career-list" id="cet6WritingList"></div>
             </div>
-            <div class="card">
-              <div class="card-head">🌐 翻译 <span class="m-count" id="cet6TranslationCount"></span></div>
-              <div class="career-list" id="cet6TranslationList"></div>
+          </div>
+
+          <!-- 添加写译记录弹窗 -->
+          <div class="cet6-modal-overlay" id="cet6AddWriteModal" style="display:none" onclick="hideCet6AddWriteModal(event)">
+            <div class="cet6-modal" onclick="event.stopPropagation()">
+              <div class="cet6-modal-header">
+                <div class="cet6-modal-title">➕ 添加写译记录</div>
+                <div class="cet6-modal-close" onclick="hideCet6AddWriteModal()">✕</div>
+              </div>
+              <div class="cet6-modal-body">
+                <div class="cet6-form-group">
+                  <label class="cet6-form-label">题目/主题 *</label>
+                  <input type="text" class="cet6-form-input" id="cet6WriteTopic" placeholder="例如：2023年6月真题作文">
+                </div>
+                <div class="cet6-form-group">
+                  <label class="cet6-form-label">类型</label>
+                  <select class="cet6-form-input" id="cet6WriteType">
+                    <option value="writing">写作</option>
+                    <option value="translation">翻译</option>
+                  </select>
+                </div>
+                <div class="cet6-form-row">
+                  <div class="cet6-form-group" style="flex:1">
+                    <label class="cet6-form-label">得分（满分15）</label>
+                    <input type="number" class="cet6-form-input" id="cet6WriteScoreInput" placeholder="例如：12" min="0" max="15">
+                  </div>
+                  <div class="cet6-form-group" style="flex:1">
+                    <label class="cet6-form-label">用时（分钟）</label>
+                    <input type="number" class="cet6-form-input" id="cet6WriteDuration" placeholder="例如：30" min="0">
+                  </div>
+                </div>
+                <div class="cet6-form-group">
+                  <label class="cet6-form-label">日期</label>
+                  <input type="date" class="cet6-form-input" id="cet6WriteDate">
+                </div>
+                <div class="cet6-form-group">
+                  <label class="cet6-form-label">备注/反思</label>
+                  <textarea class="cet6-form-textarea" id="cet6WriteNote" placeholder="记录写作思路、翻译技巧、错题原因、反思..."></textarea>
+                </div>
+              </div>
+              <div class="cet6-modal-footer">
+                <button class="cet6-btn cet6-btn-secondary" onclick="hideCet6AddWriteModal()">取消</button>
+                <button class="cet6-btn cet6-btn-primary" onclick="addCet6Write()">添加</button>
+              </div>
             </div>
           </div>
           <!-- 错题 -->
           <div class="cet6-sub" id="cet6-sub-errors" style="display:none">
+            <!-- 错题统计看板 -->
+            <div class="stat-grid cet6-error-stats">
+              <div class="stat-card p1">
+                <div class="em">❌</div>
+                <div class="lab">错题总数</div>
+                <div class="num" id="cet6ErrorTotal">0</div>
+              </div>
+              <div class="stat-card p2">
+                <div class="em">🔄</div>
+                <div class="lab">待复习</div>
+                <div class="num" id="cet6ErrorReview">0</div>
+              </div>
+              <div class="stat-card p3">
+                <div class="em">✅</div>
+                <div class="lab">已掌握</div>
+                <div class="num" id="cet6ErrorMastered">0</div>
+              </div>
+              <div class="stat-card p4">
+                <div class="em">➕</div>
+                <div class="lab">今日新增</div>
+                <div class="num" id="cet6ErrorToday">0</div>
+              </div>
+            </div>
+
+            <!-- 操作栏：添加错题 + 错因分布 -->
+            <div class="cet6-vocab-actions">
+              <div class="cet6-add-word-btn" onclick="showCet6AddErrorModal()">
+                <span class="cet6-add-icon">➕</span>
+                <span>添加错题</span>
+              </div>
+              <div class="cet6-error-type-dist">
+                <div class="cet6-task-label">错因分布</div>
+                <div class="cet6-error-tags" id="cet6ErrorTagsDist"></div>
+              </div>
+            </div>
+
+            <!-- 待复习错题区 -->
+            <div class="card cet6-review-card" id="cet6ErrorReviewCard" style="display:none">
+              <div class="card-head">
+                🔄 今日待复习
+                <span class="cet6-review-count" id="cet6ErrorReviewCount">0</span>
+              </div>
+              <div class="cet6-error-review-list" id="cet6ErrorReviewList"></div>
+            </div>
+
+            <!-- 错题列表 -->
             <div class="card">
-              <div class="card-head">❌ 错题本 <span class="m-count" id="cet6ErrorsCount"></span></div>
+              <div class="card-head">
+                ❌ 错题本
+                <div class="cet6-vocab-filters" id="cet6ErrorFilters">
+                  <button class="cet6-filter-btn active" data-filter="all" onclick="filterCet6Errors('all')">全部</button>
+                  <button class="cet6-filter-btn" data-filter="vocab" onclick="filterCet6Errors('vocab')">词汇</button>
+                  <button class="cet6-filter-btn" data-filter="定位" onclick="filterCet6Errors('定位')">定位</button>
+                  <button class="cet6-filter-btn" data-filter="理解" onclick="filterCet6Errors('理解')">理解</button>
+                  <button class="cet6-filter-btn" data-filter="逻辑" onclick="filterCet6Errors('逻辑')">逻辑</button>
+                  <button class="cet6-filter-btn" data-filter="粗心" onclick="filterCet6Errors('粗心')">粗心</button>
+                </div>
+              </div>
+              <div class="cet6-vocab-search">
+                <input type="text" id="cet6ErrorSearch" placeholder="🔍 搜索错题..." oninput="searchCet6Errors()">
+              </div>
+              <div class="cet6-error-list" id="cet6ErrorList">
+                <div class="cet6-vocab-empty">📝 还没有添加错题，点击上方"添加错题"开始记录吧～</div>
+              </div>
+            </div>
+
+            <!-- 错题学习资料 -->
+            <div class="card">
+              <div class="card-head">📚 错题学习资料</div>
               <div class="career-list" id="cet6ErrorsList"></div>
+            </div>
+          </div>
+
+          <!-- 添加错题弹窗 -->
+          <div class="cet6-modal-overlay" id="cet6AddErrorModal" style="display:none" onclick="hideCet6AddErrorModal(event)">
+            <div class="cet6-modal" onclick="event.stopPropagation()">
+              <div class="cet6-modal-header">
+                <div class="cet6-modal-title">➕ 添加错题</div>
+                <div class="cet6-modal-close" onclick="hideCet6AddErrorModal()">✕</div>
+              </div>
+              <div class="cet6-modal-body">
+                <div class="cet6-form-group">
+                  <label class="cet6-form-label">题型</label>
+                  <select class="cet6-form-input" id="cet6ErrorType">
+                    <option value="听力">听力</option>
+                    <option value="阅读">阅读</option>
+                    <option value="写作">写作</option>
+                    <option value="翻译">翻译</option>
+                    <option value="词汇">词汇</option>
+                  </select>
+                </div>
+                <div class="cet6-form-group">
+                  <label class="cet6-form-label">错因标签 *</label>
+                  <div class="cet6-error-tag-select" id="cet6ErrorTagSelect">
+                    <span class="cet6-error-tag-option" data-tag="词汇" onclick="selectCet6ErrorTag('词汇')">词汇</span>
+                    <span class="cet6-error-tag-option" data-tag="定位" onclick="selectCet6ErrorTag('定位')">定位</span>
+                    <span class="cet6-error-tag-option" data-tag="理解" onclick="selectCet6ErrorTag('理解')">理解</span>
+                    <span class="cet6-error-tag-option" data-tag="逻辑" onclick="selectCet6ErrorTag('逻辑')">逻辑</span>
+                    <span class="cet6-error-tag-option" data-tag="粗心" onclick="selectCet6ErrorTag('粗心')">粗心</span>
+                    <span class="cet6-error-tag-option" data-tag="其他" onclick="selectCet6ErrorTag('其他')">其他</span>
+                  </div>
+                </div>
+                <div class="cet6-form-group">
+                  <label class="cet6-form-label">题目内容 *</label>
+                  <textarea class="cet6-form-textarea" id="cet6ErrorQuestion" placeholder="输入错题题目..."></textarea>
+                </div>
+                <div class="cet6-form-group">
+                  <label class="cet6-form-label">正确答案</label>
+                  <input type="text" class="cet6-form-input" id="cet6ErrorAnswer" placeholder="例如：C">
+                </div>
+                <div class="cet6-form-group">
+                  <label class="cet6-form-label">解析/反思</label>
+                  <textarea class="cet6-form-textarea" id="cet6ErrorAnalysis" placeholder="写下错题解析和反思..."></textarea>
+                </div>
+                <div class="cet6-form-group">
+                  <label class="cet6-form-label">来源</label>
+                  <input type="text" class="cet6-form-input" id="cet6ErrorSource" placeholder="例如：2023年6月真题">
+                </div>
+              </div>
+              <div class="cet6-modal-footer">
+                <button class="cet6-btn cet6-btn-secondary" onclick="hideCet6AddErrorModal()">取消</button>
+                <button class="cet6-btn cet6-btn-primary" onclick="addCet6Error()">添加</button>
+              </div>
             </div>
           </div>
           <!-- 资料 -->
           <div class="cet6-sub" id="cet6-sub-materials" style="display:none">
             <div class="card">
-              <div class="card-head">📚 学习资料 <span class="m-count" id="cet6MaterialsCount"></span></div>
+              <div class="card-head">📚 六级学习资料 <span class="m-count" id="cet6MaterialsCount"></span></div>
+              <div class="cet6-vocab-search">
+                <input type="text" id="cet6MaterialsSearch" placeholder="🔍 搜索资料..." oninput="searchCet6Materials()">
+              </div>
               <div class="career-list" id="cet6MaterialsList"></div>
             </div>
           </div>

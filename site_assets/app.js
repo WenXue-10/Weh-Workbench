@@ -2907,6 +2907,8 @@ function initCet6SubTabs(){
   });
   // 渲染各子模块内容
   renderCet6Category();
+  // 初始化概览子模块（倒计时 + 打卡 + 进度）
+  initCet6Overview();
 }
 
 function switchCet6Sub(sub){
@@ -2967,6 +2969,1325 @@ function renderCet6Category(){
       var sub = n.date ? '📅 ' + n.date : '';
       return careerListItem(n.icon || '📄', n.title, sub, '', onclick);
     }).join('');
+  });
+}
+
+
+/* ===== 六级模块 - 概览子模块增强功能 ===== */
+
+// 考试日期
+var CET6_EXAM_DATE = new Date('2026-12-12');
+
+// 初始化六级概览（倒计时 + 打卡 + 进度）
+function initCet6Overview(){
+  updateCet6Countdown();
+  loadCet6CheckinData();
+  renderCet6WeekCalendar();
+  updateCet6TrainingProgress();
+  // 初始化词汇模块
+  renderCet6Vocab();
+  renderCet6ReviewList();
+  updateCet6VocabStats();
+  // 初始化错题模块
+  renderCet6Errors();
+  renderCet6ErrorReviewList();
+  renderCet6ErrorTagsDist();
+  updateCet6ErrorStats();
+  // 初始化听力模块
+  renderCet6Listen();
+  updateCet6ListenStats();
+  // 初始化阅读模块
+  renderCet6Read();
+  updateCet6ReadStats();
+  // 初始化写译模块
+  renderCet6Write();
+  updateCet6WriteStats();
+}
+
+// 更新倒计时
+function updateCet6Countdown(){
+  var now = new Date();
+  var diff = Math.ceil((CET6_EXAM_DATE - now) / (1000 * 60 * 60 * 24));
+  var el = document.getElementById('cet6Countdown');
+  if(el) el.textContent = diff > 0 ? diff : 0;
+  var aiEl = document.getElementById('cet6AiDays');
+  if(aiEl) aiEl.textContent = diff > 0 ? diff : 0;
+}
+
+// 打卡数据存储 key: cet6_checkin_YYYY-MM-DD, value: {words:bool, listening:bool, reading:bool, writing:bool, review:bool}
+function getCet6CheckinKey(date){
+  var d = date || new Date();
+  return 'cet6_checkin_' + d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+
+function getCet6CheckinData(date){
+  var key = getCet6CheckinKey(date);
+  try{
+    var data = localStorage.getItem(key);
+    return data ? JSON.parse(data) : {words:false, listening:false, reading:false, writing:false, review:false};
+  }catch(e){
+    return {words:false, listening:false, reading:false, writing:false, review:false};
+  }
+}
+
+function saveCet6CheckinData(date, data){
+  var key = getCet6CheckinKey(date);
+  localStorage.setItem(key, JSON.stringify(data));
+}
+
+// 切换任务完成状态
+function toggleCet6Task(task){
+  var today = new Date();
+  var data = getCet6CheckinData(today);
+  data[task] = !data[task];
+  saveCet6CheckinData(today, data);
+  loadCet6CheckinData();
+  renderCet6WeekCalendar();
+}
+
+// 加载今日打卡数据并渲染
+function loadCet6CheckinData(){
+  var today = new Date();
+  var data = getCet6CheckinData(today);
+  var tasks = ['words', 'listening', 'reading', 'writing', 'review'];
+  var doneCount = 0;
+  tasks.forEach(function(task){
+    var item = document.querySelector('.cet6-task-item[data-task="'+task+'"]');
+    if(item){
+      if(data[task]){
+        item.classList.add('done');
+        doneCount++;
+      }else{
+        item.classList.remove('done');
+      }
+    }
+  });
+  var progressEl = document.getElementById('cet6TodayProgress');
+  if(progressEl) progressEl.textContent = doneCount + '/5';
+  // 更新本周打卡和连续打卡
+  updateCet6WeekAndStreak();
+}
+
+// 渲染本周打卡日历
+function renderCet6WeekCalendar(){
+  var today = new Date();
+  var dayOfWeek = today.getDay(); // 0=周日, 1=周一
+  // 计算本周一的日期
+  var monday = new Date(today);
+  monday.setDate(today.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
+  // 渲染每一天
+  for(var i = 0; i < 7; i++){
+    var date = new Date(monday);
+    date.setDate(monday.getDate() + i);
+    var dayNum = date.getDay(); // 0=周日
+    var dayEl = document.querySelector('.cet6-week-day[data-day="'+dayNum+'"]');
+    if(dayEl){
+      // 检查这一天是否打卡（5项全完成才算打卡）
+      var data = getCet6CheckinData(date);
+      var allDone = data.words && data.listening && data.reading && data.writing && data.review;
+      if(allDone){
+        dayEl.classList.add('checked');
+      }else{
+        dayEl.classList.remove('checked');
+      }
+      // 标记今天
+      if(date.toDateString() === today.toDateString()){
+        dayEl.classList.add('today');
+      }else{
+        dayEl.classList.remove('today');
+      }
+    }
+  }
+}
+
+// 更新本周打卡天数和连续打卡天数
+function updateCet6WeekAndStreak(){
+  var today = new Date();
+  var dayOfWeek = today.getDay();
+  var monday = new Date(today);
+  monday.setDate(today.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
+  // 计算本周打卡天数
+  var weekCount = 0;
+  for(var i = 0; i < 7; i++){
+    var date = new Date(monday);
+    date.setDate(monday.getDate() + i);
+    if(date > today) break; // 未来的不算
+    var data = getCet6CheckinData(date);
+    if(data.words && data.listening && data.reading && data.writing && data.review){
+      weekCount++;
+    }
+  }
+  var weekEl = document.getElementById('cet6WeekCheckin');
+  if(weekEl) weekEl.textContent = weekCount;
+  // 计算连续打卡天数（从今天往前数）
+  var streak = 0;
+  var checkDate = new Date(today);
+  while(true){
+    var data = getCet6CheckinData(checkDate);
+    if(data.words && data.listening && data.reading && data.writing && data.review){
+      streak++;
+      checkDate.setDate(checkDate.getDate() - 1);
+    }else{
+      break;
+    }
+  }
+  var streakEl = document.getElementById('cet6Streak');
+  if(streakEl) streakEl.textContent = streak;
+}
+
+// 更新分项训练进度（从知识库笔记数量估算）
+function updateCet6TrainingProgress(){
+  // 听力：从02-听力分类的笔记数估算
+  var listeningKb = (CET6KBS||[]).find(function(k){ return k.name && k.name.indexOf('02-听力') >= 0; });
+  var listeningCount = 0;
+  if(listeningKb && listeningKb.groups){
+    listeningKb.groups.forEach(function(g){ listeningCount += (g.notes||[]).length; });
+  }
+  updateCet6Progress('cet6Listening', listeningCount, 40);
+  // 阅读：从03-阅读分类
+  var readingKb = (CET6KBS||[]).find(function(k){ return k.name && k.name.indexOf('03-阅读') >= 0; });
+  var readingCount = 0;
+  if(readingKb && readingKb.groups){
+    readingKb.groups.forEach(function(g){ readingCount += (g.notes||[]).length; });
+  }
+  updateCet6Progress('cet6Reading', readingCount, 80);
+  // 写作：从04-写作分类
+  var writingKb = (CET6KBS||[]).find(function(k){ return k.name && k.name.indexOf('04-写作') >= 0; });
+  var writingCount = 0;
+  if(writingKb && writingKb.groups){
+    writingKb.groups.forEach(function(g){ writingCount += (g.notes||[]).length; });
+  }
+  updateCet6Progress('cet6Writing', writingCount, 30);
+  // 翻译：从05-翻译分类
+  var translationKb = (CET6KBS||[]).find(function(k){ return k.name && k.name.indexOf('05-翻译') >= 0; });
+  var translationCount = 0;
+  if(translationKb && translationKb.groups){
+    translationKb.groups.forEach(function(g){ translationCount += (g.notes||[]).length; });
+  }
+  updateCet6Progress('cet6Translation', translationCount, 60);
+}
+
+function updateCet6Progress(prefix, done, total){
+  var doneEl = document.getElementById(prefix + 'Done');
+  var progressEl = document.getElementById(prefix + 'Progress');
+  if(doneEl) doneEl.textContent = done;
+  if(progressEl) progressEl.style.width = Math.min(100, (done / total * 100)) + '%';
+}
+
+
+/* ===== 六级模块 - 词汇管理功能 ===== */
+
+// 单词数据存储 key: cet6_vocab_words, value: [{id, word, phonetic, meaning, example, addedDate, mastered, reviewDate, reviewCount}]
+var CET6_VOCAB_KEY = 'cet6_vocab_words';
+var cet6VocabFilter = 'all';
+var cet6VocabSearchTerm = '';
+
+// 艾宾浩斯记忆曲线复习间隔（天）
+var REVIEW_INTERVALS = [1, 2, 4, 7, 15, 30];
+
+function getCet6VocabWords(){
+  try{
+    var data = localStorage.getItem(CET6_VOCAB_KEY);
+    return data ? JSON.parse(data) : [];
+  }catch(e){
+    return [];
+  }
+}
+
+function saveCet6VocabWords(words){
+  localStorage.setItem(CET6_VOCAB_KEY, JSON.stringify(words));
+}
+
+// 显示添加单词弹窗
+function showCet6AddWordModal(){
+  var modal = document.getElementById('cet6AddWordModal');
+  if(modal) modal.style.display = 'flex';
+  // 清空表单
+  document.getElementById('cet6NewWord').value = '';
+  document.getElementById('cet6NewPhonetic').value = '';
+  document.getElementById('cet6NewMeaning').value = '';
+  document.getElementById('cet6NewExample').value = '';
+  setTimeout(function(){ document.getElementById('cet6NewWord').focus(); }, 100);
+}
+
+function hideCet6AddWordModal(event){
+  if(event && event.target !== event.currentTarget) return;
+  var modal = document.getElementById('cet6AddWordModal');
+  if(modal) modal.style.display = 'none';
+}
+
+// 添加单词
+function addCet6Word(){
+  var word = document.getElementById('cet6NewWord').value.trim();
+  var phonetic = document.getElementById('cet6NewPhonetic').value.trim();
+  var meaning = document.getElementById('cet6NewMeaning').value.trim();
+  var example = document.getElementById('cet6NewExample').value.trim();
+  if(!word || !meaning){
+    alert('请填写单词和释义');
+    return;
+  }
+  var words = getCet6VocabWords();
+  var now = new Date();
+  var newWord = {
+    id: Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+    word: word,
+    phonetic: phonetic,
+    meaning: meaning,
+    example: example,
+    addedDate: now.toISOString(),
+    mastered: false,
+    reviewDate: now.toISOString(),
+    reviewCount: 0
+  };
+  words.unshift(newWord);
+  saveCet6VocabWords(words);
+  hideCet6AddWordModal();
+  renderCet6Vocab();
+  updateCet6VocabStats();
+}
+
+// 删除单词
+function deleteCet6Word(id){
+  if(!confirm('确定要删除这个单词吗？')) return;
+  var words = getCet6VocabWords();
+  words = words.filter(function(w){ return w.id !== id; });
+  saveCet6VocabWords(words);
+  renderCet6Vocab();
+  updateCet6VocabStats();
+}
+
+// 切换掌握状态
+function toggleCet6WordMastered(id){
+  var words = getCet6VocabWords();
+  var word = words.find(function(w){ return w.id === id; });
+  if(word){
+    word.mastered = !word.mastered;
+    if(word.mastered){
+      word.reviewCount = REVIEW_INTERVALS.length;
+    }else{
+      word.reviewCount = 0;
+      word.reviewDate = new Date().toISOString();
+    }
+    saveCet6VocabWords(words);
+    renderCet6Vocab();
+    updateCet6VocabStats();
+  }
+}
+
+// 复习单词（认识/不认识）
+function reviewCet6Word(id, know){
+  var words = getCet6VocabWords();
+  var word = words.find(function(w){ return w.id === id; });
+  if(word){
+    if(know){
+      word.reviewCount = Math.min(word.reviewCount + 1, REVIEW_INTERVALS.length);
+      if(word.reviewCount >= REVIEW_INTERVALS.length){
+        word.mastered = true;
+      }else{
+        var nextReview = new Date();
+        nextReview.setDate(nextReview.getDate() + REVIEW_INTERVALS[word.reviewCount]);
+        word.reviewDate = nextReview.toISOString();
+      }
+    }else{
+      word.reviewCount = 0;
+      word.reviewDate = new Date().toISOString();
+    }
+    saveCet6VocabWords(words);
+    renderCet6Vocab();
+    renderCet6ReviewList();
+    updateCet6VocabStats();
+  }
+}
+
+// 获取今日待复习单词
+function getCet6ReviewWords(){
+  var words = getCet6VocabWords();
+  var now = new Date();
+  return words.filter(function(w){
+    if(w.mastered) return false;
+    var reviewDate = new Date(w.reviewDate);
+    return reviewDate <= now;
+  });
+}
+
+// 渲染待复习列表
+function renderCet6ReviewList(){
+  var reviewWords = getCet6ReviewWords();
+  var card = document.getElementById('cet6ReviewCard');
+  var list = document.getElementById('cet6ReviewList');
+  var count = document.getElementById('cet6ReviewCount');
+  if(!card || !list) return;
+  if(reviewWords.length === 0){
+    card.style.display = 'none';
+    return;
+  }
+  card.style.display = '';
+  if(count) count.textContent = reviewWords.length + ' 个';
+  list.innerHTML = reviewWords.slice(0, 10).map(function(w){
+    return '<div class="cet6-review-item">' +
+      '<div class="cet6-review-word">' + escapeHtml(w.word) + '</div>' +
+      (w.phonetic ? '<div class="cet6-review-phonetic">' + escapeHtml(w.phonetic) + '</div>' : '') +
+      '<div class="cet6-review-meaning">' + escapeHtml(w.meaning) + '</div>' +
+      '<div class="cet6-review-actions">' +
+      '<button class="cet6-review-btn know" onclick="reviewCet6Word(\'' + w.id + '\', true)">认识</button>' +
+      '<button class="cet6-review-btn dont-know" onclick="reviewCet6Word(\'' + w.id + '\', false)">不认识</button>' +
+      '</div></div>';
+  }).join('');
+}
+
+// 筛选单词
+function filterCet6Vocab(filter){
+  cet6VocabFilter = filter;
+  document.querySelectorAll('.cet6-filter-btn').forEach(function(btn){
+    btn.classList.toggle('active', btn.getAttribute('data-filter') === filter);
+  });
+  renderCet6Vocab();
+}
+
+// 搜索单词
+function searchCet6Vocab(){
+  var input = document.getElementById('cet6VocabSearch');
+  cet6VocabSearchTerm = input ? input.value.trim().toLowerCase() : '';
+  renderCet6Vocab();
+}
+
+// 渲染单词列表
+function renderCet6Vocab(){
+  var list = document.getElementById('cet6VocabList');
+  if(!list) return;
+  var words = getCet6VocabWords();
+  // 筛选
+  if(cet6VocabFilter === 'mastered'){
+    words = words.filter(function(w){ return w.mastered; });
+  }else if(cet6VocabFilter === 'unmastered'){
+    words = words.filter(function(w){ return !w.mastered; });
+  }
+  // 搜索
+  if(cet6VocabSearchTerm){
+    words = words.filter(function(w){
+      return w.word.toLowerCase().indexOf(cet6VocabSearchTerm) >= 0 ||
+             w.meaning.toLowerCase().indexOf(cet6VocabSearchTerm) >= 0;
+    });
+  }
+  if(words.length === 0){
+    list.innerHTML = '<div class="cet6-vocab-empty">📖 没有找到匹配的单词</div>';
+    return;
+  }
+  list.innerHTML = words.map(function(w){
+    return '<div class="cet6-vocab-item' + (w.mastered ? ' mastered' : '') + '">' +
+      '<div class="cet6-vocab-word">' + escapeHtml(w.word) + '</div>' +
+      (w.phonetic ? '<div class="cet6-vocab-phonetic">' + escapeHtml(w.phonetic) + '</div>' : '') +
+      '<div style="flex:1;min-width:0">' +
+      '<div class="cet6-vocab-meaning">' + escapeHtml(w.meaning) + '</div>' +
+      (w.example ? '<div class="cet6-vocab-example">' + escapeHtml(w.example) + '</div>' : '') +
+      '</div>' +
+      '<div class="cet6-vocab-actions">' +
+      '<button class="cet6-vocab-action-btn mastered-btn" title="' + (w.mastered ? '取消掌握' : '标记掌握') + '" onclick="toggleCet6WordMastered(\'' + w.id + '\')">' + (w.mastered ? '✅' : '⬜') + '</button>' +
+      '<button class="cet6-vocab-action-btn delete-btn" title="删除" onclick="deleteCet6Word(\'' + w.id + '\')">🗑️</button>' +
+      '</div></div>';
+  }).join('');
+}
+
+// 更新词汇统计
+function updateCet6VocabStats(){
+  var words = getCet6VocabWords();
+  var total = words.length;
+  var mastered = words.filter(function(w){ return w.mastered; }).length;
+  var reviewWords = getCet6ReviewWords();
+  var review = reviewWords.length;
+  // 今日新增
+  var today = new Date();
+  var todayStr = today.toDateString();
+  var todayCount = words.filter(function(w){
+    return new Date(w.addedDate).toDateString() === todayStr;
+  }).length;
+  // 更新统计卡片
+  var totalEl = document.getElementById('cet6VocabTotal');
+  if(totalEl) totalEl.textContent = total;
+  var masteredEl = document.getElementById('cet6VocabMastered');
+  if(masteredEl) masteredEl.textContent = mastered;
+  var reviewEl = document.getElementById('cet6VocabReview');
+  if(reviewEl) reviewEl.textContent = review;
+  var todayEl = document.getElementById('cet6VocabToday');
+  if(todayEl) todayEl.textContent = todayCount;
+  // 更新今日进度
+  var todayCountEl = document.getElementById('cet6VocabTodayCount');
+  if(todayCountEl) todayCountEl.textContent = todayCount;
+  var progressEl = document.getElementById('cet6VocabTodayProgress');
+  if(progressEl) progressEl.style.width = Math.min(100, (todayCount / 100 * 100)) + '%';
+  // 更新概览的生词统计
+  var wordTotalEl = document.getElementById('cet6WordTotal');
+  if(wordTotalEl) wordTotalEl.textContent = total;
+  var wordMasteredEl = document.getElementById('cet6WordMastered');
+  if(wordMasteredEl) wordMasteredEl.textContent = mastered;
+}
+
+// HTML转义
+function escapeHtml(text){
+  var div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+
+/* ===== 六级模块 - 错题管理功能 ===== */
+
+var CET6_ERROR_KEY = 'cet6_error_questions';
+var cet6ErrorFilter = 'all';
+var cet6ErrorSearchTerm = '';
+var cet6SelectedErrorTag = '';
+
+function getCet6Errors(){
+  try{
+    var data = localStorage.getItem(CET6_ERROR_KEY);
+    return data ? JSON.parse(data) : [];
+  }catch(e){
+    return [];
+  }
+}
+
+function saveCet6Errors(errors){
+  localStorage.setItem(CET6_ERROR_KEY, JSON.stringify(errors));
+}
+
+// 显示添加错题弹窗
+function showCet6AddErrorModal(){
+  var modal = document.getElementById('cet6AddErrorModal');
+  if(modal) modal.style.display = 'flex';
+  cet6SelectedErrorTag = '';
+  document.querySelectorAll('.cet6-error-tag-option').forEach(function(el){
+    el.classList.remove('selected');
+  });
+  document.getElementById('cet6ErrorType').value = '听力';
+  document.getElementById('cet6ErrorQuestion').value = '';
+  document.getElementById('cet6ErrorAnswer').value = '';
+  document.getElementById('cet6ErrorAnalysis').value = '';
+  document.getElementById('cet6ErrorSource').value = '';
+  setTimeout(function(){ document.getElementById('cet6ErrorQuestion').focus(); }, 100);
+}
+
+function hideCet6AddErrorModal(event){
+  if(event && event.target !== event.currentTarget) return;
+  var modal = document.getElementById('cet6AddErrorModal');
+  if(modal) modal.style.display = 'none';
+}
+
+// 选择错因标签
+function selectCet6ErrorTag(tag){
+  cet6SelectedErrorTag = tag;
+  document.querySelectorAll('.cet6-error-tag-option').forEach(function(el){
+    el.classList.toggle('selected', el.getAttribute('data-tag') === tag);
+  });
+}
+
+// 添加错题
+function addCet6Error(){
+  var type = document.getElementById('cet6ErrorType').value;
+  var question = document.getElementById('cet6ErrorQuestion').value.trim();
+  var answer = document.getElementById('cet6ErrorAnswer').value.trim();
+  var analysis = document.getElementById('cet6ErrorAnalysis').value.trim();
+  var source = document.getElementById('cet6ErrorSource').value.trim();
+  if(!cet6SelectedErrorTag){
+    alert('请选择错因标签');
+    return;
+  }
+  if(!question){
+    alert('请填写题目内容');
+    return;
+  }
+  var errors = getCet6Errors();
+  var now = new Date();
+  var newError = {
+    id: Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+    type: type,
+    tag: cet6SelectedErrorTag,
+    question: question,
+    answer: answer,
+    analysis: analysis,
+    source: source,
+    addedDate: now.toISOString(),
+    mastered: false,
+    reviewDate: now.toISOString(),
+    reviewCount: 0
+  };
+  errors.unshift(newError);
+  saveCet6Errors(errors);
+  hideCet6AddErrorModal();
+  renderCet6Errors();
+  renderCet6ErrorReviewList();
+  renderCet6ErrorTagsDist();
+  updateCet6ErrorStats();
+}
+
+// 删除错题
+function deleteCet6Error(id){
+  if(!confirm('确定要删除这道错题吗？')) return;
+  var errors = getCet6Errors();
+  errors = errors.filter(function(e){ return e.id !== id; });
+  saveCet6Errors(errors);
+  renderCet6Errors();
+  renderCet6ErrorReviewList();
+  renderCet6ErrorTagsDist();
+  updateCet6ErrorStats();
+}
+
+// 切换掌握状态
+function toggleCet6ErrorMastered(id){
+  var errors = getCet6Errors();
+  var error = errors.find(function(e){ return e.id === id; });
+  if(error){
+    error.mastered = !error.mastered;
+    if(error.mastered){
+      error.reviewCount = REVIEW_INTERVALS.length;
+    }else{
+      error.reviewCount = 0;
+      error.reviewDate = new Date().toISOString();
+    }
+    saveCet6Errors(errors);
+    renderCet6Errors();
+    renderCet6ErrorReviewList();
+    updateCet6ErrorStats();
+  }
+}
+
+// 复习错题
+function reviewCet6Error(id, know){
+  var errors = getCet6Errors();
+  var error = errors.find(function(e){ return e.id === id; });
+  if(error){
+    if(know){
+      error.reviewCount = Math.min(error.reviewCount + 1, REVIEW_INTERVALS.length);
+      if(error.reviewCount >= REVIEW_INTERVALS.length){
+        error.mastered = true;
+      }else{
+        var nextReview = new Date();
+        nextReview.setDate(nextReview.getDate() + REVIEW_INTERVALS[error.reviewCount]);
+        error.reviewDate = nextReview.toISOString();
+      }
+    }else{
+      error.reviewCount = 0;
+      error.reviewDate = new Date().toISOString();
+    }
+    saveCet6Errors(errors);
+    renderCet6Errors();
+    renderCet6ErrorReviewList();
+    updateCet6ErrorStats();
+  }
+}
+
+// 获取待复习错题
+function getCet6ErrorReviewWords(){
+  var errors = getCet6Errors();
+  var now = new Date();
+  return errors.filter(function(e){
+    if(e.mastered) return false;
+    var reviewDate = new Date(e.reviewDate);
+    return reviewDate <= now;
+  });
+}
+
+// 渲染待复习列表
+function renderCet6ErrorReviewList(){
+  var reviewErrors = getCet6ErrorReviewWords();
+  var card = document.getElementById('cet6ErrorReviewCard');
+  var list = document.getElementById('cet6ErrorReviewList');
+  var count = document.getElementById('cet6ErrorReviewCount');
+  if(!card || !list) return;
+  if(reviewErrors.length === 0){
+    card.style.display = 'none';
+    return;
+  }
+  card.style.display = '';
+  if(count) count.textContent = reviewErrors.length + ' 道';
+  list.innerHTML = reviewErrors.slice(0, 5).map(function(e){
+    return '<div class="cet6-error-review-item">' +
+      '<div class="cet6-error-review-header">' +
+      '<span class="cet6-error-tag-badge ' + e.tag + '">' + e.tag + '</span>' +
+      '<span class="cet6-error-type-badge">' + e.type + '</span>' +
+      '</div>' +
+      '<div class="cet6-error-review-question">' + escapeHtml(e.question.substring(0, 100)) + (e.question.length > 100 ? '...' : '') + '</div>' +
+      (e.answer ? '<div class="cet6-error-review-answer">答案：' + escapeHtml(e.answer) + '</div>' : '') +
+      '<div class="cet6-error-review-actions">' +
+      '<button class="cet6-review-btn know" onclick="reviewCet6Error(\'' + e.id + '\', true)">掌握了</button>' +
+      '<button class="cet6-review-btn dont-know" onclick="reviewCet6Error(\'' + e.id + '\', false)">还不会</button>' +
+      '</div></div>';
+  }).join('');
+}
+
+// 渲染错因分布
+function renderCet6ErrorTagsDist(){
+  var errors = getCet6Errors();
+  var tags = ['词汇', '定位', '理解', '逻辑', '粗心', '其他'];
+  var dist = document.getElementById('cet6ErrorTagsDist');
+  if(!dist) return;
+  var total = errors.length;
+  dist.innerHTML = tags.map(function(tag){
+    var count = errors.filter(function(e){ return e.tag === tag; }).length;
+    if(count === 0) return '';
+    var cls = tag === '词汇' ? 'vocab' : tag;
+    return '<span class="cet6-error-tag-dist ' + cls + '">' + tag + ' ' + count + '</span>';
+  }).join('');
+}
+
+// 筛选错题
+function filterCet6Errors(filter){
+  cet6ErrorFilter = filter;
+  document.querySelectorAll('#cet6ErrorFilters .cet6-filter-btn').forEach(function(btn){
+    btn.classList.toggle('active', btn.getAttribute('data-filter') === filter);
+  });
+  renderCet6Errors();
+}
+
+// 搜索错题
+function searchCet6Errors(){
+  var input = document.getElementById('cet6ErrorSearch');
+  cet6ErrorSearchTerm = input ? input.value.trim().toLowerCase() : '';
+  renderCet6Errors();
+}
+
+// 渲染错题列表
+function renderCet6Errors(){
+  var list = document.getElementById('cet6ErrorList');
+  if(!list) return;
+  var errors = getCet6Errors();
+  // 筛选
+  if(cet6ErrorFilter !== 'all'){
+    errors = errors.filter(function(e){ return e.tag === cet6ErrorFilter; });
+  }
+  // 搜索
+  if(cet6ErrorSearchTerm){
+    errors = errors.filter(function(e){
+      return e.question.toLowerCase().indexOf(cet6ErrorSearchTerm) >= 0 ||
+             e.answer.toLowerCase().indexOf(cet6ErrorSearchTerm) >= 0 ||
+             e.analysis.toLowerCase().indexOf(cet6ErrorSearchTerm) >= 0;
+    });
+  }
+  if(errors.length === 0){
+    list.innerHTML = '<div class="cet6-vocab-empty">📝 没有找到匹配的错题</div>';
+    return;
+  }
+  list.innerHTML = errors.map(function(e){
+    return '<div class="cet6-error-item' + (e.mastered ? ' mastered' : '') + '" data-tag="' + e.tag + '">' +
+      '<div class="cet6-error-header">' +
+      '<div class="cet6-error-meta">' +
+      '<span class="cet6-error-type-badge">' + e.type + '</span>' +
+      '<span class="cet6-error-tag-badge ' + e.tag + '">' + e.tag + '</span>' +
+      (e.source ? '<span class="cet6-error-source">📌 ' + escapeHtml(e.source) + '</span>' : '') +
+      '</div>' +
+      '<div class="cet6-error-actions">' +
+      '<button class="cet6-vocab-action-btn mastered-btn" title="' + (e.mastered ? '取消掌握' : '标记掌握') + '" onclick="toggleCet6ErrorMastered(\'' + e.id + '\')">' + (e.mastered ? '✅' : '⬜') + '</button>' +
+      '<button class="cet6-vocab-action-btn delete-btn" title="删除" onclick="deleteCet6Error(\'' + e.id + '\')">🗑️</button>' +
+      '</div></div>' +
+      '<div class="cet6-error-question">' + escapeHtml(e.question) + '</div>' +
+      (e.answer ? '<div class="cet6-error-answer">✅ 答案：' + escapeHtml(e.answer) + '</div>' : '') +
+      (e.analysis ? '<div class="cet6-error-analysis">💡 ' + escapeHtml(e.analysis) + '</div>' : '') +
+      '</div>';
+  }).join('');
+}
+
+// 更新错题统计
+function updateCet6ErrorStats(){
+  var errors = getCet6Errors();
+  var total = errors.length;
+  var mastered = errors.filter(function(e){ return e.mastered; }).length;
+  var reviewErrors = getCet6ErrorReviewWords();
+  var review = reviewErrors.length;
+  // 今日新增
+  var today = new Date();
+  var todayStr = today.toDateString();
+  var todayCount = errors.filter(function(e){
+    return new Date(e.addedDate).toDateString() === todayStr;
+  }).length;
+  // 更新统计卡片
+  var totalEl = document.getElementById('cet6ErrorTotal');
+  if(totalEl) totalEl.textContent = total;
+  var reviewEl = document.getElementById('cet6ErrorReview');
+  if(reviewEl) reviewEl.textContent = review;
+  var masteredEl = document.getElementById('cet6ErrorMastered');
+  if(masteredEl) masteredEl.textContent = mastered;
+  var todayEl = document.getElementById('cet6ErrorToday');
+  if(todayEl) todayEl.textContent = todayCount;
+  // 更新概览的错题统计
+  var errorTotalEl = document.getElementById('cet6ErrorTotal');
+  var errorPendingEl = document.getElementById('cet6ErrorPending');
+  if(errorPendingEl) errorPendingEl.textContent = review;
+}
+
+
+/* ===== 六级模块 - 听力管理功能 ===== */
+
+var CET6_LISTEN_KEY = 'cet6_listen_records';
+var cet6ListenFilter = 'all';
+var cet6ListenSearchTerm = '';
+
+var LISTEN_TYPE_NAMES = {
+  conversation: '长对话',
+  passage: '听力篇章',
+  lecture: '讲座/报道',
+  dictation: '听写填空',
+  full: '全套听力'
+};
+
+function getCet6ListenRecords(){
+  try{
+    var data = localStorage.getItem(CET6_LISTEN_KEY);
+    return data ? JSON.parse(data) : [];
+  }catch(e){
+    return [];
+  }
+}
+
+function saveCet6ListenRecords(records){
+  localStorage.setItem(CET6_LISTEN_KEY, JSON.stringify(records));
+}
+
+// 显示添加听力记录弹窗
+function showCet6AddListenModal(){
+  var modal = document.getElementById('cet6AddListenModal');
+  if(modal) modal.style.display = 'flex';
+  document.getElementById('cet6ListenName').value = '';
+  document.getElementById('cet6ListenType').value = 'conversation';
+  document.getElementById('cet6ListenCorrect').value = '';
+  document.getElementById('cet6ListenTotalQ').value = '';
+  document.getElementById('cet6ListenDuration').value = '';
+  document.getElementById('cet6ListenNote').value = '';
+  // 默认日期为今天
+  var today = new Date();
+  var dateStr = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0') + '-' + String(today.getDate()).padStart(2,'0');
+  document.getElementById('cet6ListenDate').value = dateStr;
+  setTimeout(function(){ document.getElementById('cet6ListenName').focus(); }, 100);
+}
+
+function hideCet6AddListenModal(event){
+  if(event && event.target !== event.currentTarget) return;
+  var modal = document.getElementById('cet6AddListenModal');
+  if(modal) modal.style.display = 'none';
+}
+
+// 添加听力记录
+function addCet6Listen(){
+  var name = document.getElementById('cet6ListenName').value.trim();
+  var type = document.getElementById('cet6ListenType').value;
+  var correct = parseInt(document.getElementById('cet6ListenCorrect').value) || 0;
+  var totalQ = parseInt(document.getElementById('cet6ListenTotalQ').value) || 0;
+  var duration = parseInt(document.getElementById('cet6ListenDuration').value) || 0;
+  var date = document.getElementById('cet6ListenDate').value;
+  var note = document.getElementById('cet6ListenNote').value.trim();
+  if(!name){
+    alert('请填写套题名称');
+    return;
+  }
+  var records = getCet6ListenRecords();
+  var newRecord = {
+    id: Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+    name: name,
+    type: type,
+    correct: correct,
+    total: totalQ,
+    duration: duration,
+    date: date || new Date().toISOString().split('T')[0],
+    note: note,
+    addedDate: new Date().toISOString()
+  };
+  records.unshift(newRecord);
+  saveCet6ListenRecords(records);
+  hideCet6AddListenModal();
+  renderCet6Listen();
+  updateCet6ListenStats();
+}
+
+// 删除听力记录
+function deleteCet6Listen(id){
+  if(!confirm('确定要删除这条听力记录吗？')) return;
+  var records = getCet6ListenRecords();
+  records = records.filter(function(r){ return r.id !== id; });
+  saveCet6ListenRecords(records);
+  renderCet6Listen();
+  updateCet6ListenStats();
+}
+
+// 筛选听力记录
+function filterCet6Listen(filter){
+  cet6ListenFilter = filter;
+  document.querySelectorAll('#cet6ListenFilters .cet6-filter-btn').forEach(function(btn){
+    btn.classList.toggle('active', btn.getAttribute('data-filter') === filter);
+  });
+  renderCet6Listen();
+}
+
+// 搜索听力记录
+function searchCet6Listen(){
+  var input = document.getElementById('cet6ListenSearch');
+  cet6ListenSearchTerm = input ? input.value.trim().toLowerCase() : '';
+  renderCet6Listen();
+}
+
+// 渲染听力记录列表
+function renderCet6Listen(){
+  var list = document.getElementById('cet6ListenList');
+  if(!list) return;
+  var records = getCet6ListenRecords();
+  // 筛选
+  if(cet6ListenFilter !== 'all'){
+    records = records.filter(function(r){ return r.type === cet6ListenFilter; });
+  }
+  // 搜索
+  if(cet6ListenSearchTerm){
+    records = records.filter(function(r){
+      return r.name.toLowerCase().indexOf(cet6ListenSearchTerm) >= 0 ||
+             r.note.toLowerCase().indexOf(cet6ListenSearchTerm) >= 0;
+    });
+  }
+  if(records.length === 0){
+    list.innerHTML = '<div class="cet6-vocab-empty">🎧 没有找到匹配的听力记录</div>';
+    return;
+  }
+  list.innerHTML = records.map(function(r){
+    var accuracy = r.total > 0 ? Math.round(r.correct / r.total * 100) : 0;
+    var accuracyClass = accuracy >= 70 ? 'cet6-listen-accuracy-high' : (accuracy >= 50 ? 'cet6-listen-accuracy-mid' : 'cet6-listen-accuracy-low');
+    var typeName = LISTEN_TYPE_NAMES[r.type] || r.type;
+    return '<div class="cet6-listen-item" data-type="' + r.type + '">' +
+      '<div class="cet6-listen-header">' +
+      '<div class="cet6-listen-meta">' +
+      '<span class="cet6-listen-type-badge ' + r.type + '">' + typeName + '</span>' +
+      '<span class="cet6-listen-date">📅 ' + r.date + '</span>' +
+      '</div>' +
+      '<div class="cet6-listen-actions">' +
+      '<button class="cet6-vocab-action-btn delete-btn" title="删除" onclick="deleteCet6Listen(\'' + r.id + '\')">🗑️</button>' +
+      '</div></div>' +
+      '<div class="cet6-listen-name">' + escapeHtml(r.name) + '</div>' +
+      '<div class="cet6-listen-stats">' +
+      '<div class="cet6-listen-stat">正确率：<strong class="' + accuracyClass + '">' + accuracy + '%</strong>（' + r.correct + '/' + r.total + '）</div>' +
+      (r.duration > 0 ? '<div class="cet6-listen-stat">用时：<strong>' + r.duration + '分钟</strong></div>' : '') +
+      '</div>' +
+      (r.note ? '<div class="cet6-listen-note">💡 ' + escapeHtml(r.note) + '</div>' : '') +
+      '</div>';
+  }).join('');
+}
+
+// 更新听力统计
+function updateCet6ListenStats(){
+  var records = getCet6ListenRecords();
+  var total = records.length;
+  var done = records.filter(function(r){ return r.total > 0 && r.correct >= 0; }).length;
+  // 平均正确率
+  var totalAccuracy = 0;
+  var countWithAccuracy = 0;
+  records.forEach(function(r){
+    if(r.total > 0){
+      totalAccuracy += r.correct / r.total * 100;
+      countWithAccuracy++;
+    }
+  });
+  var avgAccuracy = countWithAccuracy > 0 ? Math.round(totalAccuracy / countWithAccuracy) : 0;
+  // 今日新增
+  var today = new Date();
+  var todayStr = today.toDateString();
+  var todayCount = records.filter(function(r){
+    return new Date(r.addedDate).toDateString() === todayStr;
+  }).length;
+  // 更新统计卡片
+  var totalEl = document.getElementById('cet6ListenTotal');
+  if(totalEl) totalEl.textContent = total;
+  var doneEl = document.getElementById('cet6ListenDone');
+  if(doneEl) doneEl.textContent = done;
+  var accuracyEl = document.getElementById('cet6ListenAccuracy');
+  if(accuracyEl) accuracyEl.textContent = avgAccuracy + '%';
+  var todayEl = document.getElementById('cet6ListenToday');
+  if(todayEl) todayEl.textContent = todayCount;
+  // 更新进度
+  var progressCountEl = document.getElementById('cet6ListenProgressCount');
+  if(progressCountEl) progressCountEl.textContent = total;
+  var progressEl = document.getElementById('cet6ListenProgress');
+  if(progressEl) progressEl.style.width = Math.min(100, (total / 40 * 100)) + '%';
+}
+
+
+/* ===== 六级模块 - 阅读管理功能 ===== */
+
+var CET6_READ_KEY = 'cet6_read_records';
+var cet6ReadFilter = 'all';
+var cet6ReadSearchTerm = '';
+
+var READ_TYPE_NAMES = {
+  detail: '仔细阅读',
+  match: '段落匹配',
+  cloze: '选词填空',
+  full: '全套阅读'
+};
+
+function getCet6ReadRecords(){
+  try{
+    var data = localStorage.getItem(CET6_READ_KEY);
+    return data ? JSON.parse(data) : [];
+  }catch(e){
+    return [];
+  }
+}
+
+function saveCet6ReadRecords(records){
+  localStorage.setItem(CET6_READ_KEY, JSON.stringify(records));
+}
+
+// 显示添加阅读记录弹窗
+function showCet6AddReadModal(){
+  var modal = document.getElementById('cet6AddReadModal');
+  if(modal) modal.style.display = 'flex';
+  document.getElementById('cet6ReadName').value = '';
+  document.getElementById('cet6ReadType').value = 'detail';
+  document.getElementById('cet6ReadCorrect').value = '';
+  document.getElementById('cet6ReadTotalQ').value = '';
+  document.getElementById('cet6ReadDuration').value = '';
+  document.getElementById('cet6ReadNote').value = '';
+  // 默认日期为今天
+  var today = new Date();
+  var dateStr = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0') + '-' + String(today.getDate()).padStart(2,'0');
+  document.getElementById('cet6ReadDate').value = dateStr;
+  setTimeout(function(){ document.getElementById('cet6ReadName').focus(); }, 100);
+}
+
+function hideCet6AddReadModal(event){
+  if(event && event.target !== event.currentTarget) return;
+  var modal = document.getElementById('cet6AddReadModal');
+  if(modal) modal.style.display = 'none';
+}
+
+// 添加阅读记录
+function addCet6Read(){
+  var name = document.getElementById('cet6ReadName').value.trim();
+  var type = document.getElementById('cet6ReadType').value;
+  var correct = parseInt(document.getElementById('cet6ReadCorrect').value) || 0;
+  var totalQ = parseInt(document.getElementById('cet6ReadTotalQ').value) || 0;
+  var duration = parseInt(document.getElementById('cet6ReadDuration').value) || 0;
+  var date = document.getElementById('cet6ReadDate').value;
+  var note = document.getElementById('cet6ReadNote').value.trim();
+  if(!name){
+    alert('请填写文章/套题名称');
+    return;
+  }
+  var records = getCet6ReadRecords();
+  var newRecord = {
+    id: Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+    name: name,
+    type: type,
+    correct: correct,
+    total: totalQ,
+    duration: duration,
+    date: date || new Date().toISOString().split('T')[0],
+    note: note,
+    addedDate: new Date().toISOString()
+  };
+  records.unshift(newRecord);
+  saveCet6ReadRecords(records);
+  hideCet6AddReadModal();
+  renderCet6Read();
+  updateCet6ReadStats();
+}
+
+// 删除阅读记录
+function deleteCet6Read(id){
+  if(!confirm('确定要删除这条阅读记录吗？')) return;
+  var records = getCet6ReadRecords();
+  records = records.filter(function(r){ return r.id !== id; });
+  saveCet6ReadRecords(records);
+  renderCet6Read();
+  updateCet6ReadStats();
+}
+
+// 筛选阅读记录
+function filterCet6Read(filter){
+  cet6ReadFilter = filter;
+  document.querySelectorAll('#cet6ReadFilters .cet6-filter-btn').forEach(function(btn){
+    btn.classList.toggle('active', btn.getAttribute('data-filter') === filter);
+  });
+  renderCet6Read();
+}
+
+// 搜索阅读记录
+function searchCet6Read(){
+  var input = document.getElementById('cet6ReadSearch');
+  cet6ReadSearchTerm = input ? input.value.trim().toLowerCase() : '';
+  renderCet6Read();
+}
+
+// 渲染阅读记录列表
+function renderCet6Read(){
+  var list = document.getElementById('cet6ReadList');
+  if(!list) return;
+  var records = getCet6ReadRecords();
+  // 筛选
+  if(cet6ReadFilter !== 'all'){
+    records = records.filter(function(r){ return r.type === cet6ReadFilter; });
+  }
+  // 搜索
+  if(cet6ReadSearchTerm){
+    records = records.filter(function(r){
+      return r.name.toLowerCase().indexOf(cet6ReadSearchTerm) >= 0 ||
+             r.note.toLowerCase().indexOf(cet6ReadSearchTerm) >= 0;
+    });
+  }
+  if(records.length === 0){
+    list.innerHTML = '<div class="cet6-vocab-empty">📖 没有找到匹配的阅读记录</div>';
+    return;
+  }
+  list.innerHTML = records.map(function(r){
+    var accuracy = r.total > 0 ? Math.round(r.correct / r.total * 100) : 0;
+    var accuracyClass = accuracy >= 70 ? 'cet6-listen-accuracy-high' : (accuracy >= 50 ? 'cet6-listen-accuracy-mid' : 'cet6-listen-accuracy-low');
+    var typeName = READ_TYPE_NAMES[r.type] || r.type;
+    return '<div class="cet6-read-item" data-type="' + r.type + '">' +
+      '<div class="cet6-read-header">' +
+      '<div class="cet6-read-meta">' +
+      '<span class="cet6-read-type-badge ' + r.type + '">' + typeName + '</span>' +
+      '<span class="cet6-read-date">📅 ' + r.date + '</span>' +
+      '</div>' +
+      '<div class="cet6-read-actions">' +
+      '<button class="cet6-vocab-action-btn delete-btn" title="删除" onclick="deleteCet6Read(\'' + r.id + '\')">🗑️</button>' +
+      '</div></div>' +
+      '<div class="cet6-read-name">' + escapeHtml(r.name) + '</div>' +
+      '<div class="cet6-read-stats">' +
+      '<div class="cet6-read-stat">正确率：<strong class="' + accuracyClass + '">' + accuracy + '%</strong>（' + r.correct + '/' + r.total + '）</div>' +
+      (r.duration > 0 ? '<div class="cet6-read-stat">用时：<strong>' + r.duration + '分钟</strong></div>' : '') +
+      '</div>' +
+      (r.note ? '<div class="cet6-read-note">💡 ' + escapeHtml(r.note) + '</div>' : '') +
+      '</div>';
+  }).join('');
+}
+
+// 更新阅读统计
+function updateCet6ReadStats(){
+  var records = getCet6ReadRecords();
+  var total = records.length;
+  var done = records.filter(function(r){ return r.total > 0 && r.correct >= 0; }).length;
+  // 平均正确率
+  var totalAccuracy = 0;
+  var countWithAccuracy = 0;
+  records.forEach(function(r){
+    if(r.total > 0){
+      totalAccuracy += r.correct / r.total * 100;
+      countWithAccuracy++;
+    }
+  });
+  var avgAccuracy = countWithAccuracy > 0 ? Math.round(totalAccuracy / countWithAccuracy) : 0;
+  // 今日新增
+  var today = new Date();
+  var todayStr = today.toDateString();
+  var todayCount = records.filter(function(r){
+    return new Date(r.addedDate).toDateString() === todayStr;
+  }).length;
+  // 更新统计卡片
+  var totalEl = document.getElementById('cet6ReadTotal');
+  if(totalEl) totalEl.textContent = total;
+  var doneEl = document.getElementById('cet6ReadDone');
+  if(doneEl) doneEl.textContent = done;
+  var accuracyEl = document.getElementById('cet6ReadAccuracy');
+  if(accuracyEl) accuracyEl.textContent = avgAccuracy + '%';
+  var todayEl = document.getElementById('cet6ReadToday');
+  if(todayEl) todayEl.textContent = todayCount;
+  // 更新进度
+  var progressCountEl = document.getElementById('cet6ReadProgressCount');
+  if(progressCountEl) progressCountEl.textContent = total;
+  var progressEl = document.getElementById('cet6ReadProgress');
+  if(progressEl) progressEl.style.width = Math.min(100, (total / 80 * 100)) + '%';
+}
+
+
+/* ===== 六级模块 - 写译管理功能 ===== */
+
+var CET6_WRITE_KEY = 'cet6_write_records';
+var cet6WriteFilter = 'all';
+var cet6WriteSearchTerm = '';
+
+var WRITE_TYPE_NAMES = {
+  writing: '写作',
+  translation: '翻译'
+};
+
+function getCet6WriteRecords(){
+  try{
+    var data = localStorage.getItem(CET6_WRITE_KEY);
+    return data ? JSON.parse(data) : [];
+  }catch(e){
+    return [];
+  }
+}
+
+function saveCet6WriteRecords(records){
+  localStorage.setItem(CET6_WRITE_KEY, JSON.stringify(records));
+}
+
+// 显示添加写译记录弹窗
+function showCet6AddWriteModal(){
+  var modal = document.getElementById('cet6AddWriteModal');
+  if(modal) modal.style.display = 'flex';
+  document.getElementById('cet6WriteTopic').value = '';
+  document.getElementById('cet6WriteType').value = 'writing';
+  document.getElementById('cet6WriteScoreInput').value = '';
+  document.getElementById('cet6WriteDuration').value = '';
+  document.getElementById('cet6WriteNote').value = '';
+  // 默认日期为今天
+  var today = new Date();
+  var dateStr = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0') + '-' + String(today.getDate()).padStart(2,'0');
+  document.getElementById('cet6WriteDate').value = dateStr;
+  setTimeout(function(){ document.getElementById('cet6WriteTopic').focus(); }, 100);
+}
+
+function hideCet6AddWriteModal(event){
+  if(event && event.target !== event.currentTarget) return;
+  var modal = document.getElementById('cet6AddWriteModal');
+  if(modal) modal.style.display = 'none';
+}
+
+// 添加写译记录
+function addCet6Write(){
+  var topic = document.getElementById('cet6WriteTopic').value.trim();
+  var type = document.getElementById('cet6WriteType').value;
+  var score = parseFloat(document.getElementById('cet6WriteScoreInput').value) || 0;
+  var duration = parseInt(document.getElementById('cet6WriteDuration').value) || 0;
+  var date = document.getElementById('cet6WriteDate').value;
+  var note = document.getElementById('cet6WriteNote').value.trim();
+  if(!topic){
+    alert('请填写题目/主题');
+    return;
+  }
+  var records = getCet6WriteRecords();
+  var newRecord = {
+    id: Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+    topic: topic,
+    type: type,
+    score: score,
+    duration: duration,
+    date: date || new Date().toISOString().split('T')[0],
+    note: note,
+    addedDate: new Date().toISOString()
+  };
+  records.unshift(newRecord);
+  saveCet6WriteRecords(records);
+  hideCet6AddWriteModal();
+  renderCet6Write();
+  updateCet6WriteStats();
+}
+
+// 删除写译记录
+function deleteCet6Write(id){
+  if(!confirm('确定要删除这条写译记录吗？')) return;
+  var records = getCet6WriteRecords();
+  records = records.filter(function(r){ return r.id !== id; });
+  saveCet6WriteRecords(records);
+  renderCet6Write();
+  updateCet6WriteStats();
+}
+
+// 筛选写译记录
+function filterCet6Write(filter){
+  cet6WriteFilter = filter;
+  document.querySelectorAll('#cet6WriteFilters .cet6-filter-btn').forEach(function(btn){
+    btn.classList.toggle('active', btn.getAttribute('data-filter') === filter);
+  });
+  renderCet6Write();
+}
+
+// 搜索写译记录
+function searchCet6Write(){
+  var input = document.getElementById('cet6WriteSearch');
+  cet6WriteSearchTerm = input ? input.value.trim().toLowerCase() : '';
+  renderCet6Write();
+}
+
+// 渲染写译记录列表
+function renderCet6Write(){
+  var list = document.getElementById('cet6WriteList');
+  if(!list) return;
+  var records = getCet6WriteRecords();
+  // 筛选
+  if(cet6WriteFilter !== 'all'){
+    records = records.filter(function(r){ return r.type === cet6WriteFilter; });
+  }
+  // 搜索
+  if(cet6WriteSearchTerm){
+    records = records.filter(function(r){
+      return r.topic.toLowerCase().indexOf(cet6WriteSearchTerm) >= 0 ||
+             r.note.toLowerCase().indexOf(cet6WriteSearchTerm) >= 0;
+    });
+  }
+  if(records.length === 0){
+    list.innerHTML = '<div class="cet6-vocab-empty">✍️ 没有找到匹配的写译记录</div>';
+    return;
+  }
+  list.innerHTML = records.map(function(r){
+    var scoreClass = r.score >= 12 ? 'cet6-write-score-high' : (r.score >= 9 ? 'cet6-write-score-mid' : 'cet6-write-score-low');
+    var typeName = WRITE_TYPE_NAMES[r.type] || r.type;
+    return '<div class="cet6-write-item" data-type="' + r.type + '">' +
+      '<div class="cet6-write-header">' +
+      '<div class="cet6-write-meta">' +
+      '<span class="cet6-write-type-badge ' + r.type + '">' + typeName + '</span>' +
+      '<span class="cet6-write-date">📅 ' + r.date + '</span>' +
+      '</div>' +
+      '<div class="cet6-write-actions">' +
+      '<button class="cet6-vocab-action-btn delete-btn" title="删除" onclick="deleteCet6Write(\'' + r.id + '\')">🗑️</button>' +
+      '</div></div>' +
+      '<div class="cet6-write-topic">' + escapeHtml(r.topic) + '</div>' +
+      '<div class="cet6-write-stats">' +
+      (r.score > 0 ? '<div class="cet6-write-stat">得分：<strong class="' + scoreClass + '">' + r.score + '/15</strong></div>' : '') +
+      (r.duration > 0 ? '<div class="cet6-write-stat">用时：<strong>' + r.duration + '分钟</strong></div>' : '') +
+      '</div>' +
+      (r.note ? '<div class="cet6-write-note">💡 ' + escapeHtml(r.note) + '</div>' : '') +
+      '</div>';
+  }).join('');
+}
+
+// 更新写译统计
+function updateCet6WriteStats(){
+  var records = getCet6WriteRecords();
+  var total = records.length;
+  var done = records.filter(function(r){ return r.score > 0; }).length;
+  // 平均得分
+  var totalScore = 0;
+  var countWithScore = 0;
+  records.forEach(function(r){
+    if(r.score > 0){
+      totalScore += r.score;
+      countWithScore++;
+    }
+  });
+  var avgScore = countWithScore > 0 ? (totalScore / countWithScore).toFixed(1) : 0;
+  // 今日新增
+  var today = new Date();
+  var todayStr = today.toDateString();
+  var todayCount = records.filter(function(r){
+    return new Date(r.addedDate).toDateString() === todayStr;
+  }).length;
+  // 更新统计卡片
+  var totalEl = document.getElementById('cet6WriteTotal');
+  if(totalEl) totalEl.textContent = total;
+  var doneEl = document.getElementById('cet6WriteDone');
+  if(doneEl) doneEl.textContent = done;
+  var scoreEl = document.getElementById('cet6WriteScore');
+  if(scoreEl) scoreEl.textContent = avgScore;
+  var todayEl = document.getElementById('cet6WriteToday');
+  if(todayEl) todayEl.textContent = todayCount;
+  // 更新进度
+  var progressCountEl = document.getElementById('cet6WriteProgressCount');
+  if(progressCountEl) progressCountEl.textContent = total;
+  var progressEl = document.getElementById('cet6WriteProgress');
+  if(progressEl) progressEl.style.width = Math.min(100, (total / 30 * 100)) + '%';
+}
+
+
+/* ===== 六级模块 - 资料搜索功能 ===== */
+
+function searchCet6Materials(){
+  var input = document.getElementById('cet6MaterialsSearch');
+  var searchTerm = input ? input.value.trim().toLowerCase() : '';
+  var list = document.getElementById('cet6MaterialsList');
+  if(!list) return;
+  var items = list.querySelectorAll('.career-item, .m-item');
+  items.forEach(function(item){
+    var text = item.textContent.toLowerCase();
+    if(searchTerm === '' || text.indexOf(searchTerm) >= 0){
+      item.style.display = '';
+    }else{
+      item.style.display = 'none';
+    }
   });
 }
 
