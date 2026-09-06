@@ -2640,8 +2640,11 @@ function go(view){
   });
   var titleEl = document.getElementById("pageTitle");
   if(titleEl) titleEl.textContent = TITLES[view] || view;
-  // SCM Career模块底栏显示控制
+  // 底栏显示控制（SCM Career / CET-6 / 灵犀库 / 工作SOP）
   document.body.classList.toggle("career-active", view==="career");
+  document.body.classList.toggle("cet6-active", view==="cet6");
+  document.body.classList.toggle("baichuan-active", view==="baichuan");
+  document.body.classList.toggle("sop-active", view==="sop");
   window.scrollTo({top:0});
 }
 document.addEventListener("click", function(e){
@@ -2692,12 +2695,18 @@ document.addEventListener("keydown", function(e){ if(e.key==="Escape") closeModa
     }
     if(document.getElementById("bcKbGrid")){
       flattenKb(); renderBcKb();
+      // 初始化灵犀库底栏子模块
+      initBaichuanSubTabs();
     }
     if(document.getElementById("cet6KbGrid")){
       flattenKb(); renderGenericKb("cet6KbGrid", CET6KBS, {_total:"cet6KbCount","词汇":"cet6WordCount","错题":"cet6ErrorCount","学习资料":"cet6MatCount"});
+      // 初始化六级底栏子模块
+      initCet6SubTabs();
     }
     if(document.getElementById("sopKbGrid")){
       flattenKb(); renderGenericKb("sopKbGrid", SOPKBS, {_total:"sopKbCount","工作流程":"sopFlowCount","岗位知识":"sopKnowCount","错题":"sopErrorCount"});
+      // 初始化工作SOP底栏子模块
+      initSopSubTabs();
     }
     if(document.getElementById("moneyRemain")){
       renderMoney();
@@ -2881,6 +2890,230 @@ function renderCareerKbCategory(){
       var idx = KB_FLAT.indexOf(n);
       var onclick = idx >= 0 ? 'openKbNote('+idx+')' : '';
       return careerListItem(n.icon || '📄', n.title, '', '', onclick);
+    }).join('');
+  });
+}
+
+
+/* ===== CET-6 六级底栏子模块导航 ===== */
+function initCet6SubTabs(){
+  var tabs = document.querySelectorAll('#module-cet6 .sub-tab');
+  if(!tabs.length) return;
+  tabs.forEach(function(tab){
+    tab.addEventListener('click', function(){
+      var sub = this.getAttribute('data-sub');
+      switchCet6Sub(sub);
+    });
+  });
+  // 渲染各子模块内容
+  renderCet6Category();
+}
+
+function switchCet6Sub(sub){
+  // 切换tab激活状态
+  document.querySelectorAll('#module-cet6 .sub-tab').forEach(function(t){
+    t.classList.toggle('active', t.getAttribute('data-sub') === sub);
+  });
+  // 切换内容显示
+  document.querySelectorAll('#module-cet6 .cet6-sub').forEach(function(el){
+    el.style.display = (el.id === 'cet6-sub-' + sub) ? '' : 'none';
+  });
+}
+
+function renderCet6Category(){
+  // 从CET6KBS中找到对应分类并渲染
+  var categories = {
+    'cet6WordsList': '01-词汇',
+    'cet6ListeningList': '02-听力',
+    'cet6ReadingList': '03-阅读',
+    'cet6WritingList': '04-写作',
+    'cet6TranslationList': '05-翻译',
+    'cet6ErrorsList': '06-错题本',
+    'cet6MaterialsList': '07-学习资料'
+  };
+  var countMap = {
+    'cet6WordsList': 'cet6WordsCount',
+    'cet6ListeningList': 'cet6ListeningCount',
+    'cet6ReadingList': 'cet6ReadingCount',
+    'cet6WritingList': 'cet6WritingCount',
+    'cet6TranslationList': 'cet6TranslationCount',
+    'cet6ErrorsList': 'cet6ErrorsCount',
+    'cet6MaterialsList': 'cet6MaterialsCount'
+  };
+  Object.keys(categories).forEach(function(elId){
+    var el = document.getElementById(elId);
+    if(!el) return;
+    var catName = categories[elId];
+    var kb = (CET6KBS||[]).find(function(k){ return k.name && k.name.indexOf(catName) >= 0; });
+    var countEl = document.getElementById(countMap[elId]);
+    if(!kb || !kb.groups || !kb.groups.length){
+      el.innerHTML = '<div class="career-list-empty">📂 这个分类还没有内容，去知识库添加吧～</div>';
+      if(countEl) countEl.textContent = '';
+      return;
+    }
+    var allNotes = [];
+    kb.groups.forEach(function(g){
+      (g.notes||[]).forEach(function(n){ allNotes.push(n); });
+    });
+    if(countEl) countEl.textContent = allNotes.length + ' 篇';
+    if(!allNotes.length){
+      el.innerHTML = '<div class="career-list-empty">📂 这个分类还没有内容</div>';
+      return;
+    }
+    // 找到在KB_FLAT中的索引
+    el.innerHTML = allNotes.map(function(n){
+      var idx = KB_FLAT.indexOf(n);
+      var onclick = idx >= 0 ? 'openKbNote('+idx+')' : '';
+      var sub = n.date ? '📅 ' + n.date : '';
+      return careerListItem(n.icon || '📄', n.title, sub, '', onclick);
+    }).join('');
+  });
+}
+
+
+/* ===== 灵犀库（百川智库）底栏子模块导航 ===== */
+function initBaichuanSubTabs(){
+  var tabs = document.querySelectorAll('#module-baichuan .sub-tab');
+  if(!tabs.length) return;
+  tabs.forEach(function(tab){
+    tab.addEventListener('click', function(){
+      var sub = this.getAttribute('data-sub');
+      switchBaichuanSub(sub);
+    });
+  });
+  // 渲染各子模块内容
+  renderBaichuanCategory();
+}
+
+function switchBaichuanSub(sub){
+  // 切换tab激活状态
+  document.querySelectorAll('#module-baichuan .sub-tab').forEach(function(t){
+    t.classList.toggle('active', t.getAttribute('data-sub') === sub);
+  });
+  // 切换内容显示
+  document.querySelectorAll('#module-baichuan .baichuan-sub').forEach(function(el){
+    el.style.display = (el.id === 'baichuan-sub-' + sub) ? '' : 'none';
+  });
+}
+
+function renderBaichuanCategory(){
+  // 从BCKBS中找到对应分类并渲染
+  var categories = {
+    'bcSkillsList': '01-技能技巧',
+    'bcTasksList': '02-任务流程',
+    'bcToolsList': '03-工具方法',
+    'bcIdeasList': '04-灵感碎片'
+  };
+  var countMap = {
+    'bcSkillsList': 'bcSkillsCount',
+    'bcTasksList': 'bcTasksCount',
+    'bcToolsList': 'bcToolsCount',
+    'bcIdeasList': 'bcIdeasCount'
+  };
+  Object.keys(categories).forEach(function(elId){
+    var el = document.getElementById(elId);
+    if(!el) return;
+    var catName = categories[elId];
+    var kb = (BCKBS||[]).find(function(k){ return k.name && k.name.indexOf(catName) >= 0; });
+    var countEl = document.getElementById(countMap[elId]);
+    if(!kb || !kb.groups || !kb.groups.length){
+      el.innerHTML = '<div class="career-list-empty">📂 这个分类还没有内容，去知识库添加吧～</div>';
+      if(countEl) countEl.textContent = '';
+      return;
+    }
+    var allNotes = [];
+    kb.groups.forEach(function(g){
+      (g.notes||[]).forEach(function(n){ allNotes.push(n); });
+    });
+    if(countEl) countEl.textContent = allNotes.length + ' 篇';
+    if(!allNotes.length){
+      el.innerHTML = '<div class="career-list-empty">📂 这个分类还没有内容</div>';
+      return;
+    }
+    // 找到在KB_FLAT中的索引
+    el.innerHTML = allNotes.map(function(n){
+      var idx = KB_FLAT.indexOf(n);
+      var onclick = idx >= 0 ? 'openKbNote('+idx+')' : '';
+      var sub = n.date ? '📅 ' + n.date : '';
+      return careerListItem(n.icon || '📄', n.title, sub, '', onclick);
+    }).join('');
+  });
+}
+
+
+/* ===== 工作SOP底栏子模块导航 ===== */
+function initSopSubTabs(){
+  var tabs = document.querySelectorAll('#module-sop .sub-tab');
+  if(!tabs.length) return;
+  tabs.forEach(function(tab){
+    tab.addEventListener('click', function(){
+      var sub = this.getAttribute('data-sub');
+      switchSopSub(sub);
+    });
+  });
+  // 渲染各子模块内容
+  renderSopCategory();
+}
+
+function switchSopSub(sub){
+  // 切换tab激活状态
+  document.querySelectorAll('#module-sop .sub-tab').forEach(function(t){
+    t.classList.toggle('active', t.getAttribute('data-sub') === sub);
+  });
+  // 切换内容显示
+  document.querySelectorAll('#module-sop .sop-sub').forEach(function(el){
+    el.style.display = (el.id === 'sop-sub-' + sub) ? '' : 'none';
+  });
+}
+
+function renderSopCategory(){
+  // 从SOPKBS中找到对应分类并渲染
+  var categories = {
+    'sopFlowList': '03_日常工作流程',
+    'sopKnowList': '05_岗位知识',
+    'sopErrorList': '07_错题本',
+    'sopHandoverList': '01_交接文件',
+    'sopToolsList': '02_网栈工具',
+    'sopTermsList': '04_行业术语',
+    'sopProjectsList': '06_项目成果',
+    'sopAssetsList': '08_素材库'
+  };
+  var countMap = {
+    'sopFlowList': 'sopFlowListCount',
+    'sopKnowList': 'sopKnowListCount',
+    'sopErrorList': 'sopErrorListCount',
+    'sopHandoverList': 'sopHandoverCount',
+    'sopToolsList': 'sopToolsCount',
+    'sopTermsList': 'sopTermsCount',
+    'sopProjectsList': 'sopProjectsCount',
+    'sopAssetsList': 'sopAssetsCount'
+  };
+  Object.keys(categories).forEach(function(elId){
+    var el = document.getElementById(elId);
+    if(!el) return;
+    var catName = categories[elId];
+    var kb = (SOPKBS||[]).find(function(k){ return k.name && k.name.indexOf(catName) >= 0; });
+    var countEl = document.getElementById(countMap[elId]);
+    if(!kb || !kb.groups || !kb.groups.length){
+      el.innerHTML = '<div class="career-list-empty">📂 这个分类还没有内容，去知识库添加吧～</div>';
+      if(countEl) countEl.textContent = '';
+      return;
+    }
+    var allNotes = [];
+    kb.groups.forEach(function(g){
+      (g.notes||[]).forEach(function(n){ allNotes.push(n); });
+    });
+    if(countEl) countEl.textContent = allNotes.length + ' 篇';
+    if(!allNotes.length){
+      el.innerHTML = '<div class="career-list-empty">📂 这个分类还没有内容</div>';
+      return;
+    }
+    // 找到在KB_FLAT中的索引
+    el.innerHTML = allNotes.map(function(n){
+      var idx = KB_FLAT.indexOf(n);
+      var onclick = idx >= 0 ? 'openKbNote('+idx+')' : '';
+      var sub = n.date ? '📅 ' + n.date : '';
+      return careerListItem(n.icon || '📄', n.title, sub, '', onclick);
     }).join('');
   });
 }

@@ -404,15 +404,57 @@
           <div class="page-title">📚 百川智库</div>
           <div class="page-sub">你的第二大脑 · 技能技巧 / 工具方法 / 任务流程 / 灵感碎片</div>
         </div>
-        <div class="stat-grid">
-          <div class="stat-card p1"><div class="em">📄</div><div class="lab">知识笔记</div><div class="num" id="bcKbCount">0</div></div>
-          <div class="stat-card p2"><div class="em">🛠️</div><div class="lab">技能技巧</div><div class="num" id="bcSkillCount">0</div></div>
-          <div class="stat-card p3"><div class="em">🔧</div><div class="lab">工具方法</div><div class="num" id="bcToolCount">0</div></div>
-          <div class="stat-card p4"><div class="em">💡</div><div class="lab">灵感碎片</div><div class="num" id="bcIdeaCount">0</div></div>
+        <!-- 子模块内容区 -->
+        <div class="baichuan-sub-content">
+          <!-- 概览 -->
+          <div class="baichuan-sub" id="baichuan-sub-overview">
+            <div class="stat-grid">
+              <div class="stat-card p1"><div class="em">📄</div><div class="lab">知识笔记</div><div class="num" id="bcKbCount">0</div></div>
+              <div class="stat-card p2"><div class="em">🛠️</div><div class="lab">技能技巧</div><div class="num" id="bcSkillCount">0</div></div>
+              <div class="stat-card p3"><div class="em">🔧</div><div class="lab">工具方法</div><div class="num" id="bcToolCount">0</div></div>
+              <div class="stat-card p4"><div class="em">💡</div><div class="lab">灵感碎片</div><div class="num" id="bcIdeaCount">0</div></div>
+            </div>
+            <div class="card">
+              <div class="card-head">📂 知识分类</div>
+              <div class="kb-grid" id="bcKbGrid"></div>
+            </div>
+          </div>
+          <!-- 技能技巧 -->
+          <div class="baichuan-sub" id="baichuan-sub-skills" style="display:none">
+            <div class="card">
+              <div class="card-head">🛠️ 技能技巧 <span class="m-count" id="bcSkillsCount"></span></div>
+              <div class="career-list" id="bcSkillsList"></div>
+            </div>
+          </div>
+          <!-- 任务流程 -->
+          <div class="baichuan-sub" id="baichuan-sub-tasks" style="display:none">
+            <div class="card">
+              <div class="card-head">📋 任务流程 <span class="m-count" id="bcTasksCount"></span></div>
+              <div class="career-list" id="bcTasksList"></div>
+            </div>
+          </div>
+          <!-- 工具方法 -->
+          <div class="baichuan-sub" id="baichuan-sub-tools" style="display:none">
+            <div class="card">
+              <div class="card-head">🔧 工具方法 <span class="m-count" id="bcToolsCount"></span></div>
+              <div class="career-list" id="bcToolsList"></div>
+            </div>
+          </div>
+          <!-- 灵感碎片 -->
+          <div class="baichuan-sub" id="baichuan-sub-ideas" style="display:none">
+            <div class="card">
+              <div class="card-head">💡 灵感碎片 <span class="m-count" id="bcIdeasCount"></span></div>
+              <div class="career-list" id="bcIdeasList"></div>
+            </div>
+          </div>
         </div>
-        <div class="card">
-          <div class="card-head">📂 知识分类</div>
-          <div class="kb-grid" id="bcKbGrid"></div>
+        <!-- 底栏子模块导航 -->
+        <div class="sub-tab-bar">
+          <div class="sub-tab active" data-sub="overview">📊 概览</div>
+          <div class="sub-tab" data-sub="skills">🛠️ 技能</div>
+          <div class="sub-tab" data-sub="tasks">📋 流程</div>
+          <div class="sub-tab" data-sub="tools">🔧 工具</div>
+          <div class="sub-tab" data-sub="ideas">💡 灵感</div>
         </div>
       </section>
 
@@ -495,8 +537,6 @@
           <div class="sub-tab" data-sub="materials">📚 资料</div>
         </div>
       </section>
-        </div>
-      </section>
 
       <!-- 📖 六级学习 -->
       <section id="module-cet6" class="view">
@@ -504,15 +544,77 @@
           <div class="page-title">📖 六级学习</div>
           <div class="page-sub">备考总览 · 词汇/听力/阅读/写作/翻译 · 错题本</div>
         </div>
-        <div class="stat-grid">
-          <div class="stat-card p1"><div class="em">📄</div><div class="lab">学习笔记</div><div class="num" id="cet6KbCount">0</div></div>
-          <div class="stat-card p2"><div class="em">📝</div><div class="lab">词汇</div><div class="num" id="cet6WordCount">0</div></div>
-          <div class="stat-card p3"><div class="em">❌</div><div class="lab">错题</div><div class="num" id="cet6ErrorCount">0</div></div>
-          <div class="stat-card p4"><div class="em">📚</div><div class="lab">学习资料</div><div class="num" id="cet6MatCount">0</div></div>
+        <!-- 子模块内容区 -->
+        <div class="cet6-sub-content">
+          <!-- 概览 -->
+          <div class="cet6-sub" id="cet6-sub-overview">
+            <div class="stat-grid">
+              <div class="stat-card p1"><div class="em">📄</div><div class="lab">学习笔记</div><div class="num" id="cet6KbCount">0</div></div>
+              <div class="stat-card p2"><div class="em">📝</div><div class="lab">词汇</div><div class="num" id="cet6WordCount">0</div></div>
+              <div class="stat-card p3"><div class="em">❌</div><div class="lab">错题</div><div class="num" id="cet6ErrorCount">0</div></div>
+              <div class="stat-card p4"><div class="em">📚</div><div class="lab">学习资料</div><div class="num" id="cet6MatCount">0</div></div>
+            </div>
+            <div class="card">
+              <div class="card-head">📂 学习分类</div>
+              <div class="kb-grid" id="cet6KbGrid"></div>
+            </div>
+          </div>
+          <!-- 词汇 -->
+          <div class="cet6-sub" id="cet6-sub-words" style="display:none">
+            <div class="card">
+              <div class="card-head">📝 词汇 <span class="m-count" id="cet6WordsCount"></span></div>
+              <div class="career-list" id="cet6WordsList"></div>
+            </div>
+          </div>
+          <!-- 听力 -->
+          <div class="cet6-sub" id="cet6-sub-listening" style="display:none">
+            <div class="card">
+              <div class="card-head">🎧 听力 <span class="m-count" id="cet6ListeningCount"></span></div>
+              <div class="career-list" id="cet6ListeningList"></div>
+            </div>
+          </div>
+          <!-- 阅读 -->
+          <div class="cet6-sub" id="cet6-sub-reading" style="display:none">
+            <div class="card">
+              <div class="card-head">📖 阅读 <span class="m-count" id="cet6ReadingCount"></span></div>
+              <div class="career-list" id="cet6ReadingList"></div>
+            </div>
+          </div>
+          <!-- 写译 -->
+          <div class="cet6-sub" id="cet6-sub-writing" style="display:none">
+            <div class="card">
+              <div class="card-head">✍️ 写作 <span class="m-count" id="cet6WritingCount"></span></div>
+              <div class="career-list" id="cet6WritingList"></div>
+            </div>
+            <div class="card">
+              <div class="card-head">🌐 翻译 <span class="m-count" id="cet6TranslationCount"></span></div>
+              <div class="career-list" id="cet6TranslationList"></div>
+            </div>
+          </div>
+          <!-- 错题 -->
+          <div class="cet6-sub" id="cet6-sub-errors" style="display:none">
+            <div class="card">
+              <div class="card-head">❌ 错题本 <span class="m-count" id="cet6ErrorsCount"></span></div>
+              <div class="career-list" id="cet6ErrorsList"></div>
+            </div>
+          </div>
+          <!-- 资料 -->
+          <div class="cet6-sub" id="cet6-sub-materials" style="display:none">
+            <div class="card">
+              <div class="card-head">📚 学习资料 <span class="m-count" id="cet6MaterialsCount"></span></div>
+              <div class="career-list" id="cet6MaterialsList"></div>
+            </div>
+          </div>
         </div>
-        <div class="card">
-          <div class="card-head">📂 学习分类</div>
-          <div class="kb-grid" id="cet6KbGrid"></div>
+        <!-- 底栏子模块导航 -->
+        <div class="sub-tab-bar">
+          <div class="sub-tab active" data-sub="overview">📊 概览</div>
+          <div class="sub-tab" data-sub="words">📝 词汇</div>
+          <div class="sub-tab" data-sub="listening">🎧 听力</div>
+          <div class="sub-tab" data-sub="reading">📖 阅读</div>
+          <div class="sub-tab" data-sub="writing">✍️ 写译</div>
+          <div class="sub-tab" data-sub="errors">❌ 错题</div>
+          <div class="sub-tab" data-sub="materials">📚 资料</div>
         </div>
       </section>
 
@@ -522,15 +624,73 @@
           <div class="page-title">🛠️ 工作SOP</div>
           <div class="page-sub">标准化工作流程 · 行业术语 · 岗位知识 · 项目成果 · 错题本</div>
         </div>
-        <div class="stat-grid">
-          <div class="stat-card p1"><div class="em">📄</div><div class="lab">SOP笔记</div><div class="num" id="sopKbCount">0</div></div>
-          <div class="stat-card p2"><div class="em">📋</div><div class="lab">工作流程</div><div class="num" id="sopFlowCount">0</div></div>
-          <div class="stat-card p3"><div class="em">💡</div><div class="lab">岗位知识</div><div class="num" id="sopKnowCount">0</div></div>
-          <div class="stat-card p4"><div class="em">❌</div><div class="lab">错题复盘</div><div class="num" id="sopErrorCount">0</div></div>
+        <!-- 子模块内容区 -->
+        <div class="sop-sub-content">
+          <!-- 概览 -->
+          <div class="sop-sub" id="sop-sub-overview">
+            <div class="stat-grid">
+              <div class="stat-card p1"><div class="em">📄</div><div class="lab">SOP笔记</div><div class="num" id="sopKbCount">0</div></div>
+              <div class="stat-card p2"><div class="em">📋</div><div class="lab">工作流程</div><div class="num" id="sopFlowCount">0</div></div>
+              <div class="stat-card p3"><div class="em">💡</div><div class="lab">岗位知识</div><div class="num" id="sopKnowCount">0</div></div>
+              <div class="stat-card p4"><div class="em">❌</div><div class="lab">错题复盘</div><div class="num" id="sopErrorCount">0</div></div>
+            </div>
+            <div class="card">
+              <div class="card-head">📂 SOP分类</div>
+              <div class="kb-grid" id="sopKbGrid"></div>
+            </div>
+          </div>
+          <!-- 工作流程 -->
+          <div class="sop-sub" id="sop-sub-flow" style="display:none">
+            <div class="card">
+              <div class="card-head">📋 工作流程 <span class="m-count" id="sopFlowListCount"></span></div>
+              <div class="career-list" id="sopFlowList"></div>
+            </div>
+          </div>
+          <!-- 岗位知识 -->
+          <div class="sop-sub" id="sop-sub-know" style="display:none">
+            <div class="card">
+              <div class="card-head">💡 岗位知识 <span class="m-count" id="sopKnowListCount"></span></div>
+              <div class="career-list" id="sopKnowList"></div>
+            </div>
+          </div>
+          <!-- 错题复盘 -->
+          <div class="sop-sub" id="sop-sub-error" style="display:none">
+            <div class="card">
+              <div class="card-head">❌ 错题复盘 <span class="m-count" id="sopErrorListCount"></span></div>
+              <div class="career-list" id="sopErrorList"></div>
+            </div>
+          </div>
+          <!-- 资料素材 -->
+          <div class="sop-sub" id="sop-sub-materials" style="display:none">
+            <div class="card">
+              <div class="card-head">📁 交接文件 <span class="m-count" id="sopHandoverCount"></span></div>
+              <div class="career-list" id="sopHandoverList"></div>
+            </div>
+            <div class="card">
+              <div class="card-head">🔧 网栈工具 <span class="m-count" id="sopToolsCount"></span></div>
+              <div class="career-list" id="sopToolsList"></div>
+            </div>
+            <div class="card">
+              <div class="card-head">📖 行业术语 <span class="m-count" id="sopTermsCount"></span></div>
+              <div class="career-list" id="sopTermsList"></div>
+            </div>
+            <div class="card">
+              <div class="card-head">🏆 项目成果 <span class="m-count" id="sopProjectsCount"></span></div>
+              <div class="career-list" id="sopProjectsList"></div>
+            </div>
+            <div class="card">
+              <div class="card-head">📦 素材库 <span class="m-count" id="sopAssetsCount"></span></div>
+              <div class="career-list" id="sopAssetsList"></div>
+            </div>
+          </div>
         </div>
-        <div class="card">
-          <div class="card-head">📂 SOP分类</div>
-          <div class="kb-grid" id="sopKbGrid"></div>
+        <!-- 底栏子模块导航 -->
+        <div class="sub-tab-bar">
+          <div class="sub-tab active" data-sub="overview">📊 概览</div>
+          <div class="sub-tab" data-sub="flow">📋 流程</div>
+          <div class="sub-tab" data-sub="know">💡 知识</div>
+          <div class="sub-tab" data-sub="error">❌ 错题</div>
+          <div class="sub-tab" data-sub="materials">📁 素材</div>
         </div>
       </section>
 

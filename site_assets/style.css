@@ -725,9 +725,56 @@ a{color:var(--pink-deep);text-decoration:none}
 }
 
 
+/* ===== 模块标题区样式（SCM Career / 灵犀库 / CET-6 / 工作SOP） ===== */
+#module-career .page-head,
+#module-baichuan .page-head,
+#module-cet6 .page-head,
+#module-sop .page-head{
+  margin-bottom:28px;
+  padding:6px 4px;
+}
+#module-career .page-title,
+#module-baichuan .page-title,
+#module-cet6 .page-title,
+#module-sop .page-title{
+  font-size:28px;
+  font-weight:800;
+  color:var(--text);
+  display:inline-block;
+  position:relative;
+  padding-bottom:10px;
+}
+#module-career .page-title::after,
+#module-baichuan .page-title::after,
+#module-cet6 .page-title::after,
+#module-sop .page-title::after{
+  content:'';
+  position:absolute;
+  bottom:0;
+  left:0;
+  width:140px;
+  height:3px;
+  background:linear-gradient(90deg,var(--pink-deep),var(--purple));
+  border-radius:2px;
+}
+#module-career .page-sub,
+#module-baichuan .page-sub,
+#module-cet6 .page-sub,
+#module-sop .page-sub{
+  font-size:14px;
+  color:var(--muted);
+  margin-top:8px;
+}
+
 /* ===== SCM Career 底栏子模块导航 ===== */
 .career-sub-content{padding-bottom:90px;min-height:calc(100vh - 200px)}
 .career-sub{animation:fadeIn .3s ease}
+.cet6-sub-content{padding-bottom:90px;min-height:calc(100vh - 200px)}
+.cet6-sub{animation:fadeIn .3s ease}
+.baichuan-sub-content{padding-bottom:90px;min-height:calc(100vh - 200px)}
+.baichuan-sub{animation:fadeIn .3s ease}
+.sop-sub-content{padding-bottom:90px;min-height:calc(100vh - 200px)}
+.sop-sub{animation:fadeIn .3s ease}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 
 /* 底栏默认隐藏，只在SCM Career模块激活时显示 */
@@ -755,7 +802,10 @@ a{color:var(--pink-deep);text-decoration:none}
   max-width:680px;
   margin:0 auto;
 }
-body.career-active .sub-tab-bar{display:flex}
+body.career-active .sub-tab-bar,
+body.cet6-active .sub-tab-bar,
+body.baichuan-active .sub-tab-bar,
+body.sop-active .sub-tab-bar{display:flex}
 
 .sub-tab{
   display:flex;
@@ -853,5 +903,8 @@ body.career-active .sub-tab-bar{display:flex}
   .sub-tab{padding:6px 12px;font-size:11.5px;flex-shrink:0}
   .sub-tab.active::after{display:none}
   .career-sub-content{padding-bottom:76px}
+  .cet6-sub-content{padding-bottom:76px}
+  .baichuan-sub-content{padding-bottom:76px}
+  .sop-sub-content{padding-bottom:76px}
 }
 
