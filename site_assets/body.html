@@ -1871,5 +1871,18 @@
   </div>
 </div>
 
+<!-- 通用输入/确认弹窗（替代原生 prompt/confirm，Electron 兼容） -->
+<div class="prompt-backdrop" id="wehPromptModal" style="display:none" onclick="cancelWehPrompt()">
+  <div class="prompt-modal" onclick="event.stopPropagation()">
+    <div class="prompt-title" id="wehPromptTitle"></div>
+    <div class="prompt-fields" id="wehPromptFields"></div>
+    <div class="prompt-msg" id="wehPromptMsg" style="display:none"></div>
+    <div class="prompt-btns">
+      <button type="button" class="prompt-btn prompt-cancel" onclick="cancelWehPrompt()">取消</button>
+      <button type="button" class="prompt-btn prompt-ok" id="wehPromptOk" onclick="submitWehPrompt()">确定</button>
+    </div>
+  </div>
+</div>
+
 <div id="floats"></div>
 <div class="toast" id="toast"></div>

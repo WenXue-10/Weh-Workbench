@@ -16,6 +16,71 @@ function closeModal(){ document.getElementById("modal").classList.remove("show")
 var toastTimer=null;
 function toast(msg){ var t=document.getElementById("toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(toastTimer); toastTimer=setTimeout(function(){t.classList.remove("show");},2200); }
 
+/* ===== 通用输入/确认弹窗（替代原生 prompt/confirm，Electron 兼容） ===== */
+var _promptResolve=null, _promptIsConfirm=false;
+function showPrompt(opts){
+  opts = opts || {};
+  var fields = (opts.fields && opts.fields.length) ? opts.fields : [{label:"", value:"", placeholder:""}];
+  _promptIsConfirm = false;
+  document.getElementById("wehPromptTitle").textContent = opts.title || "请输入";
+  document.getElementById("wehPromptMsg").style.display = "none";
+  var fieldsEl = document.getElementById("wehPromptFields");
+  fieldsEl.innerHTML = fields.map(function(f,i){
+    return '<div class="prompt-field"><label>'+(f.label||"")+'</label>'
+      +'<input type="'+(f.type||"text")+'" id="wehPromptInput'+i+'" value="'+esc(f.value||"")+'" placeholder="'+esc(f.placeholder||"")+'"></div>';
+  }).join("");
+  document.getElementById("wehPromptOk").textContent = opts.okText || "确定";
+  openWehPrompt();
+  var first = document.getElementById("wehPromptInput0");
+  if(first) setTimeout(function(){ first.focus(); first.select(); }, 60);
+  return new Promise(function(resolve){ _promptResolve = resolve; });
+}
+function showConfirm(msg, opts){
+  opts = opts || {};
+  _promptIsConfirm = true;
+  document.getElementById("wehPromptTitle").textContent = opts.title || "确认";
+  document.getElementById("wehPromptFields").innerHTML = "";
+  var msgEl = document.getElementById("wehPromptMsg");
+  msgEl.style.display = "block";
+  msgEl.textContent = msg;
+  document.getElementById("wehPromptOk").textContent = opts.okText || "确定";
+  openWehPrompt();
+  return new Promise(function(resolve){ _promptResolve = resolve; });
+}
+function openWehPrompt(){
+  var m = document.getElementById("wehPromptModal");
+  m.style.display = "flex";
+  setTimeout(function(){ m.classList.add("show"); }, 10);
+}
+function hideWehPrompt(){
+  var m = document.getElementById("wehPromptModal");
+  m.classList.remove("show");
+  setTimeout(function(){ m.style.display = "none"; }, 150);
+}
+function submitWehPrompt(){
+  if(!_promptResolve) return;
+  var resolve = _promptResolve; _promptResolve = null;
+  if(_promptIsConfirm){ hideWehPrompt(); resolve(true); return; }
+  var inputs = document.getElementById("wehPromptFields").querySelectorAll("input");
+  var vals = [];
+  for(var i=0;i<inputs.length;i++){ vals.push(inputs[i].value); }
+  hideWehPrompt();
+  resolve(vals);
+}
+function cancelWehPrompt(){
+  if(!_promptResolve) return;
+  var resolve = _promptResolve; _promptResolve = null;
+  hideWehPrompt();
+  resolve(null);
+}
+document.addEventListener("keydown", function(e){
+  var m = document.getElementById("wehPromptModal");
+  if(m && m.style.display === "flex"){
+    if(e.key === "Enter"){ e.preventDefault(); submitWehPrompt(); }
+    else if(e.key === "Escape"){ cancelWehPrompt(); }
+  }
+});
+
 /* ---------- 首页 ---------- */
 function renderHome(){
   var st = D.stats||{};
@@ -488,15 +553,23 @@ function renderMoney(){
   renderMoneyChat();
 }
 
-function quickExpense(cat, amount){
+async function quickExpense(cat, amount){
+  var vals = await showPrompt({
+    title: cat+" 记一笔",
+    fields: [
+      {label:"日期时间", value:nowDateTime(), placeholder:"YYYY-MM-DD HH:MM"},
+      {label:"备注", value:"", placeholder:"如：午餐/公司楼下/和朋友"}
+    ]
+  });
+  if(!vals) return;
+  var dt = parseDateTime(vals[0] || nowDateTime());
+  var note = vals[1] || "";
   var data = loadMoney();
   var id = Date.now();
-  var dtInput = prompt(cat+" 日期时间（默认 "+nowDateTime()+"，可改，格式 YYYY-MM-DD HH:MM）：", nowDateTime()) || nowDateTime();
-  var dt = parseDateTime(dtInput);
-  var note = prompt(cat+" 备注（可选，如：午餐/公司楼下/和朋友，不填直接点确定）：") || "";
   data.records.push({id:id, category:cat, amount:amount, date:dt.date, time:dt.time, impulse:!!IMPULSE_CATS[cat], note:note});
   saveMoney(data);
   renderMoney();
+  toast(cat+" ¥"+amount+" 已记入");
   if(isHealthCategory(cat)){
     try{
       var health = loadHealth();
@@ -507,43 +580,57 @@ function quickExpense(cat, amount){
     }catch(e){ console.log("同步到饮食台失败:", e.message); }
   }
 }
-function addCustomExpense(){
-  var cat = prompt("消费类别（如：打车/奶茶/其他）：");
+async function addCustomExpense(){
+  var vals = await showPrompt({
+    title: "记一笔自定义消费",
+    fields: [
+      {label:"消费类别", value:"", placeholder:"如：打车/奶茶/其他"},
+      {label:"金额", value:"", placeholder:"数字，如 25"},
+      {label:"日期时间", value:nowDateTime(), placeholder:"YYYY-MM-DD HH:MM"},
+      {label:"备注", value:"", placeholder:"可选"}
+    ]
+  });
+  if(!vals) return;
+  var cat = (vals[0]||"").trim();
   if(!cat) return;
-  var amount = prompt("金额：");
-  if(!amount || isNaN(amount)) return;
-  var dtInput = prompt("日期时间（默认 "+nowDateTime()+"，可改，格式 YYYY-MM-DD HH:MM）：", nowDateTime()) || nowDateTime();
-  var dt = parseDateTime(dtInput);
-  var note = prompt("备注（可选）：") || "";
+  var amount = Number(vals[1]);
+  if(!vals[1] || isNaN(amount)) return;
+  var dt = parseDateTime(vals[2] || nowDateTime());
+  var note = vals[3] || "";
   var data = loadMoney();
   var id = Date.now();
-  data.records.push({id:id, category:cat, amount:Number(amount), date:dt.date, time:dt.time, impulse:false, note:note});
+  data.records.push({id:id, category:cat, amount:amount, date:dt.date, time:dt.time, impulse:false, note:note});
   saveMoney(data);
   renderMoney();
+  toast(cat+" ¥"+amount+" 已记入");
   if(isHealthCategory(cat)){
     try{
       var health = loadHealth();
       if(!health.records.find(function(r){ return r.id===id; })){
-        health.records.push({id:id, type:getHealthType(cat), category:cat, amount:Number(amount), date:dt.date, time:dt.time, note:note});
+        health.records.push({id:id, type:getHealthType(cat), category:cat, amount:amount, date:dt.date, time:dt.time, note:note});
         saveHealth(health);
       }
     }catch(e){ console.log("同步到饮食台失败:", e.message); }
   }
 }
-function editExpAmount(id){
+async function editExpAmount(id){
   var data = loadMoney();
   var r = data.records.find(function(x){ return x.id===id; });
   if(!r) return;
-  var newAmt = prompt("修改金额（当前 ¥"+r.amount+"）：");
-  if(!newAmt || isNaN(newAmt)) return;
-  r.amount = Number(newAmt);
+  var vals = await showPrompt({
+    title: "修改金额",
+    fields: [{label:"金额", value:String(r.amount), placeholder:"数字"}]
+  });
+  if(!vals || !vals[0] || isNaN(Number(vals[0]))) return;
+  var newAmt = Number(vals[0]);
+  r.amount = newAmt;
   saveMoney(data);
   renderMoney();
   if(isHealthCategory(r.category)){
     try{
       var health = loadHealth();
       var hr = health.records.find(function(x){ return x.id===id; });
-      if(hr){ hr.amount = Number(newAmt); saveHealth(health); }
+      if(hr){ hr.amount = newAmt; saveHealth(health); }
     }catch(e){ console.log("同步修改饮食台失败:", e.message); }
   }
 }
@@ -556,39 +643,52 @@ function toggleImpulse(id){
   renderMoney();
 }
 function delExpense(id){
-  if(!confirm("确定删除这笔记录？（饮食台的对应记录也会同步删除）")) return;
-  var data = loadMoney();
-  var r = data.records.find(function(x){ return x.id===id; });
-  data.records = data.records.filter(function(x){ return x.id!==id; });
-  saveMoney(data);
-  renderMoney();
-  if(r && isHealthCategory(r.category)){
-    try{
-      var health = loadHealth();
-      health.records = health.records.filter(function(x){ return x.id!==id; });
-      saveHealth(health);
-    }catch(e){ console.log("同步删除饮食台失败:", e.message); }
-  }
+  showConfirm("确定删除这笔记录？（饮食台的对应记录也会同步删除）").then(function(ok){
+    if(!ok) return;
+    var data = loadMoney();
+    var r = data.records.find(function(x){ return x.id===id; });
+    data.records = data.records.filter(function(x){ return x.id!==id; });
+    saveMoney(data);
+    renderMoney();
+    if(r && isHealthCategory(r.category)){
+      try{
+        var health = loadHealth();
+        health.records = health.records.filter(function(x){ return x.id!==id; });
+        saveHealth(health);
+      }catch(e){ console.log("同步删除饮食台失败:", e.message); }
+    }
+  });
 }
-function editMoneyBudget(){
+async function editMoneyBudget(){
   var data = loadMoney();
-  var v = prompt("本月预算（当前 ¥"+data.budget+"）：");
-  if(!v || isNaN(v)) return;
-  data.budget = Number(v);
+  var vals = await showPrompt({
+    title: "修改本月预算",
+    fields: [{label:"预算金额", value:String(data.budget), placeholder:"数字"}]
+  });
+  if(!vals || !vals[0] || isNaN(Number(vals[0]))) return;
+  data.budget = Number(vals[0]);
   saveMoney(data); renderMoney();
 }
-function editMoneyFixedSave(){
+async function editMoneyFixedSave(){
   var data = loadMoney();
-  var v = prompt("固定存款（当前 ¥"+data.fixedSave+"）：");
-  if(!v || isNaN(v)) return;
-  data.fixedSave = Number(v);
+  var vals = await showPrompt({
+    title: "修改固定存款",
+    fields: [{label:"固定存款", value:String(data.fixedSave), placeholder:"数字"}]
+  });
+  if(!vals || !vals[0] || isNaN(Number(vals[0]))) return;
+  data.fixedSave = Number(vals[0]);
   saveMoney(data); renderMoney();
 }
-function editMoneyCycleStart(){
+async function editMoneyCycleStart(){
   var data = loadMoney();
-  var v = prompt("账单日（每月几号，当前 "+data.cycleStart+" 号）：");
-  if(!v || isNaN(v) || v<1 || v>28) return;
-  data.cycleStart = Number(v);
+  var vals = await showPrompt({
+    title: "修改账单日",
+    fields: [{label:"账单日（1-28号）", value:String(data.cycleStart), placeholder:"如 20"}]
+  });
+  if(!vals || !vals[0] || isNaN(Number(vals[0]))) return;
+  var v = Number(vals[0]);
+  if(v<1 || v>28) return;
+  data.cycleStart = v;
   saveMoney(data); renderMoney();
 }
 
@@ -859,14 +959,22 @@ function renderHealth(){
   renderHealthChat();
 }
 
-function quickDrink(cat, amount){
+async function quickDrink(cat, amount){
+  var vals = await showPrompt({
+    title: cat+" 记一杯",
+    fields: [
+      {label:"日期时间", value:nowDateTime(), placeholder:"YYYY-MM-DD HH:MM"},
+      {label:"备注", value:"", placeholder:"如：便利店/美式/大杯"}
+    ]
+  });
+  if(!vals) return;
+  var dt = parseDateTime(vals[0] || nowDateTime());
+  var note = vals[1] || "";
   var data = loadHealth();
   var recId = Date.now();
-  var dtInput = prompt(cat+" 日期时间（默认 "+nowDateTime()+"，可改，格式 YYYY-MM-DD HH:MM）：", nowDateTime()) || nowDateTime();
-  var dt = parseDateTime(dtInput);
-  var note = prompt(cat+" 备注（可选，如：便利店/美式/大杯，不填直接点确定）：") || "";
   data.records.push({id:recId, type:"drink", category:cat, amount:amount, date:dt.date, time:dt.time, note:note});
   saveHealth(data); renderHealth();
+  toast(cat+" ¥"+amount+" 已记入");
   // 同步到存钱记账
   try{
     var money = loadMoney();
@@ -874,89 +982,120 @@ function quickDrink(cat, amount){
     saveMoney(money);
   }catch(e){ console.log("同步到记账失败:", e.message); }
 }
-function quickMeal(cat){
+async function quickMeal(cat){
   var mealDef = MEALS.find(function(m){ return m.name===cat; }) || {amount:20};
-  var amount = prompt(cat+" 金额（默认 ¥"+mealDef.amount+"，可修改）：", String(mealDef.amount));
-  if(amount===null) return;
+  var vals = await showPrompt({
+    title: cat+" 记一餐",
+    fields: [
+      {label:"金额", value:String(mealDef.amount), placeholder:"数字"},
+      {label:"日期时间", value:nowDateTime(), placeholder:"YYYY-MM-DD HH:MM"},
+      {label:"备注", value:"", placeholder:"如：三明治/黄焖鸡/公司楼下"}
+    ]
+  });
+  if(!vals) return;
+  var amount = vals[0];
   if(isNaN(amount) || Number(amount)<=0) amount = mealDef.amount;
-  var dtInput = prompt(cat+" 日期时间（默认 "+nowDateTime()+"，可改，格式 YYYY-MM-DD HH:MM）：", nowDateTime()) || nowDateTime();
-  var dt = parseDateTime(dtInput);
-  var note = prompt(cat+" 备注（可选，如：三明治/黄焖鸡/公司楼下，不填直接点确定）：") || "";
+  var dt = parseDateTime(vals[1] || nowDateTime());
+  var note = vals[2] || "";
   var data = loadHealth();
   var recId = Date.now();
   data.records.push({id:recId, type:"meal", category:cat, amount:Number(amount), date:dt.date, time:dt.time, note:note});
   saveHealth(data); renderHealth();
+  toast(cat+" ¥"+Number(amount)+" 已记入");
   try{
     var money = loadMoney();
     money.records.push({id:recId, category:cat, amount:Number(amount), date:dt.date, time:dt.time, impulse:false, note:note});
     saveMoney(money);
   }catch(e){ console.log("同步到记账失败:", e.message); }
 }
-function addCustomMeal(){
-  var type = prompt("记录类型（drink=饮品，meal=吃法）：");
-  if(!type) return;
-  var cat = prompt("类别（如：咖啡/奶茶/外卖轻食）：");
+async function addCustomMeal(){
+  var vals = await showPrompt({
+    title: "记一笔饮食",
+    fields: [
+      {label:"记录类型", value:"drink", placeholder:"drink=饮品 / meal=吃法"},
+      {label:"类别", value:"", placeholder:"如：咖啡/奶茶/外卖轻食"},
+      {label:"金额", value:"", placeholder:"饮品必填，吃法可留空"},
+      {label:"日期时间", value:nowDateTime(), placeholder:"YYYY-MM-DD HH:MM"},
+      {label:"备注", value:"", placeholder:"可选"}
+    ]
+  });
+  if(!vals) return;
+  var type = (vals[0]||"").trim();
+  if(type!=="drink" && type!=="meal") type = "meal";
+  var cat = (vals[1]||"").trim();
   if(!cat) return;
   var amount = 0;
   if(type==="drink"){
-    amount = prompt("金额：");
-    if(!amount || isNaN(amount)) return;
+    amount = Number(vals[2]);
+    if(!vals[2] || isNaN(amount)) return;
+  } else if(vals[2] && !isNaN(Number(vals[2]))){
+    amount = Number(vals[2]);
   }
-  var dtInput = prompt("日期时间（默认 "+nowDateTime()+"，可改，格式 YYYY-MM-DD HH:MM）：", nowDateTime()) || nowDateTime();
-  var dt = parseDateTime(dtInput);
-  var note = prompt("备注（可选）：") || "";
+  var dt = parseDateTime(vals[3] || nowDateTime());
+  var note = vals[4] || "";
   var data = loadHealth();
   var recId = Date.now();
   data.records.push({id:recId, type:type, category:cat, amount:Number(amount), date:dt.date, time:dt.time, note:note});
   saveHealth(data); renderHealth();
+  toast(cat+" ¥"+Number(amount)+" 已记入");
   // 只要是饮食记录（drink或meal），都同步到记账台
-  if(type==="drink" || type==="meal"){
-    try{
-      var money = loadMoney();
-      money.records.push({id:recId, category:cat, amount:Number(amount), date:dt.date, time:dt.time, impulse:false, note:note});
-      saveMoney(money);
-    }catch(e){ console.log("同步到记账失败:", e.message); }
-  }
+  try{
+    var money = loadMoney();
+    money.records.push({id:recId, category:cat, amount:Number(amount), date:dt.date, time:dt.time, impulse:false, note:note});
+    saveMoney(money);
+  }catch(e){ console.log("同步到记账失败:", e.message); }
 }
-function editHealthAmount(id){
+async function editHealthAmount(id){
   var data = loadHealth();
   var r = data.records.find(function(x){ return x.id===id; });
   if(!r) return;
-  var v = prompt("修改金额（当前 ¥"+r.amount+"）：");
-  if(!v || isNaN(v)) return;
-  r.amount = Number(v);
+  var vals = await showPrompt({
+    title: "修改金额",
+    fields: [{label:"金额", value:String(r.amount), placeholder:"数字"}]
+  });
+  if(!vals || !vals[0] || isNaN(Number(vals[0]))) return;
+  var v = Number(vals[0]);
+  r.amount = v;
   saveHealth(data); renderHealth();
   // 同步修改记账金额
   try{
     var money = loadMoney();
     var mr = money.records.find(function(x){ return x.id===id; });
-    if(mr){ mr.amount = Number(v); saveMoney(money); }
+    if(mr){ mr.amount = v; saveMoney(money); }
   }catch(e){ console.log("同步修改记账失败:", e.message); }
 }
 function delHealthRecord(id){
-  if(!confirm("确定删除这条记录？（记账模块的对应记录也会同步删除）")) return;
-  var data = loadHealth();
-  data.records = data.records.filter(function(x){ return x.id!==id; });
-  saveHealth(data); renderHealth();
-  // 同步删除记账记录
-  try{
-    var money = loadMoney();
-    money.records = money.records.filter(function(x){ return x.id!==id; });
-    saveMoney(money);
-  }catch(e){ console.log("同步删除记账失败:", e.message); }
+  showConfirm("确定删除这条记录？（记账模块的对应记录也会同步删除）").then(function(ok){
+    if(!ok) return;
+    var data = loadHealth();
+    data.records = data.records.filter(function(x){ return x.id!==id; });
+    saveHealth(data); renderHealth();
+    // 同步删除记账记录
+    try{
+      var money = loadMoney();
+      money.records = money.records.filter(function(x){ return x.id!==id; });
+      saveMoney(money);
+    }catch(e){ console.log("同步删除记账失败:", e.message); }
+  });
 }
-function editHealthBudget(){
+async function editHealthBudget(){
   var data = loadHealth();
-  var v = prompt("每周饮品预算（当前 ¥"+data.drinkBudget+"）：");
-  if(!v || isNaN(v)) return;
-  data.drinkBudget = Number(v);
+  var vals = await showPrompt({
+    title: "修改每周饮品预算",
+    fields: [{label:"预算金额", value:String(data.drinkBudget), placeholder:"数字"}]
+  });
+  if(!vals || !vals[0] || isNaN(Number(vals[0]))) return;
+  data.drinkBudget = Number(vals[0]);
   saveHealth(data); renderHealth();
 }
-function editHealthGoal(){
+async function editHealthGoal(){
   var data = loadHealth();
-  var v = prompt("每周目标杯数（当前 "+data.drinkGoal+" 杯）：");
-  if(!v || isNaN(v)) return;
-  data.drinkGoal = Number(v);
+  var vals = await showPrompt({
+    title: "修改每周目标杯数",
+    fields: [{label:"目标杯数", value:String(data.drinkGoal), placeholder:"数字"}]
+  });
+  if(!vals || !vals[0] || isNaN(Number(vals[0]))) return;
+  data.drinkGoal = Number(vals[0]);
   saveHealth(data); renderHealth();
 }
 
@@ -1090,7 +1229,7 @@ function saveDecisionSettings(){
   data.stage = document.getElementById("decStage").value;
   data.depth = Number(document.getElementById("decDepth").value);
   saveDecision(data);
-  alert("设置已保存："+data.identity+" · "+data.stage+" · "+data.depth+"轮拷问");
+  toast("设置已保存："+data.identity+" · "+data.stage+" · "+data.depth+"轮拷问");
 }
 
 function updateRoundInfo(){
@@ -1243,16 +1382,18 @@ function showDecisionScore(score){
 }
 
 function resetDecision(){
-  if(!confirm("确定重新开始？当前拷问记录会清空。")) return;
-  var data = loadDecision();
-  data.chatHistory = [];
-  data.score = null;
-  data.round = 0;
-  data.started = false;
-  saveDecision(data);
-  document.getElementById("decScoreCard").style.display = "none";
-  renderDecisionChat();
-  updateRoundInfo();
+  showConfirm("确定重新开始？当前拷问记录会清空。").then(function(ok){
+    if(!ok) return;
+    var data = loadDecision();
+    data.chatHistory = [];
+    data.score = null;
+    data.round = 0;
+    data.started = false;
+    saveDecision(data);
+    document.getElementById("decScoreCard").style.display = "none";
+    renderDecisionChat();
+    updateRoundInfo();
+  });
 }
 
 
@@ -1391,20 +1532,22 @@ function markInspire(status){
   saveInspire(data);
   renderInspire();
   var statusText = {recorded:"已记录", action:"已行动"}[status] || status;
-  alert("已标记为：" + statusText);
+  toast("已标记为：" + statusText);
 }
 
 function deleteCurrentInspire(){
   if(!currentInspireId) return;
-  if(!confirm("确定删除这条灵感？")) return;
-  var data = loadInspire();
-  data.records = data.records.filter(function(x){ return x.id!==currentInspireId; });
-  saveInspire(data);
-  currentInspireId = null;
-  document.getElementById("inspireDetailTitle").textContent = "选一条灵感看看";
-  document.getElementById("inspireActions").style.display = "none";
-  document.getElementById("inspireDetail").innerHTML = '<div style="text-align:center;color:var(--muted);padding:40px 20px;font-size:13px;line-height:1.8">从左边选一条灵感<br>AI会帮你：追问、延伸、关联、判断值不值得做<br><span style="color:var(--pink-deep);font-weight:700">碎片化想法不记录就溜走了</span></div>';
-  renderInspire();
+  showConfirm("确定删除这条灵感？").then(function(ok){
+    if(!ok) return;
+    var data = loadInspire();
+    data.records = data.records.filter(function(x){ return x.id!==currentInspireId; });
+    saveInspire(data);
+    currentInspireId = null;
+    document.getElementById("inspireDetailTitle").textContent = "选一条灵感看看";
+    document.getElementById("inspireActions").style.display = "none";
+    document.getElementById("inspireDetail").innerHTML = '<div style="text-align:center;color:var(--muted);padding:40px 20px;font-size:13px;line-height:1.8">从左边选一条灵感<br>AI会帮你：追问、延伸、关联、判断值不值得做<br><span style="color:var(--pink-deep);font-weight:700">碎片化想法不记录就溜走了</span></div>';
+    renderInspire();
+  });
 }
 
 function inspireToMarkdown(r){
@@ -1461,25 +1604,27 @@ function exportInspire(id){
 function exportAllInspire(){
   var data = loadInspire();
   if(data.records.length === 0){
-    alert("还没有灵感可以导出");
+    toast("还没有灵感可以导出");
     return;
   }
-  if(!confirm("确定导出全部 " + data.records.length + " 条灵感？每条会生成一个MD文件。")) return;
-  var sorted = data.records.slice().sort(function(a,b){
-    var ta = (a.date||"") + " " + (a.time||"00:00");
-    var tb = (b.date||"") + " " + (b.time||"00:00");
-    return ta.localeCompare(tb);
-  });
-  sorted.forEach(function(r, i){
+  showConfirm("确定导出全部 " + data.records.length + " 条灵感？每条会生成一个MD文件。").then(function(ok){
+    if(!ok) return;
+    var sorted = data.records.slice().sort(function(a,b){
+      var ta = (a.date||"") + " " + (a.time||"00:00");
+      var tb = (b.date||"") + " " + (b.time||"00:00");
+      return ta.localeCompare(tb);
+    });
+    sorted.forEach(function(r, i){
+      setTimeout(function(){
+        var md = inspireToMarkdown(r);
+        var filename = "灵感-" + r.date + "-" + (r.content.slice(0,10).replace(/[\\/:*?"<>|]/g,"_")) + ".md";
+        downloadMD(filename, md);
+      }, i * 300);
+    });
     setTimeout(function(){
-      var md = inspireToMarkdown(r);
-      var filename = "灵感-" + r.date + "-" + (r.content.slice(0,10).replace(/[\\/:*?"<>|]/g,"_")) + ".md";
-      downloadMD(filename, md);
-    }, i * 300);
+      toast("已导出 " + sorted.length + " 条灵感，请检查下载文件夹，然后放到 Weh-Brain 的 00-灵感库 目录里。");
+    }, sorted.length * 300 + 500);
   });
-  setTimeout(function(){
-    alert("已导出 " + sorted.length + " 条灵感，请检查下载文件夹，然后放到 Weh-Brain 的 00-灵感库 目录里。");
-  }, sorted.length * 300 + 500);
 }
 
 /* ========== 待办清单模块 ========== */
@@ -1532,20 +1677,25 @@ function toggleTodo(id){
 }
 
 function deleteTodo(id){
-  if(!confirm("确定删除这个待办？")) return;
-  var data = loadTodo();
-  data.items = data.items.filter(function(x){ return x.id!==id; });
-  saveTodo(data);
-  renderTodo();
+  showConfirm("确定删除这个待办？").then(function(ok){
+    if(!ok) return;
+    var data = loadTodo();
+    data.items = data.items.filter(function(x){ return x.id!==id; });
+    saveTodo(data);
+    renderTodo();
+  });
 }
 
-function editTodo(id){
+async function editTodo(id){
   var data = loadTodo();
   var item = data.items.find(function(x){ return x.id===id; });
   if(!item) return;
-  var newTitle = prompt("修改待办内容（当前："+item.title+"）：", item.title);
-  if(!newTitle || !newTitle.trim()) return;
-  item.title = newTitle.trim();
+  var vals = await showPrompt({
+    title: "修改待办内容",
+    fields: [{label:"待办内容", value:item.title, placeholder:""}]
+  });
+  if(!vals || !vals[0] || !vals[0].trim()) return;
+  item.title = vals[0].trim();
   saveTodo(data);
   renderTodo();
 }
@@ -1683,7 +1833,7 @@ function selectReportAudience(audience){
 function generateReport(){
   var input = document.getElementById("reportInput").value.trim();
   if(!input){
-    alert("请先输入碎碎念内容");
+    toast("请先输入碎碎念内容");
     return;
   }
   var data = loadReport();
@@ -1831,7 +1981,7 @@ function loadReportHistory(id){
 
 function exportReport(){
   if(!currentReportId){
-    alert("请先生成或选择一份汇报");
+    toast("请先生成或选择一份汇报");
     return;
   }
   var data = loadReport();
@@ -1874,17 +2024,19 @@ function exportReport(){
 
 
 function deleteReport(id){
-  if(!confirm("确定删除这份汇报？")) return;
-  var data = loadReport();
-  data.history = data.history.filter(function(x){ return x.id!==id; });
-  saveReport(data);
-  if(currentReportId === id){
-    currentReportId = null;
-    document.getElementById("reportResultTitle").textContent = "在左边填写后点生成";
-    document.getElementById("reportExportBtn").style.display = "none";
-    document.getElementById("reportResult").innerHTML = '<div style="text-align:center;color:var(--muted);padding:60px 20px;font-size:13px;line-height:1.8">选择汇报类型和对象<br>在左边输入碎碎念（做了什么、遇到什么问题、下一步计划）<br>点"✨ 生成精简汇报"<br><span style="color:var(--pink-deep);font-weight:700">AI会参考工作SOP的模板，把"做了一大堆"翻译成"做出了什么"</span></div>';
-  }
-  renderReportHistory();
+  showConfirm("确定删除这份汇报？").then(function(ok){
+    if(!ok) return;
+    var data = loadReport();
+    data.history = data.history.filter(function(x){ return x.id!==id; });
+    saveReport(data);
+    if(currentReportId === id){
+      currentReportId = null;
+      document.getElementById("reportResultTitle").textContent = "在左边填写后点生成";
+      document.getElementById("reportExportBtn").style.display = "none";
+      document.getElementById("reportResult").innerHTML = '<div style="text-align:center;color:var(--muted);padding:60px 20px;font-size:13px;line-height:1.8">选择汇报类型和对象<br>在左边输入碎碎念（做了什么、遇到什么问题、下一步计划）<br>点"✨ 生成精简汇报"<br><span style="color:var(--pink-deep);font-weight:700">AI会参考工作SOP的模板，把"做了一大堆"翻译成"做出了什么"</span></div>';
+    }
+    renderReportHistory();
+  });
 }
 
 
@@ -2053,14 +2205,14 @@ function addToDailyFromTodo(todoId){
   var todo = todoData.items.find(function(t){ return t.id===todoId; });
   if(!todo) return;
   if(todo.done){
-    alert("该任务已完成，无需加到今日计划");
+    toast("该任务已完成，无需加到今日计划");
     return;
   }
   var dailyData = loadDaily();
   // 检查是否已经加过
   var exists = dailyData.tasks.some(function(t){ return t.title === todo.title; });
   if(exists){
-    alert("该任务已在今日计划中");
+    toast("该任务已在今日计划中");
     return;
   }
   dailyData.tasks.push({
@@ -2071,7 +2223,7 @@ function addToDailyFromTodo(todoId){
     done: false
   });
   saveDaily(dailyData);
-  alert("已加到今日计划：" + todo.title);
+  toast("已加到今日计划：" + todo.title);
   if(document.getElementById("dailyInput")){
     renderDaily();
   }
@@ -2085,7 +2237,7 @@ function addInspireToTodo(inspireId){
   if(!todoData) todoData = {items:[]};
   var exists = todoData.items.some(function(t){ return t.title === r.content; });
   if(exists){
-    alert("该灵感已在待办清单中");
+    toast("该灵感已在待办清单中");
     return;
   }
   todoData.items.push({
@@ -2098,7 +2250,7 @@ function addInspireToTodo(inspireId){
     createdAt: new Date().toISOString().slice(0,10)
   });
   localStorage.setItem("weh_todo_data_v1", JSON.stringify(todoData));
-  alert("已转到待办清单：" + (r.content.length>20?r.content.slice(0,20)+"...":r.content));
+  toast("已转到待办清单：" + (r.content.length>20?r.content.slice(0,20)+"...":r.content));
 }
 
 function addInspireToDaily(inspireId){
@@ -2108,7 +2260,7 @@ function addInspireToDaily(inspireId){
   var dailyData = loadDaily();
   var exists = dailyData.tasks.some(function(t){ return t.title === r.content; });
   if(exists){
-    alert("该灵感已在今日计划中");
+    toast("该灵感已在今日计划中");
     return;
   }
   dailyData.tasks.push({
@@ -2119,7 +2271,7 @@ function addInspireToDaily(inspireId){
     done: false
   });
   saveDaily(dailyData);
-  alert("已加到今日计划：" + (r.content.length>20?r.content.slice(0,20)+"...":r.content));
+  toast("已加到今日计划：" + (r.content.length>20?r.content.slice(0,20)+"...":r.content));
   if(document.getElementById("dailyInput")){
     renderDaily();
   }
@@ -2261,56 +2413,64 @@ function exportAllData(){
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
-  alert("数据已导出");
+  toast("数据已导出");
 }
 
 function importAllData(event){
   var file = event.target.files[0];
   if(!file) return;
-  if(!confirm("导入数据会覆盖当前所有数据，确定继续？")) return;
-  var reader = new FileReader();
-  reader.onload = function(e){
-    try{
-      var data = JSON.parse(e.target.result);
-      for(var key in DATA_KEYS){
-        if(data[key]){
-          localStorage.setItem(DATA_KEYS[key], JSON.stringify(data[key]));
+  showConfirm("导入数据会覆盖当前所有数据，确定继续？").then(function(ok){
+    if(!ok) return;
+    var reader = new FileReader();
+    reader.onload = function(e){
+      try{
+        var data = JSON.parse(e.target.result);
+        for(var key in DATA_KEYS){
+          if(data[key]){
+            localStorage.setItem(DATA_KEYS[key], JSON.stringify(data[key]));
+          }
         }
+        if(data.settings){
+          localStorage.setItem(SETTINGS_KEY, JSON.stringify(data.settings));
+        }
+        toast("数据导入成功，页面即将刷新");
+        setTimeout(function(){ location.reload(); }, 1000);
+      }catch(err){
+        toast("导入失败：文件格式错误");
       }
-      if(data.settings){
-        localStorage.setItem(SETTINGS_KEY, JSON.stringify(data.settings));
-      }
-      alert("数据导入成功，页面即将刷新");
-      setTimeout(function(){ location.reload(); }, 1000);
-    }catch(err){
-      alert("导入失败：文件格式错误");
-    }
-  };
-  reader.readAsText(file);
+    };
+    reader.readAsText(file);
+  });
 }
 
 function clearModuleData(){
   var module = document.getElementById("clearModuleSelect").value;
   if(!module){
-    alert("请先选择要清空的模块");
+    toast("请先选择要清空的模块");
     return;
   }
   var moduleNames = {money:"存钱记账", health:"吃饭健康", inspire:"灵感捕捉", decision:"决策顾问", report:"工作汇报台", daily:"日计划台", todo:"Weh Tasks"};
-  if(!confirm("确定清空「" + (moduleNames[module]||module) + "」的所有数据？此操作不可恢复！")) return;
-  localStorage.removeItem(DATA_KEYS[module]);
-  alert("已清空，页面即将刷新");
-  setTimeout(function(){ location.reload(); }, 1000);
+  showConfirm("确定清空「" + (moduleNames[module]||module) + "」的所有数据？此操作不可恢复！").then(function(ok){
+    if(!ok) return;
+    localStorage.removeItem(DATA_KEYS[module]);
+    toast("已清空，页面即将刷新");
+    setTimeout(function(){ location.reload(); }, 1000);
+  });
 }
 
 function resetAllData(){
-  if(!confirm("确定重置全部数据？所有模块的数据和设置都会被清空，此操作不可恢复！")) return;
-  if(!confirm("再次确认：真的要重置全部数据吗？")) return;
-  for(var key in DATA_KEYS){
-    localStorage.removeItem(DATA_KEYS[key]);
-  }
-  localStorage.removeItem(SETTINGS_KEY);
-  alert("已重置全部数据，页面即将刷新");
-  setTimeout(function(){ location.reload(); }, 1000);
+  showConfirm("确定重置全部数据？所有模块的数据和设置都会被清空，此操作不可恢复！").then(function(ok){
+    if(!ok) return;
+    showConfirm("再次确认：真的要重置全部数据吗？").then(function(ok2){
+      if(!ok2) return;
+      for(var key in DATA_KEYS){
+        localStorage.removeItem(DATA_KEYS[key]);
+      }
+      localStorage.removeItem(SETTINGS_KEY);
+      toast("已重置全部数据，页面即将刷新");
+      setTimeout(function(){ location.reload(); }, 1000);
+    });
+  });
 }
 
 function savePreference(){
@@ -2322,7 +2482,7 @@ function savePreference(){
   s.preferences.healthGoal = parseInt(document.getElementById("prefHealthGoal").value) || 7;
   s.preferences.dailyStart = parseInt(document.getElementById("prefDailyStart").value) || 9;
   saveSettings(s);
-  alert("偏好已保存");
+  toast("偏好已保存");
 }
 
 function loadPreference(){
@@ -3223,7 +3383,7 @@ function addCet6Word(){
   var meaning = document.getElementById('cet6NewMeaning').value.trim();
   var example = document.getElementById('cet6NewExample').value.trim();
   if(!word || !meaning){
-    alert('请填写单词和释义');
+    toast('请填写单词和释义');
     return;
   }
   var words = getCet6VocabWords();
@@ -3248,12 +3408,14 @@ function addCet6Word(){
 
 // 删除单词
 function deleteCet6Word(id){
-  if(!confirm('确定要删除这个单词吗？')) return;
-  var words = getCet6VocabWords();
-  words = words.filter(function(w){ return w.id !== id; });
-  saveCet6VocabWords(words);
-  renderCet6Vocab();
-  updateCet6VocabStats();
+  showConfirm('确定要删除这个单词吗？').then(function(ok){
+    if(!ok) return;
+    var words = getCet6VocabWords();
+    words = words.filter(function(w){ return w.id !== id; });
+    saveCet6VocabWords(words);
+    renderCet6Vocab();
+    updateCet6VocabStats();
+  });
 }
 
 // 切换掌握状态
@@ -3488,11 +3650,11 @@ function addCet6Error(){
   var analysis = document.getElementById('cet6ErrorAnalysis').value.trim();
   var source = document.getElementById('cet6ErrorSource').value.trim();
   if(!cet6SelectedErrorTag){
-    alert('请选择错因标签');
+    toast('请选择错因标签');
     return;
   }
   if(!question){
-    alert('请填写题目内容');
+    toast('请填写题目内容');
     return;
   }
   var errors = getCet6Errors();
@@ -3521,14 +3683,16 @@ function addCet6Error(){
 
 // 删除错题
 function deleteCet6Error(id){
-  if(!confirm('确定要删除这道错题吗？')) return;
-  var errors = getCet6Errors();
-  errors = errors.filter(function(e){ return e.id !== id; });
-  saveCet6Errors(errors);
-  renderCet6Errors();
-  renderCet6ErrorReviewList();
-  renderCet6ErrorTagsDist();
-  updateCet6ErrorStats();
+  showConfirm('确定要删除这道错题吗？').then(function(ok){
+    if(!ok) return;
+    var errors = getCet6Errors();
+    errors = errors.filter(function(e){ return e.id !== id; });
+    saveCet6Errors(errors);
+    renderCet6Errors();
+    renderCet6ErrorReviewList();
+    renderCet6ErrorTagsDist();
+    updateCet6ErrorStats();
+  });
 }
 
 // 切换掌握状态
@@ -3774,7 +3938,7 @@ function addCet6Listen(){
   var date = document.getElementById('cet6ListenDate').value;
   var note = document.getElementById('cet6ListenNote').value.trim();
   if(!name){
-    alert('请填写套题名称');
+    toast('请填写套题名称');
     return;
   }
   var records = getCet6ListenRecords();
@@ -3798,12 +3962,14 @@ function addCet6Listen(){
 
 // 删除听力记录
 function deleteCet6Listen(id){
-  if(!confirm('确定要删除这条听力记录吗？')) return;
-  var records = getCet6ListenRecords();
-  records = records.filter(function(r){ return r.id !== id; });
-  saveCet6ListenRecords(records);
-  renderCet6Listen();
-  updateCet6ListenStats();
+  showConfirm('确定要删除这条听力记录吗？').then(function(ok){
+    if(!ok) return;
+    var records = getCet6ListenRecords();
+    records = records.filter(function(r){ return r.id !== id; });
+    saveCet6ListenRecords(records);
+    renderCet6Listen();
+    updateCet6ListenStats();
+  });
 }
 
 // 筛选听力记录
@@ -3962,7 +4128,7 @@ function addCet6Read(){
   var date = document.getElementById('cet6ReadDate').value;
   var note = document.getElementById('cet6ReadNote').value.trim();
   if(!name){
-    alert('请填写文章/套题名称');
+    toast('请填写文章/套题名称');
     return;
   }
   var records = getCet6ReadRecords();
@@ -3986,12 +4152,14 @@ function addCet6Read(){
 
 // 删除阅读记录
 function deleteCet6Read(id){
-  if(!confirm('确定要删除这条阅读记录吗？')) return;
-  var records = getCet6ReadRecords();
-  records = records.filter(function(r){ return r.id !== id; });
-  saveCet6ReadRecords(records);
-  renderCet6Read();
-  updateCet6ReadStats();
+  showConfirm('确定要删除这条阅读记录吗？').then(function(ok){
+    if(!ok) return;
+    var records = getCet6ReadRecords();
+    records = records.filter(function(r){ return r.id !== id; });
+    saveCet6ReadRecords(records);
+    renderCet6Read();
+    updateCet6ReadStats();
+  });
 }
 
 // 筛选阅读记录
@@ -4146,7 +4314,7 @@ function addCet6Write(){
   var date = document.getElementById('cet6WriteDate').value;
   var note = document.getElementById('cet6WriteNote').value.trim();
   if(!topic){
-    alert('请填写题目/主题');
+    toast('请填写题目/主题');
     return;
   }
   var records = getCet6WriteRecords();
@@ -4169,12 +4337,14 @@ function addCet6Write(){
 
 // 删除写译记录
 function deleteCet6Write(id){
-  if(!confirm('确定要删除这条写译记录吗？')) return;
-  var records = getCet6WriteRecords();
-  records = records.filter(function(r){ return r.id !== id; });
-  saveCet6WriteRecords(records);
-  renderCet6Write();
-  updateCet6WriteStats();
+  showConfirm('确定要删除这条写译记录吗？').then(function(ok){
+    if(!ok) return;
+    var records = getCet6WriteRecords();
+    records = records.filter(function(r){ return r.id !== id; });
+    saveCet6WriteRecords(records);
+    renderCet6Write();
+    updateCet6WriteStats();
+  });
 }
 
 // 筛选写译记录
