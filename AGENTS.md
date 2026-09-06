@@ -23,16 +23,25 @@ Weh Atelier（AI 工作室）是个人AI工作台网页应用，整合存钱记�
 
 ```
 D:\Obsidian\Weh-Workbench\
-├── docs/                    ← GitHub Pages发布目录
+├── docs/                    ← GitHub Pages发布目录（自动生成，不要手动修改）
 │   ├── index.html          ← 最终单页网站（所有代码和数据内嵌）
 │   ├── manifest.json       ← PWA配置
 │   ├── sw.js               ← Service Worker
 │   ├── assets/             ← 图片资源（背景图、图标）
 │   └── files/              ← 附件（简历PDF、背调报告等）
-├── build_site.py           ← 核心构建脚本：扫描Weh-Brain知识库 → 生成网页数据 → 写入index.html
+├── site_assets/             ← 源代码目录（主要修改这里）
+│   ├── body.html           ← 页面HTML结构模板（所有模块的HTML结构）
+│   ├── style.css           ← 全站样式（配色、布局、组件样式）
+│   ├── app.js              ← 前端逻辑（所有模块的JS功能）
+│   ├── manifest.json       ← PWA配置模板
+│   ├── sw.js               ← Service Worker模板
+│   └── icons/              ← PWA图标
+├── build_site.py           ← 核心构建脚本：扫描Weh-Brain知识库 + 注入site_assets → 生成docs/index.html
 ├── update_site.ps1         ← 一键同步脚本：拉取→构建→提交→推送
 └── AGENTS.md               ← 本文件
 ```
+
+**修改源代码必须改 `site_assets/` 下的文件，不要直接改 `docs/index.html`**（构建时会被覆盖）。改完site_assets后运行 `python build_site.py` 重新生成。
 
 ---
 
@@ -109,10 +118,14 @@ git commit -m "[类型] 清晰描述本次修改"
 
 ## 已知坑（避免重复踩）
 
-1. Electron的iframe不支持原生 `prompt()` / `confirm()`，会导致按钮点击无反应
+1. Electron的iframe不支持原生 `prompt()` / `confirm()`，会导致按钮点击无反应，必须用自定义弹窗
 2. localStorage数据在桌面端和浏览器端不互通（两个独立存储环境）
 3. GitHub推送经常连接超时，失败后重试即可，本地提交不会丢
 4. 滚动条圆角在Chromium里设置了可能不生效，当前用细滚动条+主题色跟随
 5. AI对话刷新后停在顶部，需要用MutationObserver监听DOM变化后再滚动
+6. **PowerShell的`-replace`修改CSS/JS/HTML会导致编码问题（中文乱码）**，必须用Python脚本修改文件
+7. **HTML结构修改后必须验证标签开闭数量一致**（用Python统计div/section/button等的开启和闭合数量，差值必须为0），一个模块的HTML结构错误会影响后续所有模块（浏览器会自动补全/闭合标签）
+8. **改造已有结构前必须先读取确认实际结构**，不要凭印象或假设写修改脚本，否则会匹配失败
+9. 大段HTML结构重构时，先打印目标区域的实际内容（`repr(html[idx:idx+500])`），确认后再写替换脚本
 
 完整问题记录见：`D:\Obsidian\Weh-Brain\01-Projects\Weh Atelier\03-问题与解决方案日志.md`
