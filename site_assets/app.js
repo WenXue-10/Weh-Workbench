@@ -2794,8 +2794,8 @@ function loadPreference(){
   }
 }
 
-applyCardTheme(savedCardTheme);
 function initSettings(){
+  applyCardTheme(savedCardTheme);
   loadPreference();
   applyPrefsToModules(true, false);
   syncInit();
