@@ -143,12 +143,12 @@ a{color:var(--pink-deep);text-decoration:none}
 /* ===== 知识库 ===== */
 .note{font-size:12.5px;color:var(--muted);background:rgba(255,255,255,.84);border:1px solid var(--line);border-radius:16px;padding:11px 15px;margin-bottom:16px;box-shadow:var(--shadow-sm)}
 .kb-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
-.kb-card{border-radius:20px;padding:16px 18px;cursor:pointer;transition:.18s;border:1px solid rgba(255,255,255,.5);box-shadow:var(--shadow-sm);background:rgba(255,255,255,.35);backdrop-filter:blur(14px) saturate(1.2);-webkit-backdrop-filter:blur(14px) saturate(1.2);display:flex;align-items:center;gap:14px}
+.kb-card{border-radius:20px;padding:16px 18px;cursor:pointer;transition:.18s;border:1px solid var(--line);box-shadow:var(--shadow-sm);background:var(--card-bg);backdrop-filter:blur(var(--blur-radius)) saturate(1.25);-webkit-backdrop-filter:blur(var(--blur-radius)) saturate(1.25);display:flex;align-items:center;gap:14px}
 .kb-card:hover{transform:translateY(-2px);box-shadow:var(--shadow);border-color:#ffc4da}
-.kb-card .ic{font-size:22px;display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:14px;background:rgba(255,255,255,.4);backdrop-filter:blur(8px);flex-shrink:0}
+.kb-card .ic{font-size:22px;display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:14px;background:rgba(255,255,255,.5);flex-shrink:0}
 .kb-card .kb-info{flex:1;min-width:0}
 .kb-card .kn{font-weight:800;font-size:14px;color:color-mix(in srgb, var(--text) 75%, #000)}
-.kb-card .kd{font-size:12px;color:color-mix(in srgb, var(--muted) 80%, #000);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.kb-card .kd{font-size:12px;color:color-mix(in srgb, var(--muted) 80%, #000);margin-top:2px;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word}
 .kb-card .ncount{display:inline-flex;align-items:center;font-size:11.5px;background:rgba(255,227,238,.85);color:var(--pink-deep);padding:3px 10px;border-radius:20px;font-weight:700;flex-shrink:0}
 /* 简历分组 */
 .resume-group{margin-bottom:20px}
@@ -3241,7 +3241,7 @@ body.sop-active .sub-tab-bar{display:flex}
 
 <script>
 window.SITE_DATA = {
- "updated": "2026-09-07 21:24",
+ "updated": "2026-09-07 22:03",
  "stats": {
   "jobs": 32,
   "rec": 0,
