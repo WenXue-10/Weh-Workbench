@@ -2689,6 +2689,27 @@ function resetAllData(){
   });
 }
 
+function applyPrefsToModules(silent){
+  var s = loadSettings();
+  var p = s.preferences || {};
+  try{
+    var money = loadMoney();
+    var changed = false;
+    if(money.budget !== p.moneyBudget){ money.budget = p.moneyBudget; changed = true; }
+    if(money.fixedSave !== p.moneySave){ money.fixedSave = p.moneySave; changed = true; }
+    if(money.cycleStart !== p.moneyCycle){ money.cycleStart = p.moneyCycle; changed = true; }
+    if(changed){ saveMoney(money); if(typeof renderMoney === "function") renderMoney(); }
+  }catch(e){}
+  try{
+    var health = loadHealth();
+    var hc = false;
+    if(health.drinkBudget !== p.healthBudget){ health.drinkBudget = p.healthBudget; hc = true; }
+    if(health.drinkGoal !== p.healthGoal){ health.drinkGoal = p.healthGoal; hc = true; }
+    if(hc){ saveHealth(health); if(typeof renderHealth === "function") renderHealth(); }
+  }catch(e){}
+  if(typeof renderDaily === "function") renderDaily();
+}
+
 function savePreference(){
   var s = loadSettings();
   s.preferences.moneyBudget = parseInt(document.getElementById("prefMoneyBudget").value) || 3000;
@@ -2698,23 +2719,7 @@ function savePreference(){
   s.preferences.healthGoal = parseInt(document.getElementById("prefHealthGoal").value) || 7;
   s.preferences.dailyStart = parseInt(document.getElementById("prefDailyStart").value) || 9;
   saveSettings(s);
-  // 同步到各模块当前数据（实时生效）
-  try{
-    var money = loadMoney();
-    money.budget = s.preferences.moneyBudget;
-    money.fixedSave = s.preferences.moneySave;
-    money.cycleStart = s.preferences.moneyCycle;
-    saveMoney(money);
-    if(typeof renderMoney === "function") renderMoney();
-  }catch(e){}
-  try{
-    var health = loadHealth();
-    health.drinkBudget = s.preferences.healthBudget;
-    health.drinkGoal = s.preferences.healthGoal;
-    saveHealth(health);
-    if(typeof renderHealth === "function") renderHealth();
-  }catch(e){}
-  if(typeof renderDaily === "function") renderDaily();
+  applyPrefsToModules();
   toast("偏好已保存并同步到模块");
 }
 
@@ -2753,6 +2758,7 @@ function loadPreference(){
 
 function initSettings(){
   loadPreference();
+  applyPrefsToModules(true);
   syncInit();
 }
 
