@@ -24,6 +24,7 @@
 
   <div class="main">
     <header class="topbar">
+      <div id="backBtn" class="back-btn" onclick="go('home')" title="返回首页">←</div>
       <h1 id="pageTitle">🏠 首页总览</h1>
       <div class="top-right">
         <div class="sync"><span class="dot"></span><span id="syncText">工作台运行中</span></div>
@@ -1925,6 +1926,16 @@
     </div>
   </div>
 </div>
+
+  <!-- 底部导航（手机） -->
+  <nav class="bottom-nav">
+    <div class="bn-item active" data-module="home"><span class="ic">🏠</span>首页</div>
+    <div class="bn-item" data-module="money"><span class="ic">💰</span>记账</div>
+    <div class="bn-item" data-module="health"><span class="ic">🍱</span>吃饭</div>
+    <div class="bn-item" data-module="inspiration"><span class="ic">💡</span>灵感</div>
+    <div class="bn-item" data-module="todo"><span class="ic">✅</span>待办</div>
+    <div class="bn-item" data-module="settings"><span class="ic">⚙️</span>设置</div>
+  </nav>
 
 <div id="floats"></div>
 <div class="toast" id="toast"></div>

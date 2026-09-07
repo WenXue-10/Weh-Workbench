@@ -3022,6 +3022,11 @@ function go(view){
   document.body.classList.toggle("cet6-active", view==="cet6");
   document.body.classList.toggle("baichuan-active", view==="baichuan");
   document.body.classList.toggle("sop-active", view==="sop");
+  var backBtn = document.getElementById("backBtn");
+  if(backBtn){
+    var _mobile = window.matchMedia && window.matchMedia("(max-width:820px)").matches;
+    backBtn.style.display = (view==="home" || !_mobile) ? "none" : "flex";
+  }
   window.scrollTo({top:0});
 }
 document.addEventListener("click", function(e){
