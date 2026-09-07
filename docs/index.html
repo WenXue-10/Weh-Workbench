@@ -66,7 +66,7 @@ a{color:var(--pink-deep);text-decoration:none}
 @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 /* ===== 统计卡片（马卡龙渐变） ===== */
 .stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
-.stat-card{border-radius:22px;padding:16px 18px;box-shadow:var(--shadow-sm);border:1px solid rgba(255,255,255,.4);background:rgba(255,255,255,.22);backdrop-filter:blur(6px) saturate(1.1);-webkit-backdrop-filter:blur(6px) saturate(1.1);transition:transform .18s,box-shadow .18s,border-color .18s}
+.stat-card{border-radius:22px;padding:16px 18px;box-shadow:var(--shadow-sm);border:1px solid var(--line);background:var(--card-bg);backdrop-filter:blur(var(--blur-radius)) saturate(1.25);-webkit-backdrop-filter:blur(var(--blur-radius)) saturate(1.25);transition:transform .18s,box-shadow .18s,border-color .18s}
 .stat-card:hover{transform:translateY(-2px);box-shadow:var(--shadow);border-color:#ffc4da}
 .stat-card .em{font-size:18px;display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:12px;background:rgba(255,255,255,.4);backdrop-filter:blur(8px);margin-bottom:6px}
 .stat-card .lab{font-size:12px;font-weight:600;color:var(--muted)}
@@ -1325,7 +1325,7 @@ body.sop-active .sub-tab-bar{display:flex}
 
       <!-- 🏠 首页总览 -->
       <section id="module-home" class="view active">
-        <div class="card" style="background:linear-gradient(135deg,rgba(255,240,246,.72),rgba(243,236,255,.72));border:none;padding:20px 24px">
+        <div class="card">
           <div style="font-size:16px;font-weight:800">✨ 欢迎来到 Weh Atelier</div>
           <div style="font-size:13px;color:var(--muted);margin-top:6px">这是你的专属AI工作室，慢慢搭建中。左侧切换不同模块，每个模块都有对应的AI助手帮你干活～</div>
         </div>
@@ -3237,7 +3237,7 @@ body.sop-active .sub-tab-bar{display:flex}
 
 <script>
 window.SITE_DATA = {
- "updated": "2026-09-07 19:49",
+ "updated": "2026-09-07 20:13",
  "stats": {
   "jobs": 32,
   "rec": 0,
