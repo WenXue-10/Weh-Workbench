@@ -2546,12 +2546,12 @@ function syncDownload(c, silent){
     var c2 = loadSyncConfig();
     c2.lastSync = Date.now();
     localStorage.setItem(SYNC_CONFIG_KEY, JSON.stringify(c2));
-    if(typeof renderMoney === "function") renderMoney();
-    if(typeof renderHealth === "function") renderHealth();
-    if(typeof renderInspire === "function") renderInspire();
-    if(typeof renderTodo === "function") renderTodo();
-    if(typeof renderDaily === "function") renderDaily();
-    if(typeof renderHome === "function") renderHome();
+    try{ if(typeof renderHome === "function") renderHome(); }catch(e){}
+    try{ if(typeof renderMoney === "function") renderMoney(); }catch(e){}
+    try{ if(typeof renderHealth === "function") renderHealth(); }catch(e){}
+    try{ if(typeof renderInspire === "function") renderInspire(); }catch(e){}
+    try{ if(typeof renderTodo === "function") renderTodo(); }catch(e){}
+    try{ if(typeof renderDaily === "function") renderDaily(); }catch(e){}
     if(!silent){ toast("已从云端同步最新数据"); }
     return true;
   }).catch(function(e){
