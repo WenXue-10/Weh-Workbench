@@ -861,6 +861,21 @@ function loadHealth(){
 }
 function saveHealth(data){ markLocalChange(); localStorage.setItem(HEALTH_KEY, JSON.stringify(data)); }
 
+var healthWeekOffset = 0;
+function getHealthWeekRange(){
+  var now = new Date();
+  var day = now.getDay() || 7;
+  var monday = new Date(now); monday.setDate(now.getDate() - day + 1 + healthWeekOffset*7); monday.setHours(0,0,0,0);
+  var sunday = new Date(monday); sunday.setDate(monday.getDate()+7);
+  return {start:monday, end:sunday};
+}
+function healthWeekLabelText(){
+  if(healthWeekOffset === 0) return "本周";
+  return healthWeekOffset < 0 ? "上"+(-healthWeekOffset)+"周" : "下"+healthWeekOffset+"周";
+}
+function prevHealthWeek(){ healthWeekOffset--; renderHealth(); }
+function nextHealthWeek(){ healthWeekOffset++; renderHealth(); }
+function resetHealthWeek(){ if(healthWeekOffset!==0){ healthWeekOffset=0; renderHealth(); } }
 function getWeekRange(){
   var now = new Date();
   var day = now.getDay() || 7;
@@ -884,8 +899,9 @@ function renderHealth(){
   document.getElementById("healthBudget").textContent = "¥" + data.drinkBudget;
   document.getElementById("healthGoal").textContent = data.drinkGoal + "杯";
   document.getElementById("healthBudgetShow").textContent = "¥" + data.drinkBudget;
-  // 本周记录
-  var weekRecords = data.records.filter(function(r){ return inThisWeek(r.date); });
+  // 选中周记录
+  var hr = getHealthWeekRange();
+  var weekRecords = data.records.filter(function(r){ var d=new Date(r.date); return d>=hr.start && d<hr.end; });
   var drinks = weekRecords.filter(function(r){ return r.type==="drink"; });
   var meals = weekRecords.filter(function(r){ return r.type==="meal"; });
   var drinkCups = drinks.length;
@@ -908,9 +924,19 @@ function renderHealth(){
   // 本周剩余天数
   var hlEl = document.getElementById("healthWeekLeft");
   if(hlEl){
-    var dl = daysLeftInWeek();
-    hlEl.textContent = dl > 0 ? "本周还剩"+dl+"天" : "本周最后一天";
+    if(healthWeekOffset === 0){
+      var dl = daysLeftInWeek();
+      hlEl.textContent = dl > 0 ? "本周还剩"+dl+"天" : "本周最后一天";
+    } else {
+      var sun = new Date(hr.end); sun.setDate(sun.getDate()-1);
+      function p(n){ return (n<10?"0":"")+n; }
+      hlEl.textContent = (hr.start.getMonth()+1)+"."+p(hr.start.getDate())+" - "+(sun.getMonth()+1)+"."+p(sun.getDate());
+    }
   }
+  var wt = document.getElementById("healthWeekTitle");
+  if(wt) wt.textContent = healthWeekLabelText();
+  var wl = document.getElementById("healthWeekLabel");
+  if(wl) wl.textContent = healthWeekLabelText();
   // 饮品计数器
   var dg = document.getElementById("drinkGrid");
   dg.innerHTML = DRINKS.map(function(d){

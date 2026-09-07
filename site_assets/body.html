@@ -182,7 +182,14 @@
               <div class="quick-expense-grid" id="mealGrid"></div>
             </div>
             <div class="card">
-              <div class="card-head">📝 本周饮食记录 <span class="m-count" id="healthRecordCount"></span></div>
+              <div class="card-head">
+                <span>📝 <span id="healthWeekTitle">本周</span>饮食记录 <span class="m-count" id="healthRecordCount"></span></span>
+                <span class="week-nav">
+                  <button class="week-nav-btn" onclick="prevHealthWeek()">←</button>
+                  <span class="week-nav-label" id="healthWeekLabel" onclick="resetHealthWeek()">本周</span>
+                  <button class="week-nav-btn" onclick="nextHealthWeek()">→</button>
+                </span>
+              </div>
               <div class="expense-list" id="healthRecordList"></div>
             </div>
           </div>
