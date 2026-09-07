@@ -758,6 +758,7 @@ a{color:var(--pink-deep);text-decoration:none}
 #module-cet6 .page-head,
 #module-sop .page-head{
   margin-bottom:28px;
+  margin-top:8px;
   padding:6px 4px;
 }
 #module-career .page-title,
@@ -791,6 +792,9 @@ a{color:var(--pink-deep);text-decoration:none}
   font-size:14px;
   color:var(--muted);
   margin-top:8px;
+  line-height:1.6;
+  white-space:normal;
+  word-break:break-word;
 }
 
 /* ===== SCM Career 底栏子模块导航 ===== */

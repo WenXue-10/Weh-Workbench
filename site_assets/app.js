@@ -2383,7 +2383,7 @@ function setTheme(theme){
 function setGlassOpacity(value){
   var s = loadSettings();
   s.glassOpacity = parseInt(value);
-  saveSettings(s);
+  saveSettings(s); markLocalChange();
   document.getElementById("glassOpacityValue").textContent = value + "%";
   // 应用透明度
   document.documentElement.style.setProperty("--glass-opacity", value/100);
@@ -2392,7 +2392,7 @@ function setGlassOpacity(value){
 function setVeilOpacity(value){
   var s = loadSettings();
   s.veilOpacity = parseInt(value);
-  saveSettings(s);
+  saveSettings(s); markLocalChange();
   document.getElementById("veilOpacityValue").textContent = value + "%";
   var base = value / 100;
   document.documentElement.style.setProperty("--veil-alpha", base);
@@ -2407,7 +2407,7 @@ function setVeilOpacity(value){
 function setBlurRadius(value){
   var s = loadSettings();
   s.blurRadius = parseInt(value);
-  saveSettings(s);
+  saveSettings(s); markLocalChange();
   document.getElementById("blurRadiusValue").textContent = value + "px";
   document.documentElement.style.setProperty("--blur-radius", value + "px");
 }
@@ -2415,7 +2415,7 @@ function setBlurRadius(value){
 function setFontSize(size){
   var s = loadSettings();
   s.fontSize = size;
-  saveSettings(s);
+  saveSettings(s); markLocalChange();
   var sizes = {small:"13px", medium:"14px", large:"15px"};
   document.documentElement.style.fontSize = sizes[size] || "14px";
 }
