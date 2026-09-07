@@ -287,7 +287,7 @@ a{color:var(--pink-deep);text-decoration:none}
   .two-col{grid-template-columns:1fr}
   .quick-grid{grid-template-columns:repeat(2,1fr)}
   .cmp-grid{grid-template-columns:1fr}
-  .kb-grid{grid-template-columns:1fr 1fr}
+  .kb-grid{grid-template-columns:1fr}
   .resume-list{grid-template-columns:1fr}
   .job-card{padding:14px}
   .resume-card .act{flex-direction:row}
