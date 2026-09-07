@@ -2535,21 +2535,24 @@ function syncDownload(c, silent){
     if(!f || !f.content){ throw new Error("云端没有数据文件"); }
     var data = JSON.parse(f.content);
     var m = loadSyncMeta();
-    var localTs = m.lastLocalChange || 0;
-    var cloudTs = data.syncTime || 0;
-    if(cloudTs < localTs){
-      if(!silent){ toast("本地数据比云端新，跳过下载"); }
+    var localDirty = (m.lastLocalChange || 0) > (m.lastUpload || 0);
+    if(localDirty){
+      if(!silent){ toast("本地有未上传的修改，跳过下载"); }
       return false;
     }
     writeAllData(data);
-    m.lastLocalChange = cloudTs;
     m.lastDownload = Date.now();
     saveSyncMeta(m);
     var c2 = loadSyncConfig();
     c2.lastSync = Date.now();
     localStorage.setItem(SYNC_CONFIG_KEY, JSON.stringify(c2));
-    if(!silent){ toast("已从云端恢复数据，页面刷新"); }
-    setTimeout(function(){ location.reload(); }, 800);
+    if(typeof renderMoney === "function") renderMoney();
+    if(typeof renderHealth === "function") renderHealth();
+    if(typeof renderInspire === "function") renderInspire();
+    if(typeof renderTodo === "function") renderTodo();
+    if(typeof renderDaily === "function") renderDaily();
+    if(typeof renderHome === "function") renderHome();
+    if(!silent){ toast("已从云端同步最新数据"); }
     return true;
   }).catch(function(e){
     if(!silent){ toast("下载失败：" + e.message); }
