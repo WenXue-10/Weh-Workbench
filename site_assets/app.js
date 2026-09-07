@@ -2698,7 +2698,24 @@ function savePreference(){
   s.preferences.healthGoal = parseInt(document.getElementById("prefHealthGoal").value) || 7;
   s.preferences.dailyStart = parseInt(document.getElementById("prefDailyStart").value) || 9;
   saveSettings(s);
-  toast("偏好已保存");
+  // 同步到各模块当前数据（实时生效）
+  try{
+    var money = loadMoney();
+    money.budget = s.preferences.moneyBudget;
+    money.fixedSave = s.preferences.moneySave;
+    money.cycleStart = s.preferences.moneyCycle;
+    saveMoney(money);
+    if(typeof renderMoney === "function") renderMoney();
+  }catch(e){}
+  try{
+    var health = loadHealth();
+    health.drinkBudget = s.preferences.healthBudget;
+    health.drinkGoal = s.preferences.healthGoal;
+    saveHealth(health);
+    if(typeof renderHealth === "function") renderHealth();
+  }catch(e){}
+  if(typeof renderDaily === "function") renderDaily();
+  toast("偏好已保存并同步到模块");
 }
 
 function loadPreference(){
