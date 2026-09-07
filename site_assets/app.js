@@ -2558,13 +2558,39 @@ function syncDownload(c, silent){
   });
 }
 
+function findExistingGist(token){
+  return fetch("https://api.github.com/user/gists", {
+    headers: { "Authorization": "Bearer " + token, "Accept": "application/vnd.github+json" }
+  }).then(function(r){ return r.json().then(function(j){ return {ok: r.ok, j: j}; }); })
+  .then(function(res){
+    if(!res.ok || !Array.isArray(res.j)) return null;
+    for(var i = 0; i < res.j.length; i++){
+      if(res.j[i].files && res.j[i].files[SYNC_FILE]){ return res.j[i].id; }
+    }
+    return null;
+  }).catch(function(){ return null; });
+}
+
 function syncConnect(){
   var c = readSyncInputs();
   if(!c.token){ toast("请先填写 Token"); switchSettingsTab("sync"); return; }
   localStorage.setItem(SYNC_CONFIG_KEY, JSON.stringify(c));
   renderSyncStatus();
-  if(c.gistId){ syncNow("download", true); }
-  else { syncNow("upload", true); }
+  if(c.gistId){ syncNow("download", true); return; }
+  // 没有 Gist ID：先查找已有的 Weh Atelier 同步 Gist，找到则复用，避免多设备数据分叉
+  toast("正在查找已有的同步 Gist…");
+  findExistingGist(c.token).then(function(id){
+    if(id){
+      c.gistId = id;
+      localStorage.setItem(SYNC_CONFIG_KEY, JSON.stringify(c));
+      var g = document.getElementById("syncGistId");
+      if(g) g.value = id;
+      toast("已连接已有的 Gist：" + id.slice(0,8) + "…");
+      syncNow("download", true);
+    } else {
+      syncNow("upload", true);
+    }
+  });
 }
 
 function syncInit(){
