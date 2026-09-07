@@ -2689,7 +2689,8 @@ function resetAllData(){
   });
 }
 
-function applyPrefsToModules(silent){
+function applyPrefsToModules(silent, markChange){
+  if(markChange === undefined) markChange = true;
   var s = loadSettings();
   var p = s.preferences || {};
   try{
@@ -2698,14 +2699,22 @@ function applyPrefsToModules(silent){
     if(money.budget !== p.moneyBudget){ money.budget = p.moneyBudget; changed = true; }
     if(money.fixedSave !== p.moneySave){ money.fixedSave = p.moneySave; changed = true; }
     if(money.cycleStart !== p.moneyCycle){ money.cycleStart = p.moneyCycle; changed = true; }
-    if(changed){ saveMoney(money); if(typeof renderMoney === "function") renderMoney(); }
+    if(changed){
+      if(markChange) saveMoney(money);
+      else localStorage.setItem(MONEY_KEY, JSON.stringify(money));
+      if(typeof renderMoney === "function") renderMoney();
+    }
   }catch(e){}
   try{
     var health = loadHealth();
     var hc = false;
     if(health.drinkBudget !== p.healthBudget){ health.drinkBudget = p.healthBudget; hc = true; }
     if(health.drinkGoal !== p.healthGoal){ health.drinkGoal = p.healthGoal; hc = true; }
-    if(hc){ saveHealth(health); if(typeof renderHealth === "function") renderHealth(); }
+    if(hc){
+      if(markChange) saveHealth(health);
+      else localStorage.setItem(HEALTH_KEY, JSON.stringify(health));
+      if(typeof renderHealth === "function") renderHealth();
+    }
   }catch(e){}
   if(typeof renderDaily === "function") renderDaily();
 }
@@ -2758,7 +2767,7 @@ function loadPreference(){
 
 function initSettings(){
   loadPreference();
-  applyPrefsToModules(true);
+  applyPrefsToModules(true, false);
   syncInit();
 }
 
