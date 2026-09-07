@@ -2794,6 +2794,7 @@ function loadPreference(){
   }
 }
 
+applyCardTheme(savedCardTheme);
 function initSettings(){
   loadPreference();
   applyPrefsToModules(true, false);
@@ -2995,10 +2996,41 @@ function pickHtml(type, imgs, cur){
   });
   return h + '</div>';
 }
+var CARD_THEMES = [
+  {key:"pink", name:"樱花粉", bg:"rgba(255,227,238,.8)", border:"#ffd0e2", color:"#c2185b"},
+  {key:"purple", name:"香芋紫", bg:"rgba(237,230,255,.8)", border:"#d4c4ff", color:"#6a1b9a"},
+  {key:"blue", name:"海盐蓝", bg:"rgba(227,242,255,.8)", border:"#c4e0ff", color:"#1565c0"},
+  {key:"green", name:"薄荷绿", bg:"rgba(227,255,238,.8)", border:"#c4ffd4", color:"#2e7d32"},
+  {key:"white", name:"云朵白", bg:"rgba(255,255,255,.6)", border:"rgba(255,255,255,.8)", color:"#4a4a4a"}
+];
+var savedCardTheme = "pink";
+try{ savedCardTheme = localStorage.getItem("atelier_card_theme") || "pink"; }catch(e){}
+function applyCardTheme(k){
+  var t = CARD_THEMES.find(function(x){ return x.key===k; }) || CARD_THEMES[0];
+  var r = document.documentElement.style;
+  r.setProperty("--quick-bg", t.bg);
+  r.setProperty("--quick-border", t.border);
+  r.setProperty("--quick-color", t.color);
+}
+function setCardTheme(k){
+  savedCardTheme = k;
+  try{ localStorage.setItem("atelier_card_theme", k); }catch(e){}
+  applyCardTheme(k); openPersonalize();
+}
+function cardThemePickHtml(cur){
+  var h = '<div class="pick-grid">';
+  CARD_THEMES.forEach(function(t){
+    h += '<div class="pick-item '+(t.key===cur?" active":"")+'" onclick="setCardTheme(\''+t.key+'\')">'
+      + '<div style="width:100%;height:60px;border-radius:12px;background:'+t.bg+';border:1px solid '+t.border+';display:flex;align-items:center;justify-content:center;color:'+t.color+';font-weight:700;font-size:12px">'+t.name+'</div>'
+      + '<div class="pn">'+t.name+'</div></div>';
+  });
+  return h+'</div>';
+}
 function openPersonalize(){
   setModal('<h2>🐱 换个风格</h2><div class="m-sub">点下面的图片，实时换背景和头像，你的选择会被记住；换左上角Logo请直接点它</div>'
     + '<div class="pick-sec"><div class="m-sec">🖼️ 背景图</div><div class="pick-hint">选一张做整站背景（会自动提取主色调）</div>'+pickHtml("Bg", BG_IMGS, savedBg)+'</div>'
-    + '<div class="pick-sec"><div class="m-sec">😺 小头像</div><div class="pick-hint">右上角头像，点它随时能换</div>'+pickHtml("Av", AV_IMGS, savedAv)+'</div>');
+    + '<div class="pick-sec"><div class="m-sec">😺 小头像</div><div class="pick-hint">右上角头像，点它随时能换</div>'+pickHtml("Av", AV_IMGS, savedAv)+'</div>'
+    + '<div class="pick-sec"><div class="m-sec">🎨 卡片配色</div><div class="pick-hint">首页内层按钮的颜色</div>'+cardThemePickHtml(savedCardTheme)+'</div>');
 }
 function setBg(k){ savedBg=k; try{localStorage.setItem("atelier_bg",k);}catch(e){} applyBg(); openPersonalize(); }
 function setAv(k){ savedAv=k; try{localStorage.setItem("atelier_av",k);}catch(e){} applyAv(); openPersonalize(); }

@@ -75,7 +75,7 @@ a{color:var(--pink-deep);text-decoration:none}
 .tl-date{flex-shrink:0;background:var(--pink-soft);color:var(--pink-deep);font-size:12px;font-weight:700;padding:2px 9px;border-radius:20px;height:fit-content}
 .text-link{font-size:13px;color:var(--pink-deep);font-weight:600}
 .quick-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
-.quick-grid a{display:flex;flex-direction:column;align-items:center;gap:7px;border-radius:20px;padding:16px 8px;font-size:13px;font-weight:700;cursor:pointer;background:rgba(255,227,238,.8);color:var(--pink-deep);border:1px solid #ffd0e2;transition:.15s}
+.quick-grid a{display:flex;flex-direction:column;align-items:center;gap:7px;border-radius:20px;padding:16px 8px;font-size:13px;font-weight:700;cursor:pointer;background:var(--quick-bg,rgba(255,227,238,.8));color:var(--quick-color,var(--pink-deep));border:1px solid var(--quick-border,#ffd0e2);transition:.15s}
 .quick-grid a:hover{transform:translateY(-2px)}
 /* ===== 筛选 ===== */
 .filterbar{display:flex;flex-direction:column;gap:12px;margin-bottom:16px}
