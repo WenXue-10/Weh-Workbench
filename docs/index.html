@@ -185,7 +185,7 @@ a{color:var(--pink-deep);text-decoration:none}
 .pick-item.av .pn{padding:6px 2px 9px}
 .pick-hint{font-size:11.5px;color:var(--muted);margin:-6px 0 10px}
 @media(max-width:820px){
-  .avatar{width:34px;height:34px}
+  .avatar{width:30px;height:30px}
   .pick-grid{grid-template-columns:repeat(2,1fr)}
 }
 /* ===== 弹窗 ===== */
@@ -288,9 +288,10 @@ a{color:var(--pink-deep);text-decoration:none}
   .sidebar{display:none}
   .bottom-nav{display:flex}
   .content{padding:14px 14px 100px}
-  .topbar{padding:12px 14px}
-  .topbar h1{font-size:16px}
-  .sync{font-size:11px;padding:5px 10px}
+  .topbar{padding:10px 12px;gap:8px}
+  .topbar h1{font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1}
+  .sync{font-size:11px;padding:5px 8px}
+  .sync #syncText{display:none}
   .stat-grid{grid-template-columns:repeat(2,1fr);gap:10px}
   .two-col{grid-template-columns:1fr}
   .quick-grid{grid-template-columns:repeat(2,1fr)}
@@ -356,7 +357,7 @@ a{color:var(--pink-deep);text-decoration:none}
 /* 顶栏全局搜索按钮 */
 .gsearch{width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.4);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.5);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;box-shadow:var(--shadow-sm);flex-shrink:0;transition:.2s}
 .gsearch:hover{background:color-mix(in srgb, var(--pink-deep) 15%, rgba(255,255,255,.5));transform:scale(1.08);border-color:color-mix(in srgb, var(--pink-deep) 30%, transparent)}
-@media(max-width:820px){ .gsearch{width:34px;height:34px;font-size:15px} }
+@media(max-width:820px){ .gsearch{width:30px;height:30px;font-size:14px} }
 
 /* ===== 页脚同步状态 ===== */
 .site-footer{
@@ -1307,7 +1308,7 @@ body.sop-active .sub-tab-bar{display:flex}
 
   <div class="main">
     <header class="topbar">
-      <div id="backBtn" class="back-btn" onclick="go('home')" title="返回首页">←</div>
+      <div id="backBtn" class="back-btn" onclick="go('home')" title="返回首页" style="display:none">←</div>
       <h1 id="pageTitle">🏠 首页总览</h1>
       <div class="top-right">
         <div class="sync"><span class="dot"></span><span id="syncText">工作台运行中</span></div>
@@ -3225,7 +3226,7 @@ body.sop-active .sub-tab-bar{display:flex}
 
 <script>
 window.SITE_DATA = {
- "updated": "2026-09-07 13:14",
+ "updated": "2026-09-07 13:50",
  "stats": {
   "jobs": 32,
   "rec": 0,
@@ -7356,6 +7357,11 @@ window.SITE_DATA = {
        "title": "求其上得其中求职目标设定与配得感_2026-08-28",
        "icon": "📄",
        "html": "<h1>求其上，得其中——求职目标设定与配得感</h1>\n<blockquote>\n<p>来源：史蒂文不做牛马「求其上，得其中；求其中，得其下，求其下，必败！」（6分钟）。核心：<strong>职业发展对赚钱至关重要，找工作时要有配得感，目标越高结果越好</strong>。</p>\n</blockquote>\n<h2>速读（核心结论）</h2>\n<ul>\n<li><strong>求职铁律</strong>：求其上，得其中；求其中，得其下；求其下，必败——<strong>目标要定高</strong></li>\n<li>找工作时要有<strong>配得感</strong>：目标定得高，最后能拿到的才更高</li>\n<li><strong>好公司</strong>＝在劳动法基础上主动拔高，提供更好的待遇和工作环境（劳动法标准只是底线）</li>\n<li><strong>外企要求并不高</strong>：掌握职场英文即可，工作难度甚至更低——别被\"外企门槛高\"吓退</li>\n<li>行动建议：坚持追求好的工作 + 提高英语水平 + 相信自己能拿到满意的工作</li>\n</ul>\n<h2>章节拆解</h2>\n<h3>配得感的重要性（00:26）</h3>\n<ul>\n<li>找工作时要有配得感，<strong>目标越高，结果越好</strong></li>\n<li>很多人不敢投好公司，是自我设限，不是能力不够</li>\n</ul>\n<h3>好公司的定义（01:19）</h3>\n<ul>\n<li>好公司在<strong>劳动法基础上拔高</strong>：待遇、工作环境都比法定标准更好</li>\n<li>如果一家公司只做到劳动法最低标准，它只是普通公司</li>\n<li>评论区金句印证：\"劳动法规定的那些，对于外企来说其实是最基本的，如果它没有拔高，它就是最普通的外企\"</li>\n</ul>\n<h3>进外企的可能性（03:44）</h3>\n<ul>\n<li><strong>外企要求并不高</strong>，掌握职场英文即可，工作难度甚至更低</li>\n<li>评论区实证：\"我去外企面试通过了……面试甚至比国内外贸私企轻松很多，也不过问具体家庭情况和离职原因\"</li>\n</ul>\n<h3>找工作的建议（04:55）</h3>\n<ul>\n<li>坚持追求好的工作</li>\n<li>提高英语水平（评论区都在搜\"剑桥商务英语\"）</li>\n<li>相信自己能得到满意的工作</li>\n</ul>\n<h2>关键补充</h2>\n<ul>\n<li>作者史蒂文不做牛马是\"小而美外资\"系列博主，此观点与其外资合集一脉相承——<strong>普通人也能进好外企，别被想象的门槛劝退</strong></li>\n<li>与 求其上得其中求职目标设定与配得感_2026-08-28 的\"配得感\"配合使用：先定高目标，再逐级准备（简历→网申→面试）</li>\n</ul>\n<h2>反思</h2>\n<ul>\n<li><strong>直接对应画像</strong>：外企首选+薪资底线 8K-15K 已定，但\"配得感\"提醒的是心理层面——投递时别因无实习、内向自我降级（如只投要求宽松的岗位），目标定在画像上限而非下限</li>\n<li><strong>\"劳动法拔高\"可加入公司评估</strong>：评估 offer 时，一家公司若只做到法定最低标准（大小周/无加班费），即使薪资达标也应按画像\"氛围压抑降权\"处理——判断标准与 劳动合同签订避坑指南_2026-08-26 一致</li>\n<li><strong>英语短板的具体缓解</strong>：\"外企要求并不高，掌握职场英文即可\"降低焦虑，但六级备考项目仍要继续——外企日常中文为主是筛选条件，英语是长期竞争力</li>\n</ul>\n<h2>关联笔记</h2>\n<ul>\n<li>求其上得其中求职目标设定与配得感_2026-08-28</li>\n<li>00_合集索引与总览_2026-08-27</li>\n<li>00_企业推荐汇总</li>\n<li>应届生零经验可冲的外企推荐_2026-08-26</li>\n</ul>"
+      },
+      {
+       "title": "私企国企外企三线求职玩法_2026-09-07",
+       "icon": "📄",
+       "html": "<h2>速读（核心结论）</h2>\n<ul>\n<li><strong>私企、国企、外企根本不是一套玩法</strong>：别太早三选一，普通条件的学生先按\"五项条件\"盘点自己，三条线都建公司池，用覆盖面换概率</li>\n<li><strong>五项条件定优先级</strong>：学校学历、专业匹配、成绩证书、实习项目、实操技能——谁强谁弱决定秋招第一轮时间怎么分配</li>\n<li><strong>三条线的找岗入口完全不同</strong>：私企看\"能不能快点干活\"（JD 写数据分析/Excel/SQL/供应链等具体技能）；国央企看硬条件（招聘对象/学历/专业/资格四项）+四层往下翻（央企集团→成员单位→省市国企→地方人社平台）；外企用雇主榜单反向建公司库</li>\n<li><strong>有效海投 ≠ 对着推荐职位一路点申请</strong>：先把公司池扩大（10+10+10），再逐个补官方渠道进跟踪表</li>\n</ul>\n<h2>正文</h2>\n<h3>第一步：盘点五项条件</h3>\n<table>\n<thead>\n<tr>\n<th>条件</th>\n<th>作用</th>\n<th>强弱决定</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>学校学历</td>\n<td>纸面门槛</td>\n<td>国央企第一轮筛选用</td>\n</tr>\n<tr>\n<td>专业匹配</td>\n<td>对口程度</td>\n<td>决定岗位池大小</td>\n</tr>\n<tr>\n<td>成绩证书</td>\n<td>纸面条件</td>\n<td>国央企/银行加分</td>\n</tr>\n<tr>\n<td>实习项目</td>\n<td>真实业务证据</td>\n<td>私企/外企核心考察</td>\n</tr>\n<tr>\n<td>实操技能</td>\n<td>入职即用能力</td>\n<td>私企最关心</td>\n</tr>\n</tbody>\n</table>\n<h3>私企玩法：多久能开始做事</h3>\n<ul>\n<li>互联网/消费/制造/科技公司 JD 直接写数据分析、内容运营、销售、开发、设计、供应链、Excel、SQL——都是\"入职即用\"信号</li>\n<li>学校成绩一般但做过真实项目/实习/比赛作品/技能扎实 → 中大型私企校招值得重点冲</li>\n<li><strong>跨专业找工作的样本库法</strong>：看培训机构/训练营/转行社群公开展示的成功案例（不买课），反向研究——什么专业的人去了什么岗位、补了什么技能、做了什么项目、企业为哪部分能力买单</li>\n</ul>\n<h3>国央企玩法：先核对硬条件</h3>\n<ul>\n<li>看到招聘公告先找四项：<strong>招聘对象、学历要求、专业要求、资格条件</strong>（卡应届身份/专业/英语/证书/成绩）</li>\n<li>纸面条件完整（对口专业+成绩+奖学金+证书）→ 国央企优先级提高</li>\n<li>找国企四层结构：<strong>央企集团→成员单位→省市国企→地方人社和人才平台</strong></li>\n<li>看央企别只看总部招聘，继续找官网里\"成员单位/所属企业/二级公司/区域公司\"</li>\n<li>想去某城市 → 查当地国资委监管企业、人社局、人才集团、学校就业网</li>\n<li>国家大学生就业服务平台 + 政府/人社系统面向高校的就业渠道单独建收藏夹</li>\n</ul>\n<h3>外企玩法：反向建公司库</h3>\n<ul>\n<li>别只守着宝洁/联合利华/欧莱雅/雀巢，公司池一开始就太小</li>\n<li><strong>拿雇主榜单和行业榜单反向建库</strong>：把消费、医药、工业、汽车、咨询、物流、科技行业里感兴趣的公司抄下来，逐家反查</li>\n<li>检索方式：公众号搜\"公司名+招聘\"/\"公司名+校园招聘\"；官网搜\"公司名+Careers\"/\"公司名+Jobs\"；LinkedIn 等职业平台</li>\n<li>很多外企岗位不会同时出现在常用招聘软件里</li>\n</ul>\n<h3>秋招三线表 + 6 条找岗方法</h3>\n<p><strong>秋招三线表字段</strong>：公司 | 私企/国企/外企 | 城市 | 目标岗位 | 官方入口 | 其他入口 | 开放时间 | 截止时间 | 硬性要求 | 目前进度</p>\n<ol>\n<li>国资委名录不是读政策的，是拿来<strong>扩国企公司池</strong>的</li>\n<li>雇主榜单不是看排名的，是拿来<strong>扩外企公司池</strong>的</li>\n<li>培训机构案例别急着买单，先<strong>反向研究别人补了什么能力</strong></li>\n<li>陌生的\"XX科技/XX运营/XX工程\"，先查<strong>背后属于哪个集团</strong></li>\n<li>招聘公众号搜\"公司+招聘\"，不要只关注企业宣传号</li>\n<li>岗位写\"央企平台/国企项目\"，再确认<strong>最后和谁签合同</strong>——正式用工还是派遣外包</li>\n</ol>\n<h3>30 分钟行动法</h3>\n<p>前 10 分钟写自己的五项条件 → 中间 10 分钟分别找 10 家私企、10 家国央企、10 家外企 → 最后 10 分钟把官网/招聘号/学校渠道/开放时间补进表里。不用当晚投完，先把目标从十几家扩成三四十家。</p>\n<h2>关键补充</h2>\n<ul>\n<li><strong>海投 ≠ 乱投</strong>：真正有效的海投是先把公司池扩大，再按官方渠道逐个跟踪；对着\"推荐职位\"一路点申请不是海投</li>\n<li><strong>秋招最大的第一轮信息差</strong>：不是竞争不过，而是别人比你多往下找了一层（成员单位/榜单/人社平台）</li>\n<li>学校、学历、专业当然影响秋招，但\"私企国企外企分别在哪招人、成员公司有哪些、官方渠道从哪进\"这些本来可以找全</li>\n</ul>\n<h2>关联笔记</h2>\n<ul>\n<li>Boss直聘筛选外企实操方法_甄别真假外企_2026-09-03（同类：外企筛选实操，互补）</li>\n<li>家里没矿就去投的中小厂秋招清单_2026-08-27（同类：秋招公司池清单）</li>\n<li>小而美公司求职方法_2026-08-26（同类：公司选择方法论）</li>\n</ul>\n<h2>反思</h2>\n<ul>\n<li><strong>五项条件对号入座</strong>：我的纸面条件（GPA 81.19、四级）不算强，但实操技能（Python/R/SPSS/U8+）和真实项目/实习经历是相对长板——按这篇的逻辑，这正好是\"私企/外企看重多久能开始做事\"的玩法，也印证画像 v2.1 里\"外企首选\"方向：外企同样看实操和项目证据，而非纸面条件</li>\n<li><strong>国央企部分对我不太适用</strong>：画像已基本排除央国企（除非纯后台数据岗且氛围轻松）。若真走例外路线，\"四层找法\"和\"硬条件核对\"可用——用我的 Python/SPSS 数据分析能力去卡数据岗的硬条件</li>\n<li><strong>外企池可能真的太小</strong>：知识库企业推荐汇总以\"小而美外企\"为主，这篇提醒可用雇主榜单反向建库扩充，扩大外企池后才能匹配\"外企首选\"策略</li>\n<li><strong>第 6 条对\"幼年体/子公司\"筛选有防坑价值</strong>：投标注\"央企平台/国企项目\"的岗位时确认签合同主体，避免派遣外包</li>\n</ul>\n<h2>行动项</h2>\n<ul>\n<li>[ ] 用雇主榜单（消费/医药/工业/汽车/咨询/物流/科技）反向扩充外企目标池，逐家查官网招聘页/招聘公众号/LinkedIn，补进企业推荐汇总（优先级：高）</li>\n<li>[ ] 建\"秋招三线跟踪表\"（公司|类型|城市|岗位|官方入口|开放/截止|硬性要求|进度），与现有企业推荐汇总核对字段（优先级：中）</li>\n</ul>"
       },
       {
        "title": "试用期最容易被开的4种应届生_2026-08-26",
