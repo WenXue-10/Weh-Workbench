@@ -1,7 +1,7 @@
 /* ===== 文雪求职小窝 · 前端逻辑（数据由生成器自动注入） ===== */
 var D = window.SITE_DATA || {};
 var JOBS = D.jobs || [], COMPS = D.companies || [], TL = D.timeline || [];
-var RESUMES = D.resumes || {general:[], custom:[]}, KBS = D.kb || [], BCKBS = D.baichuanKb || [], CET6KBS = D.cet6Kb || [], SOPKBS = D.sopKb || [];
+var RESUMES = D.resumes || {general:[], custom:[]}, KBS = D.kb || [], BCKBS = D.baichuanKb || [], CET6KBS = D.cet6Kb || [], SOPKBS = D.sopKb || [], WIKI_AREAS = D.wikiAreasKb || [], WIKI_CONCEPTS = D.wikiConceptsKb || [], WIKI_RESOURCES = D.wikiResourcesKb || [];
 var IMGS = D.images || {bg:{}, av:{}};
 /* 快捷操作中转站（Cloudflare Worker），接入后由助手填写 */
 var BRIDGE = { url: "https://1473705102-gh71l7a70a.ap-shanghai.tencentscf.com", key: "XNTbRx7spQJHDGWfKjchz8iSL2OIwoFY" };
@@ -403,6 +403,38 @@ function renderBcKb(){
 }
 function openBcKb(i){
   var k = BCKBS[i];
+  var html = "";
+  (k.groups||[{title:"", notes:k.notes||[]}]).forEach(function(g){
+    if(g.title) html += '<div class="kb-section">'+esc(g.title)+'</div>';
+    var items = renderNotes(g.notes);
+    html += items || '<div style="color:var(--muted);font-size:13px;margin:4px 0">（空）🐾</div>';
+  });
+  setModal('<h2>'+k.icon+' '+esc(k.name)+'</h2><div class="m-sub">'+esc(k.desc)+' · 点击查看</div>'+(html||'<div class="m-sub">这个文件夹还没有内容 🐾</div>'));
+}
+
+/* ---------- 灵犀智库-领域认知/百科/资源 ---------- */
+function renderWikiCategory(gridId, data, statIds){
+  var grid = document.getElementById(gridId);
+  if(!grid || !data) return;
+  grid.innerHTML = data.map(function(k,i){
+    var cnt = 0;
+    (k.groups||[{title:"", notes:k.notes||[]}]).forEach(function(g){ cnt += countNotes(g.notes); });
+    return '<div class="kb-card" onclick="openWikiKb(\''+gridId+'\','+i+')"><div class="ic">'+k.icon+'</div><div class="kb-info"><div class="kn">'+esc(k.name)+'</div><div class="kd">'+esc(k.desc)+'</div></div><span class="ncount">'+cnt+' 项</span></div>';
+  }).join("");
+  // 更新统计
+  if(statIds){
+    data.forEach(function(k, i){
+      var cnt = 0;
+      (k.groups||[{title:"", notes:k.notes||[]}]).forEach(function(g){ cnt += countNotes(g.notes); });
+      if(statIds[i]){ var el = document.getElementById(statIds[i]); if(el) el.textContent = cnt; }
+    });
+  }
+}
+function openWikiKb(gridId, i){
+  var dataMap = {"wikiAreasGrid": WIKI_AREAS, "wikiConceptsGrid": WIKI_CONCEPTS, "wikiResourcesGrid": WIKI_RESOURCES};
+  var data = dataMap[gridId] || [];
+  var k = data[i];
+  if(!k) return;
   var html = "";
   (k.groups||[{title:"", notes:k.notes||[]}]).forEach(function(g){
     if(g.title) html += '<div class="kb-section">'+esc(g.title)+'</div>';
@@ -3151,7 +3183,7 @@ function setIcon(k){
 var TITLES = {
   home:"🏠 首页总览", money:"💰 存钱记账", health:"🍱 吃饭健康",
   inspiration:"💡 灵感捕捉", decision:"🎯 决策顾问", report:"📝 工作汇报台",
-  baichuan:"📚 灵犀库", career:"💼 SCM Career", cet6:"📖 CET-6备战", sop:"🛠️ 工作SOP",
+  baichuan:"📚 灵犀智库", career:"💼 SCM Career", cet6:"📖 CET-6备战", sop:"🛠️ 工作SOP",
   daily:"📅 日计划台", todo:"✅ 待办清单", settings:"⚙️ 设置",
   jobs:"🐾 岗位看板", companies:"🐈 目标公司池", timeline:"😺 每日日报",
   resume:"📄 简历库", knowledge:"📚 知识库"
@@ -4838,7 +4870,7 @@ function searchCet6Materials(){
 }
 
 
-/* ===== 灵犀库（百川智库）底栏子模块导航 ===== */
+/* ===== 灵犀智库底栏子模块导航 ===== */
 function initBaichuanSubTabs(){
   var tabs = document.querySelectorAll('#module-baichuan .sub-tab');
   if(!tabs.length) return;
@@ -4848,64 +4880,22 @@ function initBaichuanSubTabs(){
       switchBaichuanSub(sub);
     });
   });
-  // 渲染各子模块内容
-  renderBaichuanCategory();
+  // 渲染所有分类
+  renderWikiCategory("wikiAreasGrid", WIKI_AREAS, ["wikiAreasCount","wikiAreasJobCount","wikiAreasCareerCount","wikiAreasEngCount"]);
+  renderWikiCategory("wikiConceptsGrid", WIKI_CONCEPTS, ["wikiConceptsModelCount","wikiConceptsCodeCount"]);
+  renderWikiCategory("wikiResourcesGrid", WIKI_RESOURCES, ["wikiResEcoCount","wikiResAiCount"]);
 }
 
 function switchBaichuanSub(sub){
-  // 切换tab激活状态
   document.querySelectorAll('#module-baichuan .sub-tab').forEach(function(t){
     t.classList.toggle('active', t.getAttribute('data-sub') === sub);
   });
-  // 切换内容显示
   document.querySelectorAll('#module-baichuan .baichuan-sub').forEach(function(el){
     el.style.display = (el.id === 'baichuan-sub-' + sub) ? '' : 'none';
   });
 }
 
-function renderBaichuanCategory(){
-  // 从BCKBS中找到对应分类并渲染
-  var categories = {
-    'bcSkillsList': '01-技能技巧',
-    'bcTasksList': '02-任务流程',
-    'bcToolsList': '03-工具方法',
-    'bcIdeasList': '04-灵感碎片'
-  };
-  var countMap = {
-    'bcSkillsList': 'bcSkillsCount',
-    'bcTasksList': 'bcTasksCount',
-    'bcToolsList': 'bcToolsCount',
-    'bcIdeasList': 'bcIdeasCount'
-  };
-  Object.keys(categories).forEach(function(elId){
-    var el = document.getElementById(elId);
-    if(!el) return;
-    var catName = categories[elId];
-    var kb = (BCKBS||[]).find(function(k){ return k.name && k.name.indexOf(catName) >= 0; });
-    var countEl = document.getElementById(countMap[elId]);
-    if(!kb || !kb.groups || !kb.groups.length){
-      el.innerHTML = '<div class="career-list-empty">📂 这个分类还没有内容，去知识库添加吧～</div>';
-      if(countEl) countEl.textContent = '';
-      return;
-    }
-    var allNotes = [];
-    kb.groups.forEach(function(g){
-      (g.notes||[]).forEach(function(n){ allNotes.push(n); });
-    });
-    if(countEl) countEl.textContent = allNotes.length + ' 篇';
-    if(!allNotes.length){
-      el.innerHTML = '<div class="career-list-empty">📂 这个分类还没有内容</div>';
-      return;
-    }
-    // 找到在KB_FLAT中的索引
-    el.innerHTML = allNotes.map(function(n){
-      var idx = KB_FLAT.indexOf(n);
-      var onclick = idx >= 0 ? 'openKbNote('+idx+')' : '';
-      var sub = n.date ? '📅 ' + n.date : '';
-      return careerListItem(n.icon || '📄', n.title, sub, '', onclick);
-    }).join('');
-  });
-}
+
 
 
 /* ===== 工作SOP底栏子模块导航 ===== */

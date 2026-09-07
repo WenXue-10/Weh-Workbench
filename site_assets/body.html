@@ -14,7 +14,7 @@
     <div class="nav-item" data-module="report">📝 工作汇报台</div>
     <div class="nav-item" data-module="daily">📅 日计划台</div>
     <div class="nav-item" data-module="todo">✅ Weh Tasks</div>
-    <div class="nav-item" data-module="baichuan">📚 灵犀库</div>
+    <div class="nav-item" data-module="baichuan">📚 灵犀智库</div>
     <div class="nav-item" data-module="career">💼 SCM Career</div>
     <div class="nav-item" data-module="cet6">📖 CET-6备战</div>
     <div class="nav-item" data-module="sop">🛠️ 工作SOP</div>
@@ -51,7 +51,7 @@
           <div class="card">
             <div class="card-head">📚 知识库模块</div>
             <div class="quick-grid">
-              <a data-module="baichuan">📚 灵犀库</a>
+              <a data-module="baichuan">📚 灵犀智库</a>
               <a data-module="career">💼 SCM Career</a>
               <a data-module="cet6">📖 CET-6备战</a>
               <a data-module="sop">🛠️ 工作SOP</a>
@@ -412,16 +412,16 @@
         </div>
       </section>
 
-<!-- 📚 百川智库 -->
+<!-- 📚 灵犀智库 -->
       <section id="module-baichuan" class="view">
         <div class="page-head">
-          <div class="page-title">📚 百川智库</div>
-          <div class="page-sub">你的第二大脑 · 技能技巧 / 工具方法 / 任务流程 / 灵感碎片</div>
+          <div class="page-title">📚 灵犀智库</div>
+          <div class="page-sub">你的第二大脑 · 百川智库 / 领域认知 / 百科概念 / 资源收藏</div>
         </div>
         <!-- 子模块内容区 -->
         <div class="baichuan-sub-content">
-          <!-- 概览 -->
-          <div class="baichuan-sub" id="baichuan-sub-overview">
+          <!-- 百川智库 -->
+          <div class="baichuan-sub" id="baichuan-sub-bc">
             <div class="stat-grid">
               <div class="stat-card p1"><div class="em">📄</div><div class="lab">知识笔记</div><div class="num" id="bcKbCount">0</div></div>
               <div class="stat-card p2"><div class="em">🛠️</div><div class="lab">技能技巧</div><div class="num" id="bcSkillCount">0</div></div>
@@ -429,46 +429,52 @@
               <div class="stat-card p4"><div class="em">💡</div><div class="lab">灵感碎片</div><div class="num" id="bcIdeaCount">0</div></div>
             </div>
             <div class="card">
-              <div class="card-head">📂 知识分类</div>
+              <div class="card-head">📂 百川分类</div>
               <div class="kb-grid" id="bcKbGrid"></div>
             </div>
           </div>
-          <!-- 技能技巧 -->
-          <div class="baichuan-sub" id="baichuan-sub-skills" style="display:none">
+          <!-- 领域认知 -->
+          <div class="baichuan-sub" id="baichuan-sub-areas" style="display:none">
+            <div class="stat-grid">
+              <div class="stat-card p1"><div class="em">🧠</div><div class="lab">个人认知</div><div class="num" id="wikiAreasCount">0</div></div>
+              <div class="stat-card p2"><div class="em">🎯</div><div class="lab">求职方法</div><div class="num" id="wikiAreasJobCount">0</div></div>
+              <div class="stat-card p3"><div class="em">📈</div><div class="lab">职场成长</div><div class="num" id="wikiAreasCareerCount">0</div></div>
+              <div class="stat-card p4"><div class="em">🌐</div><div class="lab">英语学习</div><div class="num" id="wikiAreasEngCount">0</div></div>
+            </div>
             <div class="card">
-              <div class="card-head">🛠️ 技能技巧 <span class="m-count" id="bcSkillsCount"></span></div>
-              <div class="career-list" id="bcSkillsList"></div>
+              <div class="card-head">📂 领域分类</div>
+              <div class="kb-grid" id="wikiAreasGrid"></div>
             </div>
           </div>
-          <!-- 任务流程 -->
-          <div class="baichuan-sub" id="baichuan-sub-tasks" style="display:none">
+          <!-- 百科概念 -->
+          <div class="baichuan-sub" id="baichuan-sub-concepts" style="display:none">
+            <div class="stat-grid">
+              <div class="stat-card p1"><div class="em">🧩</div><div class="lab">认知模型</div><div class="num" id="wikiConceptsModelCount">0</div></div>
+              <div class="stat-card p2"><div class="em">💻</div><div class="lab">编程工具</div><div class="num" id="wikiConceptsCodeCount">0</div></div>
+            </div>
             <div class="card">
-              <div class="card-head">📋 任务流程 <span class="m-count" id="bcTasksCount"></span></div>
-              <div class="career-list" id="bcTasksList"></div>
+              <div class="card-head">📂 百科分类</div>
+              <div class="kb-grid" id="wikiConceptsGrid"></div>
             </div>
           </div>
-          <!-- 工具方法 -->
-          <div class="baichuan-sub" id="baichuan-sub-tools" style="display:none">
-            <div class="card">
-              <div class="card-head">🔧 工具方法 <span class="m-count" id="bcToolsCount"></span></div>
-              <div class="career-list" id="bcToolsList"></div>
+          <!-- 资源收藏 -->
+          <div class="baichuan-sub" id="baichuan-sub-resources" style="display:none">
+            <div class="stat-grid">
+              <div class="stat-card p1"><div class="em">💰</div><div class="lab">经济商业</div><div class="num" id="wikiResEcoCount">0</div></div>
+              <div class="stat-card p2"><div class="em">🤖</div><div class="lab">AI科技</div><div class="num" id="wikiResAiCount">0</div></div>
             </div>
-          </div>
-          <!-- 灵感碎片 -->
-          <div class="baichuan-sub" id="baichuan-sub-ideas" style="display:none">
             <div class="card">
-              <div class="card-head">💡 灵感碎片 <span class="m-count" id="bcIdeasCount"></span></div>
-              <div class="career-list" id="bcIdeasList"></div>
+              <div class="card-head">📂 资源分类</div>
+              <div class="kb-grid" id="wikiResourcesGrid"></div>
             </div>
           </div>
         </div>
         <!-- 底栏子模块导航 -->
         <div class="sub-tab-bar">
-          <div class="sub-tab active" data-sub="overview">📊 概览</div>
-          <div class="sub-tab" data-sub="skills">🛠️ 技能</div>
-          <div class="sub-tab" data-sub="tasks">📋 流程</div>
-          <div class="sub-tab" data-sub="tools">🔧 工具</div>
-          <div class="sub-tab" data-sub="ideas">💡 灵感</div>
+          <div class="sub-tab active" data-sub="bc">🌊 百川</div>
+          <div class="sub-tab" data-sub="areas">🧠 认知</div>
+          <div class="sub-tab" data-sub="concepts">📖 百科</div>
+          <div class="sub-tab" data-sub="resources">📦 资源</div>
         </div>
       </section>
 

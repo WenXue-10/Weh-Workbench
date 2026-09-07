@@ -823,6 +823,47 @@ def scan_sop():
         sop.append({"icon": icon, "name": folder, "desc": desc, "cls": "", "groups": [{"title": "", "notes": notes}]})
     return sop
 
+# ========== 灵犀智库-领域认知（02-Areas） ==========
+WIKI_AREAS_ROOT = r"D:\Obsidian\Weh-Brain-Areas"
+_WIKI_AREAS_META = [
+    ("个人认知", "🧠", "认知升级、思维模型、自我觉察"),
+    ("求职方法论", "🎯", "求职策略、面试技巧、职业规划"),
+    ("职场成长", "📈", "职场生存、晋升路径、人际关系"),
+    ("英语学习", "🌐", "英语学习方法、笔记、资料"),
+]
+def scan_wiki_areas():
+    items = []
+    for folder, icon, desc in _WIKI_AREAS_META:
+        notes = _walk_notes(os.path.join(WIKI_AREAS_ROOT, folder))
+        items.append({"icon": icon, "name": folder, "desc": desc, "cls": "", "groups": [{"title": "", "notes": notes}]})
+    return items
+
+# ========== 灵犀智库-百科概念（06-Wiki） ==========
+WIKI_CONCEPTS_ROOT = r"D:\Obsidian\Weh-Brain-Wiki"
+_WIKI_CONCEPTS_META = [
+    ("认知模型", "🧩", "心智模型、思维框架、决策模型"),
+    ("编程工具", "💻", "开发工具、技术栈、效率工具"),
+]
+def scan_wiki_concepts():
+    items = []
+    for folder, icon, desc in _WIKI_CONCEPTS_META:
+        notes = _walk_notes(os.path.join(WIKI_CONCEPTS_ROOT, folder))
+        items.append({"icon": icon, "name": folder, "desc": desc, "cls": "", "groups": [{"title": "", "notes": notes}]})
+    return items
+
+# ========== 灵犀智库-资源收藏（03-Resources） ==========
+WIKI_RESOURCES_ROOT = r"D:\Obsidian\Weh-Brain-Resources"
+_WIKI_RESOURCES_META = [
+    ("01-经济商业", "💰", "经济分析、商业洞察、行业研究"),
+    ("02-AI科技", "🤖", "AI技术、科技趋势、前沿动态"),
+]
+def scan_wiki_resources():
+    items = []
+    for folder, icon, desc in _WIKI_RESOURCES_META:
+        notes = _walk_notes(os.path.join(WIKI_RESOURCES_ROOT, folder))
+        items.append({"icon": icon, "name": folder, "desc": desc, "cls": "", "groups": [{"title": "", "notes": notes}]})
+    return items
+
 # 取知识库最近一次改动时间（保证只有真的改过才更新时间，避免自动提交刷屏）
 _SKIP_DIRS = {".git", ".obsidian", ".trash", "Templates", ".agents", ".codex", "docs"}
 def latest_mtime():
@@ -946,6 +987,9 @@ def build():
     baichuanKb = scan_baichuan()
     cet6Kb = scan_cet6()
     sopKb = scan_sop()
+    wikiAreasKb = scan_wiki_areas()
+    wikiConceptsKb = scan_wiki_concepts()
+    wikiResourcesKb = scan_wiki_resources()
     stats = {
         "jobs": len(jobs),
         "rec": sum(1 for j in jobs if j.get("status") == "rec"),
@@ -965,6 +1009,9 @@ def build():
         "baichuanKb": baichuanKb,
         "cet6Kb": cet6Kb,
         "sopKb": sopKb,
+        "wikiAreasKb": wikiAreasKb,
+        "wikiConceptsKb": wikiConceptsKb,
+        "wikiResourcesKb": wikiResourcesKb,
         "images": {"bg": bg, "av": av, "theme": theme, "bgMobile": bgm},
     "appIcons": app_icons,
     }
