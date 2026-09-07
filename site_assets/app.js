@@ -27,7 +27,10 @@ function showPrompt(opts){
   var fieldsEl = document.getElementById("wehPromptFields");
   fieldsEl.innerHTML = fields.map(function(f,i){
     return '<div class="prompt-field"><label>'+(f.label||"")+'</label>'
-      +'<input type="'+(f.type||"text")+'" id="wehPromptInput'+i+'" value="'+esc(f.value||"")+'" placeholder="'+esc(f.placeholder||"")+'"></div>';
+      +'<div style="display:flex;gap:8px;align-items:center">'
+      +'<input type="'+(f.type||"text")+'" id="wehPromptInput'+i+'" value="'+esc(f.value||"")+'" placeholder="'+esc(f.placeholder||"")+'" style="flex:1;min-width:0">'
+      +'<button type="button" class="voice-btn" data-target="wehPromptInput'+i+'" onclick="toggleVoice(\'wehPromptInput'+i+'\')">🎤</button>'
+      +'</div></div>';
   }).join("");
   document.getElementById("wehPromptOk").textContent = opts.okText || "确定";
   openWehPrompt();
@@ -72,6 +75,63 @@ function cancelWehPrompt(){
   var resolve = _promptResolve; _promptResolve = null;
   hideWehPrompt();
   resolve(null);
+}
+
+/* ---------- 语音输入 ---------- */
+var _voiceRec = null, _voiceActive = false, _voiceTarget = null, _voiceFinal = "";
+function isVoiceSupported(){ return !!(window.SpeechRecognition || window.webkitSpeechRecognition); }
+function toggleVoice(inputId){
+  var input = document.getElementById(inputId);
+  if(!input) return;
+  if(_voiceActive && _voiceTarget === inputId){
+    if(_voiceRec) _voiceRec.stop();
+    return;
+  }
+  if(_voiceRec){ try{ _voiceRec.stop(); }catch(e){} }
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR){ toast("当前浏览器不支持语音输入"); return; }
+  _voiceRec = new SR();
+  _voiceRec.lang = "zh-CN";
+  _voiceRec.continuous = true;
+  _voiceRec.interimResults = true;
+  _voiceFinal = input.value ? input.value + " " : "";
+  _voiceRec.onresult = function(e){
+    var interim = "";
+    for(var i=e.resultIndex; i<e.results.length; i++){
+      if(e.results[i].isFinal) _voiceFinal += e.results[i][0].transcript;
+      else interim += e.results[i][0].transcript;
+    }
+    input.value = _voiceFinal + interim;
+  };
+  _voiceRec.onend = function(){ _voiceActive=false; _voiceTarget=null; _updateVoiceBtns(); };
+  _voiceRec.onerror = function(e){
+    if(e.error !== "no-speech" && e.error !== "aborted") toast("语音识别失败："+e.error);
+    _voiceActive=false; _voiceTarget=null; _updateVoiceBtns();
+  };
+  try{
+    _voiceActive = true; _voiceTarget = inputId;
+    _voiceRec.start();
+    _updateVoiceBtns();
+  }catch(e){ toast("语音启动失败"); }
+}
+function _updateVoiceBtns(){
+  document.querySelectorAll(".voice-btn").forEach(function(btn){
+    var t = btn.getAttribute("data-target");
+    if(_voiceActive && _voiceTarget === t){ btn.classList.add("recording"); btn.textContent="🔴"; }
+    else { btn.classList.remove("recording"); btn.textContent="🎤"; }
+  });
+}
+function initVoiceInput(){
+  if(!isVoiceSupported()){
+    document.querySelectorAll(".voice-btn").forEach(function(b){ b.style.display="none"; });
+  }
+}
+function voiceDecisionDilemma(){
+  showPrompt({title:"说说你的决策困境", fields:[{label:"当前纠结什么？", placeholder:"比如：要不要接这个offer，担心加班太多..."}]}).then(function(vals){
+    if(!vals || !vals[0]) return;
+    var el = document.getElementById("decisionDilemma");
+    if(el){ el.style.display = "block"; el.textContent = "💭 " + vals[0]; }
+  });
 }
 document.addEventListener("keydown", function(e){
   var m = document.getElementById("wehPromptModal");
@@ -3208,6 +3268,7 @@ document.addEventListener("keydown", function(e){ if(e.key==="Escape") closeModa
     if(document.getElementById("settings-profile")){
       initSettings();
     }
+    initVoiceInput();
     // 更新统计数字
     function countAllNotes(notes){
       var count = 0;

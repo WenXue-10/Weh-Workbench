@@ -198,6 +198,12 @@ a{color:var(--pink-deep);text-decoration:none}
 .prompt-btn{border:none;border-radius:12px;padding:9px 20px;font-size:14px;font-weight:700;cursor:pointer;transition:.15s}
 .prompt-btn.prompt-cancel{background:rgba(0,0,0,.06);color:var(--muted)}
 .prompt-btn.prompt-cancel:hover{background:rgba(0,0,0,.1)}
+
+/* 语音输入按钮 */
+.voice-btn{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:12px;border:1px solid var(--line);background:var(--card-bg);backdrop-filter:blur(var(--blur-radius));-webkit-backdrop-filter:blur(var(--blur-radius));cursor:pointer;font-size:18px;flex-shrink:0;transition:.15s;user-select:none}
+.voice-btn:hover{transform:scale(1.05);border-color:var(--pink-deep)}
+.voice-btn.recording{background:rgba(255,80,80,.15);border-color:#ff5050;animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
 .prompt-btn.prompt-ok{background:var(--pink-deep);color:#fff;box-shadow:0 4px 12px rgba(224,85,138,.3)}
 .prompt-btn.prompt-ok:hover{filter:brightness(1.08)}
 .modal h2{font-size:19px;margin-bottom:4px}

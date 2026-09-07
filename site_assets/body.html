@@ -241,6 +241,7 @@
       <section id="module-inspiration" class="view">
         <div class="inspire-input-bar">
           <input type="text" id="inspireInput" placeholder="想到什么？直接记下来，回车保存..." onkeydown="if(event.key==='Enter')addInspire()">
+          <button type="button" class="voice-btn" data-target="inspireInput" onclick="toggleVoice('inspireInput')">🎤</button>
           <button onclick="addInspire()">💡 捕捉</button>
         </div>
         <div class="money-layout">
@@ -349,7 +350,11 @@
                   <div class="dec-score-verdict" id="decVerdict"></div>
                 </div>
               </div>
-              <button class="ai-truth-btn" onclick="resetDecision()" style="margin-top:12px">🔄 重新拷问一个</button>
+              <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+                <button class="ai-truth-btn" onclick="resetDecision()">🔄 重新拷问一个</button>
+                <button class="ai-truth-btn" onclick="voiceDecisionDilemma()" style="background:linear-gradient(135deg,#6b8efa,#8b5cf6)">🎤 语音说困境</button>
+              </div>
+              <div id="decisionDilemma" style="margin-top:10px;padding:10px 14px;background:rgba(255,255,255,.5);border-radius:12px;font-size:13px;color:var(--muted);display:none;white-space:pre-wrap;word-break:break-word"></div>
             </div>
           </div>
         </div>
@@ -380,6 +385,7 @@
               <div class="report-setting">
                 <div class="report-label">碎碎念（做了什么/遇到什么/下一步）</div>
                 <textarea id="reportInput" placeholder="把这周做的事、遇到的问题、下一步计划随便写，越碎越好，AI帮你整理成精简汇报..." rows="8"></textarea>
+                <div style="margin-top:8px"><button type="button" class="voice-btn" data-target="reportInput" onclick="toggleVoice('reportInput')">🎤 语音输入</button></div>
               </div>
               <button class="report-generate-btn" onclick="generateReport()">✨ 生成精简汇报</button>
             </div>
@@ -1563,7 +1569,10 @@
             <div class="card">
               <div class="card-head">➕ 添加今日任务</div>
               <div class="daily-add-form">
-                <input type="text" id="dailyInput" placeholder="要做什么？回车快速添加..." onkeydown="if(event.key==='Enter')addDailyTask()">
+                <div style="display:flex;gap:8px;align-items:center">
+                  <input type="text" id="dailyInput" placeholder="要做什么？回车快速添加..." onkeydown="if(event.key==='Enter')addDailyTask()" style="flex:1;min-width:0">
+                  <button type="button" class="voice-btn" data-target="dailyInput" onclick="toggleVoice('dailyInput')">🎤</button>
+                </div>
                 <div class="daily-add-row">
                   <select id="dailyPriority">
                     <option value="high">🔴 高优先</option>
@@ -1625,7 +1634,10 @@
           </div>
         </div>
         <div class="todo-add-bar">
-          <input type="text" id="todoInput" placeholder="要做什么？回车快速添加..." onkeydown="if(event.key==='Enter')addTodo()">
+          <div style="display:flex;gap:8px;align-items:center;flex:1;min-width:0">
+            <input type="text" id="todoInput" placeholder="要做什么？回车快速添加..." onkeydown="if(event.key==='Enter')addTodo()" style="flex:1;min-width:0">
+            <button type="button" class="voice-btn" data-target="todoInput" onclick="toggleVoice('todoInput')">🎤</button>
+          </div>
           <select id="todoPriority">
             <option value="high">🔴 高优先级</option>
             <option value="medium" selected>🟡 中优先级</option>
