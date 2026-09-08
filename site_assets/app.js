@@ -1609,12 +1609,8 @@ function showInspireLibNote(i){
   var notes = getInspireLibNotes();
   var n = notes[i];
   if(!n) return;
-  var detail = document.getElementById('inspireDetail');
-  var title = document.getElementById('inspireDetailTitle');
-  var actions = document.getElementById('inspireActions');
-  if(title) title.textContent = n.title || '';
-  if(detail) detail.innerHTML = '<div class="inspire-detail-content">'+(n.html||'')+'</div>';
-  if(actions) actions.style.display = 'none';
+  // 用弹窗展示，和灵犀智库笔记一致，不占用AI延伸区
+  setModal('<h2>💡 '+esc(n.title||'未命名')+'</h2><div class="m-sub">来自 Obsidian 灵感库</div>'+(n.html||'<div class="m-sub">暂无内容</div>'));
 }
 
 function selectInspire(id){
