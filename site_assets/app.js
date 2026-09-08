@@ -3730,7 +3730,8 @@ function initCareerSubTabs(){
     tab.addEventListener('click', function(){
       var sub = this.getAttribute('data-sub');
       switchCareerSub(sub);
-    });
+      try{ renderKbTimeline(); }catch(e){}
+});
   });
   // 渲染各子模块内容
   renderCareerJobs();
@@ -3747,6 +3748,9 @@ function switchCareerSub(sub){
   document.querySelectorAll('#module-career .career-sub').forEach(function(el){
     el.style.display = (el.id === 'career-sub-' + sub) ? '' : 'none';
   });
+  if(sub === 'overview'){ try{ renderCareerOverview(); renderKbTimeline(); }catch(e){} }
+  if(sub === 'jobs'){ try{ renderJobs(); }catch(e){} }
+  if(sub === 'companies'){ try{ renderCompanies(); }catch(e){} }
 }
 
 function careerListItem(icon, title, sub, badge, onclick){
