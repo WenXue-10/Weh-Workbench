@@ -1971,10 +1971,14 @@ async function editTodo(id){
 
 function getDueStatus(dueDate){
   if(!dueDate) return {text:"", cls:""};
+  // 兼容 date(YYYY-MM-DD) 和 datetime-local(YYYY-MM-DDTHH:MM)
+  var datePart = dueDate.length > 10 ? dueDate.slice(0,10) : dueDate;
+  var timePart = dueDate.length > 10 ? dueDate.slice(11,16) : "";
+  var display = timePart ? datePart + " " + timePart : datePart;
   var today = new Date().toISOString().slice(0,10);
-  if(dueDate < today) return {text:"⚠️ 已逾期 "+dueDate, cls:"overdue"};
-  if(dueDate === today) return {text:"📅 今日到期", cls:"today"};
-  return {text:"📅 "+dueDate, cls:""};
+  if(datePart < today) return {text:"⚠️ 已逾期 "+display, cls:"overdue"};
+  if(datePart === today) return {text: timePart ? "📅 今日 " + timePart : "📅 今日到期", cls:"today"};
+  return {text:"📅 "+display, cls:""};
 }
 
 function renderTodo(){
@@ -1985,7 +1989,7 @@ function renderTodo(){
   var done = items.filter(function(i){ return i.done; }).length;
   var pending = total - done;
   var today = new Date().toISOString().slice(0,10);
-  var todayDue = items.filter(function(i){ return !i.done && i.dueDate === today; }).length;
+  var todayDue = items.filter(function(i){ return !i.done && i.dueDate && i.dueDate.slice(0,10) === today; }).length;
   document.getElementById("todoTotal").textContent = total;
   document.getElementById("todoPending").textContent = pending;
   document.getElementById("todoDone").textContent = done;

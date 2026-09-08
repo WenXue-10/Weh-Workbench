@@ -1596,7 +1596,12 @@
                     <option value="15">15分钟</option>
                     <option value="30" selected>30分钟</option>
                     <option value="60">1小时</option>
+                    <option value="90">1.5小时</option>
                     <option value="120">2小时</option>
+                    <option value="180">3小时</option>
+                    <option value="240">4小时</option>
+                    <option value="300">5小时</option>
+                    <option value="480">半天(8小时)</option>
                   </select>
                   <button onclick="addDailyTask()">添加</button>
                 </div>
@@ -1662,7 +1667,7 @@
             <option value="life">🏠 生活</option>
             <option value="other">📌 其他</option>
           </select>
-          <input type="date" id="todoDueDate" style="width:140px">
+          <input type="datetime-local" id="todoDueDate" style="width:180px">
           <button onclick="addTodo()">➕ 添加</button>
         </div>
         <div class="card">
