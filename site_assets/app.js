@@ -1610,13 +1610,14 @@ function showInspireLibNote(i){
   var n = notes[i];
   if(!n) return;
   var fm = n.fm || {};
-  // 元信息行
-  var meta = [];
-  if(fm.date) meta.push('📅 '+esc(fm.date));
-  if(fm.author) meta.push('✍️ '+esc(fm.author));
-  if(fm.source) meta.push('🔗 '+esc(fm.source));
-  if(fm.tags) meta.push('🏷️ '+esc(fm.tags));
-  var metaHtml = meta.length ? '<div class="note-meta">'+meta.join(' · ')+'</div>' : '';
+  // 第一行：日期+作者+标签
+  var line1 = [];
+  if(fm.date) line1.push('📅 '+esc(fm.date));
+  if(fm.author) line1.push('✍️ '+esc(fm.author));
+  if(fm.tags) line1.push('🏷️ '+esc(fm.tags));
+  // 第二行：来源单独一行
+  var line2 = fm.source ? '<div class="note-meta note-source">🔗 '+esc(fm.source)+'</div>' : '';
+  var metaHtml = (line1.length ? '<div class="note-meta">'+line1.join(' · ')+'</div>' : '') + line2;
   var descHtml = fm.description ? '<div class="note-desc">'+esc(fm.description)+'</div>' : '';
   setModal('<div class="note-detail"><h2>💡 '+esc(n.title||'未命名')+'</h2>'+metaHtml+descHtml+'<div class="note-body">'+(n.html||'<div class="m-sub">暂无内容</div>')+'</div></div>');
 }
