@@ -1766,29 +1766,61 @@ function exportInspire(id){
   downloadMD(filename, md);
 }
 
+function loadJSZip(){
+  return new Promise(function(resolve, reject){
+    if(window.JSZip){ resolve(window.JSZip); return; }
+    var s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js';
+    s.onload = function(){ resolve(window.JSZip); };
+    s.onerror = function(){ reject(new Error('JSZip load failed')); };
+    document.head.appendChild(s);
+  });
+}
+
 function exportAllInspire(){
   var data = loadInspire();
   if(data.records.length === 0){
     toast("还没有灵感可以导出");
     return;
   }
-  showConfirm("确定导出全部 " + data.records.length + " 条灵感？每条会生成一个MD文件。").then(function(ok){
+  showConfirm("确定导出全部 " + data.records.length + " 条灵感？打包为zip，每条一个MD文件。").then(function(ok){
     if(!ok) return;
     var sorted = data.records.slice().sort(function(a,b){
       var ta = (a.date||"") + " " + (a.time||"00:00");
       var tb = (b.date||"") + " " + (b.time||"00:00");
       return ta.localeCompare(tb);
     });
-    sorted.forEach(function(r, i){
-      setTimeout(function(){
+    // 尝试用JSZip打包，失败则降级为逐个下载
+    loadJSZip().then(function(JSZip){
+      var zip = new JSZip();
+      var folder = zip.folder("灵感导出-" + new Date().toISOString().slice(0,10));
+      sorted.forEach(function(r){
         var md = inspireToMarkdown(r);
-        var filename = "灵感-" + r.date + "-" + (r.content.slice(0,10).replace(/[\\/:*?"<>|]/g,"_")) + ".md";
-        downloadMD(filename, md);
-      }, i * 300);
+        var filename = "灵感-" + r.date + "-" + (r.content.slice(0,15).replace(/[\\/:*?"<>|]/g,"_")) + ".md";
+        folder.file(filename, md);
+      });
+      zip.generateAsync({type:"blob"}).then(function(blob){
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement("a");
+        a.href = url;
+        a.download = "灵感导出-" + new Date().toISOString().slice(0,10) + ".zip";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        toast("已导出 " + sorted.length + " 条灵感（zip），解压后放到 Weh-Brain 的 00-灵感库 目录里。");
+      });
+    }).catch(function(){
+      // 降级：逐个下载
+      toast("zip库加载失败，改用逐个下载...");
+      sorted.forEach(function(r, i){
+        setTimeout(function(){
+          var md = inspireToMarkdown(r);
+          var filename = "灵感-" + r.date + "-" + (r.content.slice(0,10).replace(/[\\/:*?"<>|]/g,"_")) + ".md";
+          downloadMD(filename, md);
+        }, i * 300);
+      });
     });
-    setTimeout(function(){
-      toast("已导出 " + sorted.length + " 条灵感，请检查下载文件夹，然后放到 Weh-Brain 的 00-灵感库 目录里。");
-    }, sorted.length * 300 + 500);
   });
 }
 
