@@ -1387,3 +1387,11 @@ body.sop-active .sub-tab-bar{display:flex}
   .bn-item{font-size:9px}
   .bn-item .ic{font-size:16px}
 }
+
+
+/* 求职日志tab */
+.job-log-tab.active{
+  background:var(--accent) !important;
+  color:#fff;
+  border-color:var(--accent) !important;
+}

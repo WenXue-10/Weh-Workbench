@@ -502,8 +502,16 @@
               <div class="stat-card p4" onclick="switchCareerSub('jobs')" style="cursor:pointer"><div class="em">🎉</div><div class="lab">已Offer</div><div class="num" id="jobOfferCount">0</div></div>
             </div>
             <div class="card">
-              <div class="card-head">📝 求职日志 <button onclick="addJobLog()" style="float:right;font-size:12px;padding:4px 12px;border-radius:8px;border:1px solid var(--line);background:rgba(255,255,255,.5);cursor:pointer">➕ 记录</button></div>
-              <div class="career-timeline" id="careerTimeline"></div>
+              <div class="card-head">
+                📝 求职日志
+                <span style="float:right;display:flex;gap:6px;align-items:center">
+                  <button class="job-log-tab active" data-tab="kb" onclick="switchJobLogTab('kb')" style="font-size:12px;padding:4px 10px;border-radius:8px;border:1px solid var(--line);background:rgba(255,255,255,.5);cursor:pointer">📚 知识库日报</button>
+                  <button class="job-log-tab" data-tab="local" onclick="switchJobLogTab('local')" style="font-size:12px;padding:4px 10px;border-radius:8px;border:1px solid var(--line);background:rgba(255,255,255,.5);cursor:pointer">📝 快速记录</button>
+                  <button onclick="addJobLog()" style="font-size:12px;padding:4px 12px;border-radius:8px;border:1px solid var(--line);background:rgba(255,255,255,.5);cursor:pointer">➕ 记录</button>
+                </span>
+              </div>
+              <div class="career-timeline" id="kbTimeline"></div>
+              <div class="career-timeline" id="careerTimeline" style="display:none"></div>
             </div>
             <div class="card">
               <div class="card-head">📚 知识库分类</div>

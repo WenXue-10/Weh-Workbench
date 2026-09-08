@@ -2015,6 +2015,31 @@ function renderJobLogs(){
   }).join("");
 }
 
+/* 知识库日报渲染 */
+function renderKbTimeline(){
+  var el = document.getElementById("kbTimeline");
+  if(!el) return;
+  var entries = (TL && TL[0]) ? TL[0] : [];
+  if(!entries.length){ el.innerHTML = '<div style="text-align:center;color:var(--muted);padding:15px;font-size:12px">暂无知识库日报</div>'; return; }
+  // 取最近10条
+  el.innerHTML = entries.slice(0, 10).map(function(e){
+    var itemsHtml = e.items.slice(0, 3).map(function(it){
+      return '<div style="font-size:12px;color:var(--text);line-height:1.6;margin-top:2px">• ' + esc(it).replace(/\*\*/g, '') + '</div>';
+    }).join("");
+    var more = e.items.length > 3 ? '<div style="font-size:11px;color:var(--muted);margin-top:2px">...还有 ' + (e.items.length - 3) + ' 条</div>' : '';
+    return '<div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-content"><div class="timeline-date">'+e.date+' <span style="color:var(--muted);font-size:11px">'+esc(e.title)+'</span></div>'+itemsHtml+more+'</div></div>';
+  }).join("");
+}
+
+/* 求职日志tab切换 */
+function switchJobLogTab(tab){
+  document.querySelectorAll('.job-log-tab').forEach(function(b){ b.classList.toggle('active', b.dataset.tab === tab); });
+  var kb = document.getElementById("kbTimeline");
+  var local = document.getElementById("careerTimeline");
+  if(kb) kb.style.display = (tab === 'kb') ? '' : 'none';
+  if(local) local.style.display = (tab === 'local') ? '' : 'none';
+}
+
 /* ========== 求职作战：目标公司 ========== */
 var COMPANY_STATUS_TEXT = {candidate:"🎯 候选", researched:"🔍 已背调", included:"✅ 已收录", rejected:"❌ 不匹配", pending:"⏳ 未启动"};
 function loadCompanies(){
@@ -2091,14 +2116,15 @@ function renderCareerOverview(){
   set("jobInterviewCount", counts.interview);
   set("jobOfferCount", counts.offer);
   set("careerTotalCount", jobs.length + " 个岗位");
-  // 求职日志（最近5条）
+  // 求职日志：知识库日报 + 快速记录
+  renderKbTimeline();
   var logs = (data.logs || []).slice(0, 5);
   var el = document.getElementById("careerTimeline");
   if(el){
-    if(!logs.length){ el.innerHTML = '<div style="text-align:center;color:var(--muted);padding:15px;font-size:12px">暂无日志，去岗位看板记录吧～</div>'; }
+    if(!logs.length){ el.innerHTML = '<div style="text-align:center;color:var(--muted);padding:15px;font-size:12px">暂无快速记录，点右上角➕ 添加</div>'; }
     else{
       el.innerHTML = logs.map(function(l){
-        return '<div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-content"><div class="timeline-date">'+l.date+' '+l.time+'</div><div class="timeline-text">'+esc(l.content)+'</div></div></div>';
+        return '<div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-content"><div class="timeline-date">'+l.date+' '+l.time+' <span onclick="deleteJobLog('+l.id+')" style="cursor:pointer;color:var(--muted);margin-left:8px">🗑️</span></div><div class="timeline-text">'+esc(l.content)+'</div></div></div>';
       }).join("");
     }
   }
