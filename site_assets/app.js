@@ -2024,11 +2024,10 @@ function renderKbTimeline(){
   var expanded = el.dataset.expanded === "1";
   var showEntries = expanded ? entries : entries.slice(0, 2);
   var listHtml = showEntries.map(function(e){
-    var itemsHtml = e.items.slice(0, 3).map(function(it){
+    var itemsHtml = e.items.map(function(it){
       return '<div style="font-size:12px;color:var(--text);line-height:1.6;margin-top:2px">• ' + esc(it).replace(/\*\*/g, '') + '</div>';
     }).join("");
-    var more = e.items.length > 3 ? '<div style="font-size:11px;color:var(--muted);margin-top:2px">...还有 ' + (e.items.length - 3) + ' 条</div>' : '';
-    return '<div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-content"><div class="timeline-date">'+e.date+' <span style="color:var(--muted);font-size:11px">'+esc(e.title)+'</span></div>'+itemsHtml+more+'</div></div>';
+    return '<div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-content"><div class="timeline-date">'+e.date+' <span style="color:var(--muted);font-size:11px">'+esc(e.title)+'</span></div>'+itemsHtml+'</div></div>';
   }).join("");
   var toggleBtn = "";
   if(entries.length > 2){
