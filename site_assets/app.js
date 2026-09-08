@@ -1835,6 +1835,8 @@ function exportAllInspire(){
 /* ========== 待办清单模块 ========== */
 var TODO_KEY = "weh_todo_data_v1";
 var LOG_KEY = "weh_operation_logs_v1";
+var JOB_KEY = "weh_job_data_v1";
+var COMPANY_KEY = "weh_company_data_v1";
 var MAX_LOGS = 200;
 
 
@@ -1898,6 +1900,210 @@ function clearOperationLogs(){
     toast("已清空操作日志");
   });
 }
+
+/* ========== 求职作战：岗位看板 ========== */
+var JOB_STATUS_TEXT = {pending:"📮 待投递", applied:"📤 已投递", interview:"🎤 面试中", offer:"🎉 已Offer", rejected:"❌ 已挂", backup:"📌 备选"};
+var JOB_STATUS_COLOR = {pending:"#f59e0b", applied:"#3b82f6", interview:"#8b5cf6", offer:"#10b981", rejected:"#ef4444", backup:"#6b7280"};
+
+function loadJobs(){
+  try{ var d = JSON.parse(localStorage.getItem(JOB_KEY)); return d && d.jobs ? d : {jobs:[], logs:[]}; }catch(e){ return {jobs:[], logs:[]}; }
+}
+function saveJobs(data){ markLocalChange(); localStorage.setItem(JOB_KEY, JSON.stringify(data)); }
+function addJob(){
+  var company = document.getElementById("jobCompany").value.trim();
+  var position = document.getElementById("jobPosition").value.trim();
+  var salary = document.getElementById("jobSalary").value.trim();
+  var status = document.getElementById("jobStatus").value;
+  if(!company || !position){ toast("请填写公司和岗位"); return; }
+  var data = loadJobs();
+  data.jobs.unshift({id:Date.now(), company:company, position:position, salary:salary, status:status, link:"", createdAt:new Date().toISOString().slice(0,10)});
+  saveJobs(data);
+  document.getElementById("jobCompany").value = "";
+  document.getElementById("jobPosition").value = "";
+  document.getElementById("jobSalary").value = "";
+  renderJobs();
+  renderCareerOverview();
+  toast("已添加岗位");
+}
+function updateJobStatus(id, status){
+  var data = loadJobs();
+  var job = data.jobs.find(function(j){ return j.id===id; });
+  if(job){ job.status = status; saveJobs(data); renderJobs(); renderCareerOverview(); }
+}
+function deleteJob(id){
+  showConfirm("确定删除这个岗位？").then(function(ok){
+    if(!ok) return;
+    var data = loadJobs();
+    data.jobs = data.jobs.filter(function(j){ return j.id!==id; });
+    saveJobs(data); renderJobs(); renderCareerOverview();
+  });
+}
+function editJobLink(id){
+  showPrompt("输入岗位原始链接（可选）", "").then(function(link){
+    if(link === null) return;
+    var data = loadJobs();
+    var job = data.jobs.find(function(j){ return j.id===id; });
+    if(job){ job.link = link; saveJobs(data); renderJobs(); }
+  });
+}
+var currentJobFilter = "all";
+function filterJobs(status){
+  currentJobFilter = status;
+  document.querySelectorAll('.job-filter-btn').forEach(function(b){
+    b.classList.toggle('active', b.getAttribute('data-status') === status);
+  });
+  renderJobs();
+}
+function renderJobs(){
+  var data = loadJobs();
+  var jobs = data.jobs;
+  if(currentJobFilter !== "all") jobs = jobs.filter(function(j){ return j.status===currentJobFilter; });
+  var countEl = document.getElementById("jobBoardCount");
+  if(countEl) countEl.textContent = data.jobs.length + " 个岗位";
+  var list = document.getElementById("jobList");
+  if(!list) return;
+  if(!jobs.length){ list.innerHTML = '<div style="text-align:center;color:var(--muted);padding:30px;font-size:13px">暂无岗位，在上方添加第一个吧～</div>'; return; }
+  list.innerHTML = jobs.map(function(j){
+    var color = JOB_STATUS_COLOR[j.status] || "#6b7280";
+    return '<div class="job-item">'
+      +'<div class="job-item-main">'
+        +'<div class="job-item-title">'+esc(j.company)+' · '+esc(j.position)+'</div>'
+        +'<div class="job-item-meta">'
+          +(j.salary ? '<span>💰 '+esc(j.salary)+'</span>' : '')
+          +'<span style="color:'+color+'">'+JOB_STATUS_TEXT[j.status]+'</span>'
+          +'<span style="color:var(--muted)">'+j.createdAt+'</span>'
+        +'</div>'
+      +'</div>'
+      +'<div class="job-item-actions">'
+        +'<select onchange="updateJobStatus('+j.id+', this.value)" style="font-size:11px;padding:3px 6px;border-radius:6px;border:1px solid var(--line)">'
+          +Object.keys(JOB_STATUS_TEXT).map(function(k){ return '<option value="'+k+'"'+(k===j.status?' selected':'')+'>'+JOB_STATUS_TEXT[k]+'</option>'; }).join('')
+        +'</select>'
+        +(j.link ? '<a href="'+esc(j.link)+'" target="_blank" style="font-size:11px;color:var(--pink-deep);text-decoration:none">🔗</a>' : '<span onclick="editJobLink('+j.id+')" style="font-size:11px;color:var(--muted);cursor:pointer">🔗</span>')
+        +'<span onclick="deleteJob('+j.id+')" style="font-size:14px;cursor:pointer;color:var(--muted)">🗑️</span>'
+      +'</div>'
+    +'</div>';
+  }).join("");
+}
+
+/* ========== 求职作战：求职日志 ========== */
+function addJobLog(){
+  showPrompt("记录今天的求职进展", "").then(function(content){
+    if(!content) return;
+    var data = loadJobs();
+    data.logs = data.logs || [];
+    data.logs.unshift({id:Date.now(), date:new Date().toISOString().slice(0,10), time:new Date().toTimeString().slice(0,5), content:content});
+    saveJobs(data);
+    renderJobLogs();
+    renderCareerOverview();
+  });
+}
+function deleteJobLog(id){
+  var data = loadJobs();
+  data.logs = data.logs.filter(function(l){ return l.id!==id; });
+  saveJobs(data);
+  renderJobLogs();
+  renderCareerOverview();
+}
+function renderJobLogs(){
+  var data = loadJobs();
+  var logs = data.logs || [];
+  var el = document.getElementById("jobLogTimeline");
+  if(!el) return;
+  if(!logs.length){ el.innerHTML = '<div style="text-align:center;color:var(--muted);padding:20px;font-size:12px">暂无日志</div>'; return; }
+  el.innerHTML = logs.slice(0,20).map(function(l){
+    return '<div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-content"><div class="timeline-date">'+l.date+' '+l.time+' <span onclick="deleteJobLog('+l.id+')" style="cursor:pointer;color:var(--muted);margin-left:8px">🗑️</span></div><div class="timeline-text">'+esc(l.content)+'</div></div></div>';
+  }).join("");
+}
+
+/* ========== 求职作战：目标公司 ========== */
+var COMPANY_STATUS_TEXT = {candidate:"🎯 候选", researched:"🔍 已背调", included:"✅ 已收录", rejected:"❌ 不匹配", pending:"⏳ 未启动"};
+function loadCompanies(){
+  try{ var d = JSON.parse(localStorage.getItem(COMPANY_KEY)); return d && d.companies ? d : {companies:[]}; }catch(e){ return {companies:[]}; }
+}
+function saveCompanies(data){ markLocalChange(); localStorage.setItem(COMPANY_KEY, JSON.stringify(data)); }
+function addCompany(){
+  var name = document.getElementById("companyName").value.trim();
+  var industry = document.getElementById("companyIndustry").value.trim();
+  var status = document.getElementById("companyStatus").value;
+  if(!name){ toast("请填写公司名称"); return; }
+  var data = loadCompanies();
+  data.companies.unshift({id:Date.now(), name:name, industry:industry, status:status, reason:"", createdAt:new Date().toISOString().slice(0,10)});
+  saveCompanies(data);
+  document.getElementById("companyName").value = "";
+  document.getElementById("companyIndustry").value = "";
+  renderCompanies();
+  toast("已添加公司");
+}
+function updateCompanyStatus(id, status){
+  var data = loadCompanies();
+  var c = data.companies.find(function(x){ return x.id===id; });
+  if(c){ c.status = status; saveCompanies(data); renderCompanies(); }
+}
+function editCompanyReason(id){
+  var data = loadCompanies();
+  var c = data.companies.find(function(x){ return x.id===id; });
+  showPrompt("备注/背调理由", c ? c.reason : "").then(function(reason){
+    if(reason === null) return;
+    var d2 = loadCompanies();
+    var c2 = d2.companies.find(function(x){ return x.id===id; });
+    if(c2){ c2.reason = reason; saveCompanies(d2); renderCompanies(); }
+  });
+}
+function deleteCompany(id){
+  showConfirm("确定删除这个公司？").then(function(ok){
+    if(!ok) return;
+    var data = loadCompanies();
+    data.companies = data.companies.filter(function(c){ return c.id!==id; });
+    saveCompanies(data); renderCompanies();
+  });
+}
+function renderCompanies(){
+  var data = loadCompanies();
+  var countEl = document.getElementById("companyCount");
+  if(countEl) countEl.textContent = data.companies.length + " 家";
+  var grid = document.getElementById("companyGrid");
+  if(!grid) return;
+  if(!data.companies.length){ grid.innerHTML = '<div style="text-align:center;color:var(--muted);padding:30px;font-size:13px">暂无目标公司</div>'; return; }
+  grid.innerHTML = data.companies.map(function(c){
+    return '<div class="company-card">'
+      +'<div class="company-card-head">'
+        +'<div class="company-name">'+esc(c.name)+'</div>'
+        +'<select onchange="updateCompanyStatus('+c.id+', this.value)" style="font-size:11px;padding:3px 6px;border-radius:6px;border:1px solid var(--line)">'
+          +Object.keys(COMPANY_STATUS_TEXT).map(function(k){ return '<option value="'+k+'"'+(k===c.status?' selected':'')+'>'+COMPANY_STATUS_TEXT[k]+'</option>'; }).join('')
+        +'</select>'
+      +'</div>'
+      +(c.industry ? '<div class="company-industry">🏭 '+esc(c.industry)+'</div>' : '')
+      +(c.reason ? '<div class="company-reason">'+esc(c.reason)+'</div>' : '<div class="company-reason" onclick="editCompanyReason('+c.id+')" style="cursor:pointer;color:var(--muted)">+ 添加备注</div>')
+      +'<div class="company-actions"><span onclick="editCompanyReason('+c.id+')" style="cursor:pointer;font-size:12px">✏️ 备注</span><span onclick="deleteCompany('+c.id+')" style="cursor:pointer;font-size:12px;color:var(--muted)">🗑️</span></div>'
+    +'</div>';
+  }).join("");
+}
+
+/* ========== 求职作战：首页概览 ========== */
+function renderCareerOverview(){
+  var data = loadJobs();
+  var jobs = data.jobs;
+  var counts = {pending:0, applied:0, interview:0, offer:0};
+  jobs.forEach(function(j){ if(counts[j.status] !== undefined) counts[j.status]++; });
+  var set = function(id, val){ var el = document.getElementById(id); if(el) el.textContent = val; };
+  set("jobPendingCount", counts.pending);
+  set("jobAppliedCount", counts.applied);
+  set("jobInterviewCount", counts.interview);
+  set("jobOfferCount", counts.offer);
+  set("careerTotalCount", jobs.length + " 个岗位");
+  // 求职日志（最近5条）
+  var logs = (data.logs || []).slice(0, 5);
+  var el = document.getElementById("careerTimeline");
+  if(el){
+    if(!logs.length){ el.innerHTML = '<div style="text-align:center;color:var(--muted);padding:15px;font-size:12px">暂无日志，去岗位看板记录吧～</div>'; }
+    else{
+      el.innerHTML = logs.map(function(l){
+        return '<div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-content"><div class="timeline-date">'+l.date+' '+l.time+'</div><div class="timeline-text">'+esc(l.content)+'</div></div></div>';
+      }).join("");
+    }
+  }
+}
+
 var TODO_DEFAULTS = {items:[]};
 var PRIORITY_ORDER = {high:0, medium:1, low:2};
 var PRIORITY_TEXT = {high:"🔴 高", medium:"🟡 中", low:"🟢 低"};
@@ -2821,7 +3027,8 @@ function syncDownload(c, silent){
     var c2 = loadSyncConfig();
     c2.lastSync = Date.now();
     localStorage.setItem(SYNC_CONFIG_KEY, JSON.stringify(c2));
-    try{ if(typeof renderHome === "function") renderHome(); }catch(e){}
+    try{ if(typeof renderHome === "function") renderHome();
+  renderCareerOverview(); }catch(e){}
     try{ if(typeof renderMoney === "function") renderMoney(); }catch(e){}
     try{ if(typeof renderHealth === "function") renderHealth(); }catch(e){}
     try{ if(typeof renderInspire === "function") renderInspire(); }catch(e){}

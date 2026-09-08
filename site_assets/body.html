@@ -47,6 +47,23 @@
           <div class="stat-card p3" onclick="go('inspiration')" style="cursor:pointer"><div class="em">💡</div><div class="lab">灵感捕捉</div><div class="num" id="homeInspireCount">0</div><div class="lab" style="font-size:11px;margin-top:2px">条灵感</div></div>
           <div class="stat-card p4" onclick="go('decision')" style="cursor:pointer"><div class="em">🎯</div><div class="lab">决策顾问</div><div class="num" id="homeDecisionCount">0</div><div class="lab" style="font-size:11px;margin-top:2px">次拷问</div></div>
         </div>
+        <!-- 💼 求职作战概览 -->
+        <div class="card career-overview">
+          <div class="card-head">💼 求职作战 <span class="m-count" id="careerTotalCount">0</span>
+            <button onclick="go('jobboard')" style="float:right;font-size:12px;padding:4px 12px;border-radius:8px;border:1px solid var(--line);background:rgba(255,255,255,.5);cursor:pointer">岗位看板 →</button>
+            <button onclick="go('companies')" style="float:right;font-size:12px;padding:4px 12px;border-radius:8px;border:1px solid var(--line);background:rgba(255,255,255,.5);cursor:pointer;margin-right:8px">目标公司 →</button>
+          </div>
+          <div class="stat-grid" style="margin-bottom:16px">
+            <div class="stat-card p1" onclick="go('jobboard')" style="cursor:pointer"><div class="em">📮</div><div class="lab">待投递</div><div class="num" id="jobPendingCount">0</div></div>
+            <div class="stat-card p2" onclick="go('jobboard')" style="cursor:pointer"><div class="em">📤</div><div class="lab">已投递</div><div class="num" id="jobAppliedCount">0</div></div>
+            <div class="stat-card p3" onclick="go('jobboard')" style="cursor:pointer"><div class="em">🎤</div><div class="lab">面试中</div><div class="num" id="jobInterviewCount">0</div></div>
+            <div class="stat-card p4" onclick="go('jobboard')" style="cursor:pointer"><div class="em">🎉</div><div class="lab">已Offer</div><div class="num" id="jobOfferCount">0</div></div>
+          </div>
+          <div class="career-log-section">
+            <div style="font-size:13px;font-weight:700;margin-bottom:8px">📝 求职日志</div>
+            <div class="career-timeline" id="careerTimeline"></div>
+          </div>
+        </div>
         <div class="two-col">
           <div class="card">
             <div class="card-head">📚 知识库模块</div>
@@ -1676,6 +1693,60 @@
         </div>
       </section>
 
+      <!-- 💼 岗位看板 -->
+      <section id="module-jobboard" class="view">
+        <div class="card">
+          <div class="card-head">💼 岗位看板 <span class="m-count" id="jobBoardCount"></span></div>
+          <div class="job-add-bar">
+            <input type="text" id="jobCompany" placeholder="公司名称" style="flex:1;min-width:100px">
+            <input type="text" id="jobPosition" placeholder="岗位名称" style="flex:1;min-width:100px">
+            <input type="text" id="jobSalary" placeholder="薪资（如15-20K）" style="width:120px">
+            <select id="jobStatus">
+              <option value="pending">📮 待投递</option>
+              <option value="applied">📤 已投递</option>
+              <option value="interview">🎤 面试中</option>
+              <option value="offer">🎉 已Offer</option>
+              <option value="rejected">❌ 已挂</option>
+              <option value="backup">📌 备选</option>
+            </select>
+            <button onclick="addJob()">➕ 添加</button>
+          </div>
+          <div class="job-filter-bar">
+            <button class="job-filter-btn active" data-status="all" onclick="filterJobs('all')">全部</button>
+            <button class="job-filter-btn" data-status="pending" onclick="filterJobs('pending')">待投递</button>
+            <button class="job-filter-btn" data-status="applied" onclick="filterJobs('applied')">已投递</button>
+            <button class="job-filter-btn" data-status="interview" onclick="filterJobs('interview')">面试中</button>
+            <button class="job-filter-btn" data-status="offer" onclick="filterJobs('offer')">已Offer</button>
+            <button class="job-filter-btn" data-status="rejected" onclick="filterJobs('rejected')">已挂</button>
+          </div>
+          <div class="job-list" id="jobList"></div>
+        </div>
+        <div class="card">
+          <div class="card-head">📝 求职日志 <button onclick="addJobLog()" style="float:right;font-size:12px;padding:4px 12px;border-radius:8px;border:1px solid var(--line);background:rgba(255,255,255,.5);cursor:pointer">➕ 记录</button></div>
+          <div class="career-timeline" id="jobLogTimeline"></div>
+        </div>
+      </section>
+
+      <!-- 🏢 目标公司 -->
+      <section id="module-companies" class="view">
+        <div class="card">
+          <div class="card-head">🏢 目标公司池 <span class="m-count" id="companyCount"></span></div>
+          <div class="job-add-bar">
+            <input type="text" id="companyName" placeholder="公司名称" style="flex:1;min-width:100px">
+            <input type="text" id="companyIndustry" placeholder="行业（如快消/制造）" style="flex:1;min-width:100px">
+            <select id="companyStatus">
+              <option value="candidate">🎯 候选</option>
+              <option value="researched">🔍 已背调</option>
+              <option value="included">✅ 已收录</option>
+              <option value="rejected">❌ 不匹配</option>
+              <option value="pending">⏳ 未启动</option>
+            </select>
+            <button onclick="addCompany()">➕ 添加</button>
+          </div>
+          <div class="company-grid" id="companyGrid"></div>
+        </div>
+      </section>
+
       <!-- ⚙️ 设置 -->
       <section id="module-settings" class="view">
         <div class="settings-layout">
@@ -1988,6 +2059,8 @@
     <div class="bn-item" data-module="health"><span class="ic">🍱</span>吃饭</div>
     <div class="bn-item" data-module="inspiration"><span class="ic">💡</span>灵感</div>
     <div class="bn-item" data-module="todo"><span class="ic">✅</span>待办</div>
+    <div class="bn-item" data-module="jobboard"><span class="ic">💼</span>岗位</div>
+    <div class="bn-item" data-module="companies"><span class="ic">🏢</span>公司</div>
     <div class="bn-item" data-module="settings"><span class="ic">⚙️</span>设置</div>
   </nav>
 

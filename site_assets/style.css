@@ -1344,3 +1344,46 @@ body.sop-active .sub-tab-bar{display:flex}
 @media(max-width:820px){
   .log-time{margin-left:0;width:100%}
 }
+
+/* ========== 求职作战模块 ========== */
+.career-overview{margin-bottom:16px}
+.job-add-bar{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center}
+.job-add-bar input,.job-add-bar select{padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-size:13px;background:rgba(255,255,255,.6)}
+.job-add-bar button{padding:8px 16px;border:none;border-radius:8px;background:var(--pink-deep);color:#fff;font-size:13px;cursor:pointer;font-weight:600}
+.job-filter-bar{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.job-filter-btn{background:rgba(255,255,255,.5);border:1px solid rgba(0,0,0,.08);border-radius:8px;padding:5px 12px;font-size:12px;cursor:pointer;transition:.15s}
+.job-filter-btn.active{background:var(--pink-deep);color:#fff;border-color:var(--pink-deep)}
+.job-list{display:flex;flex-direction:column;gap:10px}
+.job-item{display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,.6);border:1px solid rgba(0,0,0,.06);border-radius:12px;padding:12px 14px;gap:10px}
+.job-item-main{flex:1;min-width:0}
+.job-item-title{font-weight:700;font-size:14px;margin-bottom:4px}
+.job-item-meta{display:flex;gap:10px;font-size:12px;color:var(--muted);flex-wrap:wrap}
+.job-item-actions{display:flex;gap:8px;align-items:center;flex-shrink:0}
+.company-grid{display:grid;grid-template-columns:repeat(auto-fill, minmax(220px, 1fr));gap:12px}
+.company-card{background:rgba(255,255,255,.6);border:1px solid rgba(0,0,0,.06);border-radius:12px;padding:14px}
+.company-card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:8px}
+.company-name{font-weight:700;font-size:14px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.company-industry{font-size:12px;color:var(--muted);margin-bottom:6px}
+.company-reason{font-size:12px;color:var(--text);line-height:1.5;margin-bottom:8px;min-height:18px}
+.company-actions{display:flex;gap:12px;border-top:1px solid var(--line);padding-top:8px}
+/* 求职日志时间线 */
+.career-log-section{margin-top:4px}
+.career-timeline{display:flex;flex-direction:column;gap:10px}
+.timeline-item{display:flex;gap:10px}
+.timeline-dot{width:10px;height:10px;border-radius:50%;background:var(--pink-deep);margin-top:5px;flex-shrink:0}
+.timeline-content{flex:1;min-width:0}
+.timeline-date{font-size:11px;color:var(--muted);margin-bottom:2px}
+.timeline-text{font-size:13px;color:var(--text);line-height:1.5}
+/* 底部tab 8个适配 */
+.bottom-nav{display:flex;justify-content:space-around}
+.bn-item{flex:1;min-width:0;text-align:center;padding:6px 2px;font-size:10px}
+.bn-item .ic{font-size:18px;display:block;margin-bottom:2px}
+@media(max-width:820px){
+  .job-add-bar{flex-direction:column}
+  .job-add-bar input,.job-add-bar select{width:100%}
+  .company-grid{grid-template-columns:1fr}
+  .job-item{flex-direction:column;align-items:flex-start}
+  .job-item-actions{width:100%;justify-content:flex-end}
+  .bn-item{font-size:9px}
+  .bn-item .ic{font-size:16px}
+}
