@@ -1008,7 +1008,7 @@ def build():
     }
 
     data = {
-        "updated": __import__("datetime").datetime.now().strftime("%Y-%m-%d %H:%M"),
+        "updated": (__import__("datetime").datetime.now(__import__("datetime").timezone.utc) + __import__("datetime").timedelta(hours=8)).strftime("%Y-%m-%d %H:%M"),
         "stats": stats,
         "todo": todo,
         "jobs": jobs,
