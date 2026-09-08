@@ -1327,3 +1327,20 @@ body.sop-active .sub-tab-bar{display:flex}
   .note-detail h2{font-size:17px}
   .note-body{font-size:13px;line-height:1.8}
 }
+
+/* 操作日志 */
+.log-filter-btn{background:rgba(255,255,255,.5);border:1px solid rgba(0,0,0,.08);border-radius:8px;padding:5px 12px;font-size:12px;cursor:pointer;transition:.15s}
+.log-filter-btn.active{background:var(--pink-deep);color:#fff;border-color:var(--pink-deep)}
+.operation-log-list{display:flex;flex-direction:column;gap:10px}
+.log-item{background:rgba(255,255,255,.6);border:1px solid rgba(0,0,0,.06);border-radius:12px;padding:12px 14px}
+.log-item-head{display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap}
+.log-module{font-weight:700;font-size:13px;color:var(--pink-deep)}
+.log-action{font-size:12px;color:var(--text);background:rgba(219,112,147,.1);padding:2px 8px;border-radius:6px}
+.log-time{font-size:11px;color:var(--muted);margin-left:auto}
+.log-duration{font-size:11px;color:var(--muted)}
+.log-status{font-size:12px}
+.log-input{font-size:12px;color:var(--text);margin:4px 0;line-height:1.5}
+.log-output{font-size:12px;color:var(--muted);line-height:1.5}
+@media(max-width:820px){
+  .log-time{margin-left:0;width:100%}
+}

@@ -855,11 +855,13 @@ function sendMoneyChat(){
   saveMoney(data);
   renderMoneyChat();
   // 模拟AI回复（基于消费数据）
+  var start = Date.now();
   setTimeout(function(){
     var reply = generateMoneyReply(msg, data);
     data.chatHistory.push({role:"ai", content:reply});
     saveMoney(data);
     renderMoneyChat();
+    logAction("存钱记账", "AI对话", msg, reply, Date.now()-start, "success");
   }, 600);
 }
 function generateMoneyReply(msg, data){
@@ -1288,11 +1290,13 @@ function sendHealthChat(){
   input.value = "";
   saveHealth(data);
   renderHealthChat();
+  var start = Date.now();
   setTimeout(function(){
     var reply = generateHealthReply(msg, data);
     data.chatHistory.push({role:"ai", content:reply});
     saveHealth(data);
     renderHealthChat();
+    logAction("吃饭健康", "AI对话", msg, reply, Date.now()-start, "success");
   }, 600);
 }
 function generateHealthReply(msg, data){
@@ -1395,10 +1399,12 @@ function sendDecisionChat(){
   renderDecisionChat();
   updateRoundInfo();
 
+  var start = Date.now();
   setTimeout(function(){
     var result = generateDecisionResponse(msg, data);
     data.chatHistory.push({role:"ai", content:result.content, question:result.question||null});
     data.round += 1;
+    logAction("决策顾问", "AI对话", msg, result.content, Date.now()-start, "success");
     // 达到拷问轮数，打分
     if(data.round >= data.depth && !data.score){
       var score = generateDecisionScore(data);
@@ -1632,8 +1638,10 @@ function selectInspire(id){
   document.getElementById("inspireActions").style.display = "flex";
   // 如果还没有AI延伸，生成一个
   if(!r.aiExtension){
+    var start = Date.now();
     r.aiExtension = generateInspireExtension(r.content);
     saveInspire(data);
+    logAction("灵感捕捉", "AI延伸", r.content, r.aiExtension.judgment || "", Date.now()-start, "success");
   }
   renderInspireDetail(r.aiExtension);
 }
@@ -1826,6 +1834,70 @@ function exportAllInspire(){
 
 /* ========== 待办清单模块 ========== */
 var TODO_KEY = "weh_todo_data_v1";
+var LOG_KEY = "weh_operation_logs_v1";
+var MAX_LOGS = 200;
+
+
+/* ========== 操作日志 ========== */
+function loadLogs(){
+  try{ return JSON.parse(localStorage.getItem(LOG_KEY)) || []; }catch(e){ return []; }
+}
+function saveLogs(logs){
+  localStorage.setItem(LOG_KEY, JSON.stringify(logs.slice(0, MAX_LOGS)));
+}
+function logAction(module, action, input, output, duration, status){
+  var logs = loadLogs();
+  var now = new Date();
+  var time = now.getFullYear() + "-" + String(now.getMonth()+1).padStart(2,"0") + "-" + String(now.getDate()).padStart(2,"0") + " " + String(now.getHours()).padStart(2,"0") + ":" + String(now.getMinutes()).padStart(2,"0") + ":" + String(now.getSeconds()).padStart(2,"0");
+  logs.unshift({
+    id: now.getTime(),
+    time: time,
+    module: module,
+    action: action,
+    input: (input || "").slice(0, 80),
+    output: (output || "").slice(0, 80),
+    duration: duration || 0,
+    status: status || "success"
+  });
+  saveLogs(logs);
+}
+function renderLogs(filter){
+  var list = document.getElementById("operationLogList");
+  if(!list) return;
+  var logs = loadLogs();
+  if(filter && filter !== "all"){
+    logs = logs.filter(function(l){ return l.module === filter; });
+  }
+  var countEl = document.getElementById("logCount");
+  if(countEl) countEl.textContent = logs.length + " 条";
+  if(!logs.length){
+    list.innerHTML = '<div style="text-align:center;color:var(--muted);padding:30px;font-size:13px">暂无操作记录，使用AI功能后会自动记录</div>';
+    return;
+  }
+  list.innerHTML = logs.map(function(l){
+    var statusIcon = l.status === "success" ? "✅" : "❌";
+    var dur = l.duration ? l.duration + "ms" : "";
+    return '<div class="log-item">' +
+      '<div class="log-item-head"><span class="log-module">'+esc(l.module)+'</span><span class="log-action">'+esc(l.action)+'</span><span class="log-time">'+esc(l.time)+'</span><span class="log-duration">'+dur+'</span><span class="log-status">'+statusIcon+'</span></div>' +
+      (l.input ? '<div class="log-input">💬 '+esc(l.input)+'</div>' : '') +
+      (l.output ? '<div class="log-output">🤖 '+esc(l.output)+'</div>' : '') +
+      '</div>';
+  }).join("");
+}
+function filterLogs(filter){
+  document.querySelectorAll('.log-filter-btn').forEach(function(b){
+    b.classList.toggle('active', b.getAttribute('data-filter') === filter);
+  });
+  renderLogs(filter);
+}
+function clearOperationLogs(){
+  showConfirm("确定清空所有操作日志？").then(function(ok){
+    if(!ok) return;
+    localStorage.removeItem(LOG_KEY);
+    renderLogs("all");
+    toast("已清空操作日志");
+  });
+}
 var TODO_DEFAULTS = {items:[]};
 var PRIORITY_ORDER = {high:0, medium:1, low:2};
 var PRIORITY_TEXT = {high:"🔴 高", medium:"🟡 中", low:"🟢 低"};
@@ -2028,6 +2100,7 @@ function selectReportAudience(audience){
 }
 
 function generateReport(){
+  var start = Date.now();
   var input = document.getElementById("reportInput").value.trim();
   if(!input){
     toast("请先输入碎碎念内容");
@@ -2117,6 +2190,7 @@ function generateReport(){
   saveReport(data);
   currentReportId = reportId;
 
+  logAction("工作汇报", "生成汇报", input, typeText + " / " + audienceText, Date.now()-start, "success");
   renderReportResult(result);
   renderReportHistory();
 }

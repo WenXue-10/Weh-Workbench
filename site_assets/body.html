@@ -1681,6 +1681,7 @@
             <div class="settings-nav-item" data-tab="data" onclick="switchSettingsTab('data')">💾 数据管理</div>
             <div class="settings-nav-item" data-tab="sync" onclick="switchSettingsTab('sync')">☁️ 云同步</div>
             <div class="settings-nav-item" data-tab="preference" onclick="switchSettingsTab('preference')">⚙️ 模块偏好</div>
+            <div class="settings-nav-item" data-tab="logs" onclick="switchSettingsTab('logs')">📋 操作日志</div>
             <div class="settings-nav-item" data-tab="about" onclick="switchSettingsTab('about')">ℹ️ 关于</div>
           </div>
 
@@ -1894,6 +1895,22 @@
             </div>
 
             <!-- 关于 -->
+            <div class="settings-tab" id="settings-logs">
+              <div class="card">
+                <div class="card-head">📋 操作日志 <span class="m-count" id="logCount"></span>
+                  <button onclick="clearOperationLogs()" style="float:right;font-size:12px;padding:4px 12px;border-radius:8px;border:1px solid var(--line);background:rgba(255,255,255,.5);cursor:pointer">🗑️ 清空</button>
+                </div>
+                <div style="margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap">
+                  <button class="log-filter-btn active" data-filter="all" onclick="filterLogs('all')">全部</button>
+                  <button class="log-filter-btn" data-filter="存钱记账" onclick="filterLogs('存钱记账')">存钱记账</button>
+                  <button class="log-filter-btn" data-filter="吃饭健康" onclick="filterLogs('吃饭健康')">吃饭健康</button>
+                  <button class="log-filter-btn" data-filter="灵感捕捉" onclick="filterLogs('灵感捕捉')">灵感捕捉</button>
+                  <button class="log-filter-btn" data-filter="决策顾问" onclick="filterLogs('决策顾问')">决策顾问</button>
+                  <button class="log-filter-btn" data-filter="工作汇报" onclick="filterLogs('工作汇报')">工作汇报</button>
+                </div>
+                <div class="operation-log-list" id="operationLogList"></div>
+              </div>
+            </div>
             <div class="settings-tab" id="settings-about">
               <div class="card">
                 <div class="card-head">ℹ️ 关于</div>
