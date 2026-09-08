@@ -247,8 +247,15 @@
         <div class="money-layout">
           <div class="inspire-left">
             <div class="card">
-              <div class="card-head">📝 灵感列表 <span class="m-count" id="inspireCount"></span></div>
+              <div class="card-head">
+                <span style="display:flex;gap:8px;align-items:center">
+                  <button class="inspire-tab active" data-inspire-tab="mine" onclick="switchInspireTab('mine')">📝 我的灵感</button>
+                  <button class="inspire-tab" data-inspire-tab="lib" onclick="switchInspireTab('lib')">📚 灵感库</button>
+                </span>
+                <span class="m-count" id="inspireCount"></span>
+              </div>
               <div class="inspire-list" id="inspireList"></div>
+              <div class="inspire-list" id="inspireLibList" style="display:none"></div>
             </div>
           </div>
           <div class="money-right" style="width:calc(100% - 320px)">

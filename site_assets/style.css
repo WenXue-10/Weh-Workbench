@@ -1284,3 +1284,22 @@ body.sop-active .sub-tab-bar{display:flex}
   .sop-sub-content{padding-bottom:76px}
 }
 
+
+/* 灵感捕捉tab切换 */
+.inspire-tab {
+  background: rgba(255,255,255,0.5);
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 8px;
+  padding: 4px 10px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.inspire-tab.active {
+  background: var(--pink-deep);
+  color: #fff;
+  border-color: var(--pink-deep);
+}
+@media(max-width:820px){
+  .inspire-tab { font-size: 11px; padding: 3px 8px; }
+}

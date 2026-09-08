@@ -1575,6 +1575,48 @@ function renderInspire(){
   }).join("");
 }
 
+
+/* ---------- 灵感捕捉：我的灵感/灵感库切换 ---------- */
+function switchInspireTab(tab){
+  document.querySelectorAll('.inspire-tab').forEach(function(b){
+    b.classList.toggle('active', b.getAttribute('data-inspire-tab') === tab);
+  });
+  document.getElementById('inspireList').style.display = (tab === 'mine') ? '' : 'none';
+  document.getElementById('inspireLibList').style.display = (tab === 'lib') ? '' : 'none';
+  if(tab === 'lib') renderInspireLib();
+}
+function getInspireLibNotes(){
+  // 从BCKBS中找到"灵感库"分类
+  var kb = (BCKBS||[]).find(function(k){ return k.name === '灵感库'; });
+  if(!kb || !kb.groups) return [];
+  var notes = [];
+  kb.groups.forEach(function(g){ (g.notes||[]).forEach(function(n){ notes.push(n); }); });
+  return notes;
+}
+function renderInspireLib(){
+  var list = document.getElementById('inspireLibList');
+  if(!list) return;
+  var notes = getInspireLibNotes();
+  if(!notes.length){
+    list.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:20px;text-align:center">灵感库还没有内容～</div>';
+    return;
+  }
+  list.innerHTML = notes.map(function(n,i){
+    return '<div class="inspire-item" onclick="showInspireLibNote('+i+')"><div class="ii-text">'+esc(n.title||'未命名')+'</div></div>';
+  }).join('');
+}
+function showInspireLibNote(i){
+  var notes = getInspireLibNotes();
+  var n = notes[i];
+  if(!n) return;
+  var detail = document.getElementById('inspireDetail');
+  var title = document.getElementById('inspireDetailTitle');
+  var actions = document.getElementById('inspireActions');
+  if(title) title.textContent = n.title || '';
+  if(detail) detail.innerHTML = '<div class="inspire-detail-content">'+(n.html||'')+'</div>';
+  if(actions) actions.style.display = 'none';
+}
+
 function selectInspire(id){
   currentInspireId = id;
   renderInspire();
