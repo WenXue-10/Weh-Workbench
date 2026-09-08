@@ -15,11 +15,14 @@ except ImportError:
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 ASSETS = os.path.join(BASE, "site_assets")
+
+# 知识库根目录：本地默认 D:/Obsidian/Weh-Brain，GitHub Actions 通过环境变量覆盖
+BRAIN_ROOT = os.environ.get("WEH_BRAIN_ROOT", "D:/Obsidian/Weh-Brain").replace("\\", "/")
 OUT = os.path.join(BASE, "docs")
 FILES_DIR = os.path.join(OUT, "files")
 
 # 知识库根目录：Weh-Brain 里的 SCM-Career 项目
-KB_ROOT = r"D:\Obsidian\Weh-Brain\01-Projects\SCM-Career"
+KB_ROOT = os.path.join(BRAIN_ROOT, "01-Projects", "SCM-Career")
 
 try:
     _md = markdown.Markdown(extensions=["tables", "fenced_code", "sane_lists"]) if markdown else None
@@ -501,7 +504,7 @@ _KB_META = [
 ]
 
 # ========== 百川智库 ==========
-BAICHUAN_ROOT = r"D:\Obsidian\Weh-Brain\05-Skills\百川智库"
+BAICHUAN_ROOT = os.path.join(BRAIN_ROOT, "05-Skills", "百川智库")
 _BAICHUAN_META = [
     ("01-技能技巧", "🛠️", "各种实用技能与方法技巧", ),
     ("02-任务流程", "📋", "标准化任务处理流程", ),
@@ -521,7 +524,7 @@ def scan_baichuan():
         notes = _walk_notes(os.path.join(BAICHUAN_ROOT, folder))
         bc.append({"icon": icon, "name": folder, "desc": desc, "cls": "", "groups": [{"title": "", "notes": notes}]})
     # 额外加入 Obsidian 00-灵感库（网页展示用，不与工作台灵感捕捉双向同步）
-    insp_root = "D:/Obsidian/Weh-Brain/00-灵感库"
+    insp_root = os.path.join(BRAIN_ROOT, "00-灵感库")
     if os.path.isdir(insp_root):
         insp_notes = _walk_notes(insp_root)
         bc.append({"icon": "💡", "name": "灵感库", "desc": "Obsidian 整理的灵感与收藏", "cls": "", "groups": [{"title": "", "notes": insp_notes}]})
@@ -787,7 +790,7 @@ def scan_kb(jobs, resumes):
 
 
 # ========== CET-6 六级学习 ==========
-CET6_ROOT = r"D:\Obsidian\Weh-Brain\01-Projects\CET-6"
+CET6_ROOT = os.path.join(BRAIN_ROOT, "01-Projects", "CET-6")
 _CET6_META = [
     ("00-备考总览", "📋", "备考计划、进度跟踪、总览"),
     ("01-词汇", "📝", "单词书、词汇笔记、高频词"),
@@ -808,7 +811,7 @@ def scan_cet6():
     return cet6
 
 # ========== 工作SOP ==========
-SOP_ROOT = r"D:\Obsidian\Weh-Brain\05-Skills\工作SOP"
+SOP_ROOT = os.path.join(BRAIN_ROOT, "05-Skills", "工作SOP")
 _SOP_META = [
     ("01_交接文件", "📦", "岗位交接文档与清单"),
     ("02_网栈工具", "🔧", "日常使用的网络工具与栈"),
@@ -831,7 +834,7 @@ def scan_sop():
     return sop
 
 # ========== 灵犀智库-领域认知（02-Areas） ==========
-WIKI_AREAS_ROOT = "D:/Obsidian/Weh-Brain/02-Areas"
+WIKI_AREAS_ROOT = os.path.join(BRAIN_ROOT, "02-Areas")
 _WIKI_AREAS_META = [
     ("个人认知", "🧠", "认知升级、思维模型、自我觉察"),
     ("求职方法论", "🎯", "求职策略、面试技巧、职业规划"),
@@ -846,7 +849,7 @@ def scan_wiki_areas():
     return items
 
 # ========== 灵犀智库-百科概念（06-Wiki） ==========
-WIKI_CONCEPTS_ROOT = "D:/Obsidian/Weh-Brain/06-Wiki"
+WIKI_CONCEPTS_ROOT = os.path.join(BRAIN_ROOT, "06-Wiki")
 _WIKI_CONCEPTS_META = [
     ("认知模型", "🧩", "心智模型、思维框架、决策模型"),
     ("编程工具", "💻", "开发工具、技术栈、效率工具"),
@@ -859,7 +862,7 @@ def scan_wiki_concepts():
     return items
 
 # ========== 灵犀智库-资源收藏（03-Resources） ==========
-WIKI_RESOURCES_ROOT = "D:/Obsidian/Weh-Brain/03-Resources"
+WIKI_RESOURCES_ROOT = os.path.join(BRAIN_ROOT, "03-Resources")
 _WIKI_RESOURCES_META = [
     ("01-经济商业", "💰", "经济分析、商业洞察、行业研究"),
     ("02-AI科技", "🤖", "AI技术、科技趋势、前沿动态"),
