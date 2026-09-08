@@ -824,7 +824,7 @@ def scan_sop():
     return sop
 
 # ========== 灵犀智库-领域认知（02-Areas） ==========
-WIKI_AREAS_ROOT = r"D:\Obsidian\Weh-Brain-Areas"
+WIKI_AREAS_ROOT = "D:/Obsidian/Weh-Brain/02-Areas"
 _WIKI_AREAS_META = [
     ("个人认知", "🧠", "认知升级、思维模型、自我觉察"),
     ("求职方法论", "🎯", "求职策略、面试技巧、职业规划"),
@@ -839,7 +839,7 @@ def scan_wiki_areas():
     return items
 
 # ========== 灵犀智库-百科概念（06-Wiki） ==========
-WIKI_CONCEPTS_ROOT = r"D:\Obsidian\Weh-Brain-Wiki"
+WIKI_CONCEPTS_ROOT = "D:/Obsidian/Weh-Brain/06-Wiki"
 _WIKI_CONCEPTS_META = [
     ("认知模型", "🧩", "心智模型、思维框架、决策模型"),
     ("编程工具", "💻", "开发工具、技术栈、效率工具"),
@@ -852,7 +852,7 @@ def scan_wiki_concepts():
     return items
 
 # ========== 灵犀智库-资源收藏（03-Resources） ==========
-WIKI_RESOURCES_ROOT = r"D:\Obsidian\Weh-Brain-Resources"
+WIKI_RESOURCES_ROOT = "D:/Obsidian/Weh-Brain/03-Resources"
 _WIKI_RESOURCES_META = [
     ("01-经济商业", "💰", "经济分析、商业洞察、行业研究"),
     ("02-AI科技", "🤖", "AI技术、科技趋势、前沿动态"),
