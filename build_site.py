@@ -520,6 +520,11 @@ def scan_baichuan():
         folder, icon, desc = item[0], item[1], item[2]
         notes = _walk_notes(os.path.join(BAICHUAN_ROOT, folder))
         bc.append({"icon": icon, "name": folder, "desc": desc, "cls": "", "groups": [{"title": "", "notes": notes}]})
+    # 额外加入 Obsidian 00-灵感库（网页展示用，不与工作台灵感捕捉双向同步）
+    insp_root = "D:/Obsidian/Weh-Brain/00-灵感库"
+    if os.path.isdir(insp_root):
+        insp_notes = _walk_notes(insp_root)
+        bc.append({"icon": "💡", "name": "灵感库", "desc": "Obsidian 整理的灵感与收藏", "cls": "", "groups": [{"title": "", "notes": insp_notes}]})
     return bc
 
 
