@@ -1375,7 +1375,7 @@ body.sop-active .sub-tab-bar{display:flex}
 .timeline-date{font-size:11px;color:var(--muted);margin-bottom:2px}
 .timeline-text{font-size:13px;color:var(--text);line-height:1.5}
 /* 底部tab 8个适配 */
-.bottom-nav{display:flex;justify-content:space-around}
+.bottom-nav{justify-content:space-around}
 .bn-item{flex:1;min-width:0;text-align:center;padding:6px 2px;font-size:10px}
 .bn-item .ic{font-size:18px;display:block;margin-bottom:2px}
 @media(max-width:820px){
