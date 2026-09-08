@@ -1609,8 +1609,16 @@ function showInspireLibNote(i){
   var notes = getInspireLibNotes();
   var n = notes[i];
   if(!n) return;
-  // 用弹窗展示，和灵犀智库笔记一致，不占用AI延伸区
-  setModal('<h2>💡 '+esc(n.title||'未命名')+'</h2><div class="m-sub">来自 Obsidian 灵感库</div>'+(n.html||'<div class="m-sub">暂无内容</div>'));
+  var fm = n.fm || {};
+  // 元信息行
+  var meta = [];
+  if(fm.date) meta.push('📅 '+esc(fm.date));
+  if(fm.author) meta.push('✍️ '+esc(fm.author));
+  if(fm.source) meta.push('🔗 '+esc(fm.source));
+  if(fm.tags) meta.push('🏷️ '+esc(fm.tags));
+  var metaHtml = meta.length ? '<div class="note-meta">'+meta.join(' · ')+'</div>' : '';
+  var descHtml = fm.description ? '<div class="note-desc">'+esc(fm.description)+'</div>' : '';
+  setModal('<div class="note-detail"><h2>💡 '+esc(n.title||'未命名')+'</h2>'+metaHtml+descHtml+'<div class="note-body">'+(n.html||'<div class="m-sub">暂无内容</div>')+'</div></div>');
 }
 
 function selectInspire(id){

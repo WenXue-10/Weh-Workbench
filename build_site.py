@@ -530,7 +530,9 @@ def scan_baichuan():
 
 def _md_note(path):
     fn = os.path.basename(path)
-    return {"title": os.path.splitext(fn)[0], "icon": "📄", "html": md_to_html(strip_fm(read(path)))}
+    raw = read(path)
+    fm = parse_fm(raw)
+    return {"title": os.path.splitext(fn)[0], "icon": "📄", "html": md_to_html(strip_fm(raw)), "fm": fm}
 
 def _file_note(path):
     fn = os.path.basename(path)
