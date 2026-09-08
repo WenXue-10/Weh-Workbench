@@ -3715,6 +3715,8 @@ document.addEventListener("keydown", function(e){ if(e.key==="Escape") closeModa
       if(document.getElementById("companyCount")) document.getElementById("companyCount").textContent = compTotal;
       // 初始化底栏子模块
       initCareerSubTabs();
+      // 渲染概览页（求职统计+知识库日报+快速记录）
+      try{ renderCareerOverview(); renderKbTimeline(); }catch(e){}
       // 旧版求职首页的渲染
       if(document.getElementById("statJobs")){
         renderHome(); renderJobs(); renderCompanies(); renderTimeline(); renderResumes();
