@@ -3845,6 +3845,19 @@ function renderCareerKbCategory(){
     'careerCertList': '06_证书与附件',
     'careerPersonalList': '08_个人资料库'
   };
+  // 递归收集所有note，文件夹显示为分组标题，文件显示并可点击
+  function collectNotes(ns, depth){
+    var result = [];
+    (ns||[]).forEach(function(n){
+      if(n.children){
+        result.push({note: n, depth: depth, isFolder: true});
+        result = result.concat(collectNotes(n.children, depth + 1));
+      } else {
+        result.push({note: n, depth: depth, isFolder: false});
+      }
+    });
+    return result;
+  }
   Object.keys(categories).forEach(function(elId){
     var el = document.getElementById(elId);
     if(!el) return;
@@ -3856,17 +3869,21 @@ function renderCareerKbCategory(){
     }
     var allNotes = [];
     kb.groups.forEach(function(g){
-      (g.notes||[]).forEach(function(n){ allNotes.push(n); });
+      allNotes = allNotes.concat(collectNotes(g.notes, 0));
     });
     if(!allNotes.length){
       el.innerHTML = '<div class="career-list-empty">📂 这个分类还没有内容</div>';
       return;
     }
-    // 找到在KB_FLAT中的索引
-    el.innerHTML = allNotes.map(function(n){
+    el.innerHTML = allNotes.map(function(item){
+      var n = item.note;
+      var indent = item.depth > 0 ? 'style="padding-left:' + (item.depth * 16) + 'px;"' : '';
+      if(item.isFolder){
+        return '<div class="career-list-folder" ' + indent + '>' + (n.icon || '📂') + ' ' + esc(n.title) + '</div>';
+      }
       var idx = KB_FLAT.indexOf(n);
       var onclick = idx >= 0 ? 'openKbNote('+idx+')' : '';
-      return careerListItem(n.icon || '📄', n.title, '', '', onclick);
+      return '<div ' + indent + '>' + careerListItem(n.icon || '📄', n.title, '', '', onclick) + '</div>';
     }).join('');
   });
 }
