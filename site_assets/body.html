@@ -344,7 +344,8 @@
               <div class="card-head">🔥 拷问现场 <small id="decRoundInfo">还没开始</small></div>
               <div class="dec-chat-messages" id="decChatMessages"></div>
               <div class="m-chat-input">
-                <input type="text" id="decChatInput" placeholder="把你的方案/想法/决定丢进来，我往死里挑..." onkeydown="if(event.key==='Enter')sendDecisionChat()">
+                <input type="text" id="decChatInput" placeholder="把你的方案/想法/决定丢进来，我往死里挑..." onkeydown="if(event.key==='Enter')sendDecisionChat()" style="flex:1;min-width:0">
+                <button type="button" class="voice-btn" onclick="takePhotoFor('decision')" title="拍照">📷</button>
                 <button onclick="sendDecisionChat()">开始拷问</button>
               </div>
             </div>
@@ -398,7 +399,10 @@
               <div class="report-setting">
                 <div class="report-label">碎碎念（做了什么/遇到什么/下一步）</div>
                 <textarea id="reportInput" placeholder="把这周做的事、遇到的问题、下一步计划随便写，越碎越好，AI帮你整理成精简汇报..." rows="8"></textarea>
-                <div style="margin-top:8px"><button type="button" class="voice-btn" data-target="reportInput" onclick="toggleVoice('reportInput')">🎤</button></div>
+                <div style="margin-top:8px;display:flex;gap:8px">
+                  <button type="button" class="voice-btn" data-target="reportInput" onclick="toggleVoice('reportInput')">🎤</button>
+                  <button type="button" class="voice-btn" onclick="takePhotoFor('report')" title="拍照">📷</button>
+                </div>
               </div>
               <button class="report-generate-btn" onclick="generateReport()">✨ 生成精简汇报</button>
             </div>
@@ -1644,6 +1648,7 @@
               <div class="daily-add-form">
                 <div style="display:flex;gap:8px;align-items:center">
                   <input type="text" id="dailyInput" placeholder="要做什么？回车快速添加..." onkeydown="if(event.key==='Enter')addDailyTask()" style="flex:1;min-width:0">
+                  <button type="button" class="voice-btn" onclick="takePhotoFor('daily')" title="拍照">📷</button>
                   <button type="button" class="voice-btn" data-target="dailyInput" onclick="toggleVoice('dailyInput')">🎤</button>
                 </div>
                 <div class="daily-add-row">
@@ -1714,6 +1719,7 @@
         <div class="todo-add-bar">
           <div style="display:flex;gap:8px;align-items:center;flex:1;min-width:0">
             <input type="text" id="todoInput" placeholder="要做什么？回车快速添加..." onkeydown="if(event.key==='Enter')addTodo()" style="flex:1;min-width:0">
+            <button type="button" class="voice-btn" onclick="takePhotoFor('todo')" title="拍照">📷</button>
             <button type="button" class="voice-btn" data-target="todoInput" onclick="toggleVoice('todoInput')">🎤</button>
           </div>
           <select id="todoPriority">

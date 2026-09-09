@@ -83,6 +83,37 @@ function promptClearPhoto(){
   var prev = document.getElementById("wehPromptPhotoPreview");
   if(prev) prev.style.display = "none";
 }
+
+/* ---------- 各模块输入框拍照（临时变量） ---------- */
+var _decPhotoId = null, _reportPhotoId = null, _dailyPhotoId = null, _todoPhotoId = null;
+async function takePhotoFor(module){
+  try{
+    var file = await takePhoto();
+    if(!file) return;
+    var dataUrl = await compressImage(file);
+    var pid = "photo_" + Date.now();
+    await savePhoto(pid, dataUrl);
+    if(module==="decision"){ _decPhotoId = pid; }
+    else if(module==="report"){ _reportPhotoId = pid; }
+    else if(module==="daily"){ _dailyPhotoId = pid; }
+    else if(module==="todo"){ _todoPhotoId = pid; }
+    toast("📷 照片已添加");
+  }catch(e){ toast("拍照失败："+e.message); }
+}
+async function pickPhotoFor(module){
+  try{
+    var file = await pickPhoto();
+    if(!file) return;
+    var dataUrl = await compressImage(file);
+    var pid = "photo_" + Date.now();
+    await savePhoto(pid, dataUrl);
+    if(module==="decision"){ _decPhotoId = pid; }
+    else if(module==="report"){ _reportPhotoId = pid; }
+    else if(module==="daily"){ _dailyPhotoId = pid; }
+    else if(module==="todo"){ _todoPhotoId = pid; }
+    toast("🖼️ 图片已添加");
+  }catch(e){ toast("选图失败："+e.message); }
+}
 function showConfirm(msg, opts){
   opts = opts || {};
   _promptIsConfirm = true;
@@ -1547,6 +1578,7 @@ function renderDecisionChat(){
   } else {
     box.innerHTML = data.chatHistory.map(function(m){
       var content = esc(m.content).replace(/\n/g,"<br>");
+      if(m.photoId){ content = '<span style="font-size:16px">📷</span> ' + content; }
       if(m.role==="ai" && m.question){
         content += '<span class="ai-question">💥 '+esc(m.question)+'</span>';
       }
@@ -1559,11 +1591,12 @@ function renderDecisionChat(){
 function sendDecisionChat(){
   var input = document.getElementById("decChatInput");
   var msg = input.value.trim();
-  if(!msg) return;
+  if(!msg && !_decPhotoId) return;
   var data = loadDecision();
   data.chatHistory = data.chatHistory || [];
   data.started = true;
-  data.chatHistory.push({role:"user", content:msg});
+  data.chatHistory.push({role:"user", content:msg, photoId:_decPhotoId});
+  _decPhotoId = null;
   input.value = "";
   saveDecision(data);
   renderDecisionChat();
@@ -2372,20 +2405,22 @@ function saveTodo(data){ markLocalChange(); localStorage.setItem(TODO_KEY, JSON.
 function addTodo(){
   var input = document.getElementById("todoInput");
   var title = input.value.trim();
-  if(!title) return;
+  if(!title && !_todoPhotoId) return;
   var priority = document.getElementById("todoPriority").value;
   var category = document.getElementById("todoCategory").value;
   var dueDate = document.getElementById("todoDueDate").value || "";
   var data = loadTodo();
   data.items.push({
     id: Date.now(),
-    title: title,
+    title: title || "(图片任务)",
     priority: priority,
     category: category,
     dueDate: dueDate,
     done: false,
+    photoId: _todoPhotoId,
     createdAt: new Date().toISOString().slice(0,10)
   });
+  _todoPhotoId = null;
   saveTodo(data);
   input.value = "";
   document.getElementById("todoDueDate").value = "";
@@ -2476,7 +2511,7 @@ function renderTodo(){
     return '<div class="todo-item'+doneCls+'">'
       +'<div class="todo-check'+checkedCls+'" onclick="toggleTodo('+item.id+')">'+checkIcon+'</div>'
       +'<div class="todo-content">'
-        +'<div class="todo-text">'+esc(item.title)+'</div>'
+        +'<div class="todo-text">'+(item.photoId?'📷 ':'')+esc(item.title)+'</div>'
         +'<div class="todo-meta">'
           +'<span class="todo-cat-tag '+item.category+'">'+CATEGORY_TEXT[item.category]+'</span>'
           +'<span class="todo-priority-tag">'+PRIORITY_TEXT[item.priority]+'</span>'
@@ -2562,8 +2597,8 @@ function selectReportAudience(audience){
 function generateReport(){
   var start = Date.now();
   var input = document.getElementById("reportInput").value.trim();
-  if(!input){
-    toast("请先输入碎碎念内容");
+  if(!input && !_reportPhotoId){
+    toast("请先输入内容或添加照片");
     return;
   }
   var data = loadReport();
@@ -2797,17 +2832,19 @@ function saveDaily(data){ markLocalChange();
 function addDailyTask(){
   var input = document.getElementById("dailyInput");
   var title = input.value.trim();
-  if(!title) return;
+  if(!title && !_dailyPhotoId) return;
   var priority = document.getElementById("dailyPriority").value;
   var duration = parseInt(document.getElementById("dailyDuration").value);
   var data = loadDaily();
   data.tasks.push({
     id: Date.now(),
-    title: title,
+    title: title || "(图片任务)",
     priority: priority,
     duration: duration,
-    done: false
+    done: false,
+    photoId: _dailyPhotoId
   });
+  _dailyPhotoId = null;
   saveDaily(data);
   input.value = "";
   renderDaily();
