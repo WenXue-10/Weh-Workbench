@@ -3070,7 +3070,9 @@ var DATA_KEYS = {
   decision: "weh_decision_data_v1",
   report: "weh_report_data_v1",
   daily: "weh_daily_data_v1",
-  todo: "weh_todo_data_v1"
+  todo: "weh_todo_data_v1",
+  job: "weh_job_data_v1",
+  company: "weh_company_data_v1"
 };
 
 function loadSettings(){
