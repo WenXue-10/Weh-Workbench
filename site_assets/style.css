@@ -1395,3 +1395,22 @@ body.sop-active .sub-tab-bar{display:flex}
   color:#fff;
   border-color:var(--accent) !important;
 }
+
+
+/* 弹窗拍照按钮 */
+.photo-cam-btn{
+  padding:6px 14px;
+  border:1px solid var(--border);
+  border-radius:8px;
+  background:var(--card);
+  font-size:13px;
+  cursor:pointer;
+}
+.photo-cam-btn:hover{ background:var(--bg); }
+.photo-del-btn{
+  width:24px;height:24px;
+  border:none;border-radius:50%;
+  background:rgba(0,0,0,.4);color:#fff;
+  font-size:12px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+}

@@ -18,10 +18,12 @@ function toast(msg){ var t=document.getElementById("toast"); t.textContent=msg; 
 
 /* ===== 通用输入/确认弹窗（替代原生 prompt/confirm，Electron 兼容） ===== */
 var _promptResolve=null, _promptIsConfirm=false;
+var _promptPhotoId = null;
 function showPrompt(opts){
   opts = opts || {};
   var fields = (opts.fields && opts.fields.length) ? opts.fields : [{label:"", value:"", placeholder:""}];
   _promptIsConfirm = false;
+  _promptPhotoId = null;
   document.getElementById("wehPromptTitle").textContent = opts.title || "请输入";
   document.getElementById("wehPromptMsg").style.display = "none";
   var fieldsEl = document.getElementById("wehPromptFields");
@@ -32,11 +34,54 @@ function showPrompt(opts){
       +'<button type="button" class="voice-btn" data-target="wehPromptInput'+i+'" onclick="toggleVoice(\'wehPromptInput'+i+'\')">🎤</button>'
       +'</div></div>';
   }).join("");
+  // 拍照按钮（可选）
+  var photoRow = document.getElementById("wehPromptPhotoRow");
+  if(photoRow){
+    if(opts.withPhoto){
+      photoRow.style.display = "flex";
+      photoRow.innerHTML = '<button type="button" class="photo-cam-btn" onclick="promptTakePhoto()">📷 拍照</button>'
+        +'<button type="button" class="photo-cam-btn" onclick="promptPickPhoto()">🖼️ 相册</button>'
+        +'<div id="wehPromptPhotoPreview" style="display:none;align-items:center;gap:8px;margin-left:auto">'
+        +'<img id="wehPromptPhotoImg" style="width:48px;height:48px;object-fit:cover;border-radius:8px">'
+        +'<button type="button" class="photo-del-btn" onclick="promptClearPhoto()">✕</button></div>';
+    } else {
+      photoRow.style.display = "none";
+    }
+  }
   document.getElementById("wehPromptOk").textContent = opts.okText || "确定";
   openWehPrompt();
   var first = document.getElementById("wehPromptInput0");
   if(first) setTimeout(function(){ first.focus(); first.select(); }, 60);
   return new Promise(function(resolve){ _promptResolve = resolve; });
+}
+async function promptTakePhoto(){
+  try{
+    var file = await takePhoto();
+    if(!file) return;
+    var dataUrl = await compressImage(file);
+    _promptPhotoId = "photo_" + Date.now();
+    await savePhoto(_promptPhotoId, dataUrl);
+    var prev = document.getElementById("wehPromptPhotoPreview");
+    var img = document.getElementById("wehPromptPhotoImg");
+    if(prev && img){ prev.style.display = "flex"; img.src = dataUrl; }
+  }catch(e){ toast("拍照失败："+e.message); }
+}
+async function promptPickPhoto(){
+  try{
+    var file = await pickPhoto();
+    if(!file) return;
+    var dataUrl = await compressImage(file);
+    _promptPhotoId = "photo_" + Date.now();
+    await savePhoto(_promptPhotoId, dataUrl);
+    var prev = document.getElementById("wehPromptPhotoPreview");
+    var img = document.getElementById("wehPromptPhotoImg");
+    if(prev && img){ prev.style.display = "flex"; img.src = dataUrl; }
+  }catch(e){ toast("选图失败："+e.message); }
+}
+function promptClearPhoto(){
+  _promptPhotoId = null;
+  var prev = document.getElementById("wehPromptPhotoPreview");
+  if(prev) prev.style.display = "none";
 }
 function showConfirm(msg, opts){
   opts = opts || {};
@@ -67,7 +112,10 @@ function submitWehPrompt(){
   var inputs = document.getElementById("wehPromptFields").querySelectorAll("input");
   var vals = [];
   for(var i=0;i<inputs.length;i++){ vals.push(inputs[i].value); }
+  var photoId = _promptPhotoId;
+  _promptPhotoId = null;
   hideWehPrompt();
+  if(photoId){ vals.push(photoId); } else { vals.push(null); }
   resolve(vals);
 }
 function cancelWehPrompt(){
@@ -719,7 +767,7 @@ function renderMoney(){
       var impTxt = r.impulse ? "⚠️冲动" : "普通";
       return '<div class="exp-item">'
         +'<div class="exp-icon">'+cat.icon+'</div>'
-        +'<div class="exp-info"><div class="exp-cat">'+esc(r.category)+(r.note?' · '+esc(r.note):'')+'</div><div class="exp-date">'+r.date+' '+(r.time||"")+'</div></div>'
+        +'<div class="exp-info"><div class="exp-cat">'+esc(r.category)+(r.note?' · '+esc(r.note):'')+(r.photoId?' 📷':'')+'</div><div class="exp-date">'+r.date+' '+(r.time||"")+'</div></div>'
         +'<div class="exp-amount" onclick="editExpAmount('+r.id+')">¥'+r.amount+'</div>'
         +'<div class="exp-impulse'+impCls+'" onclick="toggleImpulse('+r.id+')">'+impTxt+'</div>'
         +'<div class="exp-del" onclick="delExpense('+r.id+')">✕</div>'
@@ -751,6 +799,7 @@ function renderMoney(){
 async function quickExpense(cat, amount){
   var vals = await showPrompt({
     title: cat+" 记一笔",
+    withPhoto: true,
     fields: [
       {label:"日期时间", type:"datetime-local", value:nowDateTime()},
       {label:"备注", value:"", placeholder:"如：午餐/公司楼下/和朋友"}
@@ -759,9 +808,10 @@ async function quickExpense(cat, amount){
   if(!vals) return;
   var dt = parseDateTime(vals[0] || nowDateTime());
   var note = vals[1] || "";
+  var photoId = vals[2] || null;
   var data = loadMoney();
   var id = Date.now();
-  data.records.push({id:id, category:cat, amount:amount, date:dt.date, time:dt.time, impulse:!!IMPULSE_CATS[cat], note:note});
+  data.records.push({id:id, category:cat, amount:amount, date:dt.date, time:dt.time, impulse:!!IMPULSE_CATS[cat], note:note, photoId:photoId});
   saveMoney(data);
   renderMoney();
   toast(cat+" ¥"+amount+" 已记入");
@@ -769,7 +819,7 @@ async function quickExpense(cat, amount){
     try{
       var health = loadHealth();
       if(!health.records.find(function(r){ return r.id===id; })){
-        health.records.push({id:id, type:getHealthType(cat), category:cat, amount:amount, date:dt.date, time:dt.time, note:note});
+        health.records.push({id:id, type:getHealthType(cat), category:cat, amount:amount, date:dt.date, time:dt.time, note:note, photoId:photoId});
         saveHealth(health);
       }
     }catch(e){ console.log("同步到饮食台失败:", e.message); }
@@ -778,6 +828,7 @@ async function quickExpense(cat, amount){
 async function addCustomExpense(){
   var vals = await showPrompt({
     title: "记一笔自定义消费",
+    withPhoto: true,
     fields: [
       {label:"消费类别", value:"", placeholder:"如：打车/奶茶/其他"},
       {label:"金额", value:"", placeholder:"数字，如 25"},
@@ -792,9 +843,10 @@ async function addCustomExpense(){
   if(!vals[1] || isNaN(amount)) return;
   var dt = parseDateTime(vals[2] || nowDateTime());
   var note = vals[3] || "";
+  var photoId = vals[4] || null;
   var data = loadMoney();
   var id = Date.now();
-  data.records.push({id:id, category:cat, amount:amount, date:dt.date, time:dt.time, impulse:false, note:note});
+  data.records.push({id:id, category:cat, amount:amount, date:dt.date, time:dt.time, impulse:false, note:note, photoId:photoId});
   saveMoney(data);
   renderMoney();
   toast(cat+" ¥"+amount+" 已记入");
@@ -802,7 +854,7 @@ async function addCustomExpense(){
     try{
       var health = loadHealth();
       if(!health.records.find(function(r){ return r.id===id; })){
-        health.records.push({id:id, type:getHealthType(cat), category:cat, amount:amount, date:dt.date, time:dt.time, note:note});
+        health.records.push({id:id, type:getHealthType(cat), category:cat, amount:amount, date:dt.date, time:dt.time, note:note, photoId:photoId});
         saveHealth(health);
       }
     }catch(e){ console.log("同步到饮食台失败:", e.message); }
@@ -1165,7 +1217,7 @@ function renderHealth(){
       var amt = "¥"+r.amount;
       return '<div class="exp-item">'
         +'<div class="exp-icon">'+cat.icon+'</div>'
-        +'<div class="exp-info"><div class="exp-cat">'+esc(r.category)+(r.note?' · '+esc(r.note):'')+'</div><div class="exp-date">'+r.date+' '+(r.time||"")+' · '+(r.type==="drink"?"饮品":"吃法")+'</div></div>'
+        +'<div class="exp-info"><div class="exp-cat">'+esc(r.category)+(r.note?' · '+esc(r.note):'')+(r.photoId?' 📷':'')+'</div><div class="exp-date">'+r.date+' '+(r.time||"")+' · '+(r.type==="drink"?"饮品":"吃法")+'</div></div>'
         +'<div class="exp-amount" onclick="editHealthAmount('+r.id+')">'+amt+'</div>'
         +'<div class="exp-del" onclick="delHealthRecord('+r.id+')">✕</div>'
         +'</div>';
@@ -1194,6 +1246,7 @@ function renderHealth(){
 async function quickDrink(cat, amount){
   var vals = await showPrompt({
     title: cat+" 记一杯",
+    withPhoto: true,
     fields: [
       {label:"日期时间", type:"datetime-local", value:nowDateTime()},
       {label:"备注", value:"", placeholder:"如：便利店/美式/大杯"}
@@ -1202,15 +1255,16 @@ async function quickDrink(cat, amount){
   if(!vals) return;
   var dt = parseDateTime(vals[0] || nowDateTime());
   var note = vals[1] || "";
+  var photoId = vals[2] || null;
   var data = loadHealth();
   var recId = Date.now();
-  data.records.push({id:recId, type:"drink", category:cat, amount:amount, date:dt.date, time:dt.time, note:note});
+  data.records.push({id:recId, type:"drink", category:cat, amount:amount, date:dt.date, time:dt.time, note:note, photoId:photoId});
   saveHealth(data); renderHealth();
   toast(cat+" ¥"+amount+" 已记入");
   // 同步到存钱记账
   try{
     var money = loadMoney();
-    money.records.push({id:recId, category:cat, amount:amount, date:dt.date, time:dt.time, impulse:!!IMPULSE_CATS[cat], note:note});
+    money.records.push({id:recId, category:cat, amount:amount, date:dt.date, time:dt.time, impulse:!!IMPULSE_CATS[cat], note:note, photoId:photoId});
     saveMoney(money);
   }catch(e){ console.log("同步到记账失败:", e.message); }
 }
@@ -1218,6 +1272,7 @@ async function quickMeal(cat){
   var mealDef = MEALS.find(function(m){ return m.name===cat; }) || {amount:20};
   var vals = await showPrompt({
     title: cat+" 记一餐",
+    withPhoto: true,
     fields: [
       {label:"金额", value:String(mealDef.amount), placeholder:"数字"},
       {label:"日期时间", type:"datetime-local", value:nowDateTime()},
@@ -1229,20 +1284,22 @@ async function quickMeal(cat){
   if(isNaN(amount) || Number(amount)<=0) amount = mealDef.amount;
   var dt = parseDateTime(vals[1] || nowDateTime());
   var note = vals[2] || "";
+  var photoId = vals[3] || null;
   var data = loadHealth();
   var recId = Date.now();
-  data.records.push({id:recId, type:"meal", category:cat, amount:Number(amount), date:dt.date, time:dt.time, note:note});
+  data.records.push({id:recId, type:"meal", category:cat, amount:Number(amount), date:dt.date, time:dt.time, note:note, photoId:photoId});
   saveHealth(data); renderHealth();
   toast(cat+" ¥"+Number(amount)+" 已记入");
   try{
     var money = loadMoney();
-    money.records.push({id:recId, category:cat, amount:Number(amount), date:dt.date, time:dt.time, impulse:false, note:note});
+    money.records.push({id:recId, category:cat, amount:Number(amount), date:dt.date, time:dt.time, impulse:false, note:note, photoId:photoId});
     saveMoney(money);
   }catch(e){ console.log("同步到记账失败:", e.message); }
 }
 async function addCustomMeal(){
   var vals = await showPrompt({
     title: "记一笔饮食",
+    withPhoto: true,
     fields: [
       {label:"记录类型", value:"drink", placeholder:"drink=饮品 / meal=吃法"},
       {label:"类别", value:"", placeholder:"如：咖啡/奶茶/外卖轻食"},
@@ -1265,15 +1322,16 @@ async function addCustomMeal(){
   }
   var dt = parseDateTime(vals[3] || nowDateTime());
   var note = vals[4] || "";
+  var photoId = vals[5] || null;
   var data = loadHealth();
   var recId = Date.now();
-  data.records.push({id:recId, type:type, category:cat, amount:Number(amount), date:dt.date, time:dt.time, note:note});
+  data.records.push({id:recId, type:type, category:cat, amount:Number(amount), date:dt.date, time:dt.time, note:note, photoId:photoId});
   saveHealth(data); renderHealth();
   toast(cat+" ¥"+Number(amount)+" 已记入");
   // 只要是饮食记录（drink或meal），都同步到记账台
   try{
     var money = loadMoney();
-    money.records.push({id:recId, category:cat, amount:Number(amount), date:dt.date, time:dt.time, impulse:false, note:note});
+    money.records.push({id:recId, category:cat, amount:Number(amount), date:dt.date, time:dt.time, impulse:false, note:note, photoId:photoId});
     saveMoney(money);
   }catch(e){ console.log("同步到记账失败:", e.message); }
 }
@@ -2131,16 +2189,24 @@ function renderJobs(){
 }
 
 /* ========== 求职作战：求职日志 ========== */
-function addJobLog(){
-  showPrompt("记录今天的求职进展", "").then(function(content){
-    if(!content) return;
-    var data = loadJobs();
-    data.logs = data.logs || [];
-    data.logs.unshift({id:Date.now(), date:new Date().toISOString().slice(0,10), time:new Date().toTimeString().slice(0,5), content:content});
-    saveJobs(data);
-    renderJobLogs();
-    renderCareerOverview();
+async function addJobLog(){
+  var vals = await showPrompt({
+    title: "记录今天的求职进展",
+    withPhoto: true,
+    fields: [
+      {label:"内容", value:"", placeholder:"如：完成XX笔试 / 收到XX面试邀请"}
+    ]
   });
+  if(!vals) return;
+  var content = vals[0] || "";
+  if(!content.trim()) return;
+  var photoId = vals[1] || null;
+  var data = loadJobs();
+  data.logs = data.logs || [];
+  data.logs.unshift({id:Date.now(), date:new Date().toISOString().slice(0,10), time:new Date().toTimeString().slice(0,5), content:content, photoId:photoId});
+  saveJobs(data);
+  renderJobLogs();
+  renderCareerOverview();
 }
 function deleteJobLog(id){
   var data = loadJobs();
@@ -2156,7 +2222,7 @@ function renderJobLogs(){
   if(!el) return;
   if(!logs.length){ el.innerHTML = '<div style="text-align:center;color:var(--muted);padding:20px;font-size:12px">暂无日志</div>'; return; }
   el.innerHTML = logs.slice(0,20).map(function(l){
-    return '<div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-content"><div class="timeline-date">'+l.date+' '+l.time+' <span onclick="deleteJobLog('+l.id+')" style="cursor:pointer;color:var(--muted);margin-left:8px">🗑️</span></div><div class="timeline-text">'+esc(l.content)+'</div></div></div>';
+    return '<div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-content"><div class="timeline-date">'+l.date+' '+l.time+(l.photoId?' 📷':'')+' <span onclick="deleteJobLog('+l.id+')" style="cursor:pointer;color:var(--muted);margin-left:8px">🗑️</span></div><div class="timeline-text">'+esc(l.content)+'</div></div></div>';
   }).join("");
 }
 
