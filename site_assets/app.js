@@ -77,6 +77,109 @@ function cancelWehPrompt(){
   resolve(null);
 }
 
+/* ---------- 拍照/照片功能 ---------- */
+var PHOTO_DB = null;
+function initPhotoDB(){
+  return new Promise(function(resolve){
+    try{
+      var req = indexedDB.open("WehAtelierPhotos", 1);
+      req.onupgradeneeded = function(e){
+        var db = e.target.result;
+        if(!db.objectStoreNames.contains("photos")){
+          db.createObjectStore("photos", {keyPath:"id"});
+        }
+      };
+      req.onsuccess = function(e){ PHOTO_DB = e.target.result; resolve(true); };
+      req.onerror = function(){ resolve(false); };
+    }catch(e){ resolve(false); }
+  });
+}
+function savePhoto(id, dataUrl){
+  return new Promise(function(resolve){
+    if(!PHOTO_DB){ resolve(false); return; }
+    try{
+      var tx = PHOTO_DB.transaction(["photos"], "readwrite");
+      tx.objectStore("photos").put({id:id, data:dataUrl, time:Date.now()});
+      tx.oncomplete = function(){ resolve(true); };
+      tx.onerror = function(){ resolve(false); };
+    }catch(e){ resolve(false); }
+  });
+}
+function getPhoto(id){
+  return new Promise(function(resolve){
+    if(!PHOTO_DB){ resolve(null); return; }
+    try{
+      var tx = PHOTO_DB.transaction(["photos"], "readonly");
+      var req = tx.objectStore("photos").get(id);
+      req.onsuccess = function(){ resolve(req.result ? req.result.data : null); };
+      req.onerror = function(){ resolve(null); };
+    }catch(e){ resolve(null); }
+  });
+}
+function deletePhoto(id){
+  return new Promise(function(resolve){
+    if(!PHOTO_DB){ resolve(false); return; }
+    try{
+      var tx = PHOTO_DB.transaction(["photos"], "readwrite");
+      tx.objectStore("photos").delete(id);
+      tx.oncomplete = function(){ resolve(true); };
+      tx.onerror = function(){ resolve(false); };
+    }catch(e){ resolve(false); }
+  });
+}
+function compressImage(file, maxWidth, quality){
+  return new Promise(function(resolve){
+    var reader = new FileReader();
+    reader.onload = function(e){
+      var img = new Image();
+      img.onload = function(){
+        var canvas = document.createElement("canvas");
+        var w = img.width, h = img.height;
+        if(w > maxWidth){ h = Math.round(h * maxWidth / w); w = maxWidth; }
+        canvas.width = w; canvas.height = h;
+        var ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL("image/jpeg", quality || 0.8));
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+async function takePhoto(){
+  return new Promise(function(resolve){
+    var input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
+    input.capture = "environment";
+    input.onchange = async function(e){
+      var file = e.target.files[0];
+      if(!file){ resolve(null); return; }
+      var dataUrl = await compressImage(file, 1280, 0.8);
+      var id = "photo_" + Date.now();
+      await savePhoto(id, dataUrl);
+      resolve({id:id, data:dataUrl});
+    };
+    input.click();
+  });
+}
+async function pickPhoto(){
+  return new Promise(function(resolve){
+    var input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
+    input.onchange = async function(e){
+      var file = e.target.files[0];
+      if(!file){ resolve(null); return; }
+      var dataUrl = await compressImage(file, 1280, 0.8);
+      var id = "photo_" + Date.now();
+      await savePhoto(id, dataUrl);
+      resolve({id:id, data:dataUrl});
+    };
+    input.click();
+  });
+}
+
 /* ---------- 语音输入 ---------- */
 var _voiceRec = null, _voiceActive = false, _voiceTarget = null, _voiceFinal = "";
 function isVoiceSupported(){ return !!(window.SpeechRecognition || window.webkitSpeechRecognition); }
@@ -649,7 +752,7 @@ async function quickExpense(cat, amount){
   var vals = await showPrompt({
     title: cat+" 记一笔",
     fields: [
-      {label:"日期时间", value:nowDateTime(), placeholder:"YYYY-MM-DD HH:MM"},
+      {label:"日期时间", type:"datetime-local", value:nowDateTime()},
       {label:"备注", value:"", placeholder:"如：午餐/公司楼下/和朋友"}
     ]
   });
@@ -678,7 +781,7 @@ async function addCustomExpense(){
     fields: [
       {label:"消费类别", value:"", placeholder:"如：打车/奶茶/其他"},
       {label:"金额", value:"", placeholder:"数字，如 25"},
-      {label:"日期时间", value:nowDateTime(), placeholder:"YYYY-MM-DD HH:MM"},
+      {label:"日期时间", type:"datetime-local", value:nowDateTime()},
       {label:"备注", value:"", placeholder:"可选"}
     ]
   });
@@ -926,19 +1029,28 @@ function sortByDateTime(a, b){
 
 function nowDateTime(){
   var d = new Date();
-  return d.toISOString().slice(0,10) + " " + nowTimeStr();
+  var offset = d.getTimezoneOffset() * 60000;
+  return new Date(d.getTime() - offset).toISOString().slice(0,16);
 }
 function parseDateTime(input){
-  // 解析 "YYYY-MM-DD HH:MM" 或 "YYYY-MM-DD"
+  // 解析 "YYYY-MM-DDTHH:MM" (datetime-local) 或 "YYYY-MM-DD HH:MM" 或 "YYYY-MM-DD"
   input = (input||"").trim();
-  var parts = input.split(/\s+/);
-  var date = parts[0] || new Date().toISOString().slice(0,10);
-  var time = parts[1] || nowTimeStr();
-  // 验证日期格式
+  var date, time;
+  if(input.indexOf("T") >= 0){
+    // datetime-local 格式
+    var parts = input.split("T");
+    date = parts[0];
+    time = (parts[1]||"").slice(0,5);
+  } else {
+    var parts2 = input.split(/\s+/);
+    date = parts2[0];
+    time = parts2[1];
+  }
+  date = date || new Date().toISOString().slice(0,10);
+  time = time || nowTimeStr();
   if(!/^\d{4}-\d{2}-\d{2}$/.test(date)){
     date = new Date().toISOString().slice(0,10);
   }
-  // 验证时间格式
   if(!/^\d{2}:\d{2}$/.test(time)){
     time = nowTimeStr();
   }
@@ -1083,7 +1195,7 @@ async function quickDrink(cat, amount){
   var vals = await showPrompt({
     title: cat+" 记一杯",
     fields: [
-      {label:"日期时间", value:nowDateTime(), placeholder:"YYYY-MM-DD HH:MM"},
+      {label:"日期时间", type:"datetime-local", value:nowDateTime()},
       {label:"备注", value:"", placeholder:"如：便利店/美式/大杯"}
     ]
   });
@@ -1108,7 +1220,7 @@ async function quickMeal(cat){
     title: cat+" 记一餐",
     fields: [
       {label:"金额", value:String(mealDef.amount), placeholder:"数字"},
-      {label:"日期时间", value:nowDateTime(), placeholder:"YYYY-MM-DD HH:MM"},
+      {label:"日期时间", type:"datetime-local", value:nowDateTime()},
       {label:"备注", value:"", placeholder:"如：三明治/黄焖鸡/公司楼下"}
     ]
   });
@@ -1135,7 +1247,7 @@ async function addCustomMeal(){
       {label:"记录类型", value:"drink", placeholder:"drink=饮品 / meal=吃法"},
       {label:"类别", value:"", placeholder:"如：咖啡/奶茶/外卖轻食"},
       {label:"金额", value:"", placeholder:"饮品必填，吃法可留空"},
-      {label:"日期时间", value:nowDateTime(), placeholder:"YYYY-MM-DD HH:MM"},
+      {label:"日期时间", type:"datetime-local", value:nowDateTime()},
       {label:"备注", value:"", placeholder:"可选"}
     ]
   });
@@ -1525,6 +1637,7 @@ function resetDecision(){
 var INSPIRE_KEY = "weh_inspire_data_v1";
 var INSPIRE_DEFAULTS = {records:[]};
 var currentInspireId = null;
+var pendingInspirePhoto = null;
 
 function loadInspire(){
   try{
@@ -1539,20 +1652,40 @@ function saveInspire(data){ markLocalChange(); localStorage.setItem(INSPIRE_KEY,
 function addInspire(){
   var input = document.getElementById("inspireInput");
   var content = input.value.trim();
-  if(!content) return;
+  if(!content && !pendingInspirePhoto) return;
   var data = loadInspire();
   var now = new Date();
-  data.records.push({
+  var rec = {
     id: Date.now(),
-    content: content,
+    content: content || "（照片灵感）",
     date: now.toISOString().slice(0,10),
     time: nowTimeStr(),
     status: "pending",
-    aiExtension: null
-  });
+    aiExtension: null,
+    photoId: pendingInspirePhoto ? pendingInspirePhoto.id : null
+  };
+  data.records.push(rec);
   saveInspire(data);
   input.value = "";
+  clearInspirePhoto();
   renderInspire();
+}
+async function addInspireWithPhoto(){
+  var photo = await takePhoto();
+  if(!photo) return;
+  pendingInspirePhoto = photo;
+  var preview = document.getElementById("inspirePhotoPreview");
+  var img = document.getElementById("inspirePhotoImg");
+  if(preview && img){
+    img.src = photo.data;
+    preview.style.display = "flex";
+  }
+  toast("照片已添加，输入文字后点捕捉");
+}
+function clearInspirePhoto(){
+  pendingInspirePhoto = null;
+  var preview = document.getElementById("inspirePhotoPreview");
+  if(preview) preview.style.display = "none";
 }
 
 function renderInspire(){
@@ -1573,8 +1706,9 @@ function renderInspire(){
   list.innerHTML = sorted.map(function(r){
     var statusText = {pending:"待处理", recorded:"已记录", action:"已行动"}[r.status] || "待处理";
     var activeCls = r.id === currentInspireId ? " active" : "";
+    var photoIcon = r.photoId ? '<span style="margin-left:6px">📷</span>' : '';
     return '<div class="inspire-item'+activeCls+'" onclick="selectInspire('+r.id+')">'
-      +'<div class="inspire-item-text">'+esc(r.content)+'</div>'
+      +'<div class="inspire-item-text">'+esc(r.content)+photoIcon+'</div>'
       +'<div class="inspire-item-meta"><span>'+r.date+' '+(r.time||"")+'</span>'
       +'<span class="inspire-tag '+r.status+'">'+statusText+'</span></div>'
       +'</div>';
@@ -1643,18 +1777,29 @@ function selectInspire(id){
     saveInspire(data);
     logAction("灵感捕捉", "AI延伸", r.content, r.aiExtension.judgment || "", Date.now()-start, "success");
   }
-  renderInspireDetail(r.aiExtension);
+  renderInspireDetail(r.aiExtension, r.photoId);
 }
 
-function renderInspireDetail(ext){
+function renderInspireDetail(ext, photoId){
   var box = document.getElementById("inspireDetail");
   if(!box) return;
+  var photoHtml = '';
+  if(photoId){
+    photoHtml = '<div class="d-section"><div class="d-label">📷 照片</div><div class="d-content"><img id="inspireDetailPhoto" style="max-width:100%;border-radius:12px;display:none" onclick="this.style.display=this.style.display===\'none\'?\'\':\'none\'"></div></div>';
+  }
   box.innerHTML = ''
+    + photoHtml
     +'<div class="d-section"><div class="d-label">💭 原始想法</div><div class="d-content">'+esc(ext.original)+'</div></div>'
     +'<div class="d-section"><div class="d-label">❓ 值得追问的</div><div class="d-content">'+ext.questions.map(function(q){return '· '+esc(q);}).join('<br>')+'</div></div>'
     +'<div class="d-section"><div class="d-label">🚀 可以延伸的方向</div><div class="d-content">'+ext.directions.map(function(d){return '· '+esc(d);}).join('<br>')+'</div></div>'
     +'<div class="d-section"><div class="d-label">⚖️ 值不值得做</div><div class="d-content">'+esc(ext.judgment)+'</div></div>'
     +'<div class="d-section"><div class="d-label">🔗 可能关联</div><div class="d-content">'+esc(ext.related)+'</div></div>';
+  if(photoId){
+    getPhoto(photoId).then(function(data){
+      var img = document.getElementById("inspireDetailPhoto");
+      if(img && data){ img.src = data; img.style.display = "block"; }
+    });
+  }
 }
 
 function generateInspireExtension(content){
