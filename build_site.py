@@ -625,6 +625,26 @@ def _kb_02(resumes):
     return groups
 
 
+def _scan_kb_dir(dir_path):
+    """递归扫描知识库目录，返回notes列表（支持md/pdf/docx/图片等，跳过~$临时文件）"""
+    notes = []
+    if not os.path.isdir(dir_path):
+        return notes
+    for name in sorted(os.listdir(dir_path)):
+        p = os.path.join(dir_path, name)
+        if os.path.isdir(p):
+            children = _scan_kb_dir(p)
+            if children:
+                notes.append({"title": "📂 " + name, "icon": "📂", "children": children})
+        else:
+            if name.startswith("~$"):
+                continue
+            if name.endswith(".md") and not (name.startswith("评分-") or name.startswith("背调报告-")):
+                notes.append(_md_note(p))
+            elif name.lower().endswith((".pdf", ".doc", ".docx", ".png", ".jpg", ".jpeg")):
+                notes.append(_file_note(p))
+    return notes
+
 def _kb_03():
     root = os.path.join(KB_ROOT, "03_笔面试题库")
     groups = []
@@ -638,26 +658,7 @@ def _kb_03():
         sp = os.path.join(root, sub)
         if not os.path.isdir(sp):
             continue
-        direct = []
-        nested = []
-        for name in sorted(os.listdir(sp)):
-            p = os.path.join(sp, name)
-            if os.path.isdir(p):
-                children = []
-                for fn in sorted(os.listdir(p)):
-                    fp = os.path.join(p, fn)
-                    if fn.endswith(".md") and not (fn.startswith("评分-") or fn.startswith("背调报告-")):
-                        children.append(_md_note(fp))
-                    elif fn.lower().endswith((".pdf", ".doc", ".docx", ".png", ".jpg", ".jpeg")):
-                        children.append(_file_note(fp))
-                if children:
-                    nested.append({"title": "📂 " + name, "icon": "📂", "children": children})
-            else:
-                if name.endswith(".md") and not (name.startswith("评分-") or name.startswith("背调报告-")):
-                    direct.append(_md_note(p))
-                elif name.lower().endswith((".pdf", ".doc", ".docx", ".png", ".jpg", ".jpeg")):
-                    direct.append(_file_note(p))
-        notes = direct + nested
+        notes = _scan_kb_dir(sp)
         if notes:
             groups.append({"title": "📁 " + sub, "notes": notes})
     return groups
