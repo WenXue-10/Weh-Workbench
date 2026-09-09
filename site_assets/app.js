@@ -516,7 +516,7 @@ function openResume(i){
 var KB_FLAT = [];
 function flattenKb(){
   KB_FLAT = [];
-  var allKbs = [].concat(KBS, BCKBS, CET6KBS, SOPKBS);
+  var allKbs = [].concat(KBS, BCKBS, CET6KBS, SOPKBS, WIKI_AREAS, WIKI_CONCEPTS, WIKI_RESOURCES);
   allKbs.forEach(function(k){
     (k.groups||[{title:"", notes:k.notes||[]}]).forEach(function(g){
       (function walk(ns){ ns.forEach(function(n){ if(n.children){ walk(n.children); } else { KB_FLAT.push(n); } }); })(g.notes||[]);
