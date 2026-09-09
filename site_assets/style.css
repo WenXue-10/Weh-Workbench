@@ -180,7 +180,7 @@ a{color:var(--pink-deep);text-decoration:none}
   .pick-grid{grid-template-columns:repeat(2,1fr)}
 }
 /* ===== 弹窗 ===== */
-.modal-backdrop{position:fixed;inset:0;background:rgba(107,74,94,.45);backdrop-filter:blur(4px);display:none;align-items:flex-end;justify-content:center;z-index:50}
+.modal-backdrop{position:fixed;inset:0;background:rgba(107,74,94,.45);backdrop-filter:blur(4px);display:none;align-items:flex-end;justify-content:center;z-index:200}
 .modal-backdrop.show{display:flex}
 .modal{background:rgba(255,255,255,.97);width:100%;max-width:640px;max-height:88vh;overflow-y:auto;border-radius:28px 28px 0 0;padding:24px 22px 30px;animation:up .28s ease}
 @keyframes up{from{transform:translateY(46px);opacity:0}to{transform:none;opacity:1}}
