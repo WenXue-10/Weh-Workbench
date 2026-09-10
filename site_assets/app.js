@@ -2145,6 +2145,35 @@ function loadJobs(){
   try{ var d = JSON.parse(localStorage.getItem(JOB_KEY)); return d && d.jobs ? d : {jobs:[], logs:[]}; }catch(e){ return {jobs:[], logs:[]}; }
 }
 function saveJobs(data){ markLocalChange(); localStorage.setItem(JOB_KEY, JSON.stringify(data)); }
+var JOB_OVERRIDE_KEY = "weh_job_overrides_v1";
+function loadJobOverrides(){
+  try{ return JSON.parse(localStorage.getItem(JOB_OVERRIDE_KEY)) || {}; }catch(e){ return {}; }
+}
+function saveJobOverrides(o){ markLocalChange(); localStorage.setItem(JOB_OVERRIDE_KEY, JSON.stringify(o)); }
+function jobKey(j){ return (j.company||"") + "||" + (j.pos||j.position||""); }
+function getMergedJobs(){
+  var overrides = loadJobOverrides();
+  var local = loadJobs();
+  var merged = [];
+  // 知识库岗位
+  (JOBS||[]).forEach(function(j){
+    var k = jobKey(j);
+    var status = overrides[k] || j.status;
+    var statusTxt = overrides[k] ? (JOB_STATUS_TEXT[overrides[k]] || j.statusTxt) : j.statusTxt;
+    merged.push(Object.assign({}, j, {status: status, statusTxt: statusTxt, _source: "kb", _key: k}));
+  });
+  // 本地手动添加的岗位
+  (local.jobs||[]).forEach(function(j){
+    merged.push(Object.assign({}, j, {pos: j.position, _source: "local", _key: "local_" + j.id}));
+  });
+  // 按分数降序（手动添加的没有分数排最后）
+  merged.sort(function(a, b){
+    var sa = (typeof a.score === "number") ? a.score : -1;
+    var sb = (typeof b.score === "number") ? b.score : -1;
+    return sb - sa;
+  });
+  return merged;
+}
 function addJob(){
   var company = document.getElementById("jobCompany").value.trim();
   var position = document.getElementById("jobPosition").value.trim();
@@ -2166,12 +2195,30 @@ function updateJobStatus(id, status){
   var job = data.jobs.find(function(j){ return j.id===id; });
   if(job){ job.status = status; saveJobs(data); renderJobs(); renderCareerOverview(); }
 }
+function updateJobStatusByIdx(idx, status){
+  var jobs = getMergedJobs();
+  var j = jobs[idx];
+  if(!j) return;
+  if(j._source === "kb"){
+    var overrides = loadJobOverrides();
+    overrides[j._key] = status;
+    saveJobOverrides(overrides);
+  } else {
+    var data = loadJobs();
+    var job = data.jobs.find(function(x){ return x.id===j.id; });
+    if(job){ job.status = status; saveJobs(data); }
+  }
+  renderJobs();
+  renderCareerOverview();
+  toast("状态已更新");
+}
 function deleteJob(id){
   showConfirm("确定删除这个岗位？").then(function(ok){
     if(!ok) return;
     var data = loadJobs();
     data.jobs = data.jobs.filter(function(j){ return j.id!==id; });
     saveJobs(data); renderJobs(); renderCareerOverview();
+    toast("已删除");
   });
 }
 function editJobLink(id){
@@ -2191,31 +2238,34 @@ function filterJobs(status){
   renderJobs();
 }
 function renderJobs(){
-  var data = loadJobs();
-  var jobs = data.jobs;
+  var jobs = getMergedJobs();
   if(currentJobFilter !== "all") jobs = jobs.filter(function(j){ return j.status===currentJobFilter; });
   var countEl = document.getElementById("jobBoardCount");
-  if(countEl) countEl.textContent = data.jobs.length + " 个岗位";
+  if(countEl) countEl.textContent = jobs.length + " 个岗位";
   var list = document.getElementById("jobList");
   if(!list) return;
-  if(!jobs.length){ list.innerHTML = '<div style="text-align:center;color:var(--muted);padding:30px;font-size:13px">暂无岗位，在上方添加第一个吧～</div>'; return; }
-  list.innerHTML = jobs.map(function(j){
+  if(!jobs.length){ list.innerHTML = '<div style="text-align:center;color:var(--muted);padding:30px;font-size:13px">暂无岗位，知识库更新后自动同步～</div>'; return; }
+  list.innerHTML = jobs.map(function(j, idx){
     var color = JOB_STATUS_COLOR[j.status] || "#6b7280";
+    var posName = j.pos || j.position || "";
+    var scoreBadge = (typeof j.score === "number") ? '<span style="background:rgba(255,208,226,.3);color:var(--pink-deep);padding:1px 6px;border-radius:4px;font-size:11px;font-weight:600">'+j.score+'分</span>' : '';
+    var delBtn = (j._source === "local") ? '<span onclick="deleteJob('+j.id+')" style="font-size:14px;cursor:pointer;color:var(--muted)">🗑️</span>' : '';
+    var linkBtn = j.link ? '<a href="'+esc(j.link)+'" target="_blank" style="font-size:11px;color:var(--pink-deep);text-decoration:none">🔗</a>' : (j._source === "local" ? '<span onclick="editJobLink('+j.id+')" style="font-size:11px;color:var(--muted);cursor:pointer">🔗</span>' : '');
     return '<div class="job-item">'
       +'<div class="job-item-main">'
-        +'<div class="job-item-title">'+esc(j.company)+' · '+esc(j.position)+'</div>'
+        +'<div class="job-item-title">'+esc(j.company)+' · '+esc(posName)+' '+scoreBadge+'</div>'
         +'<div class="job-item-meta">'
+          +(j.city ? '<span>📍 '+esc(j.city)+'</span>' : '')
           +(j.salary ? '<span>💰 '+esc(j.salary)+'</span>' : '')
-          +'<span style="color:'+color+'">'+JOB_STATUS_TEXT[j.status]+'</span>'
-          +'<span style="color:var(--muted)">'+j.createdAt+'</span>'
+          +'<span style="color:'+color+'">'+(j.statusTxt || JOB_STATUS_TEXT[j.status] || j.status)+'</span>'
         +'</div>'
       +'</div>'
       +'<div class="job-item-actions">'
-        +'<select onchange="updateJobStatus('+j.id+', this.value)" style="font-size:11px;padding:3px 6px;border-radius:6px;border:1px solid var(--line)">'
+        +'<select onchange="updateJobStatusByIdx('+idx+', this.value)" style="font-size:11px;padding:3px 6px;border-radius:6px;border:1px solid var(--line)">'
           +Object.keys(JOB_STATUS_TEXT).map(function(k){ return '<option value="'+k+'"'+(k===j.status?' selected':'')+'>'+JOB_STATUS_TEXT[k]+'</option>'; }).join('')
         +'</select>'
-        +(j.link ? '<a href="'+esc(j.link)+'" target="_blank" style="font-size:11px;color:var(--pink-deep);text-decoration:none">🔗</a>' : '<span onclick="editJobLink('+j.id+')" style="font-size:11px;color:var(--muted);cursor:pointer">🔗</span>')
-        +'<span onclick="deleteJob('+j.id+')" style="font-size:14px;cursor:pointer;color:var(--muted)">🗑️</span>'
+        +linkBtn
+        +delBtn
       +'</div>'
     +'</div>';
   }).join("");
@@ -2373,8 +2423,7 @@ function renderCompanies(){
 
 /* ========== 求职作战：首页概览 ========== */
 function renderCareerOverview(){
-  var data = loadJobs();
-  var jobs = data.jobs;
+  var jobs = getMergedJobs();
   var counts = {pending:0, applied:0, interview:0, offer:0};
   jobs.forEach(function(j){ if(counts[j.status] !== undefined) counts[j.status]++; });
   var set = function(id, val){ var el = document.getElementById(id); if(el) el.textContent = val; };
