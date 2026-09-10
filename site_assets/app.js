@@ -2151,6 +2151,7 @@ function loadJobOverrides(){
 }
 function saveJobOverrides(o){ markLocalChange(); localStorage.setItem(JOB_OVERRIDE_KEY, JSON.stringify(o)); }
 function jobKey(j){ return (j.company||"") + "||" + (j.pos||j.position||""); }
+var KB_STATUS_MAP = {ready:"pending", sent:"applied", interview:"interview", offer:"offer", dead:"rejected", backup:"backup", done:"pending", warn:"pending", new:"pending"};
 function getMergedJobs(){
   var overrides = loadJobOverrides();
   var local = loadJobs();
@@ -2158,7 +2159,8 @@ function getMergedJobs(){
   // 知识库岗位
   (JOBS||[]).forEach(function(j){
     var k = jobKey(j);
-    var status = overrides[k] || j.status;
+    var kbStatus = KB_STATUS_MAP[j.status] || j.status || "pending";
+    var status = overrides[k] || kbStatus;
     var statusTxt = overrides[k] ? (JOB_STATUS_TEXT[overrides[k]] || j.statusTxt) : j.statusTxt;
     merged.push(Object.assign({}, j, {status: status, statusTxt: statusTxt, _source: "kb", _key: k}));
   });
@@ -2400,25 +2402,55 @@ function deleteCompany(id){
   });
 }
 function renderCompanies(){
-  var data = loadCompanies();
-  var countEl = document.getElementById("companyCount");
-  if(countEl) countEl.textContent = data.companies.length + " 家";
   var grid = document.getElementById("companyGrid");
   if(!grid) return;
-  if(!data.companies.length){ grid.innerHTML = '<div style="text-align:center;color:var(--muted);padding:30px;font-size:13px">暂无目标公司</div>'; return; }
-  grid.innerHTML = data.companies.map(function(c){
-    return '<div class="company-card">'
-      +'<div class="company-card-head">'
-        +'<div class="company-name">'+esc(c.name)+'</div>'
-        +'<select onchange="updateCompanyStatus('+c.id+', this.value)" style="font-size:11px;padding:3px 6px;border-radius:6px;border:1px solid var(--line)">'
-          +Object.keys(COMPANY_STATUS_TEXT).map(function(k){ return '<option value="'+k+'"'+(k===c.status?' selected':'')+'>'+COMPANY_STATUS_TEXT[k]+'</option>'; }).join('')
-        +'</select>'
-      +'</div>'
-      +(c.industry ? '<div class="company-industry">🏭 '+esc(c.industry)+'</div>' : '')
-      +(c.reason ? '<div class="company-reason">'+esc(c.reason)+'</div>' : '<div class="company-reason" onclick="editCompanyReason('+c.id+')" style="cursor:pointer;color:var(--muted)">+ 添加备注</div>')
-      +'<div class="company-actions"><span onclick="editCompanyReason('+c.id+')" style="cursor:pointer;font-size:12px">✏️ 备注</span><span onclick="deleteCompany('+c.id+')" style="cursor:pointer;font-size:12px;color:var(--muted)">🗑️</span></div>'
-    +'</div>';
-  }).join("");
+  var local = loadCompanies();
+  var kbSections = COMPS || [];
+  var totalCount = 0;
+  kbSections.forEach(function(s){ totalCount += (s.groups||[]).length; });
+  totalCount += (local.companies||[]).length;
+  var countEl = document.getElementById("companyCount");
+  if(countEl) countEl.textContent = totalCount + " 家";
+  if(!kbSections.length && !local.companies.length){
+    grid.innerHTML = '<div style="text-align:center;color:var(--muted);padding:30px;font-size:13px">暂无公司数据，知识库更新后自动同步～</div>';
+    return;
+  }
+  var html = "";
+  // 知识库分组
+  kbSections.forEach(function(sec){
+    if(!sec.groups || !sec.groups.length) return;
+    html += '<div style="margin-bottom:16px"><div style="font-size:13px;font-weight:600;color:var(--pink-deep);margin-bottom:8px;padding-left:4px">'+esc(sec.title)+'（'+sec.groups.length+'家）</div>';
+    html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px">';
+    sec.groups.forEach(function(g){
+      var catColor = {"✅ 已收录":"#10b981","⛔ 不匹配":"#ef4444","⏳ 未启动":"#6b7280","📝 待核实":"#f59e0b","📋 其他":"#6b7280","已排除":"#ef4444"}[g.cat] || "#6b7280";
+      html += '<div style="background:rgba(255,255,255,.6);border:1px solid var(--line);border-radius:10px;padding:10px">'
+        +'<div style="display:flex;justify-content:space-between;align-items:center;gap:6px">'
+          +'<div style="font-size:13px;font-weight:600;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(g.name)+'</div>'
+          +'<span style="font-size:10px;padding:1px 6px;border-radius:4px;background:rgba(0,0,0,.05);color:'+catColor+';white-space:nowrap">'+esc(g.cat)+'</span>'
+        +'</div>'
+        +(g.why ? '<div style="font-size:11px;color:var(--muted);margin-top:4px;line-height:1.4">'+esc(g.why)+'</div>' : '')
+      +'</div>';
+    });
+    html += '</div></div>';
+  });
+  // 本地手动添加的公司
+  if(local.companies && local.companies.length){
+    html += '<div style="margin-bottom:16px"><div style="font-size:13px;font-weight:600;color:var(--pink-deep);margin-bottom:8px;padding-left:4px">📝 我的记录（'+local.companies.length+'家）</div>';
+    html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px">';
+    local.companies.forEach(function(c){
+      var color = {"candidate":"#f59e0b","researched":"#3b82f6","included":"#10b981","rejected":"#ef4444","pending":"#6b7280"}[c.status] || "#6b7280";
+      html += '<div style="background:rgba(255,255,255,.6);border:1px solid var(--line);border-radius:10px;padding:10px">'
+        +'<div style="display:flex;justify-content:space-between;align-items:center;gap:6px">'
+          +'<div style="font-size:13px;font-weight:600;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(c.name)+'</div>'
+          +'<span onclick="deleteCompany('+c.id+')" style="font-size:12px;cursor:pointer;color:var(--muted)">🗑️</span>'
+        +'</div>'
+        +(c.industry ? '<div style="font-size:11px;color:var(--muted);margin-top:2px">🏭 '+esc(c.industry)+'</div>' : '')
+        +(c.reason ? '<div style="font-size:11px;color:var(--muted);margin-top:4px;line-height:1.4">'+esc(c.reason)+'</div>' : '')
+      +'</div>';
+    });
+    html += '</div></div>';
+  }
+  grid.innerHTML = html;
 }
 
 /* ========== 求职作战：首页概览 ========== */
