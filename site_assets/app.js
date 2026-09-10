@@ -2268,9 +2268,19 @@ function renderKbTimeline(){
   var expanded = el.dataset.expanded === "1";
   var showEntries = expanded ? entries : entries.slice(0, 2);
   var listHtml = showEntries.map(function(e){
-    var itemsHtml = e.items.map(function(it){
-      return '<div style="font-size:12px;color:var(--text);line-height:1.6;margin-top:2px">• ' + esc(it).replace(/\*\*/g, '') + '</div>';
-    }).join("");
+    var itemsHtml;
+    if(e.sections && e.sections.length){
+      itemsHtml = e.sections.map(function(sec){
+        var secItems = sec.items.map(function(it){
+          return '<div style="font-size:12px;color:var(--text);line-height:1.6;margin-top:2px">• ' + esc(it).replace(/\*\*/g, '') + '</div>';
+        }).join("");
+        return '<div style="margin-top:6px"><div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:2px">'+esc(sec.title)+'</div>'+secItems+'</div>';
+      }).join("");
+    } else {
+      itemsHtml = e.items.map(function(it){
+        return '<div style="font-size:12px;color:var(--text);line-height:1.6;margin-top:2px">• ' + esc(it).replace(/\*\*/g, '') + '</div>';
+      }).join("");
+    }
     return '<div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-content"><div class="timeline-date">'+e.date+' <span style="color:var(--muted);font-size:11px">'+esc(e.title)+'</span></div>'+itemsHtml+'</div></div>';
   }).join("");
   var toggleBtn = "";

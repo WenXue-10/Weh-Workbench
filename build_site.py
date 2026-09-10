@@ -390,30 +390,53 @@ def scan_timeline():
         return [], []
     text = read(p)
     entries, cur = [], None
+    cur_section = None
     for line in text.splitlines():
         m = re.match(r"^###\s*(\d{4}-\d{2}-\d{2})\s*[（(]?(.*?)[）)]?\s*$", line)
         if m:
-            cur = {"date": m.group(1), "title": m.group(2) or "日报", "items": []}
+            cur = {"date": m.group(1), "title": m.group(2) or "日报", "items": [], "sections": []}
             entries.append(cur)
-        elif line.startswith("- ") and cur:
-            cur["items"].append(line[2:].strip())
-    def _extract_todo(items):
+            cur_section = None
+        elif cur:
+            stripped = line.strip()
+            # 加粗小标题（**xxx** 或 **xxx：**），作为分组标题
+            sec_m = re.match(r"^\*\*(.+?)\*\*\s*[:：]?\s*$", stripped)
+            if sec_m:
+                cur_section = {"title": sec_m.group(1), "items": []}
+                cur["sections"].append(cur_section)
+                cur["items"].append("【" + sec_m.group(1) + "】")
+            # 编号列表（1. 2. 等）
+            elif re.match(r"^\d+\.\s", stripped):
+                if cur_section:
+                    cur_section["items"].append(stripped)
+                cur["items"].append(stripped)
+            # 普通 - 列表
+            elif stripped.startswith("- "):
+                item = stripped[2:].strip()
+                if cur_section:
+                    cur_section["items"].append(item)
+                cur["items"].append(item)
+    def _extract_todo(ent):
         out = []
-        for it in items:
-            # 兼容「待办：」「关键待办：」「**待办**：」「**关键待办**：」等写法
-            m = re.match(r"^\*{0,2}(?:关键)?待办\*{0,2}\s*[:：]\s*(.*)$", it)
-            if m:
-                out += [x.strip() for x in re.split(r"[；;]", m.group(1)) if x.strip()]
+        # 优先从 sections 中找标题含"待办"的分组
+        for sec in ent.get("sections", []):
+            if "待办" in sec["title"]:
+                out += [x.strip() for x in sec["items"] if x.strip()]
+        # 兼容旧格式：items 中「待办：」开头的行
+        if not out:
+            for it in ent["items"]:
+                m = re.match(r"^\*{0,2}(?:关键|今日)?待办\*{0,2}\s*[:：]\s*(.*)$", it)
+                if m:
+                    out += [x.strip() for x in re.split(r"[；;]", m.group(1)) if x.strip()]
         return out
 
     todo = []
     candidates = []
     for ent in entries:
-        t = _extract_todo(ent["items"])
+        t = _extract_todo(ent)
         if t:
             candidates.append((ent["date"], t))
     if candidates:
-        # 取「日期最新」且含待办（含关键待办）的日报，避免合规整改等非任务型条目清空待办
         candidates.sort(key=lambda x: x[0], reverse=True)
         todo = candidates[0][1]
     return entries, todo
