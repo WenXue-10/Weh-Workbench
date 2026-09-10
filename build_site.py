@@ -430,6 +430,8 @@ def scan_timeline():
                     out += [x.strip() for x in re.split(r"[；;]", m.group(1)) if x.strip()]
         return out
 
+    # 按日期降序排列（最新的在最前面），同一天保持原顺序
+    entries.sort(key=lambda x: x["date"], reverse=True)
     todo = []
     candidates = []
     for ent in entries:
