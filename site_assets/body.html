@@ -506,6 +506,12 @@
           <!-- 概览 -->
           <div class="career-sub" id="career-sub-overview">
             <div class="stat-grid">
+              <div class="stat-card p1" onclick="switchCareerSub('jobs')" style="cursor:pointer"><div class="em">📋</div><div class="lab">总岗位</div><div class="num" id="jobTotalCount">0</div></div>
+              <div class="stat-card p2" onclick="switchCareerSub('jobs')" style="cursor:pointer"><div class="em">🚀</div><div class="lab">冲刺档</div><div class="num" id="jobChongciCount">0</div></div>
+              <div class="stat-card p3" onclick="switchCareerSub('jobs')" style="cursor:pointer"><div class="em">✅</div><div class="lab">稳妥档</div><div class="num" id="jobWentuoCount">0</div></div>
+              <div class="stat-card p4" onclick="switchCareerSub('jobs')" style="cursor:pointer"><div class="em">🗂️</div><div class="lab">保底档</div><div class="num" id="jobBaodiCount">0</div></div>
+            </div>
+            <div class="stat-grid" style="margin-top:8px">
               <div class="stat-card p1" onclick="switchCareerSub('jobs')" style="cursor:pointer"><div class="em">📮</div><div class="lab">待投递</div><div class="num" id="jobPendingCount">0</div></div>
               <div class="stat-card p2" onclick="switchCareerSub('jobs')" style="cursor:pointer"><div class="em">📤</div><div class="lab">已投递</div><div class="num" id="jobAppliedCount">0</div></div>
               <div class="stat-card p3" onclick="switchCareerSub('jobs')" style="cursor:pointer"><div class="em">🎤</div><div class="lab">面试中</div><div class="num" id="jobInterviewCount">0</div></div>
@@ -530,6 +536,10 @@
           </div>
           <!-- 岗位看板 -->
           <div class="career-sub" id="career-sub-jobs" style="display:none">
+            <div class="card" id="jobDeadlineCard" style="display:none;margin-bottom:12px">
+              <div class="card-head">⚠️ 即将截止（7天内）<span class="m-count" id="jobDeadlineCount"></span></div>
+              <div class="job-list" id="jobDeadlineList"></div>
+            </div>
             <div class="card">
               <div class="card-head">💼 岗位看板 <span class="m-count" id="jobBoardCount"></span></div>
               <div class="job-add-bar">

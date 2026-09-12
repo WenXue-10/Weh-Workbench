@@ -379,12 +379,22 @@ function fileLinks(j, i){
   return out || '<span style="color:var(--muted)">暂无关联文件</span>';
 }
 function openJob(i){
-  var j = JOBS[i];
+  var allJobs = getMergedJobs();
+  var j = allJobs[i] || JOBS[i];
   var rows = (j.detail||[]).map(function(d){ return "<tr><td>"+esc(d[0])+"</td><td>"+esc(d[2])+" / "+esc(d[1])+"</td></tr>"; }).join("");
   setModal(
     '<h2>'+esc(j.company)+' · '+esc(j.pos)+'</h2>'
     + '<div class="m-sub">📍 '+esc(j.city)+' ｜ 💰 '+esc(j.salary)+' ｜ 🗓 截止 '+esc(j.deadline)+'</div>'
     + '<div class="job-tags"><span class="status '+statusClass(j.status)+'">'+esc(j.statusTxt)+'</span><span class="level">匹配等级 '+esc(j.level)+'</span></div>'
+    + '<div class="m-sec">📋 状态信息</div>'
+    + '<table class="m-table"><tbody>'
+    + '<tr><td>背调状态</td><td>'+esc(j.researchStatus||"—")+'</td></tr>'
+    + '<tr><td>简历状态</td><td>'+esc(j.resumeStatus||"—")+'</td></tr>'
+    + '<tr><td>面试资料</td><td>'+esc(j.interviewStatus||"—")+'</td></tr>'
+    + '<tr><td>公司性质</td><td>'+esc(j.companyType||"—")+'</td></tr>'
+    + '<tr><td>最后更新</td><td>'+esc(j.lastUpdated||"—")+'</td></tr>'
+    + '</tbody></table>'
+    + (j.risk?'<div class="m-sec">⚠️ 风险提示</div><p style="font-size:13px;color:#e67e22">'+esc(j.risk)+'</p>':'')
     + '<div class="m-sec">📄 JD 摘要</div><p style="font-size:13.5px;color:var(--muted)">'+esc(j.summary)+'</p>'
     + '<div class="m-sec">📊 匹配度评分明细</div>'
     + '<table class="m-table"><tbody>'+rows+'<tr style="background:var(--pink-soft)"><td><b>总分</b></td><td><b>'+esc(j.score)+' / 100</b></td></tr></tbody></table>'
@@ -439,11 +449,23 @@ function openJobNote(i, which){
 /* ---------- 公司池 ---------- */
 function renderCompanies(){
   var html = COMPS.map(function(g){
+    var isRecord = g.mode === "record";
     var cards = g.groups.map(function(c){
+      var dateHtml = (isRecord && c.date) ? '<div style="font-size:11px;color:var(--muted);margin-bottom:4px">📅 '+esc(c.date)+'</div>' : '';
+      var whyHtml = '';
+      if(c.why){
+        if(isRecord){
+          // 已考察记录：完整显示结果，不截断
+          whyHtml = '<div style="font-size:12px;color:var(--muted);margin-top:6px;line-height:1.5">'+esc(c.why)+'</div>';
+        } else {
+          whyHtml = '<div class="why" style="margin-top:6px">💡 '+esc(c.why)+'</div>';
+        }
+      }
       return '<div class="cmp-card" onclick="openCmp('+COMPS.indexOf(g)+','+g.groups.indexOf(c)+')">'
+        + dateHtml
         + '<div class="cn">'+esc(c.cat)+'</div><div class="why">'+esc(c.name)+'</div>'
-        + (c.why?'<div class="why" style="margin-top:6px">💡 '+esc(c.why)+'</div>':'')
-        + '<div class="more">点开看理由 →</div></div>';
+        + whyHtml
+        + '<div class="more">'+(isRecord?'查看详情 →':'点开看理由 →')+'</div></div>';
     }).join("");
     return '<div class="cmp-sec"><h3>'+esc(g.title)+'</h3><div class="cmp-grid">'+cards+'</div></div>';
   }).join("");
@@ -2239,30 +2261,87 @@ function filterJobs(status){
   });
   renderJobs();
 }
+function parseDeadline(d){
+  if(!d || d === "未披露" || d === "未确定") return null;
+  // 尝试解析 YYYY-MM-DD 或 YYYY/MM/DD 或 MM-DD
+  var m = d.match(/(\d{4})[-/年](\d{1,2})[-/月](\d{1,2})/);
+  if(m){
+    return new Date(parseInt(m[1]), parseInt(m[2])-1, parseInt(m[3]));
+  }
+  m = d.match(/(\d{1,2})[-/月](\d{1,2})/);
+  if(m){
+    var now = new Date();
+    return new Date(now.getFullYear(), parseInt(m[1])-1, parseInt(m[2]));
+  }
+  return null;
+}
 function renderJobs(){
-  var jobs = getMergedJobs();
+  var allJobs = getMergedJobs();
+  // 即将截止板块（不受筛选影响）
+  var deadlineCard = document.getElementById("jobDeadlineCard");
+  var deadlineList = document.getElementById("jobDeadlineList");
+  var deadlineCount = document.getElementById("jobDeadlineCount");
+  if(deadlineCard && deadlineList){
+    var now = new Date();
+    var sevenDays = new Date(now.getTime() + 7*24*60*60*1000);
+    var deadlineJobs = allJobs.filter(function(j){
+      var dl = parseDeadline(j.deadline);
+      return dl && dl >= now && dl <= sevenDays && j.status !== "rejected" && j.status !== "offer";
+    }).sort(function(a,b){ return parseDeadline(a.deadline) - parseDeadline(b.deadline); });
+    if(deadlineJobs.length){
+      deadlineCard.style.display = "";
+      if(deadlineCount) deadlineCount.textContent = deadlineJobs.length + "个";
+      deadlineList.innerHTML = deadlineJobs.map(function(j){
+        var dl = parseDeadline(j.deadline);
+        var daysLeft = Math.ceil((dl - now) / (24*60*60*1000));
+        var urgency = daysLeft <= 2 ? "#ef4444" : daysLeft <= 4 ? "#f59e0b" : "#3b82f6";
+        var posName = j.pos || j.position || "";
+        return '<div class="job-item">'
+          +'<div class="job-item-main">'
+            +'<div class="job-item-title">'+esc(j.company)+' · '+esc(posName)+'</div>'
+            +'<div class="job-item-meta">'
+              +(j.city ? '<span>📍 '+esc(j.city)+'</span>' : '')
+              +'<span style="color:'+urgency+'">⏰ '+esc(j.deadline)+'（还剩'+daysLeft+'天）</span>'
+            +'</div>'
+          +'</div>'
+        +'</div>';
+      }).join("");
+    } else {
+      deadlineCard.style.display = "";
+      if(deadlineCount) deadlineCount.textContent = "0个";
+      deadlineList.innerHTML = '<div style="text-align:center;color:var(--muted);padding:20px;font-size:12px">✅ 暂无7天内截止的岗位</div>';
+    }
+  }
+  var jobs = allJobs;
   if(currentJobFilter !== "all") jobs = jobs.filter(function(j){ return j.status===currentJobFilter; });
   var countEl = document.getElementById("jobBoardCount");
   if(countEl) countEl.textContent = jobs.length + " 个岗位";
   var list = document.getElementById("jobList");
   if(!list) return;
   if(!jobs.length){ list.innerHTML = '<div style="text-align:center;color:var(--muted);padding:30px;font-size:13px">暂无岗位，知识库更新后自动同步～</div>'; return; }
-  list.innerHTML = jobs.map(function(j, idx){
+  // 按三档分组
+  var chongci = jobs.filter(function(j){ return typeof j.score === "number" && j.score >= 80; });
+  var wentuo = jobs.filter(function(j){ return typeof j.score === "number" && j.score >= 70 && j.score < 80; });
+  var baodi = jobs.filter(function(j){ return typeof j.score === "number" && j.score < 70; });
+  var manual = jobs.filter(function(j){ return typeof j.score !== "number"; });
+  function renderJobItem(j, idx){
     var color = JOB_STATUS_COLOR[j.status] || "#6b7280";
     var posName = j.pos || j.position || "";
     var scoreBadge = (typeof j.score === "number") ? '<span style="background:rgba(255,208,226,.3);color:var(--pink-deep);padding:1px 6px;border-radius:4px;font-size:11px;font-weight:600">'+j.score+'分</span>' : '';
     var delBtn = (j._source === "local") ? '<span onclick="deleteJob('+j.id+')" style="font-size:14px;cursor:pointer;color:var(--muted)">🗑️</span>' : '';
     var linkBtn = j.link ? '<a href="'+esc(j.link)+'" target="_blank" style="font-size:11px;color:var(--pink-deep);text-decoration:none">🔗</a>' : (j._source === "local" ? '<span onclick="editJobLink('+j.id+')" style="font-size:11px;color:var(--muted);cursor:pointer">🔗</span>' : '');
-    return '<div class="job-item">'
+    var deadline = j.deadline && j.deadline !== "未披露" && j.deadline !== "未确定" ? '<span>⏰ '+esc(j.deadline)+'</span>' : '';
+    return '<div class="job-item" style="cursor:pointer" onclick="openJob('+idx+')">'
       +'<div class="job-item-main">'
         +'<div class="job-item-title">'+esc(j.company)+' · '+esc(posName)+' '+scoreBadge+'</div>'
         +'<div class="job-item-meta">'
           +(j.city ? '<span>📍 '+esc(j.city)+'</span>' : '')
           +(j.salary ? '<span>💰 '+esc(j.salary)+'</span>' : '')
+          +deadline
           +'<span style="color:'+color+'">'+(j.statusTxt || JOB_STATUS_TEXT[j.status] || j.status)+'</span>'
         +'</div>'
       +'</div>'
-      +'<div class="job-item-actions">'
+      +'<div class="job-item-actions" onclick="event.stopPropagation()">'
         +'<select onchange="updateJobStatusByIdx('+idx+', this.value)" style="font-size:11px;padding:3px 6px;border-radius:6px;border:1px solid var(--line)">'
           +Object.keys(JOB_STATUS_TEXT).map(function(k){ return '<option value="'+k+'"'+(k===j.status?' selected':'')+'>'+JOB_STATUS_TEXT[k]+'</option>'; }).join('')
         +'</select>'
@@ -2270,7 +2349,24 @@ function renderJobs(){
         +delBtn
       +'</div>'
     +'</div>';
-  }).join("");
+  }
+  function renderGroup(title, items, color){
+    if(!items.length) return '';
+    return '<div style="margin-bottom:16px">'
+      +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;padding-left:4px">'
+        +'<span style="width:4px;height:16px;background:'+color+';border-radius:2px"></span>'
+        +'<span style="font-size:13px;font-weight:600;color:var(--text)">'+title+'</span>'
+        +'<span style="font-size:11px;color:var(--muted)">'+items.length+'个</span>'
+      +'</div>'
+      +items.map(function(j){ return renderJobItem(j, jobs.indexOf(j)); }).join("")
+    +'</div>';
+  }
+  var html = '';
+  html += renderGroup('🚀 冲刺档（≥80分）', chongci, '#f59e0b');
+  html += renderGroup('✅ 稳妥档（70-79分）', wentuo, '#3b82f6');
+  html += renderGroup('🗂️ 保底档（<70分）', baodi, '#6b7280');
+  html += renderGroup('📝 手动添加', manual, '#10b981');
+  list.innerHTML = html;
 }
 
 /* ========== 求职作战：求职日志 ========== */
@@ -2457,8 +2553,20 @@ function renderCompanies(){
 function renderCareerOverview(){
   var jobs = getMergedJobs();
   var counts = {pending:0, applied:0, interview:0, offer:0};
-  jobs.forEach(function(j){ if(counts[j.status] !== undefined) counts[j.status]++; });
+  var tierCounts = {chongci:0, wentuo:0, baodi:0};
+  jobs.forEach(function(j){
+    if(counts[j.status] !== undefined) counts[j.status]++;
+    if(typeof j.score === "number"){
+      if(j.score >= 80) tierCounts.chongci++;
+      else if(j.score >= 70) tierCounts.wentuo++;
+      else tierCounts.baodi++;
+    }
+  });
   var set = function(id, val){ var el = document.getElementById(id); if(el) el.textContent = val; };
+  set("jobTotalCount", jobs.length);
+  set("jobChongciCount", tierCounts.chongci);
+  set("jobWentuoCount", tierCounts.wentuo);
+  set("jobBaodiCount", tierCounts.baodi);
   set("jobPendingCount", counts.pending);
   set("jobAppliedCount", counts.applied);
   set("jobInterviewCount", counts.interview);

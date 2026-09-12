@@ -3,11 +3,12 @@
 # v4优化：彻底去掉git pull，知识库（本地）是唯一源头，只从本地上传到远端，杜绝远端覆盖本地
 
 $ErrorActionPreference = "Continue"
-$vault  = "D:\Obsidian\SCM-Career"
+# 2026-09-12 审计修复：旧值 D:\Obsidian\SCM-Career 已不存在（SCM-Career 已并入 Weh-Brain），改为代码仓库自身路径
+$vault  = "D:\Obsidian\Weh-Workbench"
 $git    = "C:\Users\22814\.cache\codex-runtimes\codex-primary-runtime\dependencies\native\git\cmd\git.exe"
 $gitBin = "C:\Users\22814\.cache\codex-runtimes\codex-primary-runtime\dependencies\native\git\mingw64\bin"
 $py     = "C:\Users\22814\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe"
-$logDir = Join-Path $vault "99_系统与规则\sync_log"
+$logDir = Join-Path $vault "logs\sync"
 $log    = Join-Path $logDir "sync_$(Get-Date -Format 'yyyyMMdd').log"
 $statusFile = Join-Path $vault "LAST_SYNC_STATUS.txt"
 $pidFile = Join-Path $vault ".sync_pid"
