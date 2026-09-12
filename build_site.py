@@ -42,6 +42,9 @@ def strip_fm(text):
     return text[m.end():] if m else text
 
 def parse_fm(text):
+    # 去掉 UTF-8 BOM
+    if text.startswith("\ufeff"):
+        text = text[1:]
     m = re.match(r"^---\s*\n(.*?)\n---", text, re.DOTALL)
     fm = {}
     if m:
@@ -271,6 +274,12 @@ def scan_jobs():
                 "summary": parse_summary(text),
                 "detail": parse_detail_table(text),
                 "note": (parse_note(text) or fm.get("来源", "")),
+                "researchStatus": fm.get("背调状态", "—"),
+                "resumeStatus": fm.get("简历状态", "—"),
+                "interviewStatus": fm.get("面试资料状态", "—"),
+                "lastUpdated": fm.get("最后更新日期", fm.get("更新日期", "—")),
+                "companyType": fm.get("公司性质", "—"),
+                "risk": fm.get("风险提示", ""),
             }
             # 背调报告
             for fn in os.listdir(pp):
@@ -362,7 +371,8 @@ def scan_companies():
                 cur["groups"].append({"cat": cells[0], "name": cells[1], "why": ""})
             elif mode == "record":
                 why = cells[2] if len(cells) >= 3 else ""
-                cur["groups"].append({"cat": _classify_result(why), "name": cells[1], "why": why})
+                date = cells[0] if len(cells) >= 1 else ""
+                cur["groups"].append({"cat": _classify_result(why), "name": cells[1], "why": why, "date": date})
         elif line.startswith("- ") and mode == "exclude":
             body = line[2:].strip()
             m = re.match(r"\*{0,2}(.+?)\*\*\s*(.*)", body)
