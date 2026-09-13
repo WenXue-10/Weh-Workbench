@@ -87,7 +87,7 @@ D:\Obsidian\Weh-Workbench\
 │   ├── sw.js               ← Service Worker模板
 │   └── icons/              ← PWA图标
 ├── build_site.py           ← 核心构建脚本：扫描Weh-Brain知识库 + 注入site_assets → 生成docs/index.html
-├── update_site.ps1         ← 一键同步脚本：拉取→构建→提交→推送
+├── update_site.ps1         ← 本地构建验证脚本（仅本地 build，不提交/不推送，发布由 Actions 负责）
 └── AGENTS.md               ← 本文件
 ```
 
@@ -103,11 +103,13 @@ cd D:\Obsidian\Weh-Workbench
 python build_site.py
 ```
 
-### 一键部署
+### 本地验证与发布（发布由 GitHub Actions 自动完成）
 ```powershell
 cd D:\Obsidian\Weh-Workbench
-.\update_site.ps1
+python build_site.py   # 本地重新生成 docs/ 用于预览，无需提交
 ```
+- **发布**：push 代码/知识库到 GitHub 后，`Build and Deploy` 工作流自动构建并把 `docs/` 部署到 GitHub Pages。**不要手动提交或推送 `docs/`（它是 Actions 的构建产物）。**
+- `update_site.ps1` 仅用于本地一键 build 验证，不再承担提交/推送。
 
 ### 本地预览
 浏览器直接打开 `docs/index.html`

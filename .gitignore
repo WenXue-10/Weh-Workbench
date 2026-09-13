@@ -21,3 +21,6 @@ Thumbs.db
 # 编辑器
 .vscode/
 .idea/
+
+# 构建产物（由 GitHub Actions 自动生成并发布，本地不提交）
+docs/
