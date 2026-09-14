@@ -447,30 +447,6 @@ function openJobNote(i, which){
 }
 
 /* ---------- 公司池 ---------- */
-function renderCompanies(){
-  var html = COMPS.map(function(g){
-    var isRecord = g.mode === "record";
-    var cards = g.groups.map(function(c){
-      var dateHtml = (isRecord && c.date) ? '<div style="font-size:11px;color:var(--muted);margin-bottom:4px">📅 '+esc(c.date)+'</div>' : '';
-      var whyHtml = '';
-      if(c.why){
-        if(isRecord){
-          // 已考察记录：完整显示结果，不截断
-          whyHtml = '<div style="font-size:12px;color:var(--muted);margin-top:6px;line-height:1.5">'+esc(c.why)+'</div>';
-        } else {
-          whyHtml = '<div class="why" style="margin-top:6px">💡 '+esc(c.why)+'</div>';
-        }
-      }
-      return '<div class="cmp-card" onclick="openCmp('+COMPS.indexOf(g)+','+g.groups.indexOf(c)+')">'
-        + dateHtml
-        + '<div class="cn">'+esc(c.cat)+'</div><div class="why">'+esc(c.name)+'</div>'
-        + whyHtml
-        + '<div class="more">'+(isRecord?'查看详情 →':'点开看理由 →')+'</div></div>';
-    }).join("");
-    return '<div class="cmp-sec"><h3>'+esc(g.title)+'</h3><div class="cmp-grid">'+cards+'</div></div>';
-  }).join("");
-  document.getElementById("cmpList").innerHTML = html;
-}
 function openCmp(gi, ci){
   var g = COMPS[gi], c = g.groups[ci];
   var items = [];
@@ -2501,53 +2477,85 @@ function renderCompanies(){
   var grid = document.getElementById("companyGrid");
   if(!grid) return;
   var local = loadCompanies();
-  var kbSections = COMPS || [];
-  var totalCount = 0;
-  kbSections.forEach(function(s){ totalCount += (s.groups||[]).length; });
-  totalCount += (local.companies||[]).length;
+  var sections = [];
+  (COMPS||[]).forEach(function(s){ if(s.groups && s.groups.length) sections.push({title:s.title, kind:"kb", groups:s.groups}); });
+  if(local.companies && local.companies.length){ sections.push({title:"📝 我的记录", kind:"local", groups:local.companies}); }
+  var totalCount = sections.reduce(function(a,s){return a+s.groups.length;},0);
   var countEl = document.getElementById("companyCount");
   if(countEl) countEl.textContent = totalCount + " 家";
-  if(!kbSections.length && !local.companies.length){
+  if(!sections.length){
     grid.innerHTML = '<div style="text-align:center;color:var(--muted);padding:30px;font-size:13px">暂无公司数据，知识库更新后自动同步～</div>';
     return;
   }
-  var html = "";
-  // 知识库分组
-  kbSections.forEach(function(sec){
-    if(!sec.groups || !sec.groups.length) return;
-    html += '<div style="margin-bottom:16px"><div style="font-size:13px;font-weight:600;color:var(--pink-deep);margin-bottom:8px;padding-left:4px">'+esc(sec.title)+'（'+sec.groups.length+'家）</div>';
-    html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px">';
-    sec.groups.forEach(function(g){
-      var catColor = {"✅ 已收录":"#10b981","⛔ 不匹配":"#ef4444","⏳ 未启动":"#6b7280","📝 待核实":"#f59e0b","📋 其他":"#6b7280","已排除":"#ef4444"}[g.cat] || "#6b7280";
-      html += '<div style="background:rgba(255,255,255,.6);border:1px solid var(--line);border-radius:10px;padding:10px">'
-        +'<div style="display:flex;justify-content:space-between;align-items:center;gap:6px">'
-          +'<div style="font-size:13px;font-weight:600;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(g.name)+'</div>'
-          +'<span style="font-size:10px;padding:1px 6px;border-radius:4px;background:rgba(0,0,0,.05);color:'+catColor+';white-space:nowrap">'+esc(g.cat)+'</span>'
-        +'</div>'
-        +(g.why ? '<div style="font-size:11px;color:var(--muted);margin-top:4px;line-height:1.4">'+esc(g.why)+'</div>' : '')
-      +'</div>';
-    });
-    html += '</div></div>';
+  var pills = '<div class="cmpp-pills"><button class="cmpp-pill active" data-sec="all" onclick="filterCmpp(\'all\')">全部 '+totalCount+'</button>';
+  sections.forEach(function(s, i){
+    pills += '<button class="cmpp-pill" data-sec="'+i+'" onclick="filterCmpp('+i+')">'+esc(s.title)+' '+s.groups.length+'</button>';
   });
-  // 本地手动添加的公司
-  if(local.companies && local.companies.length){
-    html += '<div style="margin-bottom:16px"><div style="font-size:13px;font-weight:600;color:var(--pink-deep);margin-bottom:8px;padding-left:4px">📝 我的记录（'+local.companies.length+'家）</div>';
-    html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px">';
-    local.companies.forEach(function(c){
-      var color = {"candidate":"#f59e0b","researched":"#3b82f6","included":"#10b981","rejected":"#ef4444","pending":"#6b7280"}[c.status] || "#6b7280";
-      html += '<div style="background:rgba(255,255,255,.6);border:1px solid var(--line);border-radius:10px;padding:10px">'
-        +'<div style="display:flex;justify-content:space-between;align-items:center;gap:6px">'
-          +'<div style="font-size:13px;font-weight:600;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(c.name)+'</div>'
-          +'<span onclick="deleteCompany('+c.id+')" style="font-size:12px;cursor:pointer;color:var(--muted)">🗑️</span>'
-        +'</div>'
-        +(c.industry ? '<div style="font-size:11px;color:var(--muted);margin-top:2px">🏭 '+esc(c.industry)+'</div>' : '')
-        +(c.reason ? '<div style="font-size:11px;color:var(--muted);margin-top:4px;line-height:1.4">'+esc(c.reason)+'</div>' : '')
-      +'</div>';
-    });
-    html += '</div></div>';
-  }
-  grid.innerHTML = html;
+  pills += '</div>';
+  var html = "";
+  sections.forEach(function(s, i){
+    var collapsed = isCmppCollapsed(i);
+    var cards = s.groups.map(function(g){
+      if(s.kind === "kb"){
+        var catColor = {"✅ 已收录":"#10b981","⛔ 不匹配":"#ef4444","⏳ 未启动":"#6b7280","📝 待核实":"#f59e0b","📋 其他":"#6b7280","已排除":"#ef4444"}[g.cat] || "#6b7280";
+        return '<div class="cmpp-card'+(g.cat==="已排除"?' cmpp-card-excl':'')+'">'
+          +'<div class="cmpp-card-top"><span class="cmpp-name">'+esc(g.name)+'</span><span class="cmpp-cat" style="color:'+catColor+';border-color:'+catColor+'">'+esc(g.cat)+'</span></div>'
+          +(g.why ? '<div class="cmpp-why">'+esc(g.why)+'</div>' : '')
+          +'</div>';
+      }
+      var color = {"candidate":"#f59e0b","researched":"#3b82f6","included":"#10b981","rejected":"#ef4444","pending":"#6b7280"}[g.status] || "#6b7280";
+      var catText = {"candidate":"候选","researched":"已背调","included":"已收录","rejected":"已排除","pending":"待定"}[g.status] || g.status;
+      return '<div class="cmpp-card">'
+        +'<div class="cmpp-card-top"><span class="cmpp-name">'+esc(g.name)+'</span>'
+        +(g.id ? '<span class="cmpp-del" onclick="deleteCompany('+g.id+')">🗑️</span>' : '')
+        +'<span class="cmpp-cat" style="color:'+color+';border-color:'+color+'">'+esc(catText)+'</span></div>'
+        +(g.industry ? '<div class="cmpp-why">🏭 '+esc(g.industry)+'</div>' : '')
+        +(g.reason ? '<div class="cmpp-why">'+esc(g.reason)+'</div>' : '')
+        +'</div>';
+    }).join("");
+    html += '<div class="cmpp-sec" data-sec="'+i+'"'+(s.kind==="local"?' data-kind="local"':'')+'>'
+      +'<div class="cmpp-sec-head" onclick="toggleCmppSec('+i+')">'
+        +'<span class="cmpp-sec-title">'+esc(s.title)+'</span>'
+        +'<span class="cmpp-sec-badge">'+s.groups.length+' 家</span>'
+        +'<span class="cmpp-sec-arrow'+(collapsed?' collapsed':'')+'">▾</span>'
+      +'</div>'
+      +'<div class="cmpp-sec-body" style="display:'+(collapsed?'none':'block')+'"><div class="cmpp-grid">'+cards+'</div></div>'
+    +'</div>';
+  });
+  grid.innerHTML = pills + html;
+  filterCmpp(getCmppActive());
 }
+
+function filterCmpp(sec){
+  var grid = document.getElementById("companyGrid");
+  if(!grid) return;
+  setCmppActive(sec);
+  grid.querySelectorAll(".cmpp-pill").forEach(function(p){ p.classList.toggle("active", p.getAttribute("data-sec")===String(sec)); });
+  grid.querySelectorAll(".cmpp-sec").forEach(function(el){
+    el.style.display = (sec==="all" || el.getAttribute("data-sec")===String(sec)) ? "block" : "none";
+  });
+}
+
+function toggleCmppSec(i){
+  var grid = document.getElementById("companyGrid");
+  if(!grid) return;
+  var body = grid.querySelector('.cmpp-sec[data-sec="'+i+'"] .cmpp-sec-body');
+  var arrow = grid.querySelector('.cmpp-sec[data-sec="'+i+'"] .cmpp-sec-arrow');
+  if(!body) return;
+  var nowCollapsed = body.style.display!=="none";
+  body.style.display = nowCollapsed ? "none" : "block";
+  if(arrow) arrow.classList.toggle("collapsed", nowCollapsed);
+  setCmppCollapsed(i, nowCollapsed);
+}
+
+function _cmppState(){
+  try{ return JSON.parse(localStorage.getItem("cmpp_state")||"{}"); }catch(e){ return {}; }
+}
+function setCmppCollapsed(i, v){ var s=_cmppState(); s.collapsed=s.collapsed||{}; s.collapsed[i]=v; localStorage.setItem("cmpp_state", JSON.stringify(s)); }
+function isCmppCollapsed(i){ var s=_cmppState(); return !!(s.collapsed&&s.collapsed[i]); }
+function setCmppActive(v){ var s=_cmppState(); s.active=v; localStorage.setItem("cmpp_state", JSON.stringify(s)); }
+function getCmppActive(){ var s=_cmppState(); return (s.active===undefined||s.active===null)?"all":s.active; }
+
 
 /* ========== 求职作战：首页概览 ========== */
 function renderCareerOverview(){
