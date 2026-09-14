@@ -244,13 +244,13 @@ a{color:var(--pink-deep);text-decoration:none}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 /* ===== 小动画 ===== */
 @keyframes pop{from{opacity:0;transform:translateY(16px) scale(.96)}to{opacity:1;transform:none}}
-.stat-card,.job-card,.cmp-card,.kb-card,.resume-card,.tl-card,.quick-grid a{animation:pop .5s cubic-bezier(.34,1.56,.64,1) both}
+.stat-card,.job-card,.kb-card,.resume-card,.tl-card,.quick-grid a{animation:pop .5s cubic-bezier(.34,1.56,.64,1) both}
 .stat-card:nth-child(2){animation-delay:.06s}
 .stat-card:nth-child(3){animation-delay:.12s}
 .stat-card:nth-child(4){animation-delay:.18s}
-.cmp-card:nth-child(2){animation-delay:.05s}
-.cmp-card:nth-child(3){animation-delay:.10s}
-.cmp-card:nth-child(4){animation-delay:.15s}
+
+
+
 .kb-card:nth-child(2){animation-delay:.04s}
 .kb-card:nth-child(3){animation-delay:.08s}
 .kb-card:nth-child(4){animation-delay:.12s}
@@ -287,7 +287,7 @@ a{color:var(--pink-deep);text-decoration:none}
 /* 弹窗内容弹入 */
 .modal .m-sec{animation:pop .4s ease both}
 @media (prefers-reduced-motion: reduce){
-  .stat-card,.job-card,.cmp-card,.kb-card,.resume-card,.tl-card,.quick-grid a{animation:none}
+  .stat-card,.job-card,.kb-card,.resume-card,.tl-card,.quick-grid a{animation:none}
   .logo .icon,.sync .dot,#floats span{animation:none}
 }
 /* ===== 响应式 ===== */
@@ -302,7 +302,7 @@ a{color:var(--pink-deep);text-decoration:none}
   .stat-grid{grid-template-columns:repeat(2,1fr);gap:10px}
   .two-col{grid-template-columns:1fr}
   .quick-grid{grid-template-columns:repeat(2,1fr)}
-  .cmp-grid{grid-template-columns:1fr}
+  .cmpp-grid{grid-template-columns:1fr 1fr}
   .kb-grid{grid-template-columns:1fr}
   .resume-list{grid-template-columns:1fr}
   .job-card{padding:14px}
@@ -1424,6 +1424,29 @@ body.sop-active .sub-tab-bar{display:flex}
   font-size:12px;cursor:pointer;
   display:flex;align-items:center;justify-content:center;
 }
+/* 目标公司池（方案C：分区全宽 + 卡片自适应 + 顶部pill切换 + 分区折叠记忆） */
+.company-pool{display:block}
+.cmpp-pills{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.cmpp-pill{font:inherit;font-size:12.5px;padding:6px 14px;border-radius:20px;border:1px solid var(--line);background:rgba(255,255,255,.6);color:var(--muted);cursor:pointer;transition:.15s}
+.cmpp-pill:hover{border-color:#ffc4da;color:var(--text)}
+.cmpp-pill.active{background:var(--pink-deep);color:#fff;border-color:var(--pink-deep)}
+.cmpp-sec{margin-bottom:16px;background:rgba(255,255,255,.45);border:1px solid var(--line);border-radius:16px;padding:12px 14px;overflow:hidden}
+.cmpp-sec[data-kind="local"]{background:rgba(255,255,255,.6)}
+.cmpp-sec-head{display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;padding:2px 2px}
+.cmpp-sec-title{font-size:14px;font-weight:700;color:var(--pink-deep);flex:1;min-width:0}
+.cmpp-sec-badge{font-size:11px;color:var(--muted);background:rgba(0,0,0,.05);padding:2px 8px;border-radius:10px;white-space:nowrap}
+.cmpp-sec-arrow{font-size:12px;color:var(--muted);transition:transform .2s;flex-shrink:0}
+.cmpp-sec-arrow.collapsed{transform:rotate(-90deg)}
+.cmpp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px;margin-top:12px}
+.cmpp-card{background:rgba(255,255,255,.85);border:1px solid var(--line);border-radius:12px;padding:12px;box-shadow:var(--shadow-sm);transition:.15s}
+.cmpp-card:hover{transform:translateY(-2px);border-color:#ffc4da}
+.cmpp-card-excl{background:rgba(254,242,242,.7);border-color:rgba(239,68,68,.25)}
+.cmpp-card-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.cmpp-name{font-size:13.5px;font-weight:700;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cmpp-cat{font-size:10px;padding:1px 7px;border-radius:5px;border:1px solid;background:rgba(255,255,255,.6);white-space:nowrap;flex-shrink:0}
+.cmpp-del{font-size:12px;cursor:pointer;color:var(--muted);flex-shrink:0}
+.cmpp-why{font-size:11.5px;color:var(--muted);margin-top:6px;line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+@media(max-width:820px){ .cmpp-grid{grid-template-columns:1fr 1fr} }
 
 </style>
 </head>
@@ -2012,7 +2035,7 @@ body.sop-active .sub-tab-bar{display:flex}
                 </select>
                 <button onclick="addCompany()">➕ 添加</button>
               </div>
-              <div class="company-grid" id="companyGrid"></div>
+              <div class="company-pool" id="companyGrid"></div>
             </div>
           </div>
           <!-- 简历库 -->
@@ -3502,7 +3525,7 @@ body.sop-active .sub-tab-bar{display:flex}
 
 <script>
 window.SITE_DATA = {
- "updated": "2026-09-14 17:50",
+ "updated": "2026-09-14 18:25",
  "stats": {
   "jobs": 32,
   "rec": 0,
@@ -6073,7 +6096,7 @@ window.SITE_DATA = {
       {
        "title": "周复盘-2026-W38",
        "icon": "📄",
-       "html": "<h1>周复盘 · 2026-W38（2026-09-14 ~ 09-20）</h1>\n<h2>一、本周概览</h2>\n<ul>\n<li><strong>核心动作</strong>：执行 Skill 6 两层流程（岗位存量巡检 + 周复盘）</li>\n<li><strong>巡检结果</strong>：32 岗全量核查，<code>audit_jobs.py</code> 审计 <strong>0 问题</strong>；京东家电降红线；31 岗维持 L1；L2/L3 除京东家电外均为 0</li>\n<li><strong>链接核查</strong>：✅ 有效 11 / ⚠️ 待人工核实 21（其中 13 个用户已选「现在打开逐个登录核查」）</li>\n<li><strong>知识库维护</strong>：32 岗 frontmatter 统一写入「最后检查日期=2026-09-14」「链接有效性」，比亚迪-供应链计划补「投递截止=2026-11-19」</li>\n</ul>\n<h2>二、岗位状态变化报告</h2>\n<ul>\n<li><strong>状态变动（1 个）</strong>：京东家电家居供应链管培生 <code>🆕 新收录</code> → <code>❌ 淘汰（红线）</code>（画像一票排除）</li>\n<li><strong>frontmatter 一致性</strong>：32 岗全部补齐巡检字段；分档 冲刺 8 / 稳妥 17 / 保底 7 未变</li>\n<li><strong>分组快照</strong>：L1 在招组 31（已背调 12 / 待投递 12 / 新收录 3 / 备选 4）、L2 跟踪组 0、L3 终态组 1</li>\n</ul>\n<h2>三、无效岗位归档</h2>\n<ul>\n<li><strong>本周归档 1 个</strong>：京东家电家居供应链管培生（❌ 淘汰红线，画像一票排除）</li>\n<li><strong>说明</strong>：非链接失效归档，属主状态判定淘汰；L3 终态组现仅此 1 个</li>\n</ul>\n<h2>四、本周进展</h2>\n<ul>\n<li><strong>投递</strong>：本周未投递任何岗位（用户确认）</li>\n<li><strong>面试 / Offer</strong>：无</li>\n<li><strong>简历定制</strong>：完成百事集团供应链管理培训生定制简历（Skill 3，已 commit）</li>\n<li><strong>背调</strong>：无新增</li>\n<li><strong>巡检 / 维护</strong>：完成 32 岗 frontmatter 一致性更新 + 审计清零</li>\n</ul>\n<h2>五、问题分析</h2>\n<ul>\n<li><strong>问题1（链接核验阻塞）</strong>：21 个待人工核实——13 个需登录平台、7 个需 JS 门户登录、1 个已红线。自动化无法绕过登录，依赖用户交互。</li>\n<li><strong>问题2（投递启动滞后）</strong>：待投递组 12 个简历✅背调✅，却因链接未核验 + 用户未启动而 0 投递；联合利华(10-12)、百事(10-18)、沃尔玛(10-18) 截止临近。</li>\n<li><strong>问题3（简历缺口）</strong>：已背调组 8 个外企（万辰/丹纳赫/亿滋/元气森林/玛氏/百威/联合利华/达能）简历 ❌未定制，距投递还差简历环节。</li>\n<li><strong>根因</strong>：本周重心在巡检与百事简历，投递动作未排期执行。</li>\n</ul>\n<h2>六、下周计划</h2>\n<ul>\n<li><strong>投递优先（截止临近）</strong>：百事(10-18)、沃尔玛(10-18)、比亚迪-供应链计划(11-19) — 待链接核验通过后立即投递</li>\n<li><strong>简历定制优先</strong>：联合利华(10-12 截止，最紧急) → 丹纳赫 / 亿滋 / 元气森林 / 玛氏 / 百威 / 达能</li>\n<li><strong>链接核验</strong>：完成 13 登录平台 + 7 JS 门户人工核验</li>\n<li><strong>半亩花田 / 海信</strong>：登录官网确认在招状态，决定是否推进</li>\n</ul>\n<h2>七、行动项清单</h2>\n<table>\n<thead>\n<tr>\n<th style=\"text-align: left;\">#</th>\n<th style=\"text-align: left;\">行动</th>\n<th style=\"text-align: left;\">优先级</th>\n<th style=\"text-align: left;\">建议截止</th>\n<th style=\"text-align: left;\">负责</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td style=\"text-align: left;\">1</td>\n<td style=\"text-align: left;\">登录核验 13 个登录平台链接</td>\n<td style=\"text-align: left;\">高</td>\n<td style=\"text-align: left;\">本周</td>\n<td style=\"text-align: left;\">用户</td>\n</tr>\n<tr>\n<td style=\"text-align: left;\">2</td>\n<td style=\"text-align: left;\">登录核验 7 个 JS 门户链接</td>\n<td style=\"text-align: left;\">中</td>\n<td style=\"text-align: left;\">本周</td>\n<td style=\"text-align: left;\">用户</td>\n</tr>\n<tr>\n<td style=\"text-align: left;\">3</td>\n<td style=\"text-align: left;\">定制联合利华简历（10-12 截止）</td>\n<td style=\"text-align: left;\">高</td>\n<td style=\"text-align: left;\">09-20 前</td>\n<td style=\"text-align: left;\">文雪 + Agent</td>\n</tr>\n<tr>\n<td style=\"text-align: left;\">4</td>\n<td style=\"text-align: left;\">投递百事 / 沃尔玛（10-18）</td>\n<td style=\"text-align: left;\">高</td>\n<td style=\"text-align: left;\">链接核验后</td>\n<td style=\"text-align: left;\">文雪</td>\n</tr>\n<tr>\n<td style=\"text-align: left;\">5</td>\n<td style=\"text-align: left;\">定制丹纳赫 / 亿滋 / 元气森林 / 玛氏 / 百威 / 达能 简历</td>\n<td style=\"text-align: left;\">中</td>\n<td style=\"text-align: left;\">10 月初</td>\n<td style=\"text-align: left;\">文雪 + Agent</td>\n</tr>\n<tr>\n<td style=\"text-align: left;\">6</td>\n<td style=\"text-align: left;\">投递比亚迪-供应链计划（11-19）</td>\n<td style=\"text-align: left;\">中</td>\n<td style=\"text-align: left;\">链接核验后</td>\n<td style=\"text-align: left;\">文雪</td>\n</tr>\n</tbody>\n</table>",
+       "html": "<h1>周复盘 · 2026-W38（2026-09-14 ~ 09-20）</h1>\n<h2>一、本周概览</h2>\n<ul>\n<li><strong>核心动作</strong>：执行 Skill 6 两层流程（岗位存量巡检 + 周复盘）</li>\n<li><strong>巡检结果</strong>：32 岗全量核查，<code>audit_jobs.py</code> 审计 <strong>0 问题</strong>；京东家电降红线；31 岗维持 L1；L2/L3 除京东家电外均为 0</li>\n<li><strong>链接核查</strong>：✅ 有效 21 / ⚠️ 待人工核实 11（3 登录墙 + 7 JS 门户待本机登录确认；Moka×7 + 小米/欧莱雅/山东北辰 已公开核验转有效）</li>\n<li><strong>知识库维护</strong>：32 岗 frontmatter 统一写入「最后检查日期=2026-09-14」「链接有效性」，比亚迪-供应链计划补「投递截止=2026-11-19」</li>\n</ul>\n<h2>二、岗位状态变化报告</h2>\n<ul>\n<li><strong>状态变动（1 个）</strong>：京东家电家居供应链管培生 <code>🆕 新收录</code> → <code>❌ 淘汰（红线）</code>（画像一票排除）</li>\n<li><strong>frontmatter 一致性</strong>：32 岗全部补齐巡检字段；分档 冲刺 8 / 稳妥 17 / 保底 7 未变</li>\n<li><strong>分组快照</strong>：L1 在招组 31（已背调 12 / 待投递 12 / 新收录 3 / 备选 4）、L2 跟踪组 0、L3 终态组 1</li>\n</ul>\n<h2>三、无效岗位归档</h2>\n<ul>\n<li><strong>本周归档 1 个</strong>：京东家电家居供应链管培生（❌ 淘汰红线，画像一票排除）</li>\n<li><strong>说明</strong>：非链接失效归档，属主状态判定淘汰；L3 终态组现仅此 1 个</li>\n</ul>\n<h2>四、本周进展</h2>\n<ul>\n<li><strong>投递</strong>：本周未投递任何岗位（用户确认）</li>\n<li><strong>面试 / Offer</strong>：无</li>\n<li><strong>简历定制</strong>：完成百事集团供应链管理培训生定制简历（Skill 3，已 commit）</li>\n<li><strong>背调</strong>：无新增</li>\n<li><strong>巡检 / 维护</strong>：完成 32 岗 frontmatter 一致性更新 + 审计清零</li>\n</ul>\n<h2>五、问题分析</h2>\n<ul>\n<li><strong>问题1（链接核验阻塞）</strong>：11 个待人工核实——3 个需登录平台（BOSS×2 + 比亚迪官网 JS）、7 个需 JS 门户、1 个已红线。自动化无法绕过登录，依赖用户交互。</li>\n<li><strong>问题2（投递启动滞后）</strong>：待投递组 12 个简历✅背调✅，却因链接未核验 + 用户未启动而 0 投递；联合利华(10-12)、百事(10-18)、沃尔玛(10-18) 截止临近。</li>\n<li><strong>问题3（简历缺口）</strong>：已背调组 8 个外企（万辰/丹纳赫/亿滋/元气森林/玛氏/百威/联合利华/达能）简历 ❌未定制，距投递还差简历环节。</li>\n<li><strong>根因</strong>：本周重心在巡检与百事简历，投递动作未排期执行。</li>\n</ul>\n<h2>六、下周计划</h2>\n<ul>\n<li><strong>投递优先（截止临近）</strong>：百事(10-18)、沃尔玛(10-18)、比亚迪-供应链计划(11-19) — 待链接核验通过后立即投递</li>\n<li><strong>简历定制优先</strong>：联合利华(10-12 截止，最紧急) → 丹纳赫 / 亿滋 / 元气森林 / 玛氏 / 百威 / 达能</li>\n<li><strong>链接核验</strong>：完成 3 登录平台（万辰/京东数据分析 BOSS、比亚迪-计划专员 官网）+ 7 JS 门户人工核验</li>\n<li><strong>半亩花田 / 海信</strong>：登录官网确认在招状态，决定是否推进</li>\n</ul>\n<h2>七、行动项清单</h2>\n<table>\n<thead>\n<tr>\n<th style=\"text-align: left;\">#</th>\n<th style=\"text-align: left;\">行动</th>\n<th style=\"text-align: left;\">优先级</th>\n<th style=\"text-align: left;\">建议截止</th>\n<th style=\"text-align: left;\">负责</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td style=\"text-align: left;\">1</td>\n<td style=\"text-align: left;\">登录核验 3 个登录平台链接（万辰/京东数据分析 BOSS、比亚迪-计划专员 官网）</td>\n<td style=\"text-align: left;\">高</td>\n<td style=\"text-align: left;\">本周</td>\n<td style=\"text-align: left;\">用户</td>\n</tr>\n<tr>\n<td style=\"text-align: left;\">2</td>\n<td style=\"text-align: left;\">登录核验 7 个 JS 门户链接</td>\n<td style=\"text-align: left;\">中</td>\n<td style=\"text-align: left;\">本周</td>\n<td style=\"text-align: left;\">用户</td>\n</tr>\n<tr>\n<td style=\"text-align: left;\">3</td>\n<td style=\"text-align: left;\">定制联合利华简历（10-12 截止）</td>\n<td style=\"text-align: left;\">高</td>\n<td style=\"text-align: left;\">09-20 前</td>\n<td style=\"text-align: left;\">文雪 + Agent</td>\n</tr>\n<tr>\n<td style=\"text-align: left;\">4</td>\n<td style=\"text-align: left;\">投递百事 / 沃尔玛（10-18）</td>\n<td style=\"text-align: left;\">高</td>\n<td style=\"text-align: left;\">链接核验后</td>\n<td style=\"text-align: left;\">文雪</td>\n</tr>\n<tr>\n<td style=\"text-align: left;\">5</td>\n<td style=\"text-align: left;\">定制丹纳赫 / 亿滋 / 元气森林 / 玛氏 / 百威 / 达能 简历</td>\n<td style=\"text-align: left;\">中</td>\n<td style=\"text-align: left;\">10 月初</td>\n<td style=\"text-align: left;\">文雪 + Agent</td>\n</tr>\n<tr>\n<td style=\"text-align: left;\">6</td>\n<td style=\"text-align: left;\">投递比亚迪-供应链计划（11-19）</td>\n<td style=\"text-align: left;\">中</td>\n<td style=\"text-align: left;\">链接核验后</td>\n<td style=\"text-align: left;\">文雪</td>\n</tr>\n</tbody>\n</table>",
        "fm": {
         "tags": "[周复盘, Skill6, 2026-W38]",
         "周期": "2026-W38",
@@ -6899,7 +6922,7 @@ window.SITE_DATA = {
             "原始材料": "",
             "背调报告": "[[背调报告-博西家电(BSH)-产品管理实习生（济南）]]",
             "定制简历": "[[文雪_山东大学_博西家电(BSH)_产品管理实习生（济南）]]",
-            "链接有效性": "⚠️ 待人工核实",
+            "链接有效性": "✅ 有效（Moka 公开招聘页可访问，2027 校招/社招在招，2026-09-14 WebFetch 核验）",
             "最后检查日期": "2026-09-14",
             "最后更新日期": "2026-09-12"
            }
@@ -6954,7 +6977,7 @@ window.SITE_DATA = {
             "原始材料": "",
             "背调报告": "[[背调报告-博西家电(BSH)-数据分析实习生-浙江（杭州）]]",
             "定制简历": "[[文雪_山东大学_博西家电(BSH)_数据分析实习生-浙江（杭州）]]",
-            "链接有效性": "⚠️ 待人工核实",
+            "链接有效性": "✅ 有效（Moka 公开招聘页可访问，2027 校招/社招在招，2026-09-14 WebFetch 核验）",
             "最后检查日期": "2026-09-14",
             "最后更新日期": "2026-09-12"
            }
@@ -7009,7 +7032,7 @@ window.SITE_DATA = {
             "原始材料": "",
             "背调报告": "[[背调报告-博西家电(BSH)-数据分析实习生（南京）]]",
             "定制简历": "[[文雪_山东大学_博西家电(BSH)_数据分析实习生（南京）]]",
-            "链接有效性": "⚠️ 待人工核实",
+            "链接有效性": "✅ 有效（Moka 公开招聘页可访问，2027 校招/社招在招，2026-09-14 WebFetch 核验）",
             "最后检查日期": "2026-09-14",
             "最后更新日期": "2026-09-12"
            }
@@ -7064,7 +7087,7 @@ window.SITE_DATA = {
             "原始材料": "",
             "背调报告": "[[背调报告-博西家电(BSH)-采购实习生-塑料部件分析（南京）]]",
             "定制简历": "[[文雪_山东大学_博西家电(BSH)_采购实习生-塑料部件分析（南京）]]",
-            "链接有效性": "⚠️ 待人工核实",
+            "链接有效性": "✅ 有效（Moka 公开招聘页可访问，2027 校招/社招在招，2026-09-14 WebFetch 核验）",
             "最后检查日期": "2026-09-14",
             "最后更新日期": "2026-09-12"
            }
@@ -7119,7 +7142,7 @@ window.SITE_DATA = {
             "原始材料": "",
             "背调报告": "[[背调报告-博西家电(BSH)-采购实习生-电子件采购（南京）]]",
             "定制简历": "[[文雪_山东大学_博西家电(BSH)_采购实习生-电子件采购（南京）]]",
-            "链接有效性": "⚠️ 待人工核实",
+            "链接有效性": "✅ 有效（Moka 公开招聘页可访问，2027 校招/社招在招，2026-09-14 WebFetch 核验）",
             "最后检查日期": "2026-09-14",
             "最后更新日期": "2026-09-12"
            }
@@ -7174,7 +7197,7 @@ window.SITE_DATA = {
             "原始材料": "",
             "背调报告": "[[背调报告-博西家电(BSH)-采购实习生-项目采购与AI工具开发（南京）]]",
             "定制简历": "[[文雪_山东大学_博西家电(BSH)_采购实习生-项目采购与AI工具开发（南京）]]",
-            "链接有效性": "⚠️ 待人工核实",
+            "链接有效性": "✅ 有效（Moka 公开招聘页可访问，2027 校招/社招在招，2026-09-14 WebFetch 核验）",
             "最后检查日期": "2026-09-14",
             "最后更新日期": "2026-09-12"
            }
@@ -7235,7 +7258,7 @@ window.SITE_DATA = {
             "背调报告": "[[背调报告-小米-采购计划专员实习生（北京）]]",
             "定制简历": "[[文雪_山东大学_小米_采购计划专员实习生（北京）]]",
             "来源": "实习僧（shixiseng.com）",
-            "链接有效性": "⚠️ 待人工核实",
+            "链接有效性": "✅ 有效",
             "最后检查日期": "2026-09-14",
             "最后更新日期": "2026-09-12",
             "原始材料": "[[JD-小米-采购计划专员实习生（北京）-2026-08-27]]"
@@ -7299,7 +7322,7 @@ window.SITE_DATA = {
             "原始材料": "",
             "背调报告": "[[背调报告-山东北辰机电-供应链实习生（供应链管理）]]",
             "定制简历": "[[文雪_山东大学_山东北辰机电_供应链实习生（供应链管理）]]",
-            "链接有效性": "⚠️ 待人工核实",
+            "链接有效性": "✅ 有效",
             "最后检查日期": "2026-09-14",
             "最后更新日期": "2026-09-12"
            }
@@ -7423,7 +7446,7 @@ window.SITE_DATA = {
             "背调报告": "[[背调报告-欧莱雅-采购实习生（上海）]]",
             "定制简历": "[[文雪_山东大学_欧莱雅_采购实习生（上海）]]",
             "来源": "实习僧（shixiseng.com）",
-            "链接有效性": "⚠️ 待人工核实",
+            "链接有效性": "✅ 有效",
             "最后检查日期": "2026-09-14",
             "最后更新日期": "2026-09-12",
             "原始材料": "[[JD-欧莱雅-采购实习生（上海）-2026-08-27]]"
@@ -7866,7 +7889,7 @@ window.SITE_DATA = {
             "下次跟进时间": "null",
             "原始材料": "null",
             "来源": "企业官方招聘平台（Moka）",
-            "链接有效性": "⚠️ 待人工核实",
+            "链接有效性": "✅ 有效（Moka 公开招聘页可访问，2027 校招/社招在招，2026-09-14 WebFetch 核验）",
             "最后检查日期": "2026-09-14",
             "最后更新日期": "2026-09-12"
            }
@@ -12278,30 +12301,6 @@ function openJobNote(i, which){
 }
 
 /* ---------- 公司池 ---------- */
-function renderCompanies(){
-  var html = COMPS.map(function(g){
-    var isRecord = g.mode === "record";
-    var cards = g.groups.map(function(c){
-      var dateHtml = (isRecord && c.date) ? '<div style="font-size:11px;color:var(--muted);margin-bottom:4px">📅 '+esc(c.date)+'</div>' : '';
-      var whyHtml = '';
-      if(c.why){
-        if(isRecord){
-          // 已考察记录：完整显示结果，不截断
-          whyHtml = '<div style="font-size:12px;color:var(--muted);margin-top:6px;line-height:1.5">'+esc(c.why)+'</div>';
-        } else {
-          whyHtml = '<div class="why" style="margin-top:6px">💡 '+esc(c.why)+'</div>';
-        }
-      }
-      return '<div class="cmp-card" onclick="openCmp('+COMPS.indexOf(g)+','+g.groups.indexOf(c)+')">'
-        + dateHtml
-        + '<div class="cn">'+esc(c.cat)+'</div><div class="why">'+esc(c.name)+'</div>'
-        + whyHtml
-        + '<div class="more">'+(isRecord?'查看详情 →':'点开看理由 →')+'</div></div>';
-    }).join("");
-    return '<div class="cmp-sec"><h3>'+esc(g.title)+'</h3><div class="cmp-grid">'+cards+'</div></div>';
-  }).join("");
-  document.getElementById("cmpList").innerHTML = html;
-}
 function openCmp(gi, ci){
   var g = COMPS[gi], c = g.groups[ci];
   var items = [];
@@ -14332,53 +14331,85 @@ function renderCompanies(){
   var grid = document.getElementById("companyGrid");
   if(!grid) return;
   var local = loadCompanies();
-  var kbSections = COMPS || [];
-  var totalCount = 0;
-  kbSections.forEach(function(s){ totalCount += (s.groups||[]).length; });
-  totalCount += (local.companies||[]).length;
+  var sections = [];
+  (COMPS||[]).forEach(function(s){ if(s.groups && s.groups.length) sections.push({title:s.title, kind:"kb", groups:s.groups}); });
+  if(local.companies && local.companies.length){ sections.push({title:"📝 我的记录", kind:"local", groups:local.companies}); }
+  var totalCount = sections.reduce(function(a,s){return a+s.groups.length;},0);
   var countEl = document.getElementById("companyCount");
   if(countEl) countEl.textContent = totalCount + " 家";
-  if(!kbSections.length && !local.companies.length){
+  if(!sections.length){
     grid.innerHTML = '<div style="text-align:center;color:var(--muted);padding:30px;font-size:13px">暂无公司数据，知识库更新后自动同步～</div>';
     return;
   }
-  var html = "";
-  // 知识库分组
-  kbSections.forEach(function(sec){
-    if(!sec.groups || !sec.groups.length) return;
-    html += '<div style="margin-bottom:16px"><div style="font-size:13px;font-weight:600;color:var(--pink-deep);margin-bottom:8px;padding-left:4px">'+esc(sec.title)+'（'+sec.groups.length+'家）</div>';
-    html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px">';
-    sec.groups.forEach(function(g){
-      var catColor = {"✅ 已收录":"#10b981","⛔ 不匹配":"#ef4444","⏳ 未启动":"#6b7280","📝 待核实":"#f59e0b","📋 其他":"#6b7280","已排除":"#ef4444"}[g.cat] || "#6b7280";
-      html += '<div style="background:rgba(255,255,255,.6);border:1px solid var(--line);border-radius:10px;padding:10px">'
-        +'<div style="display:flex;justify-content:space-between;align-items:center;gap:6px">'
-          +'<div style="font-size:13px;font-weight:600;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(g.name)+'</div>'
-          +'<span style="font-size:10px;padding:1px 6px;border-radius:4px;background:rgba(0,0,0,.05);color:'+catColor+';white-space:nowrap">'+esc(g.cat)+'</span>'
-        +'</div>'
-        +(g.why ? '<div style="font-size:11px;color:var(--muted);margin-top:4px;line-height:1.4">'+esc(g.why)+'</div>' : '')
-      +'</div>';
-    });
-    html += '</div></div>';
+  var pills = '<div class="cmpp-pills"><button class="cmpp-pill active" data-sec="all" onclick="filterCmpp(\'all\')">全部 '+totalCount+'</button>';
+  sections.forEach(function(s, i){
+    pills += '<button class="cmpp-pill" data-sec="'+i+'" onclick="filterCmpp('+i+')">'+esc(s.title)+' '+s.groups.length+'</button>';
   });
-  // 本地手动添加的公司
-  if(local.companies && local.companies.length){
-    html += '<div style="margin-bottom:16px"><div style="font-size:13px;font-weight:600;color:var(--pink-deep);margin-bottom:8px;padding-left:4px">📝 我的记录（'+local.companies.length+'家）</div>';
-    html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px">';
-    local.companies.forEach(function(c){
-      var color = {"candidate":"#f59e0b","researched":"#3b82f6","included":"#10b981","rejected":"#ef4444","pending":"#6b7280"}[c.status] || "#6b7280";
-      html += '<div style="background:rgba(255,255,255,.6);border:1px solid var(--line);border-radius:10px;padding:10px">'
-        +'<div style="display:flex;justify-content:space-between;align-items:center;gap:6px">'
-          +'<div style="font-size:13px;font-weight:600;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(c.name)+'</div>'
-          +'<span onclick="deleteCompany('+c.id+')" style="font-size:12px;cursor:pointer;color:var(--muted)">🗑️</span>'
-        +'</div>'
-        +(c.industry ? '<div style="font-size:11px;color:var(--muted);margin-top:2px">🏭 '+esc(c.industry)+'</div>' : '')
-        +(c.reason ? '<div style="font-size:11px;color:var(--muted);margin-top:4px;line-height:1.4">'+esc(c.reason)+'</div>' : '')
-      +'</div>';
-    });
-    html += '</div></div>';
-  }
-  grid.innerHTML = html;
+  pills += '</div>';
+  var html = "";
+  sections.forEach(function(s, i){
+    var collapsed = isCmppCollapsed(i);
+    var cards = s.groups.map(function(g){
+      if(s.kind === "kb"){
+        var catColor = {"✅ 已收录":"#10b981","⛔ 不匹配":"#ef4444","⏳ 未启动":"#6b7280","📝 待核实":"#f59e0b","📋 其他":"#6b7280","已排除":"#ef4444"}[g.cat] || "#6b7280";
+        return '<div class="cmpp-card'+(g.cat==="已排除"?' cmpp-card-excl':'')+'">'
+          +'<div class="cmpp-card-top"><span class="cmpp-name">'+esc(g.name)+'</span><span class="cmpp-cat" style="color:'+catColor+';border-color:'+catColor+'">'+esc(g.cat)+'</span></div>'
+          +(g.why ? '<div class="cmpp-why">'+esc(g.why)+'</div>' : '')
+          +'</div>';
+      }
+      var color = {"candidate":"#f59e0b","researched":"#3b82f6","included":"#10b981","rejected":"#ef4444","pending":"#6b7280"}[g.status] || "#6b7280";
+      var catText = {"candidate":"候选","researched":"已背调","included":"已收录","rejected":"已排除","pending":"待定"}[g.status] || g.status;
+      return '<div class="cmpp-card">'
+        +'<div class="cmpp-card-top"><span class="cmpp-name">'+esc(g.name)+'</span>'
+        +(g.id ? '<span class="cmpp-del" onclick="deleteCompany('+g.id+')">🗑️</span>' : '')
+        +'<span class="cmpp-cat" style="color:'+color+';border-color:'+color+'">'+esc(catText)+'</span></div>'
+        +(g.industry ? '<div class="cmpp-why">🏭 '+esc(g.industry)+'</div>' : '')
+        +(g.reason ? '<div class="cmpp-why">'+esc(g.reason)+'</div>' : '')
+        +'</div>';
+    }).join("");
+    html += '<div class="cmpp-sec" data-sec="'+i+'"'+(s.kind==="local"?' data-kind="local"':'')+'>'
+      +'<div class="cmpp-sec-head" onclick="toggleCmppSec('+i+')">'
+        +'<span class="cmpp-sec-title">'+esc(s.title)+'</span>'
+        +'<span class="cmpp-sec-badge">'+s.groups.length+' 家</span>'
+        +'<span class="cmpp-sec-arrow'+(collapsed?' collapsed':'')+'">▾</span>'
+      +'</div>'
+      +'<div class="cmpp-sec-body" style="display:'+(collapsed?'none':'block')+'"><div class="cmpp-grid">'+cards+'</div></div>'
+    +'</div>';
+  });
+  grid.innerHTML = pills + html;
+  filterCmpp(getCmppActive());
 }
+
+function filterCmpp(sec){
+  var grid = document.getElementById("companyGrid");
+  if(!grid) return;
+  setCmppActive(sec);
+  grid.querySelectorAll(".cmpp-pill").forEach(function(p){ p.classList.toggle("active", p.getAttribute("data-sec")===String(sec)); });
+  grid.querySelectorAll(".cmpp-sec").forEach(function(el){
+    el.style.display = (sec==="all" || el.getAttribute("data-sec")===String(sec)) ? "block" : "none";
+  });
+}
+
+function toggleCmppSec(i){
+  var grid = document.getElementById("companyGrid");
+  if(!grid) return;
+  var body = grid.querySelector('.cmpp-sec[data-sec="'+i+'"] .cmpp-sec-body');
+  var arrow = grid.querySelector('.cmpp-sec[data-sec="'+i+'"] .cmpp-sec-arrow');
+  if(!body) return;
+  var nowCollapsed = body.style.display!=="none";
+  body.style.display = nowCollapsed ? "none" : "block";
+  if(arrow) arrow.classList.toggle("collapsed", nowCollapsed);
+  setCmppCollapsed(i, nowCollapsed);
+}
+
+function _cmppState(){
+  try{ return JSON.parse(localStorage.getItem("cmpp_state")||"{}"); }catch(e){ return {}; }
+}
+function setCmppCollapsed(i, v){ var s=_cmppState(); s.collapsed=s.collapsed||{}; s.collapsed[i]=v; localStorage.setItem("cmpp_state", JSON.stringify(s)); }
+function isCmppCollapsed(i){ var s=_cmppState(); return !!(s.collapsed&&s.collapsed[i]); }
+function setCmppActive(v){ var s=_cmppState(); s.active=v; localStorage.setItem("cmpp_state", JSON.stringify(s)); }
+function getCmppActive(){ var s=_cmppState(); return (s.active===undefined||s.active===null)?"all":s.active; }
+
 
 /* ========== 求职作战：首页概览 ========== */
 function renderCareerOverview(){
