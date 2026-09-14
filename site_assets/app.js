@@ -4048,7 +4048,9 @@ var TITLES = {
   jobs:"🐾 岗位看板", companies:"🐈 目标公司池", timeline:"😺 每日日报",
   resume:"📄 简历库", knowledge:"📚 知识库"
 };
+var _currentView="home";
 function go(view){
+  _currentView=view;
   var newModule = document.getElementById("module-"+view);
   var oldView = document.getElementById("view-"+view);
   if(newModule || oldView){
@@ -4067,13 +4069,18 @@ function go(view){
   document.body.classList.toggle("cet6-active", view==="cet6");
   document.body.classList.toggle("baichuan-active", view==="baichuan");
   document.body.classList.toggle("sop-active", view==="sop");
-  var backBtn = document.getElementById("backBtn");
-  if(backBtn){
-    var _mobile = window.matchMedia && window.matchMedia("(max-width:820px)").matches;
-    backBtn.style.display = (view==="home" || !_mobile) ? "none" : "flex";
-  }
+  updateBackBtn();
   window.scrollTo({top:0});
 }
+function updateBackBtn(){
+  var backBtn = document.getElementById("backBtn");
+  if(!backBtn) return;
+  var _mobile = window.matchMedia && window.matchMedia("(max-width:820px)").matches;
+  backBtn.style.display = (_currentView==="home" || !_mobile) ? "none" : "flex";
+}
+// 横竖屏切换 / 窗口尺寸变化后重算返回键（修复：横屏进子模块后转竖屏返回键不显示）
+window.addEventListener("resize", updateBackBtn);
+window.addEventListener("orientationchange", function(){ setTimeout(updateBackBtn, 250); });
 document.addEventListener("click", function(e){
   var t = e.target.closest("[data-module],[data-go]");
   if(t){
