@@ -3453,31 +3453,75 @@ function writeAllData(data){
   if(data.settings){ localStorage.setItem(SETTINGS_KEY, JSON.stringify(data.settings)); }
 }
 
-/* ---------- 合并工具：按记录 id 求并集，避免「整份覆盖」把另一台设备的记录冲掉 ---------- */
+/* ---------- 合并工具：按记录 id 求并集 + 基准清单判定删除 ---------- */
 var SYNC_LIST_FIELDS = {
   money: ["records"], health: ["records"], inspire: ["records"], todo: ["items"],
   report: ["history"], daily: ["tasks"], job: ["jobs"], company: ["companies"]
 };
 var SYNC_FORCE_LOCAL = { daily: { date: true } };
+var SYNC_BASE_KEY = "weh_sync_base_v1";
+var _syncMergeRemoved = 0;
 
 function _recKey(it){
   return (it && it.id !== undefined && it.id !== null) ? String(it.id) : null;
 }
-function _mergeListById(localArr, remoteArr){
+
+/* 基准清单只存本机、不上传：记录「上次同步成功时各列表有哪些 id」，用来判断谁删掉了哪条 */
+function loadSyncBase(){
+  try{
+    var b = JSON.parse(localStorage.getItem(SYNC_BASE_KEY));
+    return b && typeof b === "object" ? b : null;
+  }catch(e){ return null; }
+}
+function saveSyncBase(data){
+  var b = {}, key, f;
+  for(key in SYNC_LIST_FIELDS){
+    var mod = data ? data[key] : null;
+    if(!mod) continue;
+    var m = {};
+    SYNC_LIST_FIELDS[key].forEach(function(field){
+      var ids = [];
+      (mod[field] || []).forEach(function(it){ var k = _recKey(it); if(k !== null) ids.push(k); });
+      m[field] = ids;
+    });
+    b[key] = m;
+  }
+  try{ localStorage.setItem(SYNC_BASE_KEY, JSON.stringify(b)); }catch(e){}
+}
+function clearSyncBase(){ try{ localStorage.removeItem(SYNC_BASE_KEY); }catch(e){} }
+
+/* 并集合并；传入基准 id 清单时，「基准里有、某一侧没有」判定为该侧删过，结果中一并剔除 */
+function _mergeListById(localArr, remoteArr, baseIds){
+  var localIds = {}, remoteIds = {}, counted = {}, k;
+  (localArr || []).forEach(function(it){ k = _recKey(it); if(k !== null) localIds[k] = true; });
+  (remoteArr || []).forEach(function(it){ k = _recKey(it); if(k !== null) remoteIds[k] = true; });
+  var deleted = {};
+  if(baseIds && baseIds.length){
+    baseIds.forEach(function(id){
+      if(!localIds[id] || !remoteIds[id]) deleted[id] = true;
+    });
+  }
+  function _drop(id){
+    if(!counted[id]){ counted[id] = true; _syncMergeRemoved++; }
+  }
   var out = [], seen = {};
   (localArr || []).forEach(function(it){
-    var k = _recKey(it);
-    if(k !== null) seen[k] = true;
+    k = _recKey(it);
+    if(k !== null){
+      if(deleted[k]){ _drop(k); return; }
+      seen[k] = true;
+    }
     out.push(it);
   });
   (remoteArr || []).forEach(function(it){
-    var k = _recKey(it);
+    k = _recKey(it);
     if(k === null){ out.push(it); return; }
+    if(deleted[k]){ _drop(k); return; }
     if(!seen[k]){ seen[k] = true; out.push(it); }
   });
   return out;
 }
-function _mergeModule(localMod, remoteMod, listFields, forceLocal, localWins){
+function _mergeModule(localMod, remoteMod, listFields, forceLocal, localWins, baseMod){
   if(localMod === undefined) return remoteMod;
   if(remoteMod === undefined) return localMod;
   var out = {}, k;
@@ -3486,7 +3530,9 @@ function _mergeModule(localMod, remoteMod, listFields, forceLocal, localWins){
   for(k in loser){ out[k] = loser[k]; }
   for(k in winner){ out[k] = winner[k]; }
   if(forceLocal){ for(k in forceLocal){ if(localMod[k] !== undefined) out[k] = localMod[k]; } }
-  (listFields || []).forEach(function(f){ out[f] = _mergeListById(localMod[f], remoteMod[f]); });
+  (listFields || []).forEach(function(f){
+    out[f] = _mergeListById(localMod[f], remoteMod[f], baseMod ? baseMod[f] : null);
+  });
   return out;
 }
 function _mergeSettings(localS, remoteS, localWins){
@@ -3500,14 +3546,24 @@ function _mergeSettings(localS, remoteS, localWins){
 }
 function mergeAllData(remote, localWins){
   var local = collectAllData();
-  var out = {};
-  for(var key in DATA_KEYS){
+  var base = loadSyncBase();
+  var out = {}, key;
+  _syncMergeRemoved = 0;
+  for(key in DATA_KEYS){
     var lm = local[key], rm = remote ? remote[key] : undefined;
     if(lm === undefined && rm === undefined) continue;
-    out[key] = _mergeModule(lm, rm, SYNC_LIST_FIELDS[key], SYNC_FORCE_LOCAL[key], localWins);
+    out[key] = _mergeModule(lm, rm, SYNC_LIST_FIELDS[key], SYNC_FORCE_LOCAL[key], localWins, base ? base[key] : null);
   }
   out.settings = _mergeSettings(local.settings, remote ? remote.settings : null, localWins);
   return out;
+}
+/* 同步结果文案：新增/删除条数都报出来，不再静默 */
+function syncResultText(prefix, merged, added){
+  var parts = [prefix];
+  if(added > 0) parts.push("新增 " + added + " 条");
+  if(_syncMergeRemoved > 0) parts.push("删除 " + _syncMergeRemoved + " 条");
+  parts.push("共 " + _totalRecords(merged) + " 条");
+  return parts.join(" · ");
 }
 function _totalRecords(data){
   var n = 0;
@@ -3587,9 +3643,10 @@ function syncUpload(c, silent){
         if(g) g.value = c.gistId;
       }
       writeAllData(merged);
+      saveSyncBase(merged);
       _applySyncMeta("lastUpload");
       var added = _totalRecords(merged) - _totalRecords(localBefore);
-      if(!silent){ toast(added > 0 ? ("已合并并上传 · 同步进来 " + added + " 条，共 " + _totalRecords(merged) + " 条") : ("已合并并上传 · 共 " + _totalRecords(merged) + " 条")); }
+      if(!silent){ toast(syncResultText("已合并并上传", merged, added)); }
       return true;
     }).catch(function(e){
       toast("上传失败：" + e.message);
@@ -3612,10 +3669,11 @@ function syncDownload(c, silent){
     if(remote === null){ throw new Error("云端还没有数据文件"); }
     var merged = mergeAllData(remote, false);
     writeAllData(merged);
+    saveSyncBase(merged);
     _applySyncMeta("lastDownload");
     _refreshAfterSync();
     var added = _totalRecords(merged) - _totalRecords(localBefore);
-    if(!silent){ toast(added > 0 ? ("已从云端合并 · 新增 " + added + " 条，共 " + _totalRecords(merged) + " 条") : ("已从云端同步 · 共 " + _totalRecords(merged) + " 条，无新增")); }
+    if(!silent){ toast(syncResultText("已从云端合并", merged, added)); }
     return true;
   }).catch(function(e){
     if(!silent){ toast("下载失败：" + e.message); }
@@ -3712,6 +3770,7 @@ function importAllData(event){
         if(data.settings){
           localStorage.setItem(SETTINGS_KEY, JSON.stringify(data.settings));
         }
+        clearSyncBase(); // 整份导入属「整段替换」，不作为删除判定依据，避免同步时误删另一台设备的数据
         markLocalChange();
   toast("数据导入成功，页面即将刷新");
         setTimeout(function(){ location.reload(); }, 1000);
@@ -3733,6 +3792,7 @@ function clearModuleData(){
   showConfirm("确定清空「" + (moduleNames[module]||module) + "」的所有数据？此操作不可恢复！").then(function(ok){
     if(!ok) return;
     localStorage.removeItem(DATA_KEYS[module]);
+    clearSyncBase(); // 清空模块属「整段清掉」，不作为删除判定依据，避免同步时误删另一台设备的数据
     markLocalChange();
   toast("已清空，页面即将刷新");
     setTimeout(function(){ location.reload(); }, 1000);
@@ -3748,6 +3808,7 @@ function resetAllData(){
         localStorage.removeItem(DATA_KEYS[key]);
       }
       localStorage.removeItem(SETTINGS_KEY);
+      clearSyncBase(); // 重置全部属「整段清掉」，不作为删除判定依据，避免同步时误删另一台设备的数据
       markLocalChange();
   toast("已重置全部数据，页面即将刷新");
       setTimeout(function(){ location.reload(); }, 1000);
