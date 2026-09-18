@@ -3453,6 +3453,103 @@ function writeAllData(data){
   if(data.settings){ localStorage.setItem(SETTINGS_KEY, JSON.stringify(data.settings)); }
 }
 
+/* ---------- 合并工具：按记录 id 求并集，避免「整份覆盖」把另一台设备的记录冲掉 ---------- */
+var SYNC_LIST_FIELDS = {
+  money: ["records"], health: ["records"], inspire: ["records"], todo: ["items"],
+  report: ["history"], daily: ["tasks"], job: ["jobs"], company: ["companies"]
+};
+var SYNC_FORCE_LOCAL = { daily: { date: true } };
+
+function _recKey(it){
+  return (it && it.id !== undefined && it.id !== null) ? String(it.id) : null;
+}
+function _mergeListById(localArr, remoteArr){
+  var out = [], seen = {};
+  (localArr || []).forEach(function(it){
+    var k = _recKey(it);
+    if(k !== null) seen[k] = true;
+    out.push(it);
+  });
+  (remoteArr || []).forEach(function(it){
+    var k = _recKey(it);
+    if(k === null){ out.push(it); return; }
+    if(!seen[k]){ seen[k] = true; out.push(it); }
+  });
+  return out;
+}
+function _mergeModule(localMod, remoteMod, listFields, forceLocal, localWins){
+  if(localMod === undefined) return remoteMod;
+  if(remoteMod === undefined) return localMod;
+  var out = {}, k;
+  var winner = localWins ? localMod : remoteMod;
+  var loser = localWins ? remoteMod : localMod;
+  for(k in loser){ out[k] = loser[k]; }
+  for(k in winner){ out[k] = winner[k]; }
+  if(forceLocal){ for(k in forceLocal){ if(localMod[k] !== undefined) out[k] = localMod[k]; } }
+  (listFields || []).forEach(function(f){ out[f] = _mergeListById(localMod[f], remoteMod[f]); });
+  return out;
+}
+function _mergeSettings(localS, remoteS, localWins){
+  var l = localS || {}, r = remoteS || {};
+  var winner = localWins ? l : r, loser = localWins ? r : l;
+  var out = {}, k;
+  for(k in loser){ out[k] = loser[k]; }
+  for(k in winner){ out[k] = winner[k]; }
+  out.preferences = Object.assign({}, loser.preferences || {}, winner.preferences || {});
+  return out;
+}
+function mergeAllData(remote, localWins){
+  var local = collectAllData();
+  var out = {};
+  for(var key in DATA_KEYS){
+    var lm = local[key], rm = remote ? remote[key] : undefined;
+    if(lm === undefined && rm === undefined) continue;
+    out[key] = _mergeModule(lm, rm, SYNC_LIST_FIELDS[key], SYNC_FORCE_LOCAL[key], localWins);
+  }
+  out.settings = _mergeSettings(local.settings, remote ? remote.settings : null, localWins);
+  return out;
+}
+function _totalRecords(data){
+  var n = 0;
+  if(!data) return 0;
+  for(var key in SYNC_LIST_FIELDS){
+    var fields = SYNC_LIST_FIELDS[key], mod = data[key];
+    if(!mod) continue;
+    fields.forEach(function(f){ if(mod[f] && mod[f].length) n += mod[f].length; });
+  }
+  return n;
+}
+function fetchRemoteData(c){
+  if(!c.gistId) return Promise.resolve(null);
+  return fetch("https://api.github.com/gists/" + c.gistId, {
+    headers: { "Authorization": "Bearer " + c.token, "Accept": "application/vnd.github+json" }
+  }).then(function(r){ return r.json().then(function(j){ return {ok: r.ok, j: j}; }); })
+  .then(function(res){
+    if(!res.ok){ throw new Error((res.j && res.j.message) || "HTTP 错误"); }
+    var f = res.j && res.j.files && res.j.files[SYNC_FILE];
+    if(!f || !f.content) return null;
+    return JSON.parse(f.content);
+  });
+}
+function _applySyncMeta(field){
+  var m = loadSyncMeta();
+  m[field] = Date.now();
+  m.lastLocalChange = 0;
+  saveSyncMeta(m);
+  var c2 = loadSyncConfig();
+  c2.lastSync = Date.now();
+  localStorage.setItem(SYNC_CONFIG_KEY, JSON.stringify(c2));
+}
+function _refreshAfterSync(){
+  try{ if(typeof renderHome === "function") renderHome();
+  renderCareerOverview(); }catch(e){}
+  try{ if(typeof renderMoney === "function") renderMoney(); }catch(e){}
+  try{ if(typeof renderHealth === "function") renderHealth(); }catch(e){}
+  try{ if(typeof renderInspire === "function") renderInspire(); }catch(e){}
+  try{ if(typeof renderTodo === "function") renderTodo(); }catch(e){}
+  try{ if(typeof renderDaily === "function") renderDaily(); }catch(e){}
+}
+
 function syncNow(action, silent){
   var c = readSyncInputs();
   localStorage.setItem(SYNC_CONFIG_KEY, JSON.stringify(c));
@@ -3467,70 +3564,58 @@ function syncNow(action, silent){
 }
 
 function syncUpload(c, silent){
-  var data = collectAllData();
-  var body = { files: {} };
-  body.files[SYNC_FILE] = { content: JSON.stringify(data, null, 2) };
-  var url, method;
-  if(c.gistId){ url = "https://api.github.com/gists/" + c.gistId; method = "PATCH"; }
-  else { url = "https://api.github.com/gists"; method = "POST"; body.description = "Weh Atelier 数据同步"; body.public = false; }
-  return fetch(url, {
-    method: method,
-    headers: { "Authorization": "Bearer " + c.token, "Accept": "application/vnd.github+json" },
-    body: JSON.stringify(body)
-  }).then(function(r){ return r.json().then(function(j){ return {ok: r.ok, j: j}; }); })
-  .then(function(res){
-    if(!res.ok){ throw new Error((res.j && res.j.message) || ("HTTP " + (res.j && res.j.status || ""))); }
-    if(!c.gistId && res.j && res.j.id){
-      c.gistId = res.j.id;
-      localStorage.setItem(SYNC_CONFIG_KEY, JSON.stringify(c));
-      var g = document.getElementById("syncGistId");
-      if(g) g.value = c.gistId;
-      toast("已创建 Gist：" + c.gistId.slice(0,8) + "…");
-    }
-    c.lastSync = Date.now();
-    localStorage.setItem(SYNC_CONFIG_KEY, JSON.stringify(c));
-    var m = loadSyncMeta();
-    m.lastUpload = Date.now();
-    saveSyncMeta(m);
-    if(!silent){ toast("已上传到云端"); }
-    return true;
-  }).catch(function(e){
-    toast("上传失败：" + e.message);
-    console.error(e);
-    return false;
-  });
+  var localBefore = collectAllData();
+  function doPush(remote){
+    var merged = mergeAllData(remote, true);
+    merged.syncTime = Date.now();
+    var body = { files: {} };
+    body.files[SYNC_FILE] = { content: JSON.stringify(merged, null, 2) };
+    var url, method;
+    if(c.gistId){ url = "https://api.github.com/gists/" + c.gistId; method = "PATCH"; }
+    else { url = "https://api.github.com/gists"; method = "POST"; body.description = "Weh Atelier 数据同步"; body.public = false; }
+    return fetch(url, {
+      method: method,
+      headers: { "Authorization": "Bearer " + c.token, "Accept": "application/vnd.github+json" },
+      body: JSON.stringify(body)
+    }).then(function(r){ return r.json().then(function(j){ return {ok: r.ok, j: j}; }); })
+    .then(function(res){
+      if(!res.ok){ throw new Error((res.j && res.j.message) || ("HTTP " + (res.j && res.j.status || ""))); }
+      if(!c.gistId && res.j && res.j.id){
+        c.gistId = res.j.id;
+        localStorage.setItem(SYNC_CONFIG_KEY, JSON.stringify(c));
+        var g = document.getElementById("syncGistId");
+        if(g) g.value = c.gistId;
+      }
+      writeAllData(merged);
+      _applySyncMeta("lastUpload");
+      var added = _totalRecords(merged) - _totalRecords(localBefore);
+      if(!silent){ toast(added > 0 ? ("已合并并上传 · 同步进来 " + added + " 条，共 " + _totalRecords(merged) + " 条") : ("已合并并上传 · 共 " + _totalRecords(merged) + " 条")); }
+      return true;
+    }).catch(function(e){
+      toast("上传失败：" + e.message);
+      console.error(e);
+      return false;
+    });
+  }
+  return fetchRemoteData(c).then(function(remote){ return doPush(remote); })
+    .catch(function(e){
+      toast("上传前读取云端失败，已取消（避免覆盖对方记录）：" + e.message);
+      console.error(e);
+      return false;
+    });
 }
 
 function syncDownload(c, silent){
-  if(!c.gistId){ toast("还没有 Gist，先点“保存并连接”"); return Promise.resolve(false); }
-  return fetch("https://api.github.com/gists/" + c.gistId, {
-    headers: { "Authorization": "Bearer " + c.token, "Accept": "application/vnd.github+json" }
-  }).then(function(r){ return r.json().then(function(j){ return {ok: r.ok, j: j}; }); })
-  .then(function(res){
-    if(!res.ok){ throw new Error((res.j && res.j.message) || "HTTP 错误"); }
-    var f = res.j && res.j.files && res.j.files[SYNC_FILE];
-    if(!f || !f.content){ throw new Error("云端没有数据文件"); }
-    var data = JSON.parse(f.content);
-    var m = loadSyncMeta();
-    var localDirty = (m.lastLocalChange || 0) > (m.lastUpload || 0);
-    if(localDirty){
-      if(!silent){ toast("本地有未上传的修改，跳过下载"); }
-      return false;
-    }
-    writeAllData(data);
-    m.lastDownload = Date.now();
-    saveSyncMeta(m);
-    var c2 = loadSyncConfig();
-    c2.lastSync = Date.now();
-    localStorage.setItem(SYNC_CONFIG_KEY, JSON.stringify(c2));
-    try{ if(typeof renderHome === "function") renderHome();
-  renderCareerOverview(); }catch(e){}
-    try{ if(typeof renderMoney === "function") renderMoney(); }catch(e){}
-    try{ if(typeof renderHealth === "function") renderHealth(); }catch(e){}
-    try{ if(typeof renderInspire === "function") renderInspire(); }catch(e){}
-    try{ if(typeof renderTodo === "function") renderTodo(); }catch(e){}
-    try{ if(typeof renderDaily === "function") renderDaily(); }catch(e){}
-    if(!silent){ toast("已从云端同步最新数据"); }
+  if(!c.gistId){ if(!silent) toast("还没有 Gist，先点“保存并连接”"); return Promise.resolve(false); }
+  var localBefore = collectAllData();
+  return fetchRemoteData(c).then(function(remote){
+    if(remote === null){ throw new Error("云端还没有数据文件"); }
+    var merged = mergeAllData(remote, false);
+    writeAllData(merged);
+    _applySyncMeta("lastDownload");
+    _refreshAfterSync();
+    var added = _totalRecords(merged) - _totalRecords(localBefore);
+    if(!silent){ toast(added > 0 ? ("已从云端合并 · 新增 " + added + " 条，共 " + _totalRecords(merged) + " 条") : ("已从云端同步 · 共 " + _totalRecords(merged) + " 条，无新增")); }
     return true;
   }).catch(function(e){
     if(!silent){ toast("下载失败：" + e.message); }
@@ -3557,7 +3642,7 @@ function syncConnect(){
   if(!c.token){ toast("请先填写 Token"); switchSettingsTab("sync"); return; }
   localStorage.setItem(SYNC_CONFIG_KEY, JSON.stringify(c));
   renderSyncStatus();
-  if(c.gistId){ syncNow("download", true); return; }
+  if(c.gistId){ syncNow("download", false); return; }
   // 没有 Gist ID：先查找已有的 Weh Atelier 同步 Gist，找到则复用，避免多设备数据分叉
   toast("正在查找已有的同步 Gist…");
   findExistingGist(c.token).then(function(id){
@@ -3567,9 +3652,9 @@ function syncConnect(){
       var g = document.getElementById("syncGistId");
       if(g) g.value = id;
       toast("已连接已有的 Gist：" + id.slice(0,8) + "…");
-      syncNow("download", true);
+      syncNow("download", false);
     } else {
-      syncNow("upload", true);
+      syncNow("upload", false);
     }
   });
 }
