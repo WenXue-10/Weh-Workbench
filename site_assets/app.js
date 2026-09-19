@@ -2117,8 +2117,8 @@ function clearOperationLogs(){
 }
 
 /* ========== 求职作战：岗位看板 ========== */
-var JOB_STATUS_TEXT = {pending:"📮 待投递", done:"✅ 已背调", new:"🆕 新收录", warn:"⚠️ 待核实", backup:"📌 备选", applied:"📤 已投递", interview:"🎤 面试中", offer:"🎉 已Offer", rejected:"❌ 已挂"};
-var JOB_STATUS_COLOR = {pending:"#f59e0b", done:"#14b8a6", new:"#d946ef", warn:"#f97316", backup:"#6b7280", applied:"#3b82f6", interview:"#8b5cf6", offer:"#10b981", rejected:"#ef4444"};
+var JOB_STATUS_TEXT = {pending:"📮 待投递", done:"✅ 已背调", new:"🆕 新收录", warn:"⚠️ 待核实", backup:"📌 备选", applied:"📤 已投递", interview:"🎤 面试中", offer:"🎉 已Offer", rejected:"❌ 已挂", expired:"⏰ 已截止", closed:"❌ 已结束", unknown:"❓ 未识别"};
+var JOB_STATUS_COLOR = {pending:"#f59e0b", done:"#14b8a6", new:"#d946ef", warn:"#f97316", backup:"#6b7280", applied:"#3b82f6", interview:"#8b5cf6", offer:"#10b981", rejected:"#ef4444", expired:"#94a3b8", closed:"#64748b", unknown:"#94a3b8"};
 
 function loadJobs(){
   try{ var d = JSON.parse(localStorage.getItem(JOB_KEY)); return d && d.jobs ? d : {jobs:[], logs:[]}; }catch(e){ return {jobs:[], logs:[]}; }
@@ -2130,7 +2130,7 @@ function loadJobOverrides(){
 }
 function saveJobOverrides(o){ markLocalChange(); localStorage.setItem(JOB_OVERRIDE_KEY, JSON.stringify(o)); }
 function jobKey(j){ return (j.company||"") + "||" + (j.pos||j.position||""); }
-var KB_STATUS_MAP = {ready:"pending", sent:"applied", interview:"interview", offer:"offer", dead:"rejected", backup:"backup", done:"done", warn:"warn", new:"new"};
+var KB_STATUS_MAP = {ready:"pending", sent:"applied", interview:"interview", offer:"offer", dead:"rejected", backup:"backup", done:"done", warn:"warn", new:"new", expired:"expired", closed:"closed"};
 function getMergedJobs(){
   var overrides = loadJobOverrides();
   var local = loadJobs();
@@ -2243,7 +2243,7 @@ function renderJobs(){
     var sevenDays = new Date(now.getTime() + 7*24*60*60*1000);
     var deadlineJobs = allJobs.filter(function(j){
       var dl = parseDeadline(j.deadline);
-      return dl && dl >= now && dl <= sevenDays && j.status !== "rejected" && j.status !== "offer";
+      return dl && dl >= now && dl <= sevenDays && ["rejected","offer","expired","closed"].indexOf(j.status) < 0;
     }).sort(function(a,b){ return parseDeadline(a.deadline) - parseDeadline(b.deadline); });
     if(deadlineJobs.length){
       deadlineCard.style.display = "";

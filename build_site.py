@@ -183,9 +183,15 @@ def gen_pdf_from_md(md_path, title):
     return url
 
 # ---------- 岗位数据 ----------
+# 未识别的岗位状态会被记下来，构建结束时报警，避免以后规范新增状态时静默归错类
+UNKNOWN_STATUS = []
+
 def status_key(t):
     t = t or ""
     low = t.lower()
+    # 终态优先判定：这类状态可能带别的词（如「已截止（原待投递）」），必须放在最前
+    if "已截止" in t: return "expired"
+    if "已结束" in t or "已下线" in t or "岗位关闭" in t: return "closed"
     if "已背调" in t: return "done"
     if "offer" in low: return "offer"
     if "待投递" in t or "已写简历" in t or "定制简历" in t: return "ready"
@@ -195,7 +201,8 @@ def status_key(t):
     if "待确认" in t or "待补充" in t or "待核实" in t or "待背调" in t: return "warn"
     if "备选" in t: return "backup"
     if "新收录" in t: return "new"
-    return "backup"
+    UNKNOWN_STATUS.append(t)
+    return "unknown"
 
 def parse_detail_table(text):
     m = re.search(r"##\s*匹配度评分明细\s*\n(.*?)(?=\n##|\Z)", text, re.DOTALL)
@@ -1120,6 +1127,11 @@ if('serviceWorker' in navigator && location.protocol.indexOf('http')===0){ windo
     print("✅ 网站已生成：", idx)
     print("   Weh Atelier · 个人AI工作室")
     print("   files/ 文件数:", len(os.listdir(FILES_DIR)))
+    if UNKNOWN_STATUS:
+        print("   [!] 有", len(UNKNOWN_STATUS), "个岗位状态未能识别，已显示为「未识别」：")
+        for u in sorted(set(UNKNOWN_STATUS)):
+            print("       -", repr(u))
+        print("       请检查 build_site.py 的 status_key() 是否要补规则，或知识库该字段写错了。")
 
 if __name__ == "__main__":
     build()
