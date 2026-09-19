@@ -1914,6 +1914,9 @@ function renderInspireDetail(ext, photoId){
     +'<div class="d-section"><div class="d-label">🚀 可以延伸的方向</div><div class="d-content">'+ext.directions.map(function(d){return '· '+esc(d);}).join('<br>')+'</div></div>'
     +'<div class="d-section"><div class="d-label">⚖️ 值不值得做</div><div class="d-content">'+esc(ext.judgment)+'</div></div>'
     +'<div class="d-section"><div class="d-label">🔗 可能关联</div><div class="d-content">'+esc(ext.related)+'</div></div>'
+    + (ext.reasoning
+        ? '<details class="d-think"><summary>💭 思考过程（点开看）</summary><div class="d-think-body">' + esc(ext.reasoning) + '</div></details>'
+        : '')
     + (ext.source === "ai"
         ? '<div style="font-size:11px;color:var(--muted);text-align:right;margin-top:8px">🤖 由 ' + esc(ext.model || "AI") + ' 生成 · 可点「重新生成」换一版</div>'
         : (ext.source === "template"
@@ -3486,16 +3489,36 @@ function setFontSize(size){
 /* ========== 🤖 AI 延伸（大模型接入） ========== */
 var AI_CONFIG_KEY = "weh_ai_config_v1";
 var AI_PERSONA_DEFAULT = "我是文雪，供应链 / 物流方向，正在准备求职。平时用碎片化的方式记录灵感，关注求职、学习、知识管理与个人成长。";
+/* thinking:true = 该服务商用「请求参数」切换思考模式（目前只有 DeepSeek 这类）；
+   其他家一般靠模型名区分（如带 thinking / reasoner 字样的型号），所以开关只对有 thinking 标记的家生效 */
 var AI_PROVIDERS = {
-  deepseek:    { name: "DeepSeek",        base: "https://api.deepseek.com/v1",                       model: "deepseek-chat" },
-  zhipu:       { name: "智谱 GLM",        base: "https://open.bigmodel.cn/api/paas/v4",               model: "glm-4-flash" },
-  moonshot:    { name: "Kimi / Moonshot", base: "https://api.moonshot.cn/v1",                        model: "moonshot-v1-8k" },
-  dashscope:   { name: "通义千问",         base: "https://dashscope.aliyuncs.com/compatible-mode/v1", model: "qwen-plus" },
-  siliconflow: { name: "硅基流动",         base: "https://api.siliconflow.cn/v1",                     model: "Qwen/Qwen2.5-7B-Instruct" },
-  openrouter:  { name: "OpenRouter",      base: "https://openrouter.ai/api/v1",                      model: "openai/gpt-4o-mini" },
-  custom:      { name: "自定义",           base: "",                                                  model: "" }
+  deepseek:    { name: "DeepSeek",        base: "https://api.deepseek.com/v1",                       model: "deepseek-flash",      thinking: true,
+                 models: ["deepseek-flash", "deepseek-v4-pro", "deepseek-chat", "deepseek-reasoner"],
+                 hint: "推荐 deepseek-flash（V4.1-Flash，便宜快）；deepseek-v4-pro 更强更贵；deepseek-chat / deepseek-reasoner 是将停用的旧名。这家的模型列表接口不允许浏览器跨域，请从内置候选里选或直接手填。" },
+  zhipu:       { name: "智谱 GLM",        base: "https://open.bigmodel.cn/api/paas/v4",               model: "glm-4-flash",
+                 models: ["glm-4-flash"],
+                 hint: "点「拉取可用模型」能拿到你账号可用的全部模型名。" },
+  moonshot:    { name: "Kimi / Moonshot", base: "https://api.moonshot.cn/v1",                        model: "moonshot-v1-8k",
+                 models: ["moonshot-v1-8k", "moonshot-v1-32k", "moonshot-v1-128k"],
+                 hint: "点「拉取可用模型」能拿到你账号可用的全部模型名。" },
+  dashscope:   { name: "通义千问",         base: "https://dashscope.aliyuncs.com/compatible-mode/v1", model: "qwen-plus",
+                 models: ["qwen-plus", "qwen-turbo", "qwen-max"],
+                 hint: "这家的模型列表接口不允许浏览器跨域，请从内置候选里选或直接手填（带思考的型号如 qwq-plus）。" },
+  siliconflow: { name: "硅基流动",         base: "https://api.siliconflow.cn/v1",                     model: "Qwen/Qwen2.5-7B-Instruct",
+                 models: ["Qwen/Qwen2.5-7B-Instruct", "deepseek-ai/DeepSeek-V3"],
+                 hint: "点「拉取可用模型」能拿到你账号可用的全部模型名。" },
+  openrouter:  { name: "OpenRouter",      base: "https://openrouter.ai/api/v1",                      model: "openai/gpt-4o-mini",
+                 models: ["openai/gpt-4o-mini", "openai/gpt-4o"],
+                 hint: "点「拉取可用模型」能列出全站模型（这一家不填 Key 也能列）。" },
+  custom:      { name: "自定义",           base: "",                                                  model: "",                    models: [],
+                 hint: "自己填接口地址与模型名。" }
 };
-var AI_CONFIG_DEFAULTS = { provider: "deepseek", base: "https://api.deepseek.com/v1", key: "", model: "deepseek-chat", persona: "" };
+var AI_CONFIG_DEFAULTS = { provider: "deepseek", base: "https://api.deepseek.com/v1", key: "", model: "deepseek-flash", persona: "", thinking: false, effort: "high" };
+/* 官方合法取值只有 low / high / max（传 medium 会被映射成 low），默认 high；
+   注意 DeepSeek 思考模式「默认就是开着的」，所以不勾选时我们要显式发 disabled，否则会悄悄变慢变贵 */
+var AI_EFFORTS = ["low", "high", "max"];
+var AI_EFFORT_TEXT = { low: "省", high: "高", max: "最高" };
+var AI_OLD_MODELS = ["deepseek-chat", "deepseek-reasoner", "deepseek-v4-flash"];
 var _aiExtPendingId = null;
 var _aiFailCache = {};
 
@@ -3504,6 +3527,8 @@ function loadAIConfig(){
     var c = JSON.parse(localStorage.getItem(AI_CONFIG_KEY));
     if(!c || typeof c !== "object") c = {};
     for(var k in AI_CONFIG_DEFAULTS){ if(c[k] === undefined) c[k] = AI_CONFIG_DEFAULTS[k]; }
+    c.thinking = !!c.thinking;
+    if(AI_EFFORTS.indexOf(c.effort) < 0) c.effort = "high";   // 兼容早期写入的非法取值
     if(!c.persona) c.persona = AI_PERSONA_DEFAULT;
     return c;
   }catch(e){
@@ -3521,11 +3546,14 @@ function readAIInputs(){
   var p = document.getElementById("aiProvider"), b = document.getElementById("aiBase");
   var k = document.getElementById("aiKey"), m = document.getElementById("aiModel");
   var pe = document.getElementById("aiPersona");
+  var cb = document.getElementById("aiThinking"), ef = document.getElementById("aiEffort");
   if(p) c.provider = p.value;
   if(b) c.base = b.value.trim();
   if(k) c.key = k.value.trim();
   if(m) c.model = m.value.trim();
   if(pe) c.persona = pe.value.trim();
+  if(cb) c.thinking = !!cb.checked;
+  if(ef) c.effort = ef.value;
   return c;
 }
 function aiInit(){
@@ -3533,11 +3561,17 @@ function aiInit(){
   var p = document.getElementById("aiProvider"), b = document.getElementById("aiBase");
   var k = document.getElementById("aiKey"), m = document.getElementById("aiModel");
   var pe = document.getElementById("aiPersona");
+  var cb = document.getElementById("aiThinking"), ef = document.getElementById("aiEffort");
   if(p) p.value = c.provider || "deepseek";
   if(b) b.value = c.base || "";
   if(k) k.value = c.key || "";
   if(m) m.value = c.model || "";
   if(pe) pe.value = c.persona || AI_PERSONA_DEFAULT;
+  if(cb) cb.checked = !!c.thinking;
+  if(ef) ef.value = c.effort || "high";
+  renderModelOptions(c.provider || "deepseek");
+  updateAIModelHint(c.provider || "deepseek");
+  applyThinkAvailability(c.provider || "deepseek");
   renderAIStatus();
 }
 function renderAIStatus(){
@@ -3550,8 +3584,15 @@ function renderAIStatus(){
     return;
   }
   var pv = AI_PROVIDERS[c.provider];
-  el.textContent = "已配置 · " + ((pv && pv.name) || "自定义") + " · " + c.model;
-  el.style.color = "#2e7d32";
+  var txt = "已配置 · " + ((pv && pv.name) || "自定义") + " · " + c.model;
+  if(c.thinking && pv && pv.thinking){ txt += " · 🧠 深度思考（" + (AI_EFFORT_TEXT[c.effort] || "标准") + "）"; }
+  if(c.provider === "deepseek" && AI_OLD_MODELS.indexOf(c.model) >= 0){
+    txt += "　⚠️ 这个模型名即将停用，建议改成 deepseek-flash";
+    el.style.color = "#c62828";
+  }else{
+    el.style.color = "#2e7d32";
+  }
+  el.textContent = txt;
 }
 function saveAISettings(silent){
   var c = readAIInputs();
@@ -3563,13 +3604,82 @@ function saveAISettings(silent){
 }
 function onAIProviderChange(){
   var p = document.getElementById("aiProvider");
-  var pv = p ? AI_PROVIDERS[p.value] : null;
-  if(pv && p.value !== "custom"){
+  var key = p ? p.value : "custom";
+  var pv = AI_PROVIDERS[key];
+  if(pv && key !== "custom"){
     var b = document.getElementById("aiBase"), m = document.getElementById("aiModel");
     if(b) b.value = pv.base;
     if(m) m.value = pv.model;
   }
+  renderModelOptions(key);
+  updateAIModelHint(key);
+  applyThinkAvailability(key);
   saveAISettings(true);
+}
+
+/* 把该服务商的内置候选模型填进 datalist（输入框仍可手填任意模型名） */
+function renderModelOptions(provider){
+  var pv = AI_PROVIDERS[provider];
+  _applyModelList((pv && pv.models) ? pv.models : []);
+}
+function _applyModelList(ids){
+  var dl = document.getElementById("aiModelOptions");
+  if(!dl) return;
+  dl.innerHTML = (ids || []).map(function(x){ return '<option value="' + esc(x) + '"></option>'; }).join("");
+}
+function updateAIModelHint(provider){
+  var el = document.getElementById("aiModelHint");
+  if(!el) return;
+  var pv = AI_PROVIDERS[provider];
+  el.textContent = (pv && pv.hint) || "";
+}
+/* 思考模式开关只对该服务商可用时才亮起；不支持的家靠换模型名 */
+function applyThinkAvailability(provider){
+  var pv = AI_PROVIDERS[provider] || {};
+  var on = !!pv.thinking;
+  var cb = document.getElementById("aiThinking"), ef = document.getElementById("aiEffort");
+  var tip = document.getElementById("aiThinkHint");
+  if(cb){ cb.disabled = !on; if(!on) cb.checked = false; }
+  if(ef){ ef.disabled = !on; }
+  if(tip){
+    tip.textContent = on
+      ? "不勾选时我们会对模型明确关闭思考（更快更省）；勾选后模型先推理再回答，更准但更慢更贵，超时会自动放宽到 120 秒。"
+      : "该服务商不支持这个开关 —— 想用思考型模型，直接把模型名换成带思考字样的型号即可。";
+  }
+}
+
+/* 拉取该账号可用的模型列表（OpenAI 兼容的 GET /models） */
+function fetchModelList(){
+  var c = readAIInputs();
+  if(!c.base){ toast("请先填接口地址"); return; }
+  var btn = document.getElementById("aiFetchBtn");
+  if(btn){ btn.disabled = true; btn.textContent = "拉取中…"; }
+  var url = _trimSlash(c.base) + "/models";
+  return fetch(url, { headers: { "Authorization": "Bearer " + (c.key || "") } }).then(function(r){
+    return r.text().then(function(t){
+      var j = null;
+      try{ j = JSON.parse(t); }catch(e){}
+      if(!r.ok){
+        if(r.status === 401){ throw new Error("需要有效的 Key（401）"); }
+        throw new Error("HTTP " + r.status);
+      }
+      var arr = (j && j.data) || [];
+      var ids = [];
+      for(var i = 0; i < arr.length; i++){
+        var it = arr[i];
+        var id = (typeof it === "string") ? it : (it && it.id);
+        if(id) ids.push(String(id));
+      }
+      ids.sort();
+      if(!ids.length) throw new Error("返回里没有模型列表");
+      _applyModelList(ids);
+      toast("已拉取 " + ids.length + " 个模型，点「模型名」输入框就能选");
+    });
+  }).catch(function(e){
+    toast("拉取失败：" + e.message + "（这家可能不允许浏览器直连，请用内置候选或手填）");
+  }).then(function(){
+    if(btn){ btn.disabled = false; btn.textContent = "🔄 拉取可用模型"; }
+  });
 }
 
 function _trimSlash(s){
@@ -3578,16 +3688,28 @@ function _trimSlash(s){
   return s;
 }
 
-/* 统一的对话调用：兼容 OpenAI 格式的 /chat/completions */
+/* 统一的对话调用：兼容 OpenAI 格式的 /chat/completions
+   返回 { content, reasoning }；开启深度思考时自动放宽超时与输出额度 */
 function aiChat(cfg, messages, timeoutSec){
   var url = _trimSlash(cfg.base) + "/chat/completions";
+  var pv = AI_PROVIDERS[cfg.provider] || {};
+  var supportThink = !!pv.thinking;                  // 该服务商是否支持「参数切思考」
+  var thinkOn = !!(supportThink && cfg.thinking);
+  var payload = { model: cfg.model, messages: messages, temperature: 0.85, max_tokens: thinkOn ? 4096 : 800 };
+  if(supportThink){
+    /* 必须显式声明：DeepSeek 的思考模式默认开启，不写 disabled 就等于一直在思考 */
+    payload.thinking = { type: thinkOn ? "enabled" : "disabled" };
+    if(thinkOn) payload.reasoning_effort = (AI_EFFORTS.indexOf(cfg.effort) >= 0) ? cfg.effort : "high";
+  }
+  var secs = timeoutSec || 45;
+  if(thinkOn) secs = Math.max(secs, 120);            // 思考模式慢很多，超时下限 120s
   var ctl = (typeof AbortController !== "undefined") ? new AbortController() : null;
-  var timer = setTimeout(function(){ if(ctl){ try{ ctl.abort(); }catch(e){} } }, (timeoutSec || 45) * 1000);
+  var timer = setTimeout(function(){ if(ctl){ try{ ctl.abort(); }catch(e){} } }, secs * 1000);
   function done(){ clearTimeout(timer); }
   return fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json", "Authorization": "Bearer " + cfg.key },
-    body: JSON.stringify({ model: cfg.model, messages: messages, temperature: 0.85, max_tokens: 800 }),
+    body: JSON.stringify(payload),
     signal: ctl ? ctl.signal : undefined
   }).then(function(r){
     return r.text().then(function(t){
@@ -3601,9 +3723,11 @@ function aiChat(cfg, messages, timeoutSec){
         else if(r.status === 429){ msg = "调用太频繁被限流（429）"; }
         throw new Error(msg);
       }
-      var txt = j && j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content;
+      var msgObj = j && j.choices && j.choices[0] && j.choices[0].message;
+      var txt = msgObj && msgObj.content;
+      var think = msgObj && msgObj.reasoning_content;
       if(!txt){ throw new Error("返回内容为空"); }
-      return txt;
+      return { content: txt, reasoning: think ? String(think) : "" };
     });
   }).then(function(v){ done(); return v; }, function(e){
     done();
@@ -3653,13 +3777,14 @@ function buildExtMessages(content, persona){
 function generateInspireExtensionAI(content){
   var c = loadAIConfig();
   if(!(c.key && c.base && c.model)){ return Promise.reject(new Error("未配置 AI")); }
-  return aiChat(c, buildExtMessages(content, c.persona), 45).then(function(txt){
-    var ext = parseExtJSON(txt);
+  return aiChat(c, buildExtMessages(content, c.persona), 45).then(function(res){
+    var ext = parseExtJSON(res.content);
     if(!ext){ throw new Error("AI 返回的内容无法解析成 JSON"); }
     ext.original = content;
     ext.source = "ai";
     ext.model = c.model;
     ext.at = Date.now();
+    if(res.reasoning) ext.reasoning = res.reasoning.slice(0, 4000);   // 思考过程截断，防数据膨胀
     return ext;
   });
 }
@@ -3674,8 +3799,8 @@ function testAIConnection(){
   var el = document.getElementById("aiStatus");
   if(btn){ btn.disabled = true; btn.textContent = "测试中…"; }
   if(el){ el.textContent = "正在测试连接…"; el.style.color = "var(--muted)"; }
-  aiChat(c, [{ role: "user", content: "只回复两个字：正常" }], 20).then(function(txt){
-    var head = String(txt).replace(/\s+/g, "").slice(0, 12);
+  aiChat(c, [{ role: "user", content: "只回复两个字：正常" }], 20).then(function(res){
+    var head = String(res.content || "").replace(/\s+/g, "").slice(0, 12) || "（无正文）";
     toast("✅ 连接正常（" + c.model + "）：" + head);
     if(el){ el.textContent = "✅ 连接正常 · " + c.model; el.style.color = "#2e7d32"; }
   }).catch(function(e){

@@ -1970,7 +1970,22 @@
                 <div class="setting-row">
                   <div class="setting-label">模型名</div>
                   <div class="setting-control">
-                    <input type="text" id="aiModel" placeholder="deepseek-chat" class="ai-input">
+                    <input type="text" id="aiModel" placeholder="deepseek-flash" class="ai-input" list="aiModelOptions">
+                    <datalist id="aiModelOptions"></datalist>
+                    <button class="setting-btn" id="aiFetchBtn" onclick="fetchModelList()">🔄 拉取可用模型</button>
+                    <div class="ai-hint" id="aiModelHint"></div>
+                  </div>
+                </div>
+                <div class="setting-row">
+                  <div class="setting-label">深度思考</div>
+                  <div class="setting-control">
+                    <label class="ai-check"><input type="checkbox" id="aiThinking"> 启用（先推理再回答，更慢更贵）</label>
+                    <select id="aiEffort" class="ai-input">
+                      <option value="low">思考强度：省</option>
+                      <option value="high">思考强度：高</option>
+                      <option value="max">思考强度：最高</option>
+                    </select>
+                    <div class="ai-hint" id="aiThinkHint"></div>
                   </div>
                 </div>
                 <div class="setting-row">
