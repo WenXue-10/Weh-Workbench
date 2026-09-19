@@ -3360,7 +3360,7 @@ body.sop-active .sub-tab-bar{display:flex}
             <div class="settings-tab" id="settings-sync">
               <div class="card">
                 <div class="card-head">☁️ Gist 云同步</div>
-                <div class="setting-hint">数据默认只存在浏览器本地，换设备/浏览器看不到。配置 GitHub Gist 后，可在电脑和手机之间同步数据。Token 只存在本浏览器，请勿泄露或提交到代码仓库。</div>
+                <div class="setting-hint">数据默认只存在浏览器本地，换设备/浏览器看不到。配置 GitHub Gist 后，可在电脑和手机之间同步：记录会按条合并（两台各自记的都保留、新增的都相加），删掉的记录也会同步删除；配置项以最近上传的一方为准。Token 只存在本浏览器，请勿泄露或提交到代码仓库。</div>
                 <div class="setting-row">
                   <div class="setting-label">GitHub Token</div>
                   <div class="setting-control">
@@ -3545,7 +3545,7 @@ body.sop-active .sub-tab-bar{display:flex}
 
 <script>
 window.SITE_DATA = {
- "updated": "2026-09-19 00:32",
+ "updated": "2026-09-19 02:52",
  "stats": {
   "jobs": 34,
   "rec": 0,
@@ -16379,6 +16379,159 @@ function writeAllData(data){
   if(data.settings){ localStorage.setItem(SETTINGS_KEY, JSON.stringify(data.settings)); }
 }
 
+/* ---------- 合并工具：按记录 id 求并集 + 基准清单判定删除 ---------- */
+var SYNC_LIST_FIELDS = {
+  money: ["records"], health: ["records"], inspire: ["records"], todo: ["items"],
+  report: ["history"], daily: ["tasks"], job: ["jobs"], company: ["companies"]
+};
+var SYNC_FORCE_LOCAL = { daily: { date: true } };
+var SYNC_BASE_KEY = "weh_sync_base_v1";
+var _syncMergeRemoved = 0;
+
+function _recKey(it){
+  return (it && it.id !== undefined && it.id !== null) ? String(it.id) : null;
+}
+
+/* 基准清单只存本机、不上传：记录「上次同步成功时各列表有哪些 id」，用来判断谁删掉了哪条 */
+function loadSyncBase(){
+  try{
+    var b = JSON.parse(localStorage.getItem(SYNC_BASE_KEY));
+    return b && typeof b === "object" ? b : null;
+  }catch(e){ return null; }
+}
+function saveSyncBase(data){
+  var b = {}, key, f;
+  for(key in SYNC_LIST_FIELDS){
+    var mod = data ? data[key] : null;
+    if(!mod) continue;
+    var m = {};
+    SYNC_LIST_FIELDS[key].forEach(function(field){
+      var ids = [];
+      (mod[field] || []).forEach(function(it){ var k = _recKey(it); if(k !== null) ids.push(k); });
+      m[field] = ids;
+    });
+    b[key] = m;
+  }
+  try{ localStorage.setItem(SYNC_BASE_KEY, JSON.stringify(b)); }catch(e){}
+}
+function clearSyncBase(){ try{ localStorage.removeItem(SYNC_BASE_KEY); }catch(e){} }
+
+/* 并集合并；传入基准 id 清单时，「基准里有、某一侧没有」判定为该侧删过，结果中一并剔除 */
+function _mergeListById(localArr, remoteArr, baseIds){
+  var localIds = {}, remoteIds = {}, counted = {}, k;
+  (localArr || []).forEach(function(it){ k = _recKey(it); if(k !== null) localIds[k] = true; });
+  (remoteArr || []).forEach(function(it){ k = _recKey(it); if(k !== null) remoteIds[k] = true; });
+  var deleted = {};
+  if(baseIds && baseIds.length){
+    baseIds.forEach(function(id){
+      if(!localIds[id] || !remoteIds[id]) deleted[id] = true;
+    });
+  }
+  function _drop(id){
+    if(!counted[id]){ counted[id] = true; _syncMergeRemoved++; }
+  }
+  var out = [], seen = {};
+  (localArr || []).forEach(function(it){
+    k = _recKey(it);
+    if(k !== null){
+      if(deleted[k]){ _drop(k); return; }
+      seen[k] = true;
+    }
+    out.push(it);
+  });
+  (remoteArr || []).forEach(function(it){
+    k = _recKey(it);
+    if(k === null){ out.push(it); return; }
+    if(deleted[k]){ _drop(k); return; }
+    if(!seen[k]){ seen[k] = true; out.push(it); }
+  });
+  return out;
+}
+function _mergeModule(localMod, remoteMod, listFields, forceLocal, localWins, baseMod){
+  if(localMod === undefined) return remoteMod;
+  if(remoteMod === undefined) return localMod;
+  var out = {}, k;
+  var winner = localWins ? localMod : remoteMod;
+  var loser = localWins ? remoteMod : localMod;
+  for(k in loser){ out[k] = loser[k]; }
+  for(k in winner){ out[k] = winner[k]; }
+  if(forceLocal){ for(k in forceLocal){ if(localMod[k] !== undefined) out[k] = localMod[k]; } }
+  (listFields || []).forEach(function(f){
+    out[f] = _mergeListById(localMod[f], remoteMod[f], baseMod ? baseMod[f] : null);
+  });
+  return out;
+}
+function _mergeSettings(localS, remoteS, localWins){
+  var l = localS || {}, r = remoteS || {};
+  var winner = localWins ? l : r, loser = localWins ? r : l;
+  var out = {}, k;
+  for(k in loser){ out[k] = loser[k]; }
+  for(k in winner){ out[k] = winner[k]; }
+  out.preferences = Object.assign({}, loser.preferences || {}, winner.preferences || {});
+  return out;
+}
+function mergeAllData(remote, localWins){
+  var local = collectAllData();
+  var base = loadSyncBase();
+  var out = {}, key;
+  _syncMergeRemoved = 0;
+  for(key in DATA_KEYS){
+    var lm = local[key], rm = remote ? remote[key] : undefined;
+    if(lm === undefined && rm === undefined) continue;
+    out[key] = _mergeModule(lm, rm, SYNC_LIST_FIELDS[key], SYNC_FORCE_LOCAL[key], localWins, base ? base[key] : null);
+  }
+  out.settings = _mergeSettings(local.settings, remote ? remote.settings : null, localWins);
+  return out;
+}
+/* 同步结果文案：新增/删除条数都报出来，不再静默 */
+function syncResultText(prefix, merged, added){
+  var parts = [prefix];
+  if(added > 0) parts.push("新增 " + added + " 条");
+  if(_syncMergeRemoved > 0) parts.push("删除 " + _syncMergeRemoved + " 条");
+  parts.push("共 " + _totalRecords(merged) + " 条");
+  return parts.join(" · ");
+}
+function _totalRecords(data){
+  var n = 0;
+  if(!data) return 0;
+  for(var key in SYNC_LIST_FIELDS){
+    var fields = SYNC_LIST_FIELDS[key], mod = data[key];
+    if(!mod) continue;
+    fields.forEach(function(f){ if(mod[f] && mod[f].length) n += mod[f].length; });
+  }
+  return n;
+}
+function fetchRemoteData(c){
+  if(!c.gistId) return Promise.resolve(null);
+  return fetch("https://api.github.com/gists/" + c.gistId, {
+    headers: { "Authorization": "Bearer " + c.token, "Accept": "application/vnd.github+json" }
+  }).then(function(r){ return r.json().then(function(j){ return {ok: r.ok, j: j}; }); })
+  .then(function(res){
+    if(!res.ok){ throw new Error((res.j && res.j.message) || "HTTP 错误"); }
+    var f = res.j && res.j.files && res.j.files[SYNC_FILE];
+    if(!f || !f.content) return null;
+    return JSON.parse(f.content);
+  });
+}
+function _applySyncMeta(field){
+  var m = loadSyncMeta();
+  m[field] = Date.now();
+  m.lastLocalChange = 0;
+  saveSyncMeta(m);
+  var c2 = loadSyncConfig();
+  c2.lastSync = Date.now();
+  localStorage.setItem(SYNC_CONFIG_KEY, JSON.stringify(c2));
+}
+function _refreshAfterSync(){
+  try{ if(typeof renderHome === "function") renderHome();
+  renderCareerOverview(); }catch(e){}
+  try{ if(typeof renderMoney === "function") renderMoney(); }catch(e){}
+  try{ if(typeof renderHealth === "function") renderHealth(); }catch(e){}
+  try{ if(typeof renderInspire === "function") renderInspire(); }catch(e){}
+  try{ if(typeof renderTodo === "function") renderTodo(); }catch(e){}
+  try{ if(typeof renderDaily === "function") renderDaily(); }catch(e){}
+}
+
 function syncNow(action, silent){
   var c = readSyncInputs();
   localStorage.setItem(SYNC_CONFIG_KEY, JSON.stringify(c));
@@ -16393,70 +16546,60 @@ function syncNow(action, silent){
 }
 
 function syncUpload(c, silent){
-  var data = collectAllData();
-  var body = { files: {} };
-  body.files[SYNC_FILE] = { content: JSON.stringify(data, null, 2) };
-  var url, method;
-  if(c.gistId){ url = "https://api.github.com/gists/" + c.gistId; method = "PATCH"; }
-  else { url = "https://api.github.com/gists"; method = "POST"; body.description = "Weh Atelier 数据同步"; body.public = false; }
-  return fetch(url, {
-    method: method,
-    headers: { "Authorization": "Bearer " + c.token, "Accept": "application/vnd.github+json" },
-    body: JSON.stringify(body)
-  }).then(function(r){ return r.json().then(function(j){ return {ok: r.ok, j: j}; }); })
-  .then(function(res){
-    if(!res.ok){ throw new Error((res.j && res.j.message) || ("HTTP " + (res.j && res.j.status || ""))); }
-    if(!c.gistId && res.j && res.j.id){
-      c.gistId = res.j.id;
-      localStorage.setItem(SYNC_CONFIG_KEY, JSON.stringify(c));
-      var g = document.getElementById("syncGistId");
-      if(g) g.value = c.gistId;
-      toast("已创建 Gist：" + c.gistId.slice(0,8) + "…");
-    }
-    c.lastSync = Date.now();
-    localStorage.setItem(SYNC_CONFIG_KEY, JSON.stringify(c));
-    var m = loadSyncMeta();
-    m.lastUpload = Date.now();
-    saveSyncMeta(m);
-    if(!silent){ toast("已上传到云端"); }
-    return true;
-  }).catch(function(e){
-    toast("上传失败：" + e.message);
-    console.error(e);
-    return false;
-  });
+  var localBefore = collectAllData();
+  function doPush(remote){
+    var merged = mergeAllData(remote, true);
+    merged.syncTime = Date.now();
+    var body = { files: {} };
+    body.files[SYNC_FILE] = { content: JSON.stringify(merged, null, 2) };
+    var url, method;
+    if(c.gistId){ url = "https://api.github.com/gists/" + c.gistId; method = "PATCH"; }
+    else { url = "https://api.github.com/gists"; method = "POST"; body.description = "Weh Atelier 数据同步"; body.public = false; }
+    return fetch(url, {
+      method: method,
+      headers: { "Authorization": "Bearer " + c.token, "Accept": "application/vnd.github+json" },
+      body: JSON.stringify(body)
+    }).then(function(r){ return r.json().then(function(j){ return {ok: r.ok, j: j}; }); })
+    .then(function(res){
+      if(!res.ok){ throw new Error((res.j && res.j.message) || ("HTTP " + (res.j && res.j.status || ""))); }
+      if(!c.gistId && res.j && res.j.id){
+        c.gistId = res.j.id;
+        localStorage.setItem(SYNC_CONFIG_KEY, JSON.stringify(c));
+        var g = document.getElementById("syncGistId");
+        if(g) g.value = c.gistId;
+      }
+      writeAllData(merged);
+      saveSyncBase(merged);
+      _applySyncMeta("lastUpload");
+      var added = _totalRecords(merged) - _totalRecords(localBefore);
+      if(!silent){ toast(syncResultText("已合并并上传", merged, added)); }
+      return true;
+    }).catch(function(e){
+      toast("上传失败：" + e.message);
+      console.error(e);
+      return false;
+    });
+  }
+  return fetchRemoteData(c).then(function(remote){ return doPush(remote); })
+    .catch(function(e){
+      toast("上传前读取云端失败，已取消（避免覆盖对方记录）：" + e.message);
+      console.error(e);
+      return false;
+    });
 }
 
 function syncDownload(c, silent){
-  if(!c.gistId){ toast("还没有 Gist，先点“保存并连接”"); return Promise.resolve(false); }
-  return fetch("https://api.github.com/gists/" + c.gistId, {
-    headers: { "Authorization": "Bearer " + c.token, "Accept": "application/vnd.github+json" }
-  }).then(function(r){ return r.json().then(function(j){ return {ok: r.ok, j: j}; }); })
-  .then(function(res){
-    if(!res.ok){ throw new Error((res.j && res.j.message) || "HTTP 错误"); }
-    var f = res.j && res.j.files && res.j.files[SYNC_FILE];
-    if(!f || !f.content){ throw new Error("云端没有数据文件"); }
-    var data = JSON.parse(f.content);
-    var m = loadSyncMeta();
-    var localDirty = (m.lastLocalChange || 0) > (m.lastUpload || 0);
-    if(localDirty){
-      if(!silent){ toast("本地有未上传的修改，跳过下载"); }
-      return false;
-    }
-    writeAllData(data);
-    m.lastDownload = Date.now();
-    saveSyncMeta(m);
-    var c2 = loadSyncConfig();
-    c2.lastSync = Date.now();
-    localStorage.setItem(SYNC_CONFIG_KEY, JSON.stringify(c2));
-    try{ if(typeof renderHome === "function") renderHome();
-  renderCareerOverview(); }catch(e){}
-    try{ if(typeof renderMoney === "function") renderMoney(); }catch(e){}
-    try{ if(typeof renderHealth === "function") renderHealth(); }catch(e){}
-    try{ if(typeof renderInspire === "function") renderInspire(); }catch(e){}
-    try{ if(typeof renderTodo === "function") renderTodo(); }catch(e){}
-    try{ if(typeof renderDaily === "function") renderDaily(); }catch(e){}
-    if(!silent){ toast("已从云端同步最新数据"); }
+  if(!c.gistId){ if(!silent) toast("还没有 Gist，先点“保存并连接”"); return Promise.resolve(false); }
+  var localBefore = collectAllData();
+  return fetchRemoteData(c).then(function(remote){
+    if(remote === null){ throw new Error("云端还没有数据文件"); }
+    var merged = mergeAllData(remote, false);
+    writeAllData(merged);
+    saveSyncBase(merged);
+    _applySyncMeta("lastDownload");
+    _refreshAfterSync();
+    var added = _totalRecords(merged) - _totalRecords(localBefore);
+    if(!silent){ toast(syncResultText("已从云端合并", merged, added)); }
     return true;
   }).catch(function(e){
     if(!silent){ toast("下载失败：" + e.message); }
@@ -16483,7 +16626,7 @@ function syncConnect(){
   if(!c.token){ toast("请先填写 Token"); switchSettingsTab("sync"); return; }
   localStorage.setItem(SYNC_CONFIG_KEY, JSON.stringify(c));
   renderSyncStatus();
-  if(c.gistId){ syncNow("download", true); return; }
+  if(c.gistId){ syncNow("download", false); return; }
   // 没有 Gist ID：先查找已有的 Weh Atelier 同步 Gist，找到则复用，避免多设备数据分叉
   toast("正在查找已有的同步 Gist…");
   findExistingGist(c.token).then(function(id){
@@ -16493,9 +16636,9 @@ function syncConnect(){
       var g = document.getElementById("syncGistId");
       if(g) g.value = id;
       toast("已连接已有的 Gist：" + id.slice(0,8) + "…");
-      syncNow("download", true);
+      syncNow("download", false);
     } else {
-      syncNow("upload", true);
+      syncNow("upload", false);
     }
   });
 }
@@ -16553,6 +16696,7 @@ function importAllData(event){
         if(data.settings){
           localStorage.setItem(SETTINGS_KEY, JSON.stringify(data.settings));
         }
+        clearSyncBase(); // 整份导入属「整段替换」，不作为删除判定依据，避免同步时误删另一台设备的数据
         markLocalChange();
   toast("数据导入成功，页面即将刷新");
         setTimeout(function(){ location.reload(); }, 1000);
@@ -16574,6 +16718,7 @@ function clearModuleData(){
   showConfirm("确定清空「" + (moduleNames[module]||module) + "」的所有数据？此操作不可恢复！").then(function(ok){
     if(!ok) return;
     localStorage.removeItem(DATA_KEYS[module]);
+    clearSyncBase(); // 清空模块属「整段清掉」，不作为删除判定依据，避免同步时误删另一台设备的数据
     markLocalChange();
   toast("已清空，页面即将刷新");
     setTimeout(function(){ location.reload(); }, 1000);
@@ -16589,6 +16734,7 @@ function resetAllData(){
         localStorage.removeItem(DATA_KEYS[key]);
       }
       localStorage.removeItem(SETTINGS_KEY);
+      clearSyncBase(); // 重置全部属「整段清掉」，不作为删除判定依据，避免同步时误删另一台设备的数据
       markLocalChange();
   toast("已重置全部数据，页面即将刷新");
       setTimeout(function(){ location.reload(); }, 1000);
