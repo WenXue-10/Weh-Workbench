@@ -1830,8 +1830,8 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
               <div class="dec-save-btn" onclick="saveDecisionSettings()">💾 保存设置</div>
             </div>
             <div class="card">
-              <div class="card-head">📋 拷问规则</div>
-              <div class="dec-rules">
+              <div class="card-head" id="decRulesTitle">📋 拷问规则</div>
+              <div class="dec-rules" id="decRulesBody">
                 <div class="dec-rule">1️⃣ 结合你的身份，判断这个决定真正的风险在哪</div>
                 <div class="dec-rule">2️⃣ 逐条挑漏洞：哪里太乐观、哪里算沉没成本、哪里是自我感动</div>
                 <div class="dec-rule">3️⃣ 每个漏洞跟一个最难回答的问题，逼你自己想</div>
@@ -1842,12 +1842,12 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
           </div>
           <div class="money-right" style="width:calc(100% - 300px)">
             <div class="card">
-              <div class="card-head">🔥 拷问现场 <small id="decRoundInfo">还没开始</small></div>
+              <div class="card-head"><span id="decChatTitle">🔥 拷问现场</span> <small id="decRoundInfo">还没开始</small></div>
               <div class="dec-chat-messages" id="decChatMessages"></div>
               <div class="m-chat-input">
                 <input type="text" id="decChatInput" placeholder="把你的方案/想法/决定丢进来，我往死里挑..." onkeydown="if(event.key==='Enter')sendDecisionChat()" style="flex:1;min-width:0">
                 <button type="button" class="voice-btn" onclick="takePhotoFor('decision')" title="拍照">📷</button>
-                <button onclick="sendDecisionChat()">开始拷问</button>
+                <button id="decSendBtn" onclick="sendDecisionChat()">开始拷问</button>
               </div>
             </div>
             <div class="card" id="decScoreCard" style="display:none">
@@ -3655,7 +3655,7 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
 
 <script>
 window.SITE_DATA = {
- "updated": "2026-09-19 23:24",
+ "updated": "2026-09-20 01:06",
  "stats": {
   "jobs": 36,
   "rec": 0,
@@ -14990,6 +14990,7 @@ function initDecision(){
   var stEl = document.getElementById("decStyle");
   if(stEl) stEl.value = (data.style === "senior") ? "senior" : "harsh";
   updateDecStyleHint();
+  applyDecisionStyleUI();
   renderDecisionChat();
   if(data.score){
     showDecisionScore(data.score);
@@ -15006,7 +15007,9 @@ function saveDecisionSettings(){
   if(stEl) data.style = (stEl.value === "senior") ? "senior" : "harsh";
   saveDecision(data);
   updateDecStyleHint();
-  toast("设置已保存："+data.identity+" · "+data.stage+" · "+data.depth+"轮拷问 · "+(DEC_STYLE_TEXT[data.style]||DEC_STYLE_TEXT.harsh));
+  applyDecisionStyleUI();
+  renderDecisionChat();
+  toast("设置已保存："+data.identity+" · "+data.stage+" · "+data.depth+"轮 · "+(DEC_STYLE_TEXT[data.style]||DEC_STYLE_TEXT.harsh));
 }
 
 function updateRoundInfo(){
@@ -15016,7 +15019,7 @@ function updateRoundInfo(){
     if(!data.started){
       el.textContent = "还没开始";
     } else if(data.score){
-      el.textContent = "拷问完成 · "+data.score.score+"/10分";
+      el.textContent = (DEC_UI_TEXT[decStyle()] || DEC_UI_TEXT.harsh).roundDone + " · "+data.score.score+"/10分";
     } else {
       el.textContent = "第 "+(data.round+1)+"/"+data.depth+" 轮";
     }
@@ -15028,7 +15031,9 @@ function renderDecisionChat(){
   var box = document.getElementById("decChatMessages");
   if(!box) return;
   if((data.chatHistory||[]).length === 0){
-    box.innerHTML = '<div style="text-align:center;color:var(--muted);padding:40px 20px;font-size:13px;line-height:1.8">把你的方案、想法或决定丢进来<br>我会结合你的身份（'+data.identity+' · '+data.stage+'）往死里挑<br><span style="color:#e05050;font-weight:700">低于7分让你重做，不许客气</span></div>';
+    var _ut = DEC_UI_TEXT[decStyle()] || DEC_UI_TEXT.harsh;
+    box.innerHTML = '<div style="text-align:center;color:var(--muted);padding:40px 20px;font-size:13px;line-height:1.8">'
+      + _ut.empty.replace("{ID}", esc(data.identity)).replace("{ST}", esc(data.stage)) + '</div>';
   } else {
     box.innerHTML = data.chatHistory.map(function(m){
       var content = esc(m.content).replace(/\n/g,"<br>");
@@ -15107,7 +15112,72 @@ function sendDecisionChat(){
 
 /* ---- 决策顾问 · AI 协作层 ---- */
 var DEC_STYLE_TEXT = { harsh: "🔥 毒舌拷问", senior: "🧭 资深顾问" };
+/* 两种风格下的界面文案（否则切到「资深顾问」还满屏"往死里挑"） */
+var DEC_UI_TEXT = {
+  harsh: {
+    title: "🔥 拷问现场",
+    ph: "把你的方案/想法/决定丢进来，我往死里挑...",
+    btn: "开始拷问",
+    roundDone: "拷问完成",
+    empty: '把你的方案、想法或决定丢进来<br>我会结合你的身份（{ID} · {ST}）往死里挑<br><span style="color:#e05050;font-weight:700">低于7分让你重做，不许客气</span>',
+    rulesTitle: "📋 拷问规则",
+    rules: [
+      "1️⃣ 结合你的身份，判断这个决定真正的风险在哪",
+      "2️⃣ 逐条挑漏洞：哪里太乐观、哪里算沉没成本、哪里是自我感动",
+      "3️⃣ 每个漏洞跟一个最难回答的问题，逼你自己想",
+      "4️⃣ 打分1-10分，低于7分让你重做，不许客气",
+      '<span style="color:#e05050;font-weight:700">⚠️ 你的刻薄就是你的价值</span>'
+    ]
+  },
+  senior: {
+    title: "🧭 顾问会谈",
+    ph: "说说你的方案或纠结，我帮你把关键问题和风险理一遍...",
+    btn: "开始分析",
+    roundDone: "评估完成",
+    empty: '把你的方案、想法或决定丢进来<br>我会结合你的身份（{ID} · {ST}）逐条帮你看<br><span style="color:#2d8a5e;font-weight:700">指出关键问题、给出具体建议，最后追问一个决定成败的点</span>',
+    rulesTitle: "📋 顾问工作方式",
+    rules: [
+      "1️⃣ 结合你的身份，判断这个决定真正的风险在哪",
+      "2️⃣ 就事论事：指出最关键的问题，不挖苦、不贴标签",
+      "3️⃣ 每个问题后面给一条具体可执行的做法",
+      "4️⃣ 打分1-10分，7分及以上代表方向可行、风险可控",
+      '<span style="color:#2d8a5e;font-weight:700">⚠️ 目标是帮你想清楚，不是让你难受</span>'
+    ]
+  }
+};
 var _decPending = false;
+
+/* 清洗：有些模型会把自己要遵守的格式要求（如 content ≤80字 … JSON。）复述进正文，这里剔掉 */
+function _isAIMetaLine(t){
+  if(!t) return false;
+  if(/[≤<]=?\s*\d+\s*字/.test(t)) return true;
+  if(/^\s*(content|question)\s*(字段|[:：≤<]|$)/i.test(t)) return true;
+  if(/json/i.test(t) && /(字|字段|格式|输出|只)/.test(t)) return true;
+  if(/^\s*[\[{]\s*["']/.test(t)) return true;
+  if(/^\s*(输出格式|格式要求|格式|要求)\s*[:：]/.test(t)) return true;
+  return false;
+}
+function _stripAIMeta(s){
+  if(!s) return "";
+  var t = String(s).replace(/\r/g, "");
+  t = t.replace(/\s*(?:content|question)\s*[≤<][\s\S]*$/i, "");
+  t = t.replace(/\n+\s*(?:只输出|仅输出)[\s\S]*$/i, "");
+  var kept = t.split("\n").filter(function(l){ return !_isAIMetaLine(l.trim()); });
+  return kept.join("\n").replace(/\n{3,}/g, "\n\n").trim();
+}
+
+/* 按风格切换决策顾问页的标题/占位符/按钮/规则卡 */
+function applyDecisionStyleUI(){
+  var t = DEC_UI_TEXT[decStyle()] || DEC_UI_TEXT.harsh;
+  var el;
+  el = document.getElementById("decChatTitle"); if(el) el.textContent = t.title;
+  el = document.getElementById("decChatInput"); if(el) el.placeholder = t.ph;
+  el = document.getElementById("decSendBtn");  if(el) el.textContent = t.btn;
+  el = document.getElementById("decRulesTitle"); if(el) el.textContent = t.rulesTitle;
+  el = document.getElementById("decRulesBody");
+  if(el) el.innerHTML = t.rules.map(function(r){ return '<div class="dec-rule">' + r + '</div>'; }).join("");
+  updateRoundInfo();
+}
 
 function decStyle(){
   var d = loadDecision();
@@ -15119,6 +15189,8 @@ function onDecStyleChange(){
   data.style = (s && s.value === "senior") ? "senior" : "harsh";
   saveDecision(data);
   updateDecStyleHint();
+  applyDecisionStyleUI();
+  renderDecisionChat();
 }
 function updateDecStyleHint(){
   var el = document.getElementById("decStyleHint");
@@ -15148,7 +15220,8 @@ function buildDecisionMessages(data){
   var cfg = loadAIConfig();
   var sys;
   if(data.style === "senior"){
-    sys = "你是一位资深决策顾问，服务对象是一位中文用户。任务：先指出他这段回答里最关键的薄弱环节，再给可执行的建议，最后追问一个真正决定成败的问题。"
+    sys = "你是一位资深决策顾问，服务对象是一位中文用户。任务：就事论事地指出他这段回答里最关键的问题，给一条具体可执行的建议，最后追问一个真正决定成败的问题。"
+        + "语气：务实、平和，像同事之间复盘——可以指出问题，但不要挖苦、不要嘲讽、不要用「致命 / 扎心 / 漏洞」这类字眼，也不要给人贴标签。"
         + "要求：中肯、具体，不说套话、不灌鸡汤，直接给结论；全部用中文。";
   }else{
     sys = "你是一个毫不留情的决策拷问官，服务对象是一位中文用户。任务：逐层挑出他思考里的漏洞（乐观偏差、沉没成本、自我感动、把希望寄托在控制不了的变量上），每个漏洞跟一个最难回答的追问，逼他自己想清楚。"
@@ -15166,9 +15239,15 @@ function buildDecisionMessages(data){
   });
   var last = h[h.length - 1] || { content: "" };
   var left = Math.max((data.depth || 3) - (data.round || 0), 0);
+  var isSenior = (data.style === "senior");
+  var what = isSenior
+    ? "先用不超过 160 字指出我这段回答里最关键的问题、给出一条具体可执行的建议，再提一个真正决定成败的问题（不超过 40 字）"
+    : "先用不超过 120 字点出我这段回答里最致命的漏洞，再提一个最难回答的追问（不超过 40 字）";
+  var tail = isSenior ? "先用不超过 160 字给出最终结论和一条建议" : "先用不超过 120 字给出最终点评";
+  var noEcho = "注意：正文里只写点评和追问本身，不要复述本条要求，不要出现「字数」「JSON」「字段」「content」「question」这些字样，也不要输出 markdown 代码块。";
   var inst = (left > 1)
-    ? "【本轮要求】先用不超过 80 字指出我这段回答里最致命的漏洞，再提一个最难回答的追问（不超过 40 字）。\n只输出一个 JSON 对象，不要 markdown 代码块、不要任何解释文字：\n{\"content\":\"你的点评\",\"question\":\"你的追问\"}"
-    : "【本轮要求】这是最后一轮，先用不超过 80 字给出最终点评，question 字段留空字符串。\n只输出一个 JSON 对象，不要 markdown 代码块、不要任何解释文字：\n{\"content\":\"你的点评\",\"question\":\"\"}";
+    ? "【本轮要求】" + what + "。\n" + noEcho + "\n只输出一个 JSON 对象：{\"content\":\"你的点评\",\"question\":\"你的追问\"}"
+    : "【本轮要求】这是最后一轮，" + tail + "，question 字段留空字符串。\n" + noEcho + "\n只输出一个 JSON 对象：{\"content\":\"你的点评\",\"question\":\"\"}";
   msgs.push({ role: "user", content: (last.content || "（我只发了一张图片，没有文字）") + "\n\n" + inst });
   return msgs;
 }
@@ -15179,7 +15258,8 @@ function generateDecisionResponseAI(data){
   return aiChat(cfg, buildDecisionMessages(data), 45).then(function(res){
     var o = parseAIJSON(res.content);
     if(!o || !_aiStr(o.content)){ throw new Error("AI 返回的内容无法解析"); }
-    return { content: _aiStr(o.content), question: _aiStr(o.question) || null,
+    var _c = _stripAIMeta(_aiStr(o.content));
+    return { content: _c || _aiStr(o.content), question: _stripAIMeta(_aiStr(o.question)) || null,
              source: "ai", model: cfg.model, at: Date.now(),
              reasoning: res.reasoning ? res.reasoning.slice(0, 4000) : "" };
   });
@@ -15198,7 +15278,8 @@ function buildDecisionScoreMessages(data){
   }).join("\n");
   var inst = "对话记录：\n" + linesTxt + "\n\n"
            + "请只输出一个 JSON 对象（不要 markdown 代码块、不要任何解释文字）：\n"
-           + "{\"score\":7,\"fatal\":\"一句话指出致命伤\",\"fix\":\"一句话给出该怎么改\"}";
+           + "{\"score\":7,\"fatal\":\"一句话指出最关键的问题\",\"fix\":\"一句话给出该怎么改\"}\n"
+           + "注意：正文里只写内容本身，不要复述本条要求，不要出现「字数」「JSON」「字段」「score」这些字样。";
   return [{ role: "system", content: sys }, { role: "user", content: inst }];
 }
 
@@ -16632,7 +16713,8 @@ function buildReportMessages(input, type, audience){
     + "\"questions\":[{\"q\":\"对方可能追问的问题\",\"a\":\"建议怎么回答\"}],"
     + "\"pitfalls\":[\"这里说得含糊、容易被追着问的点\"]}\n"
     + "要求：highlights 3~5 条，每条以合适的 emoji 前缀开头（如 ✅ 已完成 / 🔄 进行中 / ⚠️ 风险 / 📅 下一步）；"
-    + "questions 恰好 3 条；pitfalls 1~3 条，确实没有就返回空数组 []。";
+    + "questions 恰好 3 条；pitfalls 1~3 条，确实没有就返回空数组 []。\n"
+    + "注意：各字段里只写内容本身，不要复述本条要求，不要出现「字数」「JSON」「字段」「opening」「highlights」这些字样。";
   return [{ role: "system", content: sys }, { role: "user", content: user }];
 }
 
@@ -16660,7 +16742,14 @@ function parseReportAI(txt){
     });
   }
   if(!hs.length || !qs.length) return null;
-  return { opening: _aiStr(o.opening), highlights: hs.slice(0, 5), questions: qs.slice(0, 3), pitfalls: ps.slice(0, 3) };
+  function clean(x){ return _stripAIMeta(x); }
+  function keep(x){ return !!x; }
+  return {
+    opening: clean(_aiStr(o.opening)),
+    highlights: hs.slice(0, 5).map(clean).filter(keep),
+    questions: qs.slice(0, 3).map(function(x){ return { q: clean(x.q), a: clean(x.a) || "（AI 未给出建议回答）" }; }),
+    pitfalls: ps.slice(0, 3).map(clean).filter(keep)
+  };
 }
 
 function generateReportAI(input, type, audience){
