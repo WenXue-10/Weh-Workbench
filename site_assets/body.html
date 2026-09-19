@@ -330,6 +330,14 @@
                   <option value="10">10轮 · 死磕</option>
                 </select>
               </div>
+              <div class="dec-setting">
+                <div class="dec-label">顾问风格</div>
+                <select class="dec-select" id="decStyle" onchange="onDecStyleChange()">
+                  <option value="harsh" selected>🔥 毒舌拷问</option>
+                  <option value="senior">🧭 资深顾问</option>
+                </select>
+                <div class="ai-hint" id="decStyleHint"></div>
+              </div>
               <div class="dec-save-btn" onclick="saveDecisionSettings()">💾 保存设置</div>
             </div>
             <div class="card">
@@ -408,7 +416,7 @@
                   <button type="button" class="voice-btn" onclick="takePhotoFor('report')" title="拍照">📷</button>
                 </div>
               </div>
-              <button class="report-generate-btn" onclick="generateReport()">✨ 生成精简汇报</button>
+              <button class="report-generate-btn" id="reportGenerateBtn" onclick="generateReport()">✨ 生成精简汇报</button>
             </div>
             <div class="card">
               <div class="card-head">📜 历史汇报 <span class="m-count" id="reportHistoryCount"></span></div>
