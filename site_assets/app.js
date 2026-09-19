@@ -342,25 +342,6 @@ function renderHome(){
 
 /* ---------- 岗位看板 ---------- */
 var curFilter="all", curQuery="";
-function renderJobs(){
-  var STATUS_FILTERS = ["done","ready","sent","interview","offer","backup","dead","warn"];
-  var list = JOBS.filter(function(j){
-    if(curFilter==="rec" && !(parseFloat(j.score)>=70)) return false;
-    if(STATUS_FILTERS.indexOf(curFilter)>=0 && j.status!==curFilter) return false;
-    if(curQuery){ var q=curQuery.toLowerCase(); if((j.company+j.pos+j.city).toLowerCase().indexOf(q)<0) return false; }
-    return true;
-  });
-  var html = "";
-  list.forEach(function(j){
-    html += '<div class="job-card" onclick="openJob('+JOBS.indexOf(j)+')">'
-      + '<div class="job-top"><div class="job-title"><span class="company">'+esc(j.company)+'</span><span class="pos">'+esc(j.pos)+'</span></div>'
-      + '<span class="badge '+scoreClass(j.score)+'">'+esc(j.score)+'</span></div>'
-      + '<div class="job-meta">📍 '+esc(j.city)+' &nbsp;·&nbsp; 💰 '+esc(j.salary)+' &nbsp;·&nbsp; 🗓 截止 '+esc(j.deadline)+'</div>'
-      + '<div class="job-tags"><span class="status '+statusClass(j.status)+'">'+esc(j.statusTxt)+'</span><span class="level">匹配等级 '+esc(j.level)+'</span>'
-      + '<span class="link-btn">🔗 原始链接</span></div></div>';
-  });
-  document.getElementById("jobList").innerHTML = html || '<div class="card" style="text-align:center;color:var(--muted)">🐾 没有符合条件的岗位哦～</div>';
-}
 function fileLinks(j, i){
   var out = "";
   if(j.report){
@@ -2136,8 +2117,8 @@ function clearOperationLogs(){
 }
 
 /* ========== 求职作战：岗位看板 ========== */
-var JOB_STATUS_TEXT = {pending:"📮 待投递", applied:"📤 已投递", interview:"🎤 面试中", offer:"🎉 已Offer", rejected:"❌ 已挂", backup:"📌 备选"};
-var JOB_STATUS_COLOR = {pending:"#f59e0b", applied:"#3b82f6", interview:"#8b5cf6", offer:"#10b981", rejected:"#ef4444", backup:"#6b7280"};
+var JOB_STATUS_TEXT = {pending:"📮 待投递", done:"✅ 已背调", new:"🆕 新收录", warn:"⚠️ 待核实", backup:"📌 备选", applied:"📤 已投递", interview:"🎤 面试中", offer:"🎉 已Offer", rejected:"❌ 已挂"};
+var JOB_STATUS_COLOR = {pending:"#f59e0b", done:"#14b8a6", new:"#d946ef", warn:"#f97316", backup:"#6b7280", applied:"#3b82f6", interview:"#8b5cf6", offer:"#10b981", rejected:"#ef4444"};
 
 function loadJobs(){
   try{ var d = JSON.parse(localStorage.getItem(JOB_KEY)); return d && d.jobs ? d : {jobs:[], logs:[]}; }catch(e){ return {jobs:[], logs:[]}; }
@@ -2149,7 +2130,7 @@ function loadJobOverrides(){
 }
 function saveJobOverrides(o){ markLocalChange(); localStorage.setItem(JOB_OVERRIDE_KEY, JSON.stringify(o)); }
 function jobKey(j){ return (j.company||"") + "||" + (j.pos||j.position||""); }
-var KB_STATUS_MAP = {ready:"pending", sent:"applied", interview:"interview", offer:"offer", dead:"rejected", backup:"backup", done:"pending", warn:"pending", new:"pending"};
+var KB_STATUS_MAP = {ready:"pending", sent:"applied", interview:"interview", offer:"offer", dead:"rejected", backup:"backup", done:"done", warn:"warn", new:"new"};
 function getMergedJobs(){
   var overrides = loadJobOverrides();
   var local = loadJobs();
