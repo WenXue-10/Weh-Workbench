@@ -341,8 +341,8 @@
               <div class="dec-save-btn" onclick="saveDecisionSettings()">💾 保存设置</div>
             </div>
             <div class="card">
-              <div class="card-head">📋 拷问规则</div>
-              <div class="dec-rules">
+              <div class="card-head" id="decRulesTitle">📋 拷问规则</div>
+              <div class="dec-rules" id="decRulesBody">
                 <div class="dec-rule">1️⃣ 结合你的身份，判断这个决定真正的风险在哪</div>
                 <div class="dec-rule">2️⃣ 逐条挑漏洞：哪里太乐观、哪里算沉没成本、哪里是自我感动</div>
                 <div class="dec-rule">3️⃣ 每个漏洞跟一个最难回答的问题，逼你自己想</div>
@@ -353,12 +353,12 @@
           </div>
           <div class="money-right" style="width:calc(100% - 300px)">
             <div class="card">
-              <div class="card-head">🔥 拷问现场 <small id="decRoundInfo">还没开始</small></div>
+              <div class="card-head"><span id="decChatTitle">🔥 拷问现场</span> <small id="decRoundInfo">还没开始</small></div>
               <div class="dec-chat-messages" id="decChatMessages"></div>
               <div class="m-chat-input">
                 <input type="text" id="decChatInput" placeholder="把你的方案/想法/决定丢进来，我往死里挑..." onkeydown="if(event.key==='Enter')sendDecisionChat()" style="flex:1;min-width:0">
                 <button type="button" class="voice-btn" onclick="takePhotoFor('decision')" title="拍照">📷</button>
-                <button onclick="sendDecisionChat()">开始拷问</button>
+                <button id="decSendBtn" onclick="sendDecisionChat()">开始拷问</button>
               </div>
             </div>
             <div class="card" id="decScoreCard" style="display:none">
