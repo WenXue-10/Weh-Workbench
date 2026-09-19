@@ -3460,7 +3460,7 @@ function writeAllData(data){
 /* ---------- 合并工具：按记录 id 求并集 + 基准清单判定删除 ---------- */
 var SYNC_LIST_FIELDS = {
   money: ["records"], health: ["records"], inspire: ["records"], todo: ["items"],
-  report: ["history"], daily: ["tasks"], job: ["jobs"], company: ["companies"]
+  report: ["history"], daily: ["tasks"], job: ["jobs", "logs"], company: ["companies"]
 };
 var SYNC_FORCE_LOCAL = { daily: { date: true } };
 var SYNC_BASE_KEY = "weh_sync_base_v1";
