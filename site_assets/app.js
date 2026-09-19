@@ -3442,6 +3442,8 @@ function collectAllData(){
     }catch(e){}
   }
   data.settings = loadSettings();
+  /* 岗位状态覆盖层（独立键，不属于 DATA_KEYS 模块）一并打包，否则跨设备不同步 */
+  data.jobOverrides = loadJobOverrides();
   data.syncTime = Date.now();
   return data;
 }
@@ -3451,6 +3453,8 @@ function writeAllData(data){
     if(data[key] !== undefined){ localStorage.setItem(DATA_KEYS[key], JSON.stringify(data[key])); }
   }
   if(data.settings){ localStorage.setItem(SETTINGS_KEY, JSON.stringify(data.settings)); }
+  /* 岗位状态覆盖层：必须直写，不能用 saveJobOverrides（它会 markLocalChange，同步写回不算本地改动） */
+  if(data.jobOverrides){ localStorage.setItem(JOB_OVERRIDE_KEY, JSON.stringify(data.jobOverrides)); }
 }
 
 /* ---------- 合并工具：按记录 id 求并集 + 基准清单判定删除 ---------- */
@@ -3544,6 +3548,15 @@ function _mergeSettings(localS, remoteS, localWins){
   out.preferences = Object.assign({}, loser.preferences || {}, winner.preferences || {});
   return out;
 }
+/* 键级并集合并（如岗位状态覆盖层）：两边不同的键都保留，仅同键冲突时按赢家 */
+function _mergeMap(localMap, remoteMap, localWins){
+  var l = localMap || {}, r = remoteMap || {};
+  var winner = localWins ? l : r, loser = localWins ? r : l;
+  var out = {}, k;
+  for(k in loser){ out[k] = loser[k]; }
+  for(k in winner){ out[k] = winner[k]; }
+  return out;
+}
 function mergeAllData(remote, localWins){
   var local = collectAllData();
   var base = loadSyncBase();
@@ -3555,6 +3568,7 @@ function mergeAllData(remote, localWins){
     out[key] = _mergeModule(lm, rm, SYNC_LIST_FIELDS[key], SYNC_FORCE_LOCAL[key], localWins, base ? base[key] : null);
   }
   out.settings = _mergeSettings(local.settings, remote ? remote.settings : null, localWins);
+  out.jobOverrides = _mergeMap(local.jobOverrides, remote ? remote.jobOverrides : null, localWins);
   return out;
 }
 /* 同步结果文案：新增/删除条数都报出来，不再静默 */
@@ -3604,6 +3618,8 @@ function _refreshAfterSync(){
   try{ if(typeof renderInspire === "function") renderInspire(); }catch(e){}
   try{ if(typeof renderTodo === "function") renderTodo(); }catch(e){}
   try{ if(typeof renderDaily === "function") renderDaily(); }catch(e){}
+  try{ if(typeof renderJobs === "function") renderJobs(); }catch(e){}
+  try{ if(typeof renderCompanies === "function") renderCompanies(); }catch(e){}
 }
 
 function syncNow(action, silent){
@@ -3740,6 +3756,7 @@ function exportAllData(){
     }catch(e){}
   }
   data.settings = loadSettings();
+  data.jobOverrides = loadJobOverrides();
   data.exportTime = new Date().toISOString();
   var blob = new Blob([JSON.stringify(data, null, 2)], {type:"application/json"});
   var url = URL.createObjectURL(blob);
@@ -3769,6 +3786,9 @@ function importAllData(event){
         }
         if(data.settings){
           localStorage.setItem(SETTINGS_KEY, JSON.stringify(data.settings));
+        }
+        if(data.jobOverrides){
+          localStorage.setItem(JOB_OVERRIDE_KEY, JSON.stringify(data.jobOverrides));
         }
         clearSyncBase(); // 整份导入属「整段替换」，不作为删除判定依据，避免同步时误删另一台设备的数据
         markLocalChange();
@@ -3808,6 +3828,7 @@ function resetAllData(){
         localStorage.removeItem(DATA_KEYS[key]);
       }
       localStorage.removeItem(SETTINGS_KEY);
+      localStorage.removeItem(JOB_OVERRIDE_KEY);
       clearSyncBase(); // 重置全部属「整段清掉」，不作为删除判定依据，避免同步时误删另一台设备的数据
       markLocalChange();
   toast("已重置全部数据，页面即将刷新");
