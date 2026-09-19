@@ -1848,6 +1848,7 @@ function selectInspire(id){
   if(!r) return;
   document.getElementById("inspireDetailTitle").textContent = r.date + " " + (r.time||"");
   document.getElementById("inspireActions").style.display = "flex";
+  renderKbState();
   // 已有延伸（AI 或模板）直接展示
   if(r.aiExtension && r.aiExtension.questions && r.aiExtension.questions.length){
     renderInspireDetail(r.aiExtension, r.photoId);
@@ -1986,6 +1987,7 @@ function deleteCurrentInspire(){
     data.records = data.records.filter(function(x){ return x.id!==currentInspireId; });
     saveInspire(data);
     currentInspireId = null;
+    renderKbState();
     document.getElementById("inspireDetailTitle").textContent = "选一条灵感看看";
     document.getElementById("inspireActions").style.display = "none";
     document.getElementById("inspireDetail").innerHTML = '<div style="text-align:center;color:var(--muted);padding:40px 20px;font-size:13px;line-height:1.8">从左边选一条灵感<br>AI会帮你：追问、延伸、关联、判断值不值得做<br><span style="color:var(--pink-deep);font-weight:700">碎片化想法不记录就溜走了</span></div>';
@@ -1993,7 +1995,8 @@ function deleteCurrentInspire(){
   });
 }
 
-function inspireToMarkdown(r){
+function inspireToMarkdown(r, opts){
+  var withExt = !opts || opts.withExt !== false;   /* 默认含 AI 延伸（保持原导出行为不变） */
   var statusText = {pending:"待处理", recorded:"已记录", action:"已行动"}[r.status] || "待处理";
   var ext = r.aiExtension || generateInspireExtension(r.content);
   var title = r.content.length > 30 ? r.content.slice(0,30) + "..." : r.content;
@@ -2003,23 +2006,95 @@ function inspireToMarkdown(r){
   md += "time: " + (r.time || "") + "\n";
   md += "status: " + statusText + "\n";
   md += "tags: [灵感, 碎片化想法]\n";
+  md += "id: " + r.id + "\n";
+  md += "source: Weh Atelier 灵感捕捉\n";
+  if(withExt){
+    md += "ai_extended: true\n";
+    if(ext.source === "ai" && ext.model) md += "ai_model: " + ext.model + "\n";
+  }
   md += "---\n\n";
   md += "# 💡 原始想法\n\n";
   md += r.content + "\n\n";
-  md += "# 🤖 AI延伸\n\n";
-  md += "## ❓ 值得追问的\n\n";
-  ext.questions.forEach(function(q){ md += "- " + q + "\n"; });
-  md += "\n";
-  md += "## 🚀 可以延伸的方向\n\n";
-  ext.directions.forEach(function(d){ md += "- " + d + "\n"; });
-  md += "\n";
-  md += "## ⚖️ 值不值得做\n\n";
-  md += ext.judgment + "\n\n";
-  md += "## 🔗 可能关联\n\n";
-  md += ext.related + "\n\n";
+  if(withExt){
+    md += "# 🤖 AI延伸\n\n";
+    md += "## ❓ 值得追问的\n\n";
+    ext.questions.forEach(function(q){ md += "- " + q + "\n"; });
+    md += "\n";
+    md += "## 🚀 可以延伸的方向\n\n";
+    ext.directions.forEach(function(d){ md += "- " + d + "\n"; });
+    md += "\n";
+    md += "## ⚖️ 值不值得做\n\n";
+    md += ext.judgment + "\n\n";
+    md += "## 🔗 可能关联\n\n";
+    md += ext.related + "\n\n";
+  }
   md += "---\n";
   md += "*由 Weh Atelier 灵感捕捉模块导出 · " + new Date().toISOString().slice(0,10) + "*\n";
   return md;
+}
+
+/* ========== 📚 存入知识库（灵感 → Obsidian 00-灵感库） ==========
+   机制：网页只负责"打标记 + 生成 md 正文"，随云同步进 Gist；
+   电脑端跑 tools/inspire-inbox.mjs 读 Gist、把 md 写进 00-灵感库。
+   为什么 md 由网页生成：模板只有一份，脚本纯搬运，不会两边漂移。 */
+function markInspireKB(variant){
+  var id = currentInspireId;
+  if(!id) return;
+  var data = loadInspire();
+  var r = data.records.find(function(x){ return x.id===id; });
+  if(!r) return;
+  var withExt = variant === "ext";
+  if(withExt && !(r.aiExtension && r.aiExtension.questions && r.aiExtension.questions.length)){
+    toast("还没有 AI 延伸，等它生成完再存");
+    return;
+  }
+  r.kb = { at: Date.now(), variant: variant, md: inspireToMarkdown(r, {withExt: withExt}) };
+  saveInspire(data);
+  renderKbState();
+  toast("已标记入库" + (withExt ? "（含 AI 延伸）" : "（仅原话）") + "，正在同步到云端…");
+  kbPushToCloud();
+}
+
+/* 取消入库：写"墓碑"（variant:null）而不是直接删字段——
+   否则会被另一台设备上仍带标记的旧副本合回来 */
+function unmarkInspireKB(){
+  var id = currentInspireId;
+  if(!id) return;
+  var data = loadInspire();
+  var r = data.records.find(function(x){ return x.id===id; });
+  if(!r || !r.kb) return;
+  r.kb = { at: Date.now(), variant: null };
+  saveInspire(data);
+  renderKbState();
+  toast("已取消入库标记（已生成的笔记不会自动删除）");
+  kbPushToCloud();
+}
+
+function kbPushToCloud(){
+  var c = loadSyncConfig();
+  if(!c.token || !c.gistId){
+    toast("还没配置云同步：标记已存本机，配好后点「☁️ 上传」即可带上去");
+    return;
+  }
+  syncUpload(c, false).then(function(ok){
+    renderSyncStatus();
+    if(ok){ toast("已同步到云端 —— 在电脑上跑一次「拉取灵感」，笔记就会写进 00-灵感库"); }
+  });
+}
+
+function renderKbState(){
+  var el = document.getElementById("inspireKbState");
+  if(!el) return;
+  var data = loadInspire();
+  var r = data.records.find(function(x){ return x.id===currentInspireId; });
+  if(!r || !r.kb || !r.kb.variant){ el.style.display = "none"; el.innerHTML = ""; return; }
+  var t = new Date(r.kb.at);
+  var p2 = function(n){ return ("0" + n).slice(-2); };
+  var ts = t.getFullYear() + "-" + p2(t.getMonth()+1) + "-" + p2(t.getDate()) + " " + p2(t.getHours()) + ":" + p2(t.getMinutes());
+  el.style.display = "block";
+  el.innerHTML = '📚 已入库（' + (r.kb.variant === "ext" ? "含 AI 延伸" : "仅原话") + ' · ' + ts + '）'
+    + ' · <a href="javascript:void(0)" onclick="unmarkInspireKB()" style="color:var(--pink-deep)">取消入库</a>'
+    + '<br><span style="font-size:11px">在电脑上跑一次「拉取灵感」，笔记会写进 00-灵感库</span>';
 }
 
 function downloadMD(filename, content){
@@ -3747,12 +3822,13 @@ function _mergeListById(localArr, remoteArr, baseIds){
   function _drop(id){
     if(!counted[id]){ counted[id] = true; _syncMergeRemoved++; }
   }
-  var out = [], seen = {};
+  var out = [], seen = {}, byKey = {};
   (localArr || []).forEach(function(it){
     k = _recKey(it);
     if(k !== null){
       if(deleted[k]){ _drop(k); return; }
       seen[k] = true;
+      byKey[k] = it;
     }
     out.push(it);
   });
@@ -3760,7 +3836,12 @@ function _mergeListById(localArr, remoteArr, baseIds){
     k = _recKey(it);
     if(k === null){ out.push(it); return; }
     if(deleted[k]){ _drop(k); return; }
-    if(!seen[k]){ seen[k] = true; out.push(it); }
+    if(!seen[k]){ seen[k] = true; out.push(it); return; }
+    /* 同 id：本机那条保留，但「入库标记 kb」按时间取新 ——
+       否则电脑端自动上传时会用本地那份"没标记"的记录把云端的标记抹掉 */
+    var kept = byKey[k];
+    if(!kept || !it.kb) return;
+    if(!kept.kb || (it.kb.at || 0) > (kept.kb.at || 0)){ kept.kb = it.kb; }
   });
   return out;
 }

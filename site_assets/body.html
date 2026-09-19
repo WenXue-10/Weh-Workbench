@@ -278,11 +278,14 @@
                 <button class="inspire-action-btn" onclick="addInspireToTodo(currentInspireId)">✅→待办</button>
                 <button class="inspire-action-btn" onclick="addInspireToDaily(currentInspireId)">📅→今日</button>
                 <button class="inspire-action-btn" onclick="exportInspire(currentInspireId)">📥 导出MD</button>
+                <button class="inspire-action-btn" onclick="markInspireKB('plain')">📚 存原话</button>
+                <button class="inspire-action-btn" onclick="markInspireKB('ext')">📚 存原话+延伸</button>
                 <button class="inspire-action-btn" onclick="regenerateInspireExtension()">🔄 重新生成</button>
                 <button class="inspire-action-btn" onclick="markInspire('recorded')">📌 已记录</button>
                 <button class="inspire-action-btn" onclick="markInspire('action')">✅ 已行动</button>
                 <button class="inspire-action-btn" onclick="deleteCurrentInspire()">🗑️ 删除</button>
               </div>
+              <div id="inspireKbState" style="margin-top:8px;font-size:12px;color:var(--muted);text-align:center;display:none"></div>
               <div style="margin-top:10px;text-align:center">
                 <button class="inspire-action-btn" style="width:100%;background:linear-gradient(135deg,var(--pink-deep),#b48ed9);color:#fff;border:none" onclick="exportAllInspire()">📦 批量导出所有灵感为MD</button>
               </div>
