@@ -1476,6 +1476,9 @@ body.sop-active .sub-tab-bar{display:flex}
 .d-think{margin-top:10px;border-top:1px dashed var(--line);padding-top:8px}
 .d-think summary{cursor:pointer;font-size:12px;color:var(--muted);outline:none}
 .d-think-body{font-size:12px;color:var(--muted);line-height:1.8;white-space:pre-wrap;max-height:260px;overflow:auto;margin-top:6px;padding:8px 10px;background:rgba(0,0,0,.03);border-radius:8px}
+.ai-src{margin-top:6px;font-size:11px;color:var(--muted);line-height:1.6}
+.report-result .ai-src{text-align:right;padding:0 16px 10px}
+.dec-chat-msg .ai-src{text-align:right}
 textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
 @media(max-width:820px){
   .ai-input{width:100%;min-width:0}
@@ -1816,6 +1819,14 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
                   <option value="10">10轮 · 死磕</option>
                 </select>
               </div>
+              <div class="dec-setting">
+                <div class="dec-label">顾问风格</div>
+                <select class="dec-select" id="decStyle" onchange="onDecStyleChange()">
+                  <option value="harsh" selected>🔥 毒舌拷问</option>
+                  <option value="senior">🧭 资深顾问</option>
+                </select>
+                <div class="ai-hint" id="decStyleHint"></div>
+              </div>
               <div class="dec-save-btn" onclick="saveDecisionSettings()">💾 保存设置</div>
             </div>
             <div class="card">
@@ -1894,7 +1905,7 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
                   <button type="button" class="voice-btn" onclick="takePhotoFor('report')" title="拍照">📷</button>
                 </div>
               </div>
-              <button class="report-generate-btn" onclick="generateReport()">✨ 生成精简汇报</button>
+              <button class="report-generate-btn" id="reportGenerateBtn" onclick="generateReport()">✨ 生成精简汇报</button>
             </div>
             <div class="card">
               <div class="card-head">📜 历史汇报 <span class="m-count" id="reportHistoryCount"></span></div>
@@ -3644,7 +3655,7 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
 
 <script>
 window.SITE_DATA = {
- "updated": "2026-09-19 20:17",
+ "updated": "2026-09-19 23:23",
  "stats": {
   "jobs": 36,
   "rec": 0,
@@ -14909,7 +14920,7 @@ function generateHealthReply(msg, data){
 
 /* ========== 决策顾问模块 ========== */
 var DECISION_KEY = "weh_decision_data_v1";
-var DECISION_DEFAULTS = {identity:"上班族", stage:"起步摸索期", depth:3, chatHistory:[], score:null, round:0, started:false};
+var DECISION_DEFAULTS = {identity:"上班族", stage:"起步摸索期", depth:3, style:"harsh", chatHistory:[], score:null, round:0, started:false};
 
 function loadDecision(){
   try{
@@ -14926,6 +14937,9 @@ function initDecision(){
   document.getElementById("decIdentity").value = data.identity;
   document.getElementById("decStage").value = data.stage;
   document.getElementById("decDepth").value = String(data.depth);
+  var stEl = document.getElementById("decStyle");
+  if(stEl) stEl.value = (data.style === "senior") ? "senior" : "harsh";
+  updateDecStyleHint();
   renderDecisionChat();
   if(data.score){
     showDecisionScore(data.score);
@@ -14938,8 +14952,11 @@ function saveDecisionSettings(){
   data.identity = document.getElementById("decIdentity").value;
   data.stage = document.getElementById("decStage").value;
   data.depth = Number(document.getElementById("decDepth").value);
+  var stEl = document.getElementById("decStyle");
+  if(stEl) data.style = (stEl.value === "senior") ? "senior" : "harsh";
   saveDecision(data);
-  toast("设置已保存："+data.identity+" · "+data.stage+" · "+data.depth+"轮拷问");
+  updateDecStyleHint();
+  toast("设置已保存："+data.identity+" · "+data.stage+" · "+data.depth+"轮拷问 · "+(DEC_STYLE_TEXT[data.style]||DEC_STYLE_TEXT.harsh));
 }
 
 function updateRoundInfo(){
@@ -14969,8 +14986,19 @@ function renderDecisionChat(){
       if(m.role==="ai" && m.question){
         content += '<span class="ai-question">💥 '+esc(m.question)+'</span>';
       }
+      if(m.role==="ai" && m.src){
+        content += '<div class="ai-src">' + (m.src === "ai"
+          ? ("🤖 由 " + esc(m.model || "AI") + " 生成")
+          : "内置模板生成（未接入 AI）") + '</div>';
+      }
+      if(m.role==="ai" && m.reasoning){
+        content += '<details class="d-think"><summary>💭 思考过程（点开看）</summary><div class="d-think-body">' + esc(m.reasoning) + '</div></details>';
+      }
       return '<div class="dec-chat-msg '+m.role+'">'+content+'</div>';
     }).join("");
+    if(_decPending){
+      box.innerHTML += '<div class="dec-chat-msg ai" style="color:var(--muted)">🧠 正在审视你的回答…</div>';
+    }
   }
   setTimeout(function(){ box.scrollTop = box.scrollHeight; }, 50);
 }
@@ -14979,6 +15007,7 @@ function sendDecisionChat(){
   var input = document.getElementById("decChatInput");
   var msg = input.value.trim();
   if(!msg && !_decPhotoId) return;
+  if(_decPending){ toast("上一轮还在进行中，稍等一下下"); return; }
   var data = loadDecision();
   data.chatHistory = data.chatHistory || [];
   data.started = true;
@@ -14990,27 +15019,183 @@ function sendDecisionChat(){
   updateRoundInfo();
 
   var start = Date.now();
-  setTimeout(function(){
-    var result = generateDecisionResponse(msg, data);
-    data.chatHistory.push({role:"ai", content:result.content, question:result.question||null});
-    data.round += 1;
-    logAction("决策顾问", "AI对话", msg, result.content, Date.now()-start, "success");
-    // 达到拷问轮数，打分
-    if(data.round >= data.depth && !data.score){
-      var score = generateDecisionScore(data);
-      data.score = score;
-      setTimeout(function(){
-        data.chatHistory.push({role:"ai", content:"拷问结束，我给你打分。"});
-        saveDecision(data);
-        renderDecisionChat();
-        showDecisionScore(score);
-        updateRoundInfo();
-      }, 800);
-    }
-    saveDecision(data);
+  var useAI = aiReady();
+  if(useAI){ _decPending = true; renderDecisionChat(); }
+  var p = useAI
+    ? generateDecisionResponseAI(data)
+    : new Promise(function(res){ setTimeout(function(){ res(generateDecisionResponse(msg, data)); }, 700); });
+
+  p.then(function(res){
+    _decPending = false;
+    var d2 = loadDecision();
+    d2.chatHistory = d2.chatHistory || [];
+    d2.chatHistory.push({ role:"ai", content: res.content, question: res.question || null,
+      src: res.source || "template", model: res.model || "", reasoning: res.reasoning || "" });
+    d2.round = (d2.round || 0) + 1;
+    logAction("决策顾问", "AI对话", msg, res.content, Date.now()-start, "success");
+    var needScore = (d2.round >= d2.depth && !d2.score);
+    saveDecision(d2);
     renderDecisionChat();
     updateRoundInfo();
-  }, 700);
+    if(needScore) _decRunScore(d2);
+  }).catch(function(e){
+    _decPending = false;
+    var d3 = loadDecision();
+    d3.chatHistory = d3.chatHistory || [];
+    var fb = generateDecisionResponse(msg, d3);
+    d3.chatHistory.push({ role:"ai", content: fb.content, question: fb.question || null, src:"template" });
+    d3.round = (d3.round || 0) + 1;
+    logAction("决策顾问", "AI对话", msg, "失败：" + e.message, Date.now()-start, "fail");
+    var needScore2 = (d3.round >= d3.depth && !d3.score);
+    saveDecision(d3);
+    renderDecisionChat();
+    updateRoundInfo();
+    toast("AI 拷问失败（已用内置模板）：" + e.message);
+    if(needScore2) _decRunScore(d3);
+  });
+}
+
+/* ---- 决策顾问 · AI 协作层 ---- */
+var DEC_STYLE_TEXT = { harsh: "🔥 毒舌拷问", senior: "🧭 资深顾问" };
+var _decPending = false;
+
+function decStyle(){
+  var d = loadDecision();
+  return (d.style === "senior") ? "senior" : "harsh";
+}
+function onDecStyleChange(){
+  var s = document.getElementById("decStyle");
+  var data = loadDecision();
+  data.style = (s && s.value === "senior") ? "senior" : "harsh";
+  saveDecision(data);
+  updateDecStyleHint();
+}
+function updateDecStyleHint(){
+  var el = document.getElementById("decStyleHint");
+  if(!el) return;
+  el.textContent = (decStyle() === "senior")
+    ? "🧭 中肯分析 + 具体建议，最后追问一个关键问题。偏复核，不扎心。"
+    : "🔥 逐条挑漏洞（乐观偏差 / 沉没成本 / 自我感动），每轮跟一个最难回答的追问。";
+}
+
+/* 通用：从模型回复里抠出一个 JSON 对象（容忍 ``` 围栏与前后解释文字） */
+function parseAIJSON(txt){
+  if(!txt) return null;
+  var s = String(txt).trim();
+  s = s.replace(/^```[a-zA-Z]*/, "").replace(/```$/, "").trim();
+  var i = s.indexOf("{"), j = s.lastIndexOf("}");
+  if(i >= 0 && j > i){ s = s.slice(i, j + 1); }
+  try{
+    var o = JSON.parse(s);
+    if(!o || typeof o !== "object") return null;
+    if(Object.prototype.toString.call(o) === "[object Array]") return null;   // 只要对象，数组一律当解析失败
+    return o;
+  }catch(e){ return null; }
+}
+function _aiStr(v){ return (v === null || v === undefined) ? "" : String(v).trim(); }
+
+function buildDecisionMessages(data){
+  var cfg = loadAIConfig();
+  var sys;
+  if(data.style === "senior"){
+    sys = "你是一位资深决策顾问，服务对象是一位中文用户。任务：先指出他这段回答里最关键的薄弱环节，再给可执行的建议，最后追问一个真正决定成败的问题。"
+        + "要求：中肯、具体，不说套话、不灌鸡汤，直接给结论；全部用中文。";
+  }else{
+    sys = "你是一个毫不留情的决策拷问官，服务对象是一位中文用户。任务：逐层挑出他思考里的漏洞（乐观偏差、沉没成本、自我感动、把希望寄托在控制不了的变量上），每个漏洞跟一个最难回答的追问，逼他自己想清楚。"
+        + "要求：犀利、具体、不客气，不说安慰话；全部用中文。";
+  }
+  sys += "\n\n【关于服务对象】身份：" + (data.identity || "未填") + "；所处阶段：" + (data.stage || "未填") + "。";
+  if(cfg.persona) sys += "\n【补充背景】" + cfg.persona;
+
+  var h = data.chatHistory || [];
+  var msgs = [{ role: "system", content: sys }];
+  h.slice(0, -1).slice(-8).forEach(function(m){
+    var t = m.content || "";
+    if(m.role === "ai" && m.question){ t += "\n（我上一轮的追问：" + m.question + "）"; }
+    msgs.push({ role: (m.role === "ai") ? "assistant" : "user", content: t });
+  });
+  var last = h[h.length - 1] || { content: "" };
+  var left = Math.max((data.depth || 3) - (data.round || 0), 0);
+  var inst = (left > 1)
+    ? "【本轮要求】先用不超过 80 字指出我这段回答里最致命的漏洞，再提一个最难回答的追问（不超过 40 字）。\n只输出一个 JSON 对象，不要 markdown 代码块、不要任何解释文字：\n{\"content\":\"你的点评\",\"question\":\"你的追问\"}"
+    : "【本轮要求】这是最后一轮，先用不超过 80 字给出最终点评，question 字段留空字符串。\n只输出一个 JSON 对象，不要 markdown 代码块、不要任何解释文字：\n{\"content\":\"你的点评\",\"question\":\"\"}";
+  msgs.push({ role: "user", content: (last.content || "（我只发了一张图片，没有文字）") + "\n\n" + inst });
+  return msgs;
+}
+
+function generateDecisionResponseAI(data){
+  var cfg = loadAIConfig();
+  if(!(cfg.key && cfg.base && cfg.model)){ return Promise.reject(new Error("未配置 AI")); }
+  return aiChat(cfg, buildDecisionMessages(data), 45).then(function(res){
+    var o = parseAIJSON(res.content);
+    if(!o || !_aiStr(o.content)){ throw new Error("AI 返回的内容无法解析"); }
+    return { content: _aiStr(o.content), question: _aiStr(o.question) || null,
+             source: "ai", model: cfg.model, at: Date.now(),
+             reasoning: res.reasoning ? res.reasoning.slice(0, 4000) : "" };
+  });
+}
+
+function buildDecisionScoreMessages(data){
+  var cfg = loadAIConfig();
+  var sys = "你是一位严格但不失公正的决策评审，服务对象是一位中文用户。请阅读下面这场围绕他决策的问答，给出评分与结论。"
+          + "评分标准：7 分及以上代表方向可行、风险可控；低于 7 分代表存在明显漏洞、不应贸然推进。不要给人情分，也不要为了严厉而压低分数。全部用中文。";
+  sys += "\n\n【关于服务对象】身份：" + (data.identity || "未填") + "；所处阶段：" + (data.stage || "未填") + "。";
+  if(cfg.persona) sys += "\n【补充背景】" + cfg.persona;
+  var linesTxt = (data.chatHistory || []).slice(-20).map(function(m){
+    var t = (m.content || "").slice(0, 300);
+    if(m.role === "ai"){ return "顾问：" + t + (m.question ? ("（追问：" + m.question + "）") : ""); }
+    return "我：" + t;
+  }).join("\n");
+  var inst = "对话记录：\n" + linesTxt + "\n\n"
+           + "请只输出一个 JSON 对象（不要 markdown 代码块、不要任何解释文字）：\n"
+           + "{\"score\":7,\"fatal\":\"一句话指出致命伤\",\"fix\":\"一句话给出该怎么改\"}";
+  return [{ role: "system", content: sys }, { role: "user", content: inst }];
+}
+
+function generateDecisionScoreAI(data){
+  var cfg = loadAIConfig();
+  if(!(cfg.key && cfg.base && cfg.model)){ return Promise.reject(new Error("未配置 AI")); }
+  return aiChat(cfg, buildDecisionScoreMessages(data), 45).then(function(res){
+    var o = parseAIJSON(res.content);
+    if(!o){ throw new Error("AI 返回的内容无法解析"); }
+    var n = Number(o.score);
+    if(!isFinite(n)){ throw new Error("AI 没给出分数"); }
+    n = Math.round(Math.min(Math.max(n, 1), 10));
+    return { score: n, fatal: _aiStr(o.fatal) || "（AI 未给出）", fix: _aiStr(o.fix) || "（AI 未给出）",
+             pass: n >= 7, source: "ai", model: cfg.model, at: Date.now(),
+             reasoning: res.reasoning ? res.reasoning.slice(0, 4000) : "" };
+  });
+}
+
+/* 打分：AI 优先，失败退回内置评分 */
+function _decRunScore(data){
+  data.chatHistory.push({ role: "ai", content: "拷问结束，我给你打分。" });
+  saveDecision(data);
+  renderDecisionChat();
+  function apply(sc){
+    var d = loadDecision();
+    d.score = sc;
+    saveDecision(d);
+    showDecisionScore(sc);
+    updateRoundInfo();
+    renderDecisionChat();
+  }
+  if(aiReady()){
+    _decPending = true;
+    renderDecisionChat();
+    generateDecisionScoreAI(data).then(function(sc){
+      _decPending = false;
+      apply(sc);
+      logAction("决策顾问", "AI打分", data.identity, sc.score + "分", 0, "success");
+    }).catch(function(e){
+      _decPending = false;
+      apply(generateDecisionScore(data));
+      toast("AI 打分失败（已用内置评分）：" + e.message);
+      logAction("决策顾问", "AI打分", data.identity, "失败：" + e.message, 0, "fail");
+    });
+  }else{
+    apply(generateDecisionScore(data));
+  }
 }
 
 function generateDecisionResponse(msg, data){
@@ -15098,6 +15283,7 @@ function showDecisionScore(score){
 function resetDecision(){
   showConfirm("确定重新开始？当前拷问记录会清空。").then(function(ok){
     if(!ok) return;
+    _decPending = false;
     var data = loadDecision();
     data.chatHistory = [];
     data.score = null;
@@ -16323,23 +16509,12 @@ function selectReportAudience(audience){
   });
 }
 
-function generateReport(){
-  var start = Date.now();
-  var input = document.getElementById("reportInput").value.trim();
-  if(!input && !_reportPhotoId){
-    toast("请先输入内容或添加照片");
-    return;
-  }
-  var data = loadReport();
-  var type = data.currentType;
-  var audience = data.currentAudience;
+/* ---- 工作汇报 · AI 整理层（AI 优先，模板兜底） ---- */
+var _reportPending = false;
 
-  // 解析输入，提取要点
+/* 内置模板：AI 不可用时的兜底，行为与改造前一致 */
+function buildReportFallback(input, type, audience){
   var lines = input.split(/[\n。；;]/).map(function(l){ return l.trim(); }).filter(function(l){ return l.length > 0; });
-  var typeText = {weekly:"周报", project:"项目进展", review:"复盘总结"}[type];
-  var audienceText = {leader:"直系领导", client:"甲方", teacher:"老师"}[audience];
-
-  // 生成精简汇报要点
   var highlights = [];
   if(type === "weekly"){
     highlights = lines.slice(0, 5).map(function(l, i){
@@ -16363,8 +16538,6 @@ function generateReport(){
       "📌 下次重点：" + (lines[4] ? lines[4].slice(0,30) : "落实改进措施")
     ];
   }
-
-  // 生成预判追问
   var questions = [];
   if(audience === "leader"){
     questions = [
@@ -16385,38 +16558,150 @@ function generateReport(){
       {q: "下一步的研究计划是什么？", a: "建议回答：下一步计划扩大样本量做验证，同时探索XX方向的延伸应用；预计3个月内出阶段性成果。"}
     ];
   }
+  var typeText = {weekly:"周报", project:"项目进展", review:"复盘总结"}[type] || "汇报";
+  var opening = lines.length
+    ? (typeText + "主要同步：" + (lines[0].length > 30 ? lines[0].slice(0,30) + "…" : lines[0]))
+    : "";
+  return { opening: opening, highlights: highlights, questions: questions, pitfalls: [] };
+}
 
-  var result = {
-    type: type,
-    audience: audience,
-    typeText: typeText,
-    audienceText: audienceText,
-    input: input,
-    highlights: highlights,
-    questions: questions,
-    createdAt: new Date().toISOString().slice(0,16).replace("T", " ")
-  };
+function buildReportMessages(input, type, audience){
+  var cfg = loadAIConfig();
+  var typeText = {weekly:"周报", project:"项目进展", review:"复盘总结"}[type] || "汇报";
+  var audienceText = {leader:"直系领导", client:"甲方", teacher:"老师"}[audience] || "对方";
+  var sys = "你是一个中文工作汇报助手，帮用户把他口语化的碎碎念整理成给「" + audienceText + "」看的" + typeText + "。"
+          + "要求：忠于原文、不编造事实；用词具体、不空泛、不说套话；动词开头、要点前置。全部用中文。";
+  if(audience === "leader") sys += "面向领导：突出进展、风险、需要的支持，口径简洁不绕弯。";
+  else if(audience === "client") sys += "面向甲方：突出交付进度、效果与承诺，语气稳妥，不暴露内部问题细节。";
+  else sys += "面向老师：突出目标、方法、结果与依据，保留必要的严谨表述。";
+  if(cfg.persona) sys += "\n\n【关于服务对象】" + cfg.persona;
+  var user = "我的碎碎念（未整理）：\n" + input + "\n\n"
+    + "请只输出一个 JSON 对象（不要 markdown 代码块、不要任何解释文字），字段如下：\n"
+    + "{\"opening\":\"一句话开场白，不超过50字，可以直接照着念\","
+    + "\"highlights\":[\"✅ 已完成……\",\"🔄 进行中……\",\"📌 重点……\"],"
+    + "\"questions\":[{\"q\":\"对方可能追问的问题\",\"a\":\"建议怎么回答\"}],"
+    + "\"pitfalls\":[\"这里说得含糊、容易被追着问的点\"]}\n"
+    + "要求：highlights 3~5 条，每条以合适的 emoji 前缀开头（如 ✅ 已完成 / 🔄 进行中 / ⚠️ 风险 / 📅 下一步）；"
+    + "questions 恰好 3 条；pitfalls 1~3 条，确实没有就返回空数组 []。";
+  return [{ role: "system", content: sys }, { role: "user", content: user }];
+}
 
-  // 保存到历史
-  var reportId = Date.now();
-  data.history.unshift({
-    id: reportId,
-    type: type,
-    audience: audience,
-    typeText: typeText,
-    audienceText: audienceText,
-    input: input,
-    highlights: highlights,
-    questions: questions,
-    createdAt: result.createdAt
+function parseReportAI(txt){
+  var o = parseAIJSON(txt);
+  if(!o) return null;
+  function arr(x){
+    return Object.prototype.toString.call(x) === "[object Array]"
+      ? x.filter(function(v){ return v !== null && v !== undefined && String(v).trim(); })
+         .map(function(v){ return String(v).trim(); })
+      : [];
+  }
+  var hs = arr(o.highlights);
+  var ps = arr(o.pitfalls);
+  var qs = [];
+  if(Object.prototype.toString.call(o.questions) === "[object Array]"){
+    o.questions.forEach(function(q){
+      if(!q) return;
+      if(typeof q === "string"){
+        if(q.trim()) qs.push({ q: q.trim(), a: "（AI 未给出建议回答）" });
+        return;
+      }
+      var qq = _aiStr(q.q || q.question), aa = _aiStr(q.a || q.answer);
+      if(qq) qs.push({ q: qq, a: aa || "（AI 未给出建议回答）" });
+    });
+  }
+  if(!hs.length || !qs.length) return null;
+  return { opening: _aiStr(o.opening), highlights: hs.slice(0, 5), questions: qs.slice(0, 3), pitfalls: ps.slice(0, 3) };
+}
+
+function generateReportAI(input, type, audience){
+  var cfg = loadAIConfig();
+  if(!(cfg.key && cfg.base && cfg.model)){ return Promise.reject(new Error("未配置 AI")); }
+  return aiChat(cfg, buildReportMessages(input, type, audience), 45).then(function(res){
+    var r = parseReportAI(res.content);
+    if(!r){ throw new Error("AI 返回的内容无法解析"); }
+    r.source = "ai";
+    r.model = cfg.model;
+    r.at = Date.now();
+    if(res.reasoning) r.reasoning = res.reasoning.slice(0, 4000);
+    return r;
   });
-  if(data.history.length > 20) data.history = data.history.slice(0, 20);
-  saveReport(data);
-  currentReportId = reportId;
+}
 
-  logAction("工作汇报", "生成汇报", input, typeText + " / " + audienceText, Date.now()-start, "success");
-  renderReportResult(result);
-  renderReportHistory();
+function renderReportLoading(){
+  var box = document.getElementById("reportResult");
+  var title = document.getElementById("reportResultTitle");
+  var exportBtn = document.getElementById("reportExportBtn");
+  if(!box) return;
+  if(title) title.textContent = "AI 正在整理这份汇报…";
+  if(exportBtn) exportBtn.style.display = "none";
+  box.innerHTML = '<div style="text-align:center;color:var(--muted);padding:60px 20px;font-size:13px;line-height:1.8">'
+    + '正在读你的碎碎念、提炼要点、预判对方会问什么…<br>通常 5~15 秒，稍等一下下</div>';
+}
+
+function generateReport(){
+  var start = Date.now();
+  var input = document.getElementById("reportInput").value.trim();
+  if(!input && !_reportPhotoId){
+    toast("请先输入内容或添加照片");
+    return;
+  }
+  if(_reportPending){ toast("上一份还在生成中，稍等一下下"); return; }
+  var data = loadReport();
+  var type = data.currentType;
+  var audience = data.currentAudience;
+  var typeText = {weekly:"周报", project:"项目进展", review:"复盘总结"}[type];
+  var audienceText = {leader:"直系领导", client:"甲方", teacher:"老师"}[audience];
+  var btn = document.getElementById("reportGenerateBtn");
+  var fb = buildReportFallback(input, type, audience);
+
+  function finish(built, isAI){
+    var result = {
+      type: type, audience: audience, typeText: typeText, audienceText: audienceText,
+      input: input,
+      opening: built.opening || "",
+      highlights: built.highlights || [],
+      questions: built.questions || [],
+      pitfalls: built.pitfalls || [],
+      source: isAI ? "ai" : "template",
+      model: built.model || "",
+      reasoning: built.reasoning || "",
+      createdAt: new Date().toISOString().slice(0,16).replace("T", " ")
+    };
+    var reportId = Date.now();
+    var d = loadReport();
+    d.history.unshift({
+      id: reportId, type: type, audience: audience, typeText: typeText, audienceText: audienceText,
+      input: input, opening: result.opening, highlights: result.highlights,
+      questions: result.questions, pitfalls: result.pitfalls,
+      source: result.source, model: result.model, createdAt: result.createdAt
+    });
+    if(d.history.length > 20) d.history = d.history.slice(0, 20);
+    saveReport(d);
+    currentReportId = reportId;
+    logAction("工作汇报", "生成汇报", input, typeText + " / " + audienceText, Date.now()-start, "success");
+    renderReportResult(result);
+    renderReportHistory();
+  }
+
+  if(!aiReady()){
+    finish(fb, false);
+    toast("未配置 AI，已用内置模板生成（去 设置 → 🤖 AI 延伸 里填 Key）");
+    return;
+  }
+  _reportPending = true;
+  if(btn){ btn.disabled = true; btn.textContent = "AI 正在整理…"; }
+  renderReportLoading();
+  generateReportAI(input, type, audience).then(function(r){
+    _reportPending = false;
+    if(btn){ btn.disabled = false; btn.textContent = "✨ 生成精简汇报"; }
+    finish(r, true);
+  }).catch(function(e){
+    _reportPending = false;
+    if(btn){ btn.disabled = false; btn.textContent = "✨ 生成精简汇报"; }
+    finish(fb, false);
+    toast("AI 生成失败（已用内置模板）：" + e.message);
+    logAction("工作汇报", "生成汇报", input, "失败：" + e.message, Date.now()-start, "fail");
+  });
 }
 
 function renderReportResult(result){
@@ -16424,21 +16709,40 @@ function renderReportResult(result){
   var title = document.getElementById("reportResultTitle");
   var exportBtn = document.getElementById("reportExportBtn");
   if(!box) return;
-  title.textContent = result.typeText + " · 汇报对象：" + result.audienceText + " · " + result.createdAt;
-  exportBtn.style.display = "inline-block";
+  if(title) title.textContent = result.typeText + " · 汇报对象：" + result.audienceText + " · " + result.createdAt;
+  if(exportBtn) exportBtn.style.display = "inline-block";
 
-  var highlightsHtml = result.highlights.map(function(h){ return "<li>" + esc(h) + "</li>"; }).join("");
-  var questionsHtml = result.questions.map(function(q){
+  var highlightsHtml = (result.highlights || []).map(function(h){ return "<li>" + esc(h) + "</li>"; }).join("");
+  var questionsHtml = (result.questions || []).map(function(q){
     return '<div class="report-question"><div class="report-question-q">❓ ' + esc(q.q) + '</div><div class="report-question-a">💡 ' + esc(q.a) + '</div></div>';
   }).join("");
+  var pitfallsHtml = (result.pitfalls || []).map(function(p){ return "<li>" + esc(p) + "</li>"; }).join("");
 
-  box.innerHTML = ''
-    + '<div class="report-section"><div class="report-section-title">📝 精简汇报（' + result.typeText + '）</div>'
-    + '<div class="report-section-content"><ul>' + highlightsHtml + '</ul></div></div>'
-    + '<div class="report-section"><div class="report-section-title">🎯 预判' + result.audienceText + '会追问的3个问题</div>'
-    + '<div>' + questionsHtml + '</div></div>'
-    + '<div class="report-section"><div class="report-section-title">💡 原始碎碎念</div>'
-    + '<div class="report-section-content" style="color:var(--muted);font-size:12px">' + esc(result.input).replace(/\n/g, "<br>") + '</div></div>';
+  var html = '';
+  if(result.opening){
+    html += '<div class="report-section"><div class="report-section-title">🎬 一句话开场</div>'
+          + '<div class="report-section-content" style="font-weight:600">' + esc(result.opening) + '</div></div>';
+  }
+  html += '<div class="report-section"><div class="report-section-title">📝 精简汇报（' + result.typeText + '）</div>'
+        + '<div class="report-section-content"><ul>' + highlightsHtml + '</ul></div></div>'
+        + '<div class="report-section"><div class="report-section-title">🎯 预判' + result.audienceText + '会追问的'
+        + ((result.questions || []).length || 3) + '个问题</div><div>' + questionsHtml + '</div></div>';
+  if(pitfallsHtml){
+    html += '<div class="report-section"><div class="report-section-title">⚠️ 可能被追问的坑</div>'
+          + '<div class="report-section-content"><ul>' + pitfallsHtml + '</ul></div></div>';
+  }
+  if(result.reasoning){
+    html += '<details class="d-think" style="margin:0 16px 12px"><summary>💭 思考过程（点开看）</summary>'
+          + '<div class="d-think-body">' + esc(result.reasoning) + '</div></details>';
+  }
+  html += '<div class="report-section"><div class="report-section-title">💡 原始碎碎念</div>'
+        + '<div class="report-section-content" style="color:var(--muted);font-size:12px">' + esc(result.input).replace(/\n/g, "<br>") + '</div></div>'
+        + (result.source === "ai"
+            ? '<div class="ai-src">🤖 由 ' + esc(result.model || "AI") + ' 生成 · 改完碎碎念可以再点一次生成</div>'
+            : (result.source === "template"
+                ? '<div class="ai-src">内置模板生成（未接入 AI，去 设置 → 🤖 AI 延伸 里填 Key）</div>'
+                : ''));
+  box.innerHTML = html;
 }
 
 function renderReportHistory(){
@@ -16492,6 +16796,7 @@ function exportReport(){
   md += "---\n\n";
   md += "# " + r.typeText + "（汇报对象：" + r.audienceText + "）\n\n";
   md += "> 生成时间：" + r.createdAt + "\n\n";
+  if(r.opening){ md += "## 🎬 一句话开场\n\n" + r.opening + "\n\n"; }
   md += "## 📝 精简汇报\n\n";
   r.highlights.forEach(function(h){ md += "- " + h + "\n"; });
   md += "\n";
@@ -16500,6 +16805,11 @@ function exportReport(){
     md += "### " + (i+1) + ". " + q.q + "\n\n";
     md += "**建议回答**：" + q.a + "\n\n";
   });
+  if(r.pitfalls && r.pitfalls.length){
+    md += "## ⚠️ 可能被追问的坑\n\n";
+    r.pitfalls.forEach(function(p){ md += "- " + p + "\n"; });
+    md += "\n";
+  }
   md += "## 💡 原始碎碎念\n\n";
   md += r.input + "\n\n";
   md += "---\n";
