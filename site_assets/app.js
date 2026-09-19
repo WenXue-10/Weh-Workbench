@@ -1832,6 +1832,14 @@ function showInspireLibNote(i){
   setModal('<div class="note-detail"><h2>💡 '+esc(n.title||'未命名')+'</h2>'+metaHtml+descHtml+'<div class="note-body">'+(n.html||'<div class="m-sub">暂无内容</div>')+'</div></div>');
 }
 
+function renderInspireLoading(){
+  var box = document.getElementById("inspireDetail");
+  if(!box) return;
+  box.innerHTML = '<div class="d-section"><div class="d-label">🤖 AI 正在延伸</div>'
+    + '<div class="d-content" style="color:var(--muted);line-height:1.9">正在针对这条灵感生成追问、方向与判断…'
+    + '<br>通常 3~10 秒，稍等一下下</div></div>';
+}
+
 function selectInspire(id){
   currentInspireId = id;
   renderInspire();
@@ -1840,14 +1848,55 @@ function selectInspire(id){
   if(!r) return;
   document.getElementById("inspireDetailTitle").textContent = r.date + " " + (r.time||"");
   document.getElementById("inspireActions").style.display = "flex";
-  // 如果还没有AI延伸，生成一个
-  if(!r.aiExtension){
-    var start = Date.now();
-    r.aiExtension = generateInspireExtension(r.content);
-    saveInspire(data);
-    logAction("灵感捕捉", "AI延伸", r.content, r.aiExtension.judgment || "", Date.now()-start, "success");
+  // 已有延伸（AI 或模板）直接展示
+  if(r.aiExtension && r.aiExtension.questions && r.aiExtension.questions.length){
+    renderInspireDetail(r.aiExtension, r.photoId);
+    return;
   }
-  renderInspireDetail(r.aiExtension, r.photoId);
+  // 没配 Key / 本会话已失败过 / 正在生成 → 用内置模板顶一下
+  // 注意：降级结果不写入缓存，避免把模板"固化"——下次打开页面仍会再试真 AI
+  if(!aiReady() || _aiFailCache[id] || _aiExtPendingId === id){
+    renderInspireDetail(r.aiExtension || generateInspireExtension(r.content), r.photoId);
+    return;
+  }
+  // 调真 AI
+  _aiExtPendingId = id;
+  renderInspireLoading();
+  var start = Date.now();
+  generateInspireExtensionAI(r.content).then(function(ext){
+    _aiExtPendingId = null;
+    var d2 = loadInspire();
+    var r2 = d2.records.find(function(x){ return x.id===id; });
+    if(r2){ r2.aiExtension = ext; saveInspire(d2); }
+    if(currentInspireId === id){ renderInspireDetail(ext, r2 ? r2.photoId : null); }
+    logAction("灵感捕捉", "AI延伸", r.content, ext.judgment || "", Date.now()-start, "success");
+  }).catch(function(e){
+    _aiExtPendingId = null;
+    _aiFailCache[id] = true;
+    if(currentInspireId === id){
+      var d3 = loadInspire();
+      var r3 = d3.records.find(function(x){ return x.id===id; });
+      var fallback = generateInspireExtension(r.content);
+      renderInspireDetail(fallback, r3 ? r3.photoId : null);
+    }
+    toast("AI 延伸失败（已临时用内置模板）：" + e.message);
+    logAction("灵感捕捉", "AI延伸", r.content, "失败：" + e.message, Date.now()-start, "fail");
+  });
+}
+
+/* 重新生成：清掉旧结果，再走一次（AI 失败时也用这个重试） */
+function regenerateInspireExtension(){
+  var id = currentInspireId;
+  if(!id) return;
+  if(!aiReady()){ toast("还没配置 API Key，请到 设置 → 🤖 AI 延伸 里填"); switchSettingsTab("ai"); return; }
+  var data = loadInspire();
+  var r = data.records.find(function(x){ return x.id===id; });
+  if(!r) return;
+  r.aiExtension = null;
+  saveInspire(data);
+  delete _aiFailCache[id];
+  _aiExtPendingId = null;
+  selectInspire(id);
 }
 
 function renderInspireDetail(ext, photoId){
@@ -1863,7 +1912,12 @@ function renderInspireDetail(ext, photoId){
     +'<div class="d-section"><div class="d-label">❓ 值得追问的</div><div class="d-content">'+ext.questions.map(function(q){return '· '+esc(q);}).join('<br>')+'</div></div>'
     +'<div class="d-section"><div class="d-label">🚀 可以延伸的方向</div><div class="d-content">'+ext.directions.map(function(d){return '· '+esc(d);}).join('<br>')+'</div></div>'
     +'<div class="d-section"><div class="d-label">⚖️ 值不值得做</div><div class="d-content">'+esc(ext.judgment)+'</div></div>'
-    +'<div class="d-section"><div class="d-label">🔗 可能关联</div><div class="d-content">'+esc(ext.related)+'</div></div>';
+    +'<div class="d-section"><div class="d-label">🔗 可能关联</div><div class="d-content">'+esc(ext.related)+'</div></div>'
+    + (ext.source === "ai"
+        ? '<div style="font-size:11px;color:var(--muted);text-align:right;margin-top:8px">🤖 由 ' + esc(ext.model || "AI") + ' 生成 · 可点「重新生成」换一版</div>'
+        : (ext.source === "template"
+            ? '<div style="font-size:11px;color:var(--muted);text-align:right;margin-top:8px">内置模板生成（未接入 AI，去 设置 → 🤖 AI 延伸 配置）</div>'
+            : ''));
   if(photoId){
     getPhoto(photoId).then(function(data){
       var img = document.getElementById("inspireDetailPhoto");
@@ -1904,6 +1958,7 @@ function generateInspireExtension(content){
 
   return {
     original: content,
+    source: "template",
     questions: questions,
     directions: directions,
     judgment: judgment,
@@ -3353,6 +3408,209 @@ function setFontSize(size){
 }
 
 
+/* ========== 🤖 AI 延伸（大模型接入） ========== */
+var AI_CONFIG_KEY = "weh_ai_config_v1";
+var AI_PERSONA_DEFAULT = "我是文雪，供应链 / 物流方向，正在准备求职。平时用碎片化的方式记录灵感，关注求职、学习、知识管理与个人成长。";
+var AI_PROVIDERS = {
+  deepseek:    { name: "DeepSeek",        base: "https://api.deepseek.com/v1",                       model: "deepseek-chat" },
+  zhipu:       { name: "智谱 GLM",        base: "https://open.bigmodel.cn/api/paas/v4",               model: "glm-4-flash" },
+  moonshot:    { name: "Kimi / Moonshot", base: "https://api.moonshot.cn/v1",                        model: "moonshot-v1-8k" },
+  dashscope:   { name: "通义千问",         base: "https://dashscope.aliyuncs.com/compatible-mode/v1", model: "qwen-plus" },
+  siliconflow: { name: "硅基流动",         base: "https://api.siliconflow.cn/v1",                     model: "Qwen/Qwen2.5-7B-Instruct" },
+  openrouter:  { name: "OpenRouter",      base: "https://openrouter.ai/api/v1",                      model: "openai/gpt-4o-mini" },
+  custom:      { name: "自定义",           base: "",                                                  model: "" }
+};
+var AI_CONFIG_DEFAULTS = { provider: "deepseek", base: "https://api.deepseek.com/v1", key: "", model: "deepseek-chat", persona: "" };
+var _aiExtPendingId = null;
+var _aiFailCache = {};
+
+function loadAIConfig(){
+  try{
+    var c = JSON.parse(localStorage.getItem(AI_CONFIG_KEY));
+    if(!c || typeof c !== "object") c = {};
+    for(var k in AI_CONFIG_DEFAULTS){ if(c[k] === undefined) c[k] = AI_CONFIG_DEFAULTS[k]; }
+    if(!c.persona) c.persona = AI_PERSONA_DEFAULT;
+    return c;
+  }catch(e){
+    var d = JSON.parse(JSON.stringify(AI_CONFIG_DEFAULTS));
+    d.persona = AI_PERSONA_DEFAULT;
+    return d;
+  }
+}
+/* 注意：AI 配置刻意不进云同步（Key 不落到 Gist），也不调 markLocalChange，避免白跑一次上传 */
+function saveAIConfig(c){ localStorage.setItem(AI_CONFIG_KEY, JSON.stringify(c)); }
+function aiReady(){ var c = loadAIConfig(); return !!(c.key && c.base && c.model); }
+
+function readAIInputs(){
+  var c = loadAIConfig();
+  var p = document.getElementById("aiProvider"), b = document.getElementById("aiBase");
+  var k = document.getElementById("aiKey"), m = document.getElementById("aiModel");
+  var pe = document.getElementById("aiPersona");
+  if(p) c.provider = p.value;
+  if(b) c.base = b.value.trim();
+  if(k) c.key = k.value.trim();
+  if(m) c.model = m.value.trim();
+  if(pe) c.persona = pe.value.trim();
+  return c;
+}
+function aiInit(){
+  var c = loadAIConfig();
+  var p = document.getElementById("aiProvider"), b = document.getElementById("aiBase");
+  var k = document.getElementById("aiKey"), m = document.getElementById("aiModel");
+  var pe = document.getElementById("aiPersona");
+  if(p) p.value = c.provider || "deepseek";
+  if(b) b.value = c.base || "";
+  if(k) k.value = c.key || "";
+  if(m) m.value = c.model || "";
+  if(pe) pe.value = c.persona || AI_PERSONA_DEFAULT;
+  renderAIStatus();
+}
+function renderAIStatus(){
+  var el = document.getElementById("aiStatus");
+  if(!el) return;
+  var c = loadAIConfig();
+  if(!c.key){
+    el.textContent = "未配置 Key —— 灵感延伸暂用内置模板";
+    el.style.color = "var(--muted)";
+    return;
+  }
+  var pv = AI_PROVIDERS[c.provider];
+  el.textContent = "已配置 · " + ((pv && pv.name) || "自定义") + " · " + c.model;
+  el.style.color = "#2e7d32";
+}
+function saveAISettings(silent){
+  var c = readAIInputs();
+  saveAIConfig(c);
+  renderAIStatus();
+  if(!silent){
+    toast(c.key ? "已保存 AI 配置" : "已保存（未填 Key，暂时用内置模板）");
+  }
+}
+function onAIProviderChange(){
+  var p = document.getElementById("aiProvider");
+  var pv = p ? AI_PROVIDERS[p.value] : null;
+  if(pv && p.value !== "custom"){
+    var b = document.getElementById("aiBase"), m = document.getElementById("aiModel");
+    if(b) b.value = pv.base;
+    if(m) m.value = pv.model;
+  }
+  saveAISettings(true);
+}
+
+function _trimSlash(s){
+  s = String(s || "").trim();
+  while(s.length && s.charAt(s.length - 1) === "/"){ s = s.slice(0, -1); }
+  return s;
+}
+
+/* 统一的对话调用：兼容 OpenAI 格式的 /chat/completions */
+function aiChat(cfg, messages, timeoutSec){
+  var url = _trimSlash(cfg.base) + "/chat/completions";
+  var ctl = (typeof AbortController !== "undefined") ? new AbortController() : null;
+  var timer = setTimeout(function(){ if(ctl){ try{ ctl.abort(); }catch(e){} } }, (timeoutSec || 45) * 1000);
+  function done(){ clearTimeout(timer); }
+  return fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "Authorization": "Bearer " + cfg.key },
+    body: JSON.stringify({ model: cfg.model, messages: messages, temperature: 0.85, max_tokens: 800 }),
+    signal: ctl ? ctl.signal : undefined
+  }).then(function(r){
+    return r.text().then(function(t){
+      var j = null;
+      try{ j = JSON.parse(t); }catch(e){}
+      if(!r.ok){
+        var msg = (j && j.error && (j.error.message || j.error.code)) || ("HTTP " + r.status);
+        if(r.status === 401){ msg = "Key 无效或已过期（401）"; }
+        else if(r.status === 402){ msg = "余额不足（402）"; }
+        else if(r.status === 404){ msg = "接口地址或模型名不对（404）"; }
+        else if(r.status === 429){ msg = "调用太频繁被限流（429）"; }
+        throw new Error(msg);
+      }
+      var txt = j && j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content;
+      if(!txt){ throw new Error("返回内容为空"); }
+      return txt;
+    });
+  }).then(function(v){ done(); return v; }, function(e){
+    done();
+    if(e && (e.name === "AbortError" || String(e.message).indexOf("abort") >= 0)){ throw new Error("超时未响应"); }
+    if(e && e.message === "Failed to fetch"){ throw new Error("网络不通或接口地址写错"); }
+    throw e;
+  });
+}
+
+/* 容错解析：模型常把 JSON 包在 ``` 里，或前后带解释文字 */
+function parseExtJSON(txt){
+  if(!txt) return null;
+  var s = String(txt).trim();
+  s = s.replace(/^```[a-zA-Z]*/, "").replace(/```$/, "").trim();
+  var i = s.indexOf("{"), j = s.lastIndexOf("}");
+  if(i >= 0 && j > i){ s = s.slice(i, j + 1); }
+  var o = null;
+  try{ o = JSON.parse(s); }catch(e){ return null; }
+  if(!o || typeof o !== "object") return null;
+  function arr(x){
+    return Object.prototype.toString.call(x) === "[object Array]"
+      ? x.filter(function(v){ return v !== null && v !== undefined && String(v).trim(); })
+         .map(function(v){ return String(v).trim(); })
+      : [];
+  }
+  var q = arr(o.questions), d = arr(o.directions);
+  var jd = o.judgment ? String(o.judgment).trim() : "";
+  var rl = o.related ? String(o.related).trim() : "";
+  if(!q.length || !d.length || !jd) return null;
+  return { questions: q.slice(0, 3), directions: d.slice(0, 3), judgment: jd,
+           related: rl || "（AI 未给出关联提示）" };
+}
+
+function buildExtMessages(content, persona){
+  var sys = "你是一个灵感延伸助手，服务对象是一位中文用户。你的任务不是附和，而是帮他看清一个想法："
+          + "追问关键问题、指出可延伸的方向、判断值不值得做、提示可能关联。"
+          + "要求：具体、不空泛、不说套话，直接给结论，不要客套；全部用中文；每个条目不超过 40 字。"
+          + (persona ? ("\n\n【关于服务对象】" + persona) : "");
+  var user = "我的灵感：" + content + "\n\n"
+           + "请只输出一个 JSON 对象（不要 markdown 代码块、不要任何解释文字），字段如下：\n"
+           + '{"questions":["追问1","追问2","追问3"],"directions":["方向1","方向2","方向3"],'
+           + '"judgment":"值不值得做的一句话判断","related":"可能关联的一句话提示"}';
+  return [{ role: "system", content: sys }, { role: "user", content: user }];
+}
+
+/* 调真 AI 生成延伸；未配置 Key / 调用失败会抛出错误，由调用方兜底 */
+function generateInspireExtensionAI(content){
+  var c = loadAIConfig();
+  if(!(c.key && c.base && c.model)){ return Promise.reject(new Error("未配置 AI")); }
+  return aiChat(c, buildExtMessages(content, c.persona), 45).then(function(txt){
+    var ext = parseExtJSON(txt);
+    if(!ext){ throw new Error("AI 返回的内容无法解析成 JSON"); }
+    ext.original = content;
+    ext.source = "ai";
+    ext.model = c.model;
+    ext.at = Date.now();
+    return ext;
+  });
+}
+
+function testAIConnection(){
+  var c = readAIInputs();
+  if(!c.key){ toast("请先填写 API Key"); return; }
+  if(!c.base || !c.model){ toast("请填写接口地址与模型名"); return; }
+  saveAIConfig(c);
+  renderAIStatus();
+  var btn = document.getElementById("aiTestBtn");
+  var el = document.getElementById("aiStatus");
+  if(btn){ btn.disabled = true; btn.textContent = "测试中…"; }
+  if(el){ el.textContent = "正在测试连接…"; el.style.color = "var(--muted)"; }
+  aiChat(c, [{ role: "user", content: "只回复两个字：正常" }], 20).then(function(txt){
+    var head = String(txt).replace(/\s+/g, "").slice(0, 12);
+    toast("✅ 连接正常（" + c.model + "）：" + head);
+    if(el){ el.textContent = "✅ 连接正常 · " + c.model; el.style.color = "#2e7d32"; }
+  }).catch(function(e){
+    toast("❌ 连接失败：" + e.message);
+    if(el){ el.textContent = "❌ 连接失败：" + e.message; el.style.color = "#c62828"; }
+  }).then(function(){
+    if(btn){ btn.disabled = false; btn.textContent = "🔍 测试连接"; }
+  });
+}
+
 /* ========== Gist 云同步 ========== */
 var SYNC_CONFIG_KEY = "weh_sync_config_v1";
 var SYNC_META_KEY = "weh_sync_meta_v1";
@@ -3899,6 +4157,7 @@ function initSettings(){
   loadPreference();
   applyPrefsToModules(true, false);
   syncInit();
+  aiInit();
 }
 
 /* ---------- 全局搜索 ---------- */

@@ -278,6 +278,7 @@
                 <button class="inspire-action-btn" onclick="addInspireToTodo(currentInspireId)">✅→待办</button>
                 <button class="inspire-action-btn" onclick="addInspireToDaily(currentInspireId)">📅→今日</button>
                 <button class="inspire-action-btn" onclick="exportInspire(currentInspireId)">📥 导出MD</button>
+                <button class="inspire-action-btn" onclick="regenerateInspireExtension()">🔄 重新生成</button>
                 <button class="inspire-action-btn" onclick="markInspire('recorded')">📌 已记录</button>
                 <button class="inspire-action-btn" onclick="markInspire('action')">✅ 已行动</button>
                 <button class="inspire-action-btn" onclick="deleteCurrentInspire()">🗑️ 删除</button>
@@ -1768,6 +1769,7 @@
             <div class="settings-nav-item" data-tab="appearance" onclick="switchSettingsTab('appearance')">🎨 外观设置</div>
             <div class="settings-nav-item" data-tab="data" onclick="switchSettingsTab('data')">💾 数据管理</div>
             <div class="settings-nav-item" data-tab="sync" onclick="switchSettingsTab('sync')">☁️ 云同步</div>
+            <div class="settings-nav-item" data-tab="ai" onclick="switchSettingsTab('ai')">🤖 AI 延伸</div>
             <div class="settings-nav-item" data-tab="preference" onclick="switchSettingsTab('preference')">⚙️ 模块偏好</div>
             <div class="settings-nav-item" data-tab="logs" onclick="switchSettingsTab('logs')">📋 操作日志</div>
             <div class="settings-nav-item" data-tab="about" onclick="switchSettingsTab('about')">ℹ️ 关于</div>
@@ -1927,6 +1929,64 @@
                     <button class="setting-btn" onclick="syncConnect()">🔗 保存并连接</button>
                     <button class="setting-btn" id="syncBtn-upload" onclick="syncNow('upload')">☁️ 上传</button>
                     <button class="setting-btn" id="syncBtn-download" onclick="syncNow('download')">📥 下载</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- 🤖 AI 延伸 -->
+            <div class="settings-tab" id="settings-ai">
+              <div class="card">
+                <div class="card-head">🤖 AI 延伸</div>
+                <div class="setting-hint">灵感捕捉里的「AI 延伸」（追问 / 方向 / 判断 / 关联）由这里配置的大模型生成，会结合下面「我的背景」来展开。没有配置或调用失败时会自动退回内置模板，不会影响使用。API Key 只存在本浏览器，<b>不会</b>随云同步上传。</div>
+                <div class="setting-row">
+                  <div class="setting-label">服务商</div>
+                  <div class="setting-control">
+                    <select id="aiProvider" class="ai-input" onchange="onAIProviderChange()">
+                      <option value="deepseek">DeepSeek（推荐）</option>
+                      <option value="zhipu">智谱 GLM</option>
+                      <option value="moonshot">Kimi / Moonshot</option>
+                      <option value="dashscope">通义千问</option>
+                      <option value="siliconflow">硅基流动</option>
+                      <option value="openrouter">OpenRouter</option>
+                      <option value="custom">自定义</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="setting-row">
+                  <div class="setting-label">接口地址</div>
+                  <div class="setting-control">
+                    <input type="text" id="aiBase" placeholder="https://api.deepseek.com/v1" class="ai-input">
+                  </div>
+                </div>
+                <div class="setting-row">
+                  <div class="setting-label">API Key</div>
+                  <div class="setting-control">
+                    <input type="password" id="aiKey" placeholder="sk-..." class="ai-input">
+                  </div>
+                </div>
+                <div class="setting-row">
+                  <div class="setting-label">模型名</div>
+                  <div class="setting-control">
+                    <input type="text" id="aiModel" placeholder="deepseek-chat" class="ai-input">
+                  </div>
+                </div>
+                <div class="setting-row">
+                  <div class="setting-label">我的背景</div>
+                  <div class="setting-control">
+                    <textarea id="aiPersona" class="ai-input" rows="3" placeholder="你是谁、在做什么，AI 会据此来延伸"></textarea>
+                  </div>
+                </div>
+                <div class="setting-row">
+                  <div class="setting-label">状态</div>
+                  <div class="setting-control">
+                    <span id="aiStatus" style="font-size:12px;color:var(--muted)">未配置</span>
+                  </div>
+                </div>
+                <div class="setting-row">
+                  <div class="setting-label">操作</div>
+                  <div class="setting-control">
+                    <button class="setting-btn" id="aiTestBtn" onclick="testAIConnection()">🔍 测试连接</button>
+                    <button class="setting-btn" onclick="saveAISettings()">💾 保存</button>
                   </div>
                 </div>
               </div>
