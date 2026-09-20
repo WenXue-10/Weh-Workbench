@@ -2077,6 +2077,9 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
                 <button class="job-filter-btn" data-status="rejected" onclick="filterJobs('rejected')">已挂</button>
                 <button class="job-filter-btn" data-status="expired" onclick="filterJobs('expired')">已截止</button>
                 <button class="job-filter-btn" data-status="closed" onclick="filterJobs('closed')">已结束</button>
+                <button class="job-filter-btn" data-status="abandoned" onclick="filterJobs('abandoned')">主动放弃</button>
+                <button class="job-filter-btn" data-status="redline" onclick="filterJobs('redline')">红线淘汰</button>
+                <button class="job-filter-btn" data-status="invalid" onclick="filterJobs('invalid')">已失效</button>
               </div>
               <div class="job-list" id="jobList"></div>
             </div>
@@ -3662,7 +3665,7 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
 
 <script>
 window.SITE_DATA = {
- "updated": "2026-09-21 02:05",
+ "updated": "2026-09-21 02:06",
  "stats": {
   "jobs": 38,
   "rec": 0,
@@ -3689,6 +3692,7 @@ window.SITE_DATA = {
    "researchStatus": "✅ 已背调",
    "resumeStatus": "❌ 未定制",
    "interviewStatus": "❌ 未生成",
+   "linkValid": "✅ 有效",
    "lastUpdated": "2026-09-14",
    "companyType": "—",
    "risk": "",
@@ -3707,7 +3711,7 @@ window.SITE_DATA = {
    "deadline": "未确定（应届生网 / 前程无忧均未标注截止日）",
    "score": 72,
    "level": "稳妥档",
-   "status": "ready",
+   "status": "pending",
    "statusTxt": "📮 待投递",
    "link": "https://www.yingjiesheng.com/job-008-055-065.html",
    "summary": "- **岗位**：实习生（宁波）｜职位类型：全职｜职能类别：物流专员/助理｜发布 2026-09-04 - **专业要求**：专业1 供应链管理 / 专业2 物流管理 - **【工作职责】** 1. 协助公司运营配送人员将医疗器械货物（外周血管支架等）配送到医院科室 2. 负责 ERP 系统的日常操作 3. 负责到货商品入库，进行货物数量、到货单据及发票的核对 4. 协助运营人员对仓内商品管理及月末库存盘点 - **【岗位要求】** 1. 物流管理、供应链管理或相关专业优先考虑 2. 做事细心，有良好的沟通能力 3. 大四学生，每周实习不少于 4 天，实习期至少六个月，表现优秀者可留用 4. ",
@@ -3752,6 +3756,7 @@ window.SITE_DATA = {
    "researchStatus": "✅ 已背调",
    "resumeStatus": "✅ 已定制",
    "interviewStatus": "❌ 未生成",
+   "linkValid": "✅ 有效（2026-09-20 核验）",
    "lastUpdated": "2026-09-20",
    "companyType": "—",
    "risk": "",
@@ -3818,6 +3823,7 @@ window.SITE_DATA = {
    "researchStatus": "❌ 未背调",
    "resumeStatus": "❌ 未定制",
    "interviewStatus": "❌ 未生成",
+   "linkValid": "✅ 有效（2026-09-20 核验）",
    "lastUpdated": "2026-09-20",
    "companyType": "—",
    "risk": ""
@@ -3840,6 +3846,7 @@ window.SITE_DATA = {
    "researchStatus": "✅ 已背调",
    "resumeStatus": "❌ 未定制",
    "interviewStatus": "❌ 未生成",
+   "linkValid": "✅ 有效",
    "lastUpdated": "2026-09-11",
    "companyType": "美国财富500强（工业自动化/生命科学）",
    "risk": "工作地点可能在上海（生活成本高），需确认能否选择苏州/成都。2027届校招已于2026-09-09开启（抖音校招汇总确认），官方投递入口 jobs.danaher.com 已上线，含供应链方向（牛客27届实习批次确认城市含苏州/广州/北京/上海/天津，供应链岗位在列）；具体中国区岗位需在官网检索确认",
@@ -3858,7 +3865,7 @@ window.SITE_DATA = {
    "deadline": "2027-03-09",
    "score": 89,
    "level": "冲刺档",
-   "status": "dead",
+   "status": "redline",
    "statusTxt": "❌ 淘汰（红线）",
    "link": "https://www.quanzhi.com/job/69b0421f3e67084e25d963f7",
    "summary": "来源：全智招聘（quanzhi.com），链接 https://www.quanzhi.com/job/69b0421f3e67084e25d963f7 **岗位职责** 1. 参与家电/家居品类供应链全链路运营，包括采购协同、仓储管理、物流履约、库存优化、供应商管理等模块轮岗学习。 2. 协助完成订单履约、库存周转、成本管控、时效提升等数据监控与分析，输出优化建议。 3. 对接采购、仓储、物流、商家等多方，推进流程落地、问题闭环与跨部门协作。 4. 参与供应链数字化项目，学习并应用系统工具、数据分析方法，支持业务效率提升。 5. 完成导师安排的专项任务，快速熟悉家电家居行业特性与京东供应链体",
@@ -3903,6 +3910,7 @@ window.SITE_DATA = {
    "researchStatus": "❌ 未背调",
    "resumeStatus": "❌ 未定制",
    "interviewStatus": "❌ 未生成",
+   "linkValid": "❌ 已失效",
    "lastUpdated": "2026-09-14",
    "companyType": "电商/零售（非外企优先，画像一票排除项）",
    "risk": "⚠️ 非目标城市（北京，北上广深靠后）；薪资未披露需确认是否覆盖北京生活成本；管培轮岗是否含销售端待核（红线）",
@@ -3964,6 +3972,7 @@ window.SITE_DATA = {
    "researchStatus": "✅ 已背调",
    "resumeStatus": "✅ 已定制",
    "interviewStatus": "❌ 未生成",
+   "linkValid": "❌ 已失效",
    "lastUpdated": "2026-09-14",
    "companyType": "—",
    "risk": "⚠️ 岗位要求硕士研究生在读（2026-09-11核实），本科生投递需谨慎",
@@ -3995,6 +4004,7 @@ window.SITE_DATA = {
    "researchStatus": "✅ 已背调",
    "resumeStatus": "❌ 未定制",
    "interviewStatus": "❌ 未生成",
+   "linkValid": "✅ 有效",
    "lastUpdated": "2026-09-11",
    "companyType": "快消外企（美国）",
    "risk": "岗位要求硕士研究生学历（应届生网2026-09-10发布确认），用户为本科，需确认是否接受或尝试投递；需确认管培生轮岗是否含销售端",
@@ -4022,6 +4032,7 @@ window.SITE_DATA = {
    "researchStatus": "✅ 已背调",
    "resumeStatus": "❌ 未定制",
    "interviewStatus": "❌ 未生成",
+   "linkValid": "✅ 有效",
    "lastUpdated": "2026-09-11",
    "companyType": "民营企业（新消费饮料品牌）",
    "risk": "",
@@ -4049,6 +4060,7 @@ window.SITE_DATA = {
    "researchStatus": "✅ 已背调",
    "resumeStatus": "✅ 已定制",
    "interviewStatus": "❌ 未生成",
+   "linkValid": "✅ 有效",
    "lastUpdated": "2026-09-11",
    "companyType": "—",
    "risk": "",
@@ -4080,6 +4092,7 @@ window.SITE_DATA = {
    "researchStatus": "❌ 未背调",
    "resumeStatus": "❌ 未定制",
    "interviewStatus": "❌ 未生成",
+   "linkValid": "✅ 有效",
    "lastUpdated": "2026-09-14",
    "companyType": "—",
    "risk": "",
@@ -4110,6 +4123,7 @@ window.SITE_DATA = {
    "researchStatus": "❌ 未背调",
    "resumeStatus": "❌ 未定制",
    "interviewStatus": "❌ 未生成",
+   "linkValid": "✅ 有效",
    "lastUpdated": "2026-09-14",
    "companyType": "—",
    "risk": "",
@@ -4140,6 +4154,7 @@ window.SITE_DATA = {
    "researchStatus": "❌ 未背调",
    "resumeStatus": "❌ 未定制",
    "interviewStatus": "❌ 未生成",
+   "linkValid": "✅ 有效",
    "lastUpdated": "2026-09-14",
    "companyType": "—",
    "risk": "",
@@ -4165,6 +4180,7 @@ window.SITE_DATA = {
    "researchStatus": "❌ 未背调",
    "resumeStatus": "❌ 未定制",
    "interviewStatus": "❌ 未生成",
+   "linkValid": "✅ 有效",
    "lastUpdated": "2026-09-14",
    "companyType": "—",
    "risk": "",
@@ -4190,6 +4206,7 @@ window.SITE_DATA = {
    "researchStatus": "❌ 未背调",
    "resumeStatus": "❌ 未定制",
    "interviewStatus": "❌ 未生成",
+   "linkValid": "✅ 有效",
    "lastUpdated": "2026-09-14",
    "companyType": "—",
    "risk": "",
@@ -4220,6 +4237,7 @@ window.SITE_DATA = {
    "researchStatus": "❌ 未背调",
    "resumeStatus": "❌ 未定制",
    "interviewStatus": "❌ 未生成",
+   "linkValid": "✅ 有效",
    "lastUpdated": "2026-09-14",
    "companyType": "—",
    "risk": "",
@@ -4236,7 +4254,7 @@ window.SITE_DATA = {
    "deadline": "未披露",
    "score": 88,
    "level": "冲刺档",
-   "status": "ready",
+   "status": "pending",
    "statusTxt": "📮 待投递",
    "link": "https://app.mokahr.com/m/social-recruitment/bshg/140686",
    "summary": "",
@@ -4245,6 +4263,7 @@ window.SITE_DATA = {
    "researchStatus": "✅ 已背调",
    "resumeStatus": "✅ 已定制",
    "interviewStatus": "❌ 未生成",
+   "linkValid": "✅ 有效",
    "lastUpdated": "2026-09-12",
    "companyType": "—",
    "risk": "",
@@ -4267,7 +4286,7 @@ window.SITE_DATA = {
    "deadline": "未披露",
    "score": 76,
    "level": "稳妥档",
-   "status": "ready",
+   "status": "pending",
    "statusTxt": "📮 待投递",
    "link": "https://app.mokahr.com/m/social-recruitment/bshg/140686",
    "summary": "",
@@ -4276,6 +4295,7 @@ window.SITE_DATA = {
    "researchStatus": "✅ 已背调",
    "resumeStatus": "✅ 已定制",
    "interviewStatus": "❌ 未生成",
+   "linkValid": "✅ 有效",
    "lastUpdated": "2026-09-12",
    "companyType": "—",
    "risk": "",
@@ -4298,7 +4318,7 @@ window.SITE_DATA = {
    "deadline": "未披露",
    "score": 82,
    "level": "冲刺档",
-   "status": "ready",
+   "status": "pending",
    "statusTxt": "📮 待投递",
    "link": "https://app.mokahr.com/m/social-recruitment/bshg/140686",
    "summary": "",
@@ -4307,6 +4327,7 @@ window.SITE_DATA = {
    "researchStatus": "✅ 已背调",
    "resumeStatus": "✅ 已定制",
    "interviewStatus": "❌ 未生成",
+   "linkValid": "✅ 有效",
    "lastUpdated": "2026-09-12",
    "companyType": "—",
    "risk": "",
@@ -4329,7 +4350,7 @@ window.SITE_DATA = {
    "deadline": "未披露",
    "score": 80,
    "level": "冲刺档",
-   "status": "ready",
+   "status": "pending",
    "statusTxt": "📮 待投递",
    "link": "https://app.mokahr.com/m/social-recruitment/bshg/140686",
    "summary": "",
@@ -4338,6 +4359,7 @@ window.SITE_DATA = {
    "researchStatus": "✅ 已背调",
    "resumeStatus": "✅ 已定制",
    "interviewStatus": "❌ 未生成",
+   "linkValid": "✅ 有效",
    "lastUpdated": "2026-09-12",
    "companyType": "—",
    "risk": "",
@@ -4360,7 +4382,7 @@ window.SITE_DATA = {
    "deadline": "未披露",
    "score": 78,
    "level": "稳妥档",
-   "status": "ready",
+   "status": "pending",
    "statusTxt": "📮 待投递",
    "link": "https://app.mokahr.com/m/social-recruitment/bshg/140686",
    "summary": "",
@@ -4369,6 +4391,7 @@ window.SITE_DATA = {
    "researchStatus": "✅ 已背调",
    "resumeStatus": "✅ 已定制",
    "interviewStatus": "❌ 未生成",
+   "linkValid": "✅ 有效",
    "lastUpdated": "2026-09-12",
    "companyType": "—",
    "risk": "",
@@ -4391,7 +4414,7 @@ window.SITE_DATA = {
    "deadline": "未披露",
    "score": 85,
    "level": "冲刺档",
-   "status": "ready",
+   "status": "pending",
    "statusTxt": "📮 待投递",
    "link": "https://app.mokahr.com/m/social-recruitment/bshg/140686",
    "summary": "",
@@ -4400,6 +4423,7 @@ window.SITE_DATA = {
    "researchStatus": "✅ 已背调",
    "resumeStatus": "✅ 已定制",
    "interviewStatus": "❌ 未生成",
+   "linkValid": "✅ 有效",
    "lastUpdated": "2026-09-12",
    "companyType": "—",
    "risk": "",
@@ -4422,7 +4446,7 @@ window.SITE_DATA = {
    "deadline": "未确定（BOSS 显示招聘中，HR 2周内活跃）",
    "score": 85,
    "level": "冲刺档",
-   "status": "ready",
+   "status": "pending",
    "statusTxt": "📮 待投递",
    "link": "https://www.zhipin.com/job_detail/f8535d04c776371703x_3921FFdW.html",
    "summary": "",
@@ -4431,6 +4455,7 @@ window.SITE_DATA = {
    "researchStatus": "✅ 已背调",
    "resumeStatus": "✅ 已转PDF",
    "interviewStatus": "❌ 未生成",
+   "linkValid": "✅ 有效",
    "lastUpdated": "2026-09-20",
    "companyType": "—",
    "risk": "",
@@ -4453,7 +4478,7 @@ window.SITE_DATA = {
    "deadline": "2027-03-05",
    "score": 80,
    "level": "冲刺档",
-   "status": "sent",
+   "status": "applied",
    "statusTxt": "✉️ 已投递",
    "link": "https://www.shixiseng.com/intern/inn_tef7sd0wv1ou",
    "summary": "",
@@ -4462,6 +4487,7 @@ window.SITE_DATA = {
    "researchStatus": "✅ 已背调",
    "resumeStatus": "✅ 已定制",
    "interviewStatus": "❌ 未生成",
+   "linkValid": "✅ 有效",
    "lastUpdated": "2026-09-17",
    "companyType": "—",
    "risk": "",
@@ -4487,7 +4513,7 @@ window.SITE_DATA = {
    "deadline": "未确定（长期挂岗，2026-08-12 更新）",
    "score": 73,
    "level": "稳妥档",
-   "status": "ready",
+   "status": "pending",
    "statusTxt": "📮 待投递",
    "link": "https://m.liepin.com/job/1984394085.shtml",
    "summary": "",
@@ -4496,6 +4522,7 @@ window.SITE_DATA = {
    "researchStatus": "✅ 已背调",
    "resumeStatus": "✅ 已定制",
    "interviewStatus": "❌ 未生成",
+   "linkValid": "✅ 有效",
    "lastUpdated": "2026-09-12",
    "companyType": "—",
    "risk": "",
@@ -4527,6 +4554,7 @@ window.SITE_DATA = {
    "researchStatus": "✅ 已背调",
    "resumeStatus": "✅ 已定制",
    "interviewStatus": "❌ 未生成",
+   "linkValid": "✅ 有效",
    "lastUpdated": "2026-09-11",
    "companyType": "—",
    "risk": "",
@@ -4552,7 +4580,7 @@ window.SITE_DATA = {
    "deadline": "未确定（BOSS 直聘显示招聘中）",
    "score": 73,
    "level": "稳妥档",
-   "status": "dead",
+   "status": "abandoned",
    "statusTxt": "🚫 主动放弃",
    "link": "https://www.zhipin.com/job_detail/3310ee098ceebe230nJ909W_F1tU.html",
    "summary": "- **岗位**：物流运营实习生 · 27届毕业 ｜ 180-200元/天 ｜ 宁波 ｜ 5天/周 · 10个月 ｜ 本科 - **工作内容**： 1. 负责欧洲订单载单、改地址等变更操作，跟进各物流环节执行情况，及时反馈异常并协调处理 2. 处理因非授权操作产生的额外费用，梳理费用明细及责任归属，发起索赔流程并跟进财务对账 3. 记录分析订单变更及费用异常数据，协助优化操作规范，减少同类问题发生 - **要求**：认真仔细、有耐心、有主动思考能力；全年实习、可偶请假、每周到岗 5 天；明年可转正为正式员工 - **福利标签**：生日福利、节日福利、高温补贴、团建聚餐、零食下午茶 - **HR",
@@ -4597,6 +4625,7 @@ window.SITE_DATA = {
    "researchStatus": "✅ 已背调",
    "resumeStatus": "✅ 已定制",
    "interviewStatus": "❌ 未生成",
+   "linkValid": "✅ 有效",
    "lastUpdated": "2026-09-20",
    "companyType": "—",
    "risk": "",
@@ -4619,7 +4648,7 @@ window.SITE_DATA = {
    "deadline": "未确定",
    "score": 78,
    "level": "稳妥档",
-   "status": "ready",
+   "status": "pending",
    "statusTxt": "📮 待投递",
    "link": "https://www.zhipin.com/job_detail/27b25cccecd322b80nN53N21EVBQ.html",
    "summary": "",
@@ -4628,6 +4657,7 @@ window.SITE_DATA = {
    "researchStatus": "✅ 已背调",
    "resumeStatus": "✅ 已定制",
    "interviewStatus": "❌ 未生成",
+   "linkValid": "✅ 有效",
    "lastUpdated": "2026-09-18",
    "companyType": "—",
    "risk": "",
@@ -4650,7 +4680,7 @@ window.SITE_DATA = {
    "deadline": "2026-11-19",
    "score": 57,
    "level": "保底档",
-   "status": "ready",
+   "status": "pending",
    "statusTxt": "📮 待投递",
    "link": "https://job.zzu.edu.cn/campus/view/id/1018826",
    "summary": "",
@@ -4659,6 +4689,7 @@ window.SITE_DATA = {
    "researchStatus": "✅ 已背调",
    "resumeStatus": "✅ 已定制",
    "interviewStatus": "❌ 未生成",
+   "linkValid": "✅ 有效",
    "lastUpdated": "2026-09-12",
    "companyType": "—",
    "risk": "",
@@ -4681,7 +4712,7 @@ window.SITE_DATA = {
    "deadline": "未披露",
    "score": 74,
    "level": "稳妥档",
-   "status": "ready",
+   "status": "pending",
    "statusTxt": "📮 待投递",
    "link": "https://job.byd.com/portal/pc/#/school/schoolPositionDetail?mIk0dngqWd5Vf0ZG4eq7vAvJ7aB5SLQ7cwMnD6Ukr8N4sEgBYlqG0CIYt+ReVLeM",
    "summary": "",
@@ -4690,6 +4721,7 @@ window.SITE_DATA = {
    "researchStatus": "✅ 已背调",
    "resumeStatus": "✅ 已定制",
    "interviewStatus": "❌ 未生成",
+   "linkValid": "✅ 有效",
    "lastUpdated": "2026-09-14",
    "companyType": "—",
    "risk": "",
@@ -4729,6 +4761,7 @@ window.SITE_DATA = {
    "researchStatus": "✅ 已背调",
    "resumeStatus": "✅ 已定制",
    "interviewStatus": "❌ 未生成",
+   "linkValid": "✅ 有效",
    "lastUpdated": "2026-09-11",
    "companyType": "—",
    "risk": "",
@@ -4754,7 +4787,7 @@ window.SITE_DATA = {
    "deadline": "未披露（官网未标注）",
    "score": 68,
    "level": "保底档",
-   "status": "sent",
+   "status": "applied",
    "statusTxt": "✉️ 已投递",
    "link": "https://jobs.hisense.com/intern/detail?jobAdId=4dc260df-75d2-4866-bdc1-25b332446235",
    "summary": "- **岗位编号**：J45593 ｜ **类别**：实习生招聘（实习）｜ **发布**：2026-09-08 ｜ **地点**：山东省·青岛市 - **工作职责**： 1. 新品计划协助：协助新品计划日常管理，跟踪新品首单交付进度；记录并反馈生产异常信息，配合计划经理跟进处理。 2. 资金台账维护：协助新品生产资金台账的录入、对账、月度报表整理；学习异常资金识别与跟进流程。 3. 试流需求跟进：协助试流物料齐套确认、产线试流排期沟通；试流机器翻包入库登记与台账更新。 4. 工单日常处理：协助 SAP / MES 系统工单录入与管理；异常工单记录、跟进、闭环。 - **任职资格**： 1. 学",
@@ -4799,6 +4832,7 @@ window.SITE_DATA = {
    "researchStatus": "✅ 已背调",
    "resumeStatus": "✅ 已定制",
    "interviewStatus": "❌ 未生成",
+   "linkValid": "✅ 有效",
    "lastUpdated": "2026-09-17",
    "companyType": "—",
    "risk": "",
@@ -4833,6 +4867,7 @@ window.SITE_DATA = {
    "researchStatus": "❌ 未背调",
    "resumeStatus": "✅ 已定制",
    "interviewStatus": "❌ 未生成",
+   "linkValid": "✅ 有效",
    "lastUpdated": "2026-09-14",
    "companyType": "—",
    "risk": "",
@@ -4864,6 +4899,7 @@ window.SITE_DATA = {
    "researchStatus": "✅ 已背调",
    "resumeStatus": "❌ 未定制",
    "interviewStatus": "❌ 未生成",
+   "linkValid": "✅ 有效",
    "lastUpdated": "2026-09-11",
    "companyType": "—",
    "risk": "",
@@ -4882,7 +4918,7 @@ window.SITE_DATA = {
    "deadline": "2026-10-18（应届生网招聘页确认）",
    "score": 75,
    "level": "稳妥档",
-   "status": "ready",
+   "status": "pending",
    "statusTxt": "📮 待投递",
    "link": "https://m.yingjiesheng.com/job-008-059-163.html",
    "summary": "",
@@ -4891,6 +4927,7 @@ window.SITE_DATA = {
    "researchStatus": "✅ 已背调",
    "resumeStatus": "✅ 已定制",
    "interviewStatus": "❌ 未生成",
+   "linkValid": "✅ 有效",
    "lastUpdated": "2026-09-13",
    "companyType": "—",
    "risk": "",
@@ -4922,6 +4959,7 @@ window.SITE_DATA = {
    "researchStatus": "✅ 已背调",
    "resumeStatus": "❌ 未定制",
    "interviewStatus": "❌ 未生成",
+   "linkValid": "✅ 有效",
    "lastUpdated": "2026-09-12",
    "companyType": "—",
    "risk": "",
@@ -4949,6 +4987,7 @@ window.SITE_DATA = {
    "researchStatus": "✅ 已背调",
    "resumeStatus": "✅ 已定制",
    "interviewStatus": "✅ 已生成",
+   "linkValid": "✅ 有效",
    "lastUpdated": "2026-09-21",
    "companyType": "—",
    "risk": "",
@@ -4980,6 +5019,7 @@ window.SITE_DATA = {
    "researchStatus": "✅ 已背调",
    "resumeStatus": "❌ 未定制",
    "interviewStatus": "❌ 未生成",
+   "linkValid": "✅ 有效",
    "lastUpdated": "2026-09-11",
    "companyType": "—",
    "risk": "",
@@ -4998,7 +5038,7 @@ window.SITE_DATA = {
    "deadline": "未确定（BOSS在招，HR两周内活跃）",
    "score": 73,
    "level": "稳妥档",
-   "status": "ready",
+   "status": "pending",
    "statusTxt": "📮 待投递",
    "link": "https://www.zhipin.com/job_detail/3d0a7288c42f56270ndy29-1GFFZ.html",
    "summary": "",
@@ -5007,6 +5047,7 @@ window.SITE_DATA = {
    "researchStatus": "✅ 已背调",
    "resumeStatus": "✅ 已定制",
    "interviewStatus": "❌ 未准备",
+   "linkValid": "⚠️ 待人工核实",
    "lastUpdated": "2026-09-18",
    "companyType": "—",
    "risk": "",
@@ -14099,6 +14140,20 @@ var STATUS_LABEL = {ready:"📮 待投递", sent:"✉️ 已投递", interview:"
 /* ---------- 工具 ---------- */
 function scoreClass(s){ if(s==="—"||s===""||s==null) return "gray"; s=parseFloat(s); if(isNaN(s)) return "gray"; if(s>=80) return "green"; if(s>=70) return "blue"; if(s>=60) return "amber"; return "red"; }
 function statusClass(s){ return {done:"done",warn:"warn",backup:"backup",new:"new",interview:"interview",dead:"dead"}[s]||"backup"; }
+
+function linkValidKey(v){
+  if(!v) return null;
+  if(v.indexOf("失效") >= 0) return "invalid";
+  if(v.indexOf("待人工核实") >= 0 || v.indexOf("待核实") >= 0) return "warn";
+  return null;
+}
+function linkValidBadge(j){
+  var v = j && j.linkValid;
+  if(!v) return "";
+  if(v.indexOf("失效") >= 0) return '<span style="display:inline-block;font-size:11px;line-height:1.6;padding:0 6px;border-radius:4px;background:rgba(220,38,38,.16);color:#dc2626;margin-left:6px">'+esc(v)+'</span>';
+  if(v.indexOf("待人工核实") >= 0 || v.indexOf("待核实") >= 0) return '<span style="display:inline-block;font-size:11px;line-height:1.6;padding:0 6px;border-radius:4px;background:rgba(249,115,22,.16);color:#f97316;margin-left:6px">'+esc(v)+'</span>';
+  return "";
+}
 function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
 function setModal(html){ document.getElementById("modalBody").innerHTML = html; document.getElementById("modal").classList.add("show"); }
 function closeModal(){ document.getElementById("modal").classList.remove("show"); }
@@ -14456,11 +14511,13 @@ function openJob(i){
     '<h2>'+esc(j.company)+' · '+esc(j.pos)+'</h2>'
     + '<div class="m-sub">📍 '+esc(j.city)+' ｜ 💰 '+esc(j.salary)+' ｜ 🗓 截止 '+esc(j.deadline)+'</div>'
     + '<div class="job-tags"><span class="status '+statusClass(j.status)+'">'+esc(j.statusTxt)+'</span><span class="level">匹配等级 '+esc(j.level)+'</span></div>'
+    + linkValidBadge(j)
     + '<div class="m-sec">📋 状态信息</div>'
     + '<table class="m-table"><tbody>'
     + '<tr><td>背调状态</td><td>'+esc(j.researchStatus||"—")+'</td></tr>'
     + '<tr><td>简历状态</td><td>'+esc(j.resumeStatus||"—")+'</td></tr>'
     + '<tr><td>面试资料</td><td>'+esc(j.interviewStatus||"—")+'</td></tr>'
+    + '<tr><td>链接有效性</td><td>'+esc(j.linkValid||"—")+'</td></tr>'
     + '<tr><td>公司性质</td><td>'+esc(j.companyType||"—")+'</td></tr>'
     + '<tr><td>最后更新</td><td>'+esc(j.lastUpdated||"—")+'</td></tr>'
     + '</tbody></table>'
@@ -16818,8 +16875,8 @@ function clearOperationLogs(){
 }
 
 /* ========== 求职作战：岗位看板 ========== */
-var JOB_STATUS_TEXT = {pending:"📮 待投递", done:"✅ 已背调", new:"🆕 新收录", warn:"⚠️ 待核实", backup:"📌 备选", applied:"📤 已投递", interview:"🎤 面试中", offer:"🎉 已Offer", rejected:"❌ 已挂", expired:"⏰ 已截止", closed:"❌ 已结束", unknown:"❓ 未识别"};
-var JOB_STATUS_COLOR = {pending:"#f59e0b", done:"#14b8a6", new:"#d946ef", warn:"#f97316", backup:"#6b7280", applied:"#3b82f6", interview:"#8b5cf6", offer:"#10b981", rejected:"#ef4444", expired:"#94a3b8", closed:"#64748b", unknown:"#94a3b8"};
+var JOB_STATUS_TEXT = {pending:"📮 待投递", done:"✅ 已背调", new:"🆕 新收录", warn:"⚠️ 待核实", backup:"📌 备选", applied:"📤 已投递", interview:"🎤 面试中", offer:"🎉 已Offer", rejected:"❌ 已挂", expired:"⏰ 已截止", closed:"❌ 已结束", abandoned:"🚫 主动放弃", redline:"❌ 红线淘汰", invalid:"❌ 已失效", unknown:"❓ 未识别"};
+var JOB_STATUS_COLOR = {pending:"#f59e0b", done:"#14b8a6", new:"#d946ef", warn:"#f97316", backup:"#6b7280", applied:"#3b82f6", interview:"#8b5cf6", offer:"#10b981", rejected:"#ef4444", expired:"#94a3b8", closed:"#64748b", abandoned:"#0891b2", redline:"#dc2626", invalid:"#a16207", unknown:"#94a3b8"};
 
 function loadJobs(){
   try{ var d = JSON.parse(localStorage.getItem(JOB_KEY)); return d && d.jobs ? d : {jobs:[], logs:[]}; }catch(e){ return {jobs:[], logs:[]}; }
@@ -16831,7 +16888,7 @@ function loadJobOverrides(){
 }
 function saveJobOverrides(o){ markLocalChange(); localStorage.setItem(JOB_OVERRIDE_KEY, JSON.stringify(o)); }
 function jobKey(j){ return (j.company||"") + "||" + (j.pos||j.position||""); }
-var KB_STATUS_MAP = {ready:"pending", sent:"applied", interview:"interview", offer:"offer", dead:"rejected", backup:"backup", done:"done", warn:"warn", new:"new", expired:"expired", closed:"closed"};
+var KB_STATUS_MAP = {ready:"pending", sent:"applied", interview:"interview", offer:"offer", dead:"rejected", backup:"backup", done:"done", warn:"warn", new:"new", expired:"expired", closed:"closed", abandoned:"abandoned", redline:"redline", invalid:"invalid"};
 function getMergedJobs(){
   var overrides = loadJobOverrides();
   var local = loadJobs();
@@ -16971,7 +17028,11 @@ function renderJobs(){
     }
   }
   var jobs = allJobs;
-  if(currentJobFilter !== "all") jobs = jobs.filter(function(j){ return j.status===currentJobFilter; });
+  if(currentJobFilter !== "all"){
+    if(currentJobFilter === "invalid") jobs = jobs.filter(function(j){ return linkValidKey(j.linkValid) === "invalid"; });
+    else if(currentJobFilter === "warn") jobs = jobs.filter(function(j){ return linkValidKey(j.linkValid) === "warn"; });
+    else jobs = jobs.filter(function(j){ return j.status===currentJobFilter; });
+  }
   var countEl = document.getElementById("jobBoardCount");
   if(countEl) countEl.textContent = jobs.length + " 个岗位";
   var list = document.getElementById("jobList");
@@ -16997,6 +17058,7 @@ function renderJobs(){
           +(j.salary ? '<span>💰 '+esc(j.salary)+'</span>' : '')
           +deadline
           +'<span style="color:'+color+'">'+(j.statusTxt || JOB_STATUS_TEXT[j.status] || j.status)+'</span>'
+          + linkValidBadge(j)
         +'</div>'
       +'</div>'
       +'<div class="job-item-actions" onclick="event.stopPropagation()">'
