@@ -1699,6 +1699,7 @@ var DEC_UI_TEXT = {
     title: "🔥 拷问现场",
     ph: "把你的方案/想法/决定丢进来，我往死里挑...",
     btn: "开始拷问",
+    reset: "🔄 重新拷问一个",
     roundDone: "拷问完成",
     empty: '把你的方案、想法或决定丢进来<br>我会结合你的身份（{ID} · {ST}）往死里挑<br><span style="color:#e05050;font-weight:700">低于7分让你重做，不许客气</span>',
     rulesTitle: "📋 拷问规则",
@@ -1714,6 +1715,7 @@ var DEC_UI_TEXT = {
     title: "🧭 顾问会谈",
     ph: "说说你的方案或纠结，我帮你把关键问题和风险理一遍...",
     btn: "开始分析",
+    reset: "🔄 重新分析一场",
     roundDone: "评估完成",
     empty: '把你的方案、想法或决定丢进来<br>我会结合你的身份（{ID} · {ST}）逐条帮你看<br><span style="color:#2d8a5e;font-weight:700">指出关键问题、给出具体建议，最后追问一个决定成败的点</span>',
     rulesTitle: "📋 顾问工作方式",
@@ -1754,6 +1756,7 @@ function applyDecisionStyleUI(){
   el = document.getElementById("decChatTitle"); if(el) el.textContent = t.title;
   el = document.getElementById("decChatInput"); if(el) el.placeholder = t.ph;
   el = document.getElementById("decSendBtn");  if(el) el.textContent = t.btn;
+  el = document.getElementById("decResetBtn"); if(el) el.textContent = t.reset;
   el = document.getElementById("decRulesTitle"); if(el) el.textContent = t.rulesTitle;
   el = document.getElementById("decRulesBody");
   if(el) el.innerHTML = t.rules.map(function(r){ return '<div class="dec-rule">' + r + '</div>'; }).join("");
@@ -2002,7 +2005,7 @@ function showDecisionScore(score){
 }
 
 function resetDecision(){
-  showConfirm("确定重新开始？这一场会自动存进「📚 历史拷问」，不会丢。").then(function(ok){
+  showConfirm("确定重新开始？这一场会自动保存，不会丢。").then(function(ok){
     if(!ok) return;
     _decPending = false;
     var d0 = loadDecision();
