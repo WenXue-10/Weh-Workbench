@@ -1501,20 +1501,51 @@ function generateHealthReply(msg, data){
 
 /* ========== 决策顾问模块 ========== */
 var DECISION_KEY = "weh_decision_data_v1";
-var DECISION_DEFAULTS = {identity:"上班族", stage:"起步摸索期", depth:3, style:"harsh", chatHistory:[], score:null, round:0, started:false};
+/* 进行中的这一场对话与打分只存本机（独立键），不参与云同步 ——
+   它是有状态的过程，两边各开一场时整段覆盖会把对方正在聊的内容抹掉；
+   打完分的快照（history）才是不可变的，它随同步走 */
+var DECISION_LIVE_KEY = "weh_decision_live_v1";
+var DEC_LIVE_FIELDS = ["chatHistory","score","round","started","archived"];
+var DECISION_DEFAULTS = {identity:"上班族", stage:"起步摸索期", depth:3, style:"harsh", chatHistory:[], score:null, round:0, started:false, archived:false, history:[]};
+var DEC_HISTORY_MAX = 50;
 
 function loadDecision(){
   try{
-    var d = JSON.parse(localStorage.getItem(DECISION_KEY));
-    if(!d) return JSON.parse(JSON.stringify(DECISION_DEFAULTS));
+    var d = JSON.parse(localStorage.getItem(DECISION_KEY)) || {};
     for(var k in DECISION_DEFAULTS){ if(d[k]===undefined) d[k]=DECISION_DEFAULTS[k]; }
+    var live = null;
+    try{ live = JSON.parse(localStorage.getItem(DECISION_LIVE_KEY)); }catch(e2){ live = null; }
+    if(live && typeof live === "object"){   /* 本机进行中的那一场优先于云端可能残留的旧 chatHistory */
+      d.chatHistory = live.chatHistory || [];
+      d.score = live.score || null;
+      d.round = live.round || 0;
+      d.started = !!live.started;
+      d.archived = !!live.archived;
+    }
     return d;
   }catch(e){ return JSON.parse(JSON.stringify(DECISION_DEFAULTS)); }
 }
-function saveDecision(data){ markLocalChange(); localStorage.setItem(DECISION_KEY, JSON.stringify(data)); }
+/* 拆成两个键写：同步键只留设置 + 历史存档，进行中的对话/打分进本机键 */
+function _decWriteStorage(data){
+  var live = {}, rest = {}, k;
+  for(k in data){ if(DEC_LIVE_FIELDS.indexOf(k) >= 0) live[k] = data[k]; else rest[k] = data[k]; }
+  localStorage.setItem(DECISION_LIVE_KEY, JSON.stringify(live));
+  localStorage.setItem(DECISION_KEY, JSON.stringify(rest));
+}
+function saveDecision(data){ markLocalChange(); _decWriteStorage(data); }
+/* 一次性迁移：老版本把进行中的对话也放在同步键里，首次加载时搬到本机键 */
+function _decMigrateLive(){
+  try{
+    if(localStorage.getItem(DECISION_LIVE_KEY) !== null) return;
+    _decWriteStorage(loadDecision());
+  }catch(e){}
+}
 
 function initDecision(){
+  _decMigrateLive();
   var data = loadDecision();
+  /* 迁移：升级前已经打完分的那一场，第一次打开时补成一条历史存档 */
+  if(!(data.history||[]).length && data.score && (data.chatHistory||[]).length && !data.archived){ archiveDecisionSession(); }
   document.getElementById("decIdentity").value = data.identity;
   document.getElementById("decStage").value = data.stage;
   document.getElementById("decDepth").value = String(data.depth);
@@ -1527,6 +1558,7 @@ function initDecision(){
     showDecisionScore(data.score);
   }
   updateRoundInfo();
+  renderDecHistory();
 }
 
 function saveDecisionSettings(){
@@ -1564,7 +1596,8 @@ function renderDecisionChat(){
   if((data.chatHistory||[]).length === 0){
     var _ut = DEC_UI_TEXT[decStyle()] || DEC_UI_TEXT.harsh;
     box.innerHTML = '<div style="text-align:center;color:var(--muted);padding:40px 20px;font-size:13px;line-height:1.8">'
-      + _ut.empty.replace("{ID}", esc(data.identity)).replace("{ST}", esc(data.stage)) + '</div>';
+      + _ut.empty.replace("{ID}", esc(data.identity)).replace("{ST}", esc(data.stage)) + '</div>'
+      + decLastHint();
   } else {
     box.innerHTML = data.chatHistory.map(function(m){
       var content = esc(m.content).replace(/\n/g,"<br>");
@@ -1596,6 +1629,7 @@ function sendDecisionChat(){
   if(_decPending){ toast("上一轮还在进行中，稍等一下下"); return; }
   var data = loadDecision();
   data.chatHistory = data.chatHistory || [];
+  if(!data.chatHistory.length) data.archived = false;   /* 新的一场开始了 */
   data.started = true;
   data.chatHistory.push({role:"user", content:msg, photoId:_decPhotoId});
   _decPhotoId = null;
@@ -1760,6 +1794,13 @@ function buildDecisionMessages(data){
   }
   sys += "\n\n【关于服务对象】身份：" + (data.identity || "未填") + "；所处阶段：" + (data.stage || "未填") + "。";
   if(cfg.persona) sys += "\n【补充背景】" + cfg.persona;
+  /* 新一场的第一轮：把上一次的致命伤带进来，让它留意有没有重蹈覆辙 */
+  var _lastH = (data.history || [])[0];
+  if((data.round || 0) === 0 && _lastH && _lastH.scored && _lastH.score && _lastH.score.fatal){
+    sys += "\n【上一次拷问的致命伤】" + _lastH.score.fatal
+        + (_lastH.score.fix ? ("（上次给的改法：" + _lastH.score.fix + "）") : "")
+        + "\n如果这一场他又犯了同样的问题，直接点出来；如果他确实已经改了，不要硬往上套。";
+  }
 
   var h = data.chatHistory || [];
   var msgs = [{ role: "system", content: sys }];
@@ -1838,6 +1879,8 @@ function _decRunScore(data){
     var d = loadDecision();
     d.score = sc;
     saveDecision(d);
+    archiveDecisionSession();   /* 打完分就存一份不可变快照 → 才能安全参与云同步 */
+    renderDecHistory();
     showDecisionScore(sc);
     updateRoundInfo();
     renderDecisionChat();
@@ -1943,19 +1986,199 @@ function showDecisionScore(score){
 }
 
 function resetDecision(){
-  showConfirm("确定重新开始？当前拷问记录会清空。").then(function(ok){
+  showConfirm("确定重新开始？这一场会自动存进「📚 历史拷问」，不会丢。").then(function(ok){
     if(!ok) return;
     _decPending = false;
+    var d0 = loadDecision();
+    /* 还没走到打分的这一场，也先存一份（标「未评分」），再开新的 */
+    if((d0.chatHistory||[]).length && !d0.archived){ archiveDecisionSession(); }
     var data = loadDecision();
     data.chatHistory = [];
     data.score = null;
     data.round = 0;
     data.started = false;
+    data.archived = false;
     saveDecision(data);
     document.getElementById("decScoreCard").style.display = "none";
     renderDecisionChat();
     updateRoundInfo();
+    renderDecHistory();
   });
+}
+
+/* ---------- 决策顾问 · 历史会话（存档 / 回看 / 导出） ---------- */
+function _decTwo(n){ return ("0" + n).slice(-2); }
+function _decFmtTs(ms){
+  var t = new Date(ms || Date.now());
+  return t.getFullYear() + "-" + _decTwo(t.getMonth()+1) + "-" + _decTwo(t.getDate())
+       + " " + _decTwo(t.getHours()) + ":" + _decTwo(t.getMinutes());
+}
+function _decStyleName(s){ return (s === "senior") ? "🧭 资深顾问" : "🔥 毒舌拷问"; }
+
+function _decDialogueTitle(dlg){
+  var s = "";
+  (dlg||[]).forEach(function(m){ if(!s && m.role === "user" && m.content){ s = String(m.content); } });
+  s = s.replace(/\s+/g, " ").trim();
+  if(!s) return "（只发了图片）";
+  return s.length > 22 ? (s.slice(0,22) + "…") : s;
+}
+
+/* 把当前这一场存成一份历史快照（不可变 → 可以安全地按 id 合并同步） */
+function archiveDecisionSession(){
+  var d = loadDecision();
+  var hasUser = (d.chatHistory||[]).some(function(m){ return m.role === "user"; });
+  if(!hasUser) return false;
+  var dlg = (d.chatHistory||[]).map(function(m){
+    var o = { role: m.role, content: m.content || "" };
+    if(m.question) o.question = m.question;
+    if(m.photoId) o.photoId = m.photoId;
+    if(m.src) o.src = m.src;
+    if(m.model) o.model = m.model;
+    if(m.reasoning) o.reasoning = String(m.reasoning).slice(0, 1000);
+    return o;
+  });
+  d.history = d.history || [];
+  d.history.unshift({
+    id: Date.now(),
+    at: Date.now(),
+    title: _decDialogueTitle(dlg),
+    identity: d.identity, stage: d.stage,
+    style: (d.style === "senior") ? "senior" : "harsh",
+    rounds: dlg.filter(function(m){ return m.role === "user"; }).length,
+    scored: !!d.score,
+    score: d.score ? JSON.parse(JSON.stringify(d.score)) : null,
+    dialogue: dlg
+  });
+  if(d.history.length > DEC_HISTORY_MAX) d.history = d.history.slice(0, DEC_HISTORY_MAX);
+  d.archived = true;
+  saveDecision(d);
+  return true;
+}
+
+function renderDecHistory(){
+  var d = loadDecision();
+  var list = d.history || [];
+  var cnt = document.getElementById("decHistoryCount");
+  if(cnt) cnt.textContent = list.length + " 场";
+  var box = document.getElementById("decHistory");
+  if(!box) return;
+  if(!list.length){
+    box.innerHTML = '<div style="text-align:center;color:var(--muted);padding:16px;font-size:12px;line-height:1.7">还没有历史拷问<br>打完分的拷问会自动存一份到这里</div>';
+    return;
+  }
+  box.innerHTML = list.map(function(h){
+    var hasSc = !!(h.scored && h.score);
+    var sc = hasSc ? (h.score.score + " 分") : "未评分";
+    var color = hasSc ? (h.score.score >= 7 ? "#2d8a5e" : (h.score.score >= 5 ? "#d48806" : "#e05050")) : "var(--muted)";
+    var fatal = (hasSc && h.score.fatal) ? String(h.score.fatal) : "";
+    return '<div class="report-history-item" onclick="openDecHistory(' + h.id + ')">'
+      + '<div style="display:flex;justify-content:space-between;align-items:flex-start">'
+      + '<div style="flex:1;min-width:0">'
+      + '<div class="report-history-title" style="word-break:break-word">' + esc(h.title || "（无文字）") + '</div>'
+      + '<div class="report-history-meta">' + _decFmtTs(h.at) + ' · ' + _decStyleName(h.style) + ' · ' + (h.rounds||0) + '轮 · <b style="color:' + color + '">' + sc + '</b></div>'
+      + (fatal ? '<div class="report-history-meta" style="margin-top:2px">' + esc(fatal.length > 26 ? (fatal.slice(0,26) + "…") : fatal) + '</div>' : '')
+      + '</div>'
+      + '<div class="report-delete-btn" onclick="event.stopPropagation();deleteDecHistory(' + h.id + ')" title="删除">🗑️</div>'
+      + '</div></div>';
+  }).join("");
+}
+
+function _decFindHis(id){
+  var list = loadDecision().history || [];
+  for(var i = 0; i < list.length; i++){ if(list[i].id === id) return list[i]; }
+  return null;
+}
+
+function openDecHistory(id){
+  var h = _decFindHis(id);
+  if(!h) return;
+  var hasSc = !!(h.scored && h.score);
+  var html = '<div style="font-size:11px;color:var(--muted);margin-bottom:6px">📚 历史拷问 · ' + _decFmtTs(h.at) + '</div>'
+    + '<div style="font-size:17px;font-weight:800;line-height:1.5;margin-bottom:8px;word-break:break-word">' + esc(h.title || "（无文字）") + '</div>'
+    + '<div style="font-size:11px;color:var(--muted);line-height:1.8;margin-bottom:14px">'
+    + esc(h.identity || "") + ' · ' + esc(h.stage || "") + ' · ' + _decStyleName(h.style) + ' · ' + (h.rounds||0) + ' 轮'
+    + (hasSc ? (' · <b>' + h.score.score + '/10 分</b>') : ' · 未评分')
+    + '</div>';
+  if(hasSc){
+    var c = h.score.score >= 7 ? "#2d8a5e" : (h.score.score >= 5 ? "#d48806" : "#e05050");
+    html += '<div style="font-size:13px;line-height:1.8;margin-bottom:6px"><b>致命伤：</b>' + esc(h.score.fatal || "") + '</div>'
+      + '<div style="font-size:13px;line-height:1.8;margin-bottom:6px"><b>怎么改：</b>' + esc(h.score.fix || "") + '</div>'
+      + '<div style="font-weight:800;color:' + c + ';margin-bottom:14px">' + (h.score.pass ? "✅ 通过" : "❌ 不通过") + '</div>';
+  }
+  html += '<div style="border-top:1px solid var(--line);padding-top:12px">';
+  html += (h.dialogue || []).map(function(m){
+    var isUser = (m.role === "user");
+    var body = esc(m.content || "").replace(/\n/g, "<br>");
+    if(!isUser && m.question){ body += '<div style="color:#e05050;font-weight:700;margin-top:6px">💥 ' + esc(m.question) + '</div>'; }
+    return '<div style="padding:10px 14px;border-radius:14px;font-size:13px;line-height:1.75;margin-bottom:8px;'
+      + (isUser ? 'background:rgba(219,112,147,.12)' : 'background:rgba(255,255,255,.75);border:1px solid var(--line)')
+      + '"><b style="font-size:11px;color:var(--muted)">' + (isUser ? "我" : "顾问") + '</b><br>' + body + '</div>';
+  }).join("");
+  html += '</div>'
+    + '<div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap">'
+    + '<button class="ai-truth-btn" style="width:auto;padding:10px 18px" onclick="exportDecHistory(' + h.id + ')">📥 导出 MD</button>'
+    + '<button class="ai-truth-btn" style="width:auto;padding:10px 18px;background:linear-gradient(135deg,#e05050,#f08080)" onclick="deleteDecHistory(' + h.id + ')">🗑️ 删除这一场</button>'
+    + '</div>';
+  setModal(html);
+}
+
+function exportDecHistory(id){
+  var h = _decFindHis(id);
+  if(!h) return;
+  var ts = _decFmtTs(h.at);
+  var date = ts.slice(0, 10);
+  var hasSc = !!(h.scored && h.score);
+  var md = "---\n";
+  md += "title: 决策拷问 - " + (h.title || date) + "\n";
+  md += "date: " + date + "\n";
+  md += "type: 决策拷问\n";
+  md += "style: " + (h.style === "senior" ? "资深顾问" : "毒舌拷问") + "\n";
+  md += "identity: " + (h.identity || "") + "\n";
+  md += "stage: " + (h.stage || "") + "\n";
+  md += "rounds: " + (h.rounds || 0) + "\n";
+  md += "score: " + (hasSc ? h.score.score : "") + "\n";
+  md += "tags: [决策顾问, 决策记录]\n";
+  md += "---\n\n";
+  md += "# 决策拷问：" + (h.title || "") + "\n\n";
+  md += "> " + ts + " · " + (h.identity || "") + " · " + (h.stage || "") + " · " + _decStyleName(h.style) + " · " + (h.rounds || 0) + " 轮\n\n";
+  if(hasSc){
+    md += "## 📊 打分：" + h.score.score + "/10（" + (h.score.pass ? "通过" : "不通过") + "）\n\n";
+    md += "- **致命伤**：" + (h.score.fatal || "") + "\n";
+    md += "- **怎么改**：" + (h.score.fix || "") + "\n\n";
+  }else{
+    md += "> 这一场没走到打分。\n\n";
+  }
+  md += "## 💬 对话\n\n";
+  (h.dialogue || []).forEach(function(m){
+    md += "### " + (m.role === "user" ? "我" : "顾问") + "\n\n" + (m.content || "") + "\n\n";
+    if(m.role !== "user" && m.question){ md += "> 💥 追问：" + m.question + "\n\n"; }
+  });
+  var short = String(h.title || "决策").replace(/[\\/:*?"<>|]/g, "_").slice(0, 16);
+  downloadMD("决策拷问-" + date + "-" + short + ".md", md);
+}
+
+function deleteDecHistory(id){
+  showConfirm("删除这一场历史拷问？删了就找不回来了。").then(function(ok){
+    if(!ok) return;
+    var d = loadDecision();
+    d.history = (d.history || []).filter(function(x){ return x.id !== id; });
+    saveDecision(d);
+    renderDecHistory();
+    closeModal();
+    toast("已删除这一场");
+  });
+}
+
+/* 开新一场时的提示：上一次的致命伤 */
+function decLastHint(){
+  var h = (loadDecision().history || [])[0];
+  if(!h) return "";
+  var when = _decFmtTs(h.at).slice(5, 10);
+  if(h.scored && h.score){
+    return '<div class="dec-last-hint">📌 上次（' + when + '）的致命伤：' + esc(h.score.fatal || "（未记录）")
+      + '<br>这次还在犯吗？</div>';
+  }
+  return '<div class="dec-last-hint">📌 上次（' + when + '）那一场没走到打分，点左边「📚 历史拷问」可以回看。</div>';
 }
 
 
@@ -3131,7 +3354,7 @@ function updateHomeStats(){
   }catch(e){}
   try{
     // 决策顾问：拷问次数
-    var decData = JSON.parse(localStorage.getItem("weh_decision_data_v1"));
+    var decData = JSON.parse(localStorage.getItem(DECISION_LIVE_KEY));
     var decCount = decData && decData.chatHistory ? decData.chatHistory.length : 0;
     var el4 = document.getElementById("homeDecisionCount");
     if(el4) el4.textContent = decCount;
@@ -4287,7 +4510,8 @@ function writeAllData(data){
 /* ---------- 合并工具：按记录 id 求并集 + 基准清单判定删除 ---------- */
 var SYNC_LIST_FIELDS = {
   money: ["records"], health: ["records"], inspire: ["records"], todo: ["items"],
-  report: ["history"], daily: ["tasks"], job: ["jobs", "logs"], company: ["companies"]
+  report: ["history"], daily: ["tasks"], job: ["jobs", "logs"], company: ["companies"],
+  decision: ["history"]   /* 只合并「已打完分的存档」；进行中的 chatHistory 在本机键里，不随同步 */
 };
 var SYNC_FORCE_LOCAL = { daily: { date: true } };
 var SYNC_BASE_KEY = "weh_sync_base_v1";
@@ -4645,6 +4869,7 @@ function clearModuleData(){
   showConfirm("确定清空「" + (moduleNames[module]||module) + "」的所有数据？此操作不可恢复！").then(function(ok){
     if(!ok) return;
     localStorage.removeItem(DATA_KEYS[module]);
+    if(module === "decision") localStorage.removeItem(DECISION_LIVE_KEY);
     clearSyncBase(); // 清空模块属「整段清掉」，不作为删除判定依据，避免同步时误删另一台设备的数据
     markLocalChange();
   toast("已清空，页面即将刷新");
@@ -4662,6 +4887,7 @@ function resetAllData(){
       }
       localStorage.removeItem(SETTINGS_KEY);
       localStorage.removeItem(JOB_OVERRIDE_KEY);
+      localStorage.removeItem(DECISION_LIVE_KEY);
       clearSyncBase(); // 重置全部属「整段清掉」，不作为删除判定依据，避免同步时误删另一台设备的数据
       markLocalChange();
   toast("已重置全部数据，页面即将刷新");

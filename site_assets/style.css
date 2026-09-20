@@ -666,6 +666,9 @@ a{color:var(--pink-deep);text-decoration:none}
   background:rgba(224,80,80,.1);
 }
 
+/* 决策顾问 · 「上次的致命伤」提示 */
+.dec-last-hint{margin-top:18px;font-size:12px;line-height:1.8;color:var(--text);background:rgba(255,169,77,.10);border-left:3px solid #ffa94d;padding:10px 14px;border-radius:0 10px 10px 0;text-align:left}
+
 
 /* ========== 日计划台模块 ========== */
 .daily-header{display:flex;gap:20px;align-items:center;margin-bottom:16px;padding:16px 20px;background:rgba(255,255,255,.7);backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:16px}
