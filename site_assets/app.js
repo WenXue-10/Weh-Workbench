@@ -10,6 +10,20 @@ var STATUS_LABEL = {ready:"📮 待投递", sent:"✉️ 已投递", interview:"
 /* ---------- 工具 ---------- */
 function scoreClass(s){ if(s==="—"||s===""||s==null) return "gray"; s=parseFloat(s); if(isNaN(s)) return "gray"; if(s>=80) return "green"; if(s>=70) return "blue"; if(s>=60) return "amber"; return "red"; }
 function statusClass(s){ return {done:"done",warn:"warn",backup:"backup",new:"new",interview:"interview",dead:"dead"}[s]||"backup"; }
+
+function linkValidKey(v){
+  if(!v) return null;
+  if(v.indexOf("失效") >= 0) return "invalid";
+  if(v.indexOf("待人工核实") >= 0 || v.indexOf("待核实") >= 0) return "warn";
+  return null;
+}
+function linkValidBadge(j){
+  var v = j && j.linkValid;
+  if(!v) return "";
+  if(v.indexOf("失效") >= 0) return '<span style="display:inline-block;font-size:11px;line-height:1.6;padding:0 6px;border-radius:4px;background:rgba(220,38,38,.16);color:#dc2626;margin-left:6px">'+esc(v)+'</span>';
+  if(v.indexOf("待人工核实") >= 0 || v.indexOf("待核实") >= 0) return '<span style="display:inline-block;font-size:11px;line-height:1.6;padding:0 6px;border-radius:4px;background:rgba(249,115,22,.16);color:#f97316;margin-left:6px">'+esc(v)+'</span>';
+  return "";
+}
 function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
 function setModal(html){ document.getElementById("modalBody").innerHTML = html; document.getElementById("modal").classList.add("show"); }
 function closeModal(){ document.getElementById("modal").classList.remove("show"); }
@@ -367,11 +381,13 @@ function openJob(i){
     '<h2>'+esc(j.company)+' · '+esc(j.pos)+'</h2>'
     + '<div class="m-sub">📍 '+esc(j.city)+' ｜ 💰 '+esc(j.salary)+' ｜ 🗓 截止 '+esc(j.deadline)+'</div>'
     + '<div class="job-tags"><span class="status '+statusClass(j.status)+'">'+esc(j.statusTxt)+'</span><span class="level">匹配等级 '+esc(j.level)+'</span></div>'
+    + linkValidBadge(j)
     + '<div class="m-sec">📋 状态信息</div>'
     + '<table class="m-table"><tbody>'
     + '<tr><td>背调状态</td><td>'+esc(j.researchStatus||"—")+'</td></tr>'
     + '<tr><td>简历状态</td><td>'+esc(j.resumeStatus||"—")+'</td></tr>'
     + '<tr><td>面试资料</td><td>'+esc(j.interviewStatus||"—")+'</td></tr>'
+    + '<tr><td>链接有效性</td><td>'+esc(j.linkValid||"—")+'</td></tr>'
     + '<tr><td>公司性质</td><td>'+esc(j.companyType||"—")+'</td></tr>'
     + '<tr><td>最后更新</td><td>'+esc(j.lastUpdated||"—")+'</td></tr>'
     + '</tbody></table>'
@@ -2882,7 +2898,11 @@ function renderJobs(){
     }
   }
   var jobs = allJobs;
-  if(currentJobFilter !== "all") jobs = jobs.filter(function(j){ return j.status===currentJobFilter; });
+  if(currentJobFilter !== "all"){
+    if(currentJobFilter === "invalid") jobs = jobs.filter(function(j){ return linkValidKey(j.linkValid) === "invalid"; });
+    else if(currentJobFilter === "warn") jobs = jobs.filter(function(j){ return linkValidKey(j.linkValid) === "warn"; });
+    else jobs = jobs.filter(function(j){ return j.status===currentJobFilter; });
+  }
   var countEl = document.getElementById("jobBoardCount");
   if(countEl) countEl.textContent = jobs.length + " 个岗位";
   var list = document.getElementById("jobList");
@@ -2908,6 +2928,7 @@ function renderJobs(){
           +(j.salary ? '<span>💰 '+esc(j.salary)+'</span>' : '')
           +deadline
           +'<span style="color:'+color+'">'+(j.statusTxt || JOB_STATUS_TEXT[j.status] || j.status)+'</span>'
+          + linkValidBadge(j)
         +'</div>'
       +'</div>'
       +'<div class="job-item-actions" onclick="event.stopPropagation()">'

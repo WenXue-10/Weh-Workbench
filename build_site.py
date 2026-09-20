@@ -287,6 +287,7 @@ def scan_jobs():
                 "researchStatus": fm.get("背调状态", "—"),
                 "resumeStatus": fm.get("简历状态", "—"),
                 "interviewStatus": fm.get("面试资料状态", "—"),
+                "linkValid": fm.get("链接有效性", ""),
                 "lastUpdated": fm.get("最后更新日期", fm.get("更新日期", "—")),
                 "companyType": fm.get("公司性质", "—"),
                 "risk": fm.get("风险提示", ""),
