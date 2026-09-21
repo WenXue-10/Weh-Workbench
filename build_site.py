@@ -589,19 +589,30 @@ def _file_note(path):
     return {"title": fn, "icon": "📎", "html": f'<p><a href="{url}" target="_blank">📥 查看 / 下载：{fn}</a></p>'}
 
 def _walk_notes(root):
+    """递归扫描目录：子文件夹保留为 children 层级节点（前端 renderNotes 支持），
+    顶层直接文件作为叶子；不再把整棵目录树拍平。"""
     notes = []
     if not os.path.isdir(root):
         return notes
-    for r, dirs, files in os.walk(root):
-        dirs[:] = [d for d in dirs if d not in (".trash",)]
-        for fn in sorted(files):
-            p = os.path.join(r, fn)
-            if fn.endswith(".md"):
-                if fn.startswith("评分-") or fn.startswith("背调报告-"):
-                    continue
-                notes.append(_md_note(p))
-            elif fn.lower().endswith((".pdf", ".doc", ".docx", ".png", ".jpg", ".jpeg")):
-                notes.append(_file_note(p))
+    try:
+        entries = sorted(os.listdir(root))
+    except OSError:
+        return notes
+    for name in entries:
+        if name.startswith(".") or name == ".trash":
+            continue
+        p = os.path.join(root, name)
+        if os.path.isdir(p):
+            children = _walk_notes(p)
+            if children:
+                notes.append({"title": name, "icon": "📂", "children": children})
+            continue
+        if name.endswith(".md"):
+            if name.startswith("评分-") or name.startswith("背调报告-"):
+                continue
+            notes.append(_md_note(p))
+        elif name.lower().endswith((".pdf", ".doc", ".docx", ".png", ".jpg", ".jpeg")):
+            notes.append(_file_note(p))
     return notes
 
 def jobs_table_html(jobs):

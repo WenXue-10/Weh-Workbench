@@ -563,12 +563,18 @@
                 <input type="text" id="jobPosition" placeholder="岗位名称" style="flex:1;min-width:100px">
                 <input type="text" id="jobSalary" placeholder="薪资（如15-20K）" style="width:120px">
                 <select id="jobStatus">
-                  <option value="pending">📮 待投递</option>
+                  <option value="new">🆕 新收录</option>
+                  <option value="done">✅ 已背调</option>
+                  <option value="pending" selected>📮 待投递</option>
                   <option value="applied">📤 已投递</option>
                   <option value="interview">🎤 面试中</option>
                   <option value="offer">🎉 已Offer</option>
                   <option value="rejected">❌ 已挂</option>
                   <option value="backup">📌 备选</option>
+                  <option value="redline">❌ 红线淘汰</option>
+                  <option value="abandoned">🚫 主动放弃</option>
+                  <option value="expired">⏰ 已截止</option>
+                  <option value="closed">❌ 已结束</option>
                 </select>
                 <button onclick="addJob()">➕ 添加</button>
               </div>
