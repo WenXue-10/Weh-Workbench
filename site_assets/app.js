@@ -2791,13 +2791,15 @@ function addJob(){
   var position = document.getElementById("jobPosition").value.trim();
   var salary = document.getElementById("jobSalary").value.trim();
   var status = document.getElementById("jobStatus").value;
+  var linkValid = document.getElementById("jobLinkValid").value;
   if(!company || !position){ toast("请填写公司和岗位"); return; }
   var data = loadJobs();
-  data.jobs.unshift({id:Date.now(), company:company, position:position, salary:salary, status:status, link:"", createdAt:new Date().toISOString().slice(0,10)});
+  data.jobs.unshift({id:Date.now(), company:company, position:position, salary:salary, status:status, link:"", linkValid:linkValid, createdAt:new Date().toISOString().slice(0,10)});
   saveJobs(data);
   document.getElementById("jobCompany").value = "";
   document.getElementById("jobPosition").value = "";
   document.getElementById("jobSalary").value = "";
+  document.getElementById("jobLinkValid").value = "";
   renderJobs();
   renderCareerOverview();
   toast("已添加岗位");
