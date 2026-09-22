@@ -4572,7 +4572,7 @@ function saveSyncBase(data){
 function clearSyncBase(){ try{ localStorage.removeItem(SYNC_BASE_KEY); }catch(e){} }
 
 /* 并集合并；传入基准 id 清单时，「基准里有、某一侧没有」判定为该侧删过，结果中一并剔除 */
-function _mergeListById(localArr, remoteArr, baseIds){
+function _mergeListById(localArr, remoteArr, baseIds, localWins){
   var localIds = {}, remoteIds = {}, counted = {}, k;
   (localArr || []).forEach(function(it){ k = _recKey(it); if(k !== null) localIds[k] = true; });
   (remoteArr || []).forEach(function(it){ k = _recKey(it); if(k !== null) remoteIds[k] = true; });
@@ -4586,26 +4586,47 @@ function _mergeListById(localArr, remoteArr, baseIds){
     if(!counted[id]){ counted[id] = true; _syncMergeRemoved++; }
   }
   var out = [], seen = {}, byKey = {};
-  (localArr || []).forEach(function(it){
-    k = _recKey(it);
-    if(k !== null){
+  if(localWins){
+    /* 上传：本机优先，保留本地记录，仅「入库标记 kb」按时间取新 */
+    (localArr || []).forEach(function(it){
+      k = _recKey(it);
+      if(k !== null){
+        if(deleted[k]){ _drop(k); return; }
+        seen[k] = true;
+        byKey[k] = it;
+      }
+      out.push(it);
+    });
+    (remoteArr || []).forEach(function(it){
+      k = _recKey(it);
+      if(k === null){ out.push(it); return; }
       if(deleted[k]){ _drop(k); return; }
-      seen[k] = true;
-      byKey[k] = it;
-    }
-    out.push(it);
-  });
-  (remoteArr || []).forEach(function(it){
-    k = _recKey(it);
-    if(k === null){ out.push(it); return; }
-    if(deleted[k]){ _drop(k); return; }
-    if(!seen[k]){ seen[k] = true; out.push(it); return; }
-    /* 同 id：本机那条保留，但「入库标记 kb」按时间取新 ——
-       否则电脑端自动上传时会用本地那份"没标记"的记录把云端的标记抹掉 */
-    var kept = byKey[k];
-    if(!kept || !it.kb) return;
-    if(!kept.kb || (it.kb.at || 0) > (kept.kb.at || 0)){ kept.kb = it.kb; }
-  });
+      if(!seen[k]){ seen[k] = true; out.push(it); return; }
+      var kept = byKey[k];
+      if(!kept || !it.kb) return;
+      if(!kept.kb || (it.kb.at || 0) > (kept.kb.at || 0)){ kept.kb = it.kb; }
+    });
+  } else {
+    /* 下载：云端优先，用另一设备的记录覆盖本地旧值；
+       若本地有「入库标记 kb」而云端没有，则保留本地 kb */
+    (remoteArr || []).forEach(function(it){
+      k = _recKey(it);
+      if(k !== null){
+        if(deleted[k]){ _drop(k); return; }
+        seen[k] = true;
+        byKey[k] = it;
+      }
+      out.push(it);
+    });
+    (localArr || []).forEach(function(it){
+      k = _recKey(it);
+      if(k === null){ out.push(it); return; }
+      if(deleted[k]){ _drop(k); return; }
+      if(!seen[k]){ seen[k] = true; out.push(it); return; }
+      var kept = byKey[k];
+      if(kept && it.kb && !kept.kb){ kept.kb = it.kb; }
+    });
+  }
   return out;
 }
 function _mergeModule(localMod, remoteMod, listFields, forceLocal, localWins, baseMod){
@@ -4618,7 +4639,7 @@ function _mergeModule(localMod, remoteMod, listFields, forceLocal, localWins, ba
   for(k in winner){ out[k] = winner[k]; }
   if(forceLocal){ for(k in forceLocal){ if(localMod[k] !== undefined) out[k] = localMod[k]; } }
   (listFields || []).forEach(function(f){
-    out[f] = _mergeListById(localMod[f], remoteMod[f], baseMod ? baseMod[f] : null);
+    out[f] = _mergeListById(localMod[f], remoteMod[f], baseMod ? baseMod[f] : null, localWins);
   });
   return out;
 }
