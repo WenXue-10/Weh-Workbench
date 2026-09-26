@@ -355,7 +355,6 @@ function renderHome(){
 }
 
 /* ---------- 岗位看板 ---------- */
-var curFilter="all", curQuery="";
 function fileLinks(j, i){
   var out = "";
   if(j.report){
@@ -2804,7 +2803,7 @@ function addJob(){
   document.getElementById("jobCompany").value = "";
   document.getElementById("jobPosition").value = "";
   document.getElementById("jobSalary").value = "";
-  document.getElementById("jobLinkValid").value = "";
+  document.getElementById("jobLinkValid").value = "✅ 有效";
   renderJobs();
   renderCareerOverview();
   toast("已添加岗位");
@@ -5377,16 +5376,6 @@ document.addEventListener("click", function(e){
     go(module || page);
   }
 });
-document.querySelectorAll(".chip").forEach(function(c){
-  c.addEventListener("click", function(){
-    document.querySelectorAll(".chip").forEach(function(x){ x.classList.remove("active"); });
-    c.classList.add("active");
-    curFilter = c.getAttribute("data-f");
-    renderJobs();
-  });
-});
-var _searchInp=document.getElementById("search");
-if(_searchInp){ _searchInp.addEventListener("input", function(e){ curQuery=e.target.value; renderJobs(); }); }
 document.addEventListener("keydown", function(e){ if(e.key==="Escape") closeModal(); });
 
 /* ---------- 漂浮小元素 ---------- */
