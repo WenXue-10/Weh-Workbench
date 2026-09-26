@@ -940,6 +940,7 @@ async function editMoneyBudget(){
   });
   if(!vals || !vals[0] || isNaN(Number(vals[0]))) return;
   data.budget = Number(vals[0]);
+  syncPrefToSettings("moneyBudget", data.budget);
   saveMoney(data); renderMoney();
 }
 async function editMoneyFixedSave(){
@@ -950,6 +951,7 @@ async function editMoneyFixedSave(){
   });
   if(!vals || !vals[0] || isNaN(Number(vals[0]))) return;
   data.fixedSave = Number(vals[0]);
+  syncPrefToSettings("moneySave", data.fixedSave);
   saveMoney(data); renderMoney();
 }
 async function editMoneyCycleStart(){
@@ -962,6 +964,7 @@ async function editMoneyCycleStart(){
   var v = Number(vals[0]);
   if(v<1 || v>28) return;
   data.cycleStart = v;
+  syncPrefToSettings("moneyCycle", data.cycleStart);
   saveMoney(data); renderMoney();
 }
 
@@ -1402,6 +1405,7 @@ async function editHealthBudget(){
   });
   if(!vals || !vals[0] || isNaN(Number(vals[0]))) return;
   data.drinkBudget = Number(vals[0]);
+  syncPrefToSettings("healthBudget", data.drinkBudget);
   saveHealth(data); renderHealth();
 }
 async function editHealthGoal(){
@@ -1412,6 +1416,7 @@ async function editHealthGoal(){
   });
   if(!vals || !vals[0] || isNaN(Number(vals[0]))) return;
   data.drinkGoal = Number(vals[0]);
+  syncPrefToSettings("healthGoal", data.drinkGoal);
   saveHealth(data); renderHealth();
 }
 
@@ -4943,6 +4948,15 @@ function resetAllData(){
   });
 }
 
+function syncPrefToSettings(key, value){
+  try{
+    var s = loadSettings();
+    if(!s.preferences) s.preferences = {};
+    s.preferences[key] = value;
+    saveSettings(s);
+  }catch(e){}
+}
+
 function applyPrefsToModules(silent, markChange){
   if(markChange === undefined) markChange = true;
   var s = loadSettings();
@@ -4950,9 +4964,9 @@ function applyPrefsToModules(silent, markChange){
   try{
     var money = loadMoney();
     var changed = false;
-    if(money.budget !== p.moneyBudget){ money.budget = p.moneyBudget; changed = true; }
-    if(money.fixedSave !== p.moneySave){ money.fixedSave = p.moneySave; changed = true; }
-    if(money.cycleStart !== p.moneyCycle){ money.cycleStart = p.moneyCycle; changed = true; }
+    if(p.moneyBudget !== undefined && !isNaN(p.moneyBudget) && money.budget !== p.moneyBudget){ money.budget = p.moneyBudget; changed = true; }
+    if(p.moneySave !== undefined && !isNaN(p.moneySave) && money.fixedSave !== p.moneySave){ money.fixedSave = p.moneySave; changed = true; }
+    if(p.moneyCycle !== undefined && !isNaN(p.moneyCycle) && money.cycleStart !== p.moneyCycle){ money.cycleStart = p.moneyCycle; changed = true; }
     if(changed){
       if(markChange) saveMoney(money);
       else localStorage.setItem(MONEY_KEY, JSON.stringify(money));
@@ -4962,8 +4976,8 @@ function applyPrefsToModules(silent, markChange){
   try{
     var health = loadHealth();
     var hc = false;
-    if(health.drinkBudget !== p.healthBudget){ health.drinkBudget = p.healthBudget; hc = true; }
-    if(health.drinkGoal !== p.healthGoal){ health.drinkGoal = p.healthGoal; hc = true; }
+    if(p.healthBudget !== undefined && !isNaN(p.healthBudget) && health.drinkBudget !== p.healthBudget){ health.drinkBudget = p.healthBudget; hc = true; }
+    if(p.healthGoal !== undefined && !isNaN(p.healthGoal) && health.drinkGoal !== p.healthGoal){ health.drinkGoal = p.healthGoal; hc = true; }
     if(hc){
       if(markChange) saveHealth(health);
       else localStorage.setItem(HEALTH_KEY, JSON.stringify(health));
