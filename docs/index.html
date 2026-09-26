@@ -2070,7 +2070,7 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
                 </select>
                 <select id="jobLinkValid">
                   <option value="">🔗 链接有效性（不填）</option>
-                  <option value="✅ 有效">✅ 有效</option>
+                  <option value="✅ 有效" selected>✅ 有效</option>
                   <option value="❌ 已失效">❌ 已失效</option>
                   <option value="⚠️ 待人工核实">⚠️ 待人工核实</option>
                 </select>
@@ -3677,7 +3677,7 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
 
 <script>
 window.SITE_DATA = {
- "updated": "2026-09-26 22:34",
+ "updated": "2026-09-26 23:18",
  "stats": {
   "jobs": 45,
   "rec": 0,
@@ -17174,7 +17174,6 @@ function renderHome(){
 }
 
 /* ---------- 岗位看板 ---------- */
-var curFilter="all", curQuery="";
 function fileLinks(j, i){
   var out = "";
   if(j.report){
@@ -19623,7 +19622,7 @@ function addJob(){
   document.getElementById("jobCompany").value = "";
   document.getElementById("jobPosition").value = "";
   document.getElementById("jobSalary").value = "";
-  document.getElementById("jobLinkValid").value = "";
+  document.getElementById("jobLinkValid").value = "✅ 有效";
   renderJobs();
   renderCareerOverview();
   toast("已添加岗位");
@@ -22196,16 +22195,6 @@ document.addEventListener("click", function(e){
     go(module || page);
   }
 });
-document.querySelectorAll(".chip").forEach(function(c){
-  c.addEventListener("click", function(){
-    document.querySelectorAll(".chip").forEach(function(x){ x.classList.remove("active"); });
-    c.classList.add("active");
-    curFilter = c.getAttribute("data-f");
-    renderJobs();
-  });
-});
-var _searchInp=document.getElementById("search");
-if(_searchInp){ _searchInp.addEventListener("input", function(e){ curQuery=e.target.value; renderJobs(); }); }
 document.addEventListener("keydown", function(e){ if(e.key==="Escape") closeModal(); });
 
 /* ---------- 漂浮小元素 ---------- */
