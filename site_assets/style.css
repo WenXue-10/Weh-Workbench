@@ -1477,3 +1477,46 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
   .ai-input{width:100%;min-width:0}
   textarea.ai-input{width:100%}
 }
+
+/* ===== 读书台 / 显化台 · 视觉对齐（第一步） ===== */
+/* 仅软化「带标题的内容卡片」，顶部统计小卡与其他模块保持一致 */
+#module-library > .card:has(.card-head),
+#module-manifest > .card:has(.card-head){
+  background:rgba(255,244,248,.6);
+  border:1px solid rgba(255,200,222,.42);
+  border-radius:22px;
+  box-shadow:0 3px 14px rgba(224,122,166,.07);
+  backdrop-filter:blur(var(--blur-radius)) saturate(1.2);
+  -webkit-backdrop-filter:blur(var(--blur-radius)) saturate(1.2);
+  transition:transform .18s,box-shadow .18s,border-color .18s;
+}
+#module-library > .card:has(.card-head):hover,
+#module-manifest > .card:has(.card-head):hover{
+  transform:translateY(-2px);
+  box-shadow:0 8px 22px rgba(224,122,166,.12);
+  border-color:rgba(255,190,214,.6);
+}
+/* 标题上方英文小标签 + 模块内字号统一下调一档 */
+#module-library,
+#module-manifest{font-size:13.5px;line-height:1.7}
+#module-library .card-head,
+#module-manifest .card-head{
+  flex-direction:column;
+  align-items:flex-start;
+  gap:3px;
+  font-size:15px;
+  line-height:1.35;
+}
+#module-library .card-head::before,
+#module-manifest .card-head::before{
+  content:attr(data-en);
+  font-size:11px;
+  letter-spacing:1.6px;
+  font-weight:700;
+  text-transform:uppercase;
+  color:var(--pink-deep);
+  opacity:.6;
+}
+/* 标题 + 计数保持同行（我的书架 / 我的目标） */
+#module-library .ch-title,
+#module-manifest .ch-title{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap}
