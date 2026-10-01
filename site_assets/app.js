@@ -5396,7 +5396,6 @@ document.addEventListener("keydown", function(e){ if(e.key==="Escape") closeModa
   }
   spawn();spawn();
   setInterval(spawn,1500);
-})();
 
 /* ---------- 初始化 ---------- */
 (function(){
@@ -7171,6 +7170,7 @@ var libCatFilter = "全部";
 var libSearchFilter = "";
 
 function loadBooks(){
+  if(typeof LIB_DEFAULTS === "undefined"){ LIB_DEFAULTS = {books:[], streak:{date:"", count:0}}; }
   try{
     var d = JSON.parse(localStorage.getItem(LIB_KEY));
     if(!d) return JSON.parse(JSON.stringify(LIB_DEFAULTS));
@@ -7614,6 +7614,7 @@ var MAN_DEFAULTS = {goals:[], diary:[], cheque:null, gratitude:[], translator:[]
 var currentGoalId = null;
 
 function loadManifest(){
+  if(typeof MAN_DEFAULTS === "undefined"){ MAN_DEFAULTS = {goals:[], diary:[], cheque:null, gratitude:[], translator:[], freq:{}}; }
   try{
     var d = JSON.parse(localStorage.getItem(MAN_KEY));
     if(!d) return JSON.parse(JSON.stringify(MAN_DEFAULTS));
@@ -7996,3 +7997,6 @@ function addFreqCustom(){
 }
 
 })();
+
+})();
+
