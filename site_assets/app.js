@@ -4035,7 +4035,10 @@ var DATA_KEYS = {
   todo: "weh_todo_data_v1",
   job: "weh_job_data_v1",
   company: "weh_company_data_v1",
-  library: "weh_library_data_v1"
+  library: "weh_library_data_v1",
+  manifest: "weh_manifest_data_v1",
+  manifest: "weh_manifest_data_v1",
+  manifest: "weh_manifest_data_v1"
 };
 
 function loadSettings(){
@@ -4543,7 +4546,10 @@ var SYNC_LIST_FIELDS = {
   money: ["records"], health: ["records"], inspire: ["records"], todo: ["items"],
   report: ["history"], daily: ["tasks"], job: ["jobs", "logs"], company: ["companies"],
   decision: ["history"],
-  library: ["books"]   /* 只合并「已打完分的存档」；进行中的 chatHistory 在本机键里，不随同步 */
+  library: ["books"],
+  manifest: ["goals", "diary"],
+  manifest: ["goals", "diary"],
+  manifest: ["goals", "diary"]   /* 只合并「已打完分的存档」；进行中的 chatHistory 在本机键里，不随同步 */
 };
 var SYNC_FORCE_LOCAL = { daily: { date: true } };
 var SYNC_BASE_KEY = "weh_sync_base_v1";
@@ -5333,7 +5339,7 @@ var TITLES = {
   home:"🏠 首页总览", money:"💰 存钱记账", health:"🍱 吃饭健康",
   inspiration:"💡 灵感捕捉", decision:"🎯 决策顾问", report:"📝 工作汇报台",
   baichuan:"📚 灵犀智库", career:"💼 SCM Career", cet6:"📖 CET-6备战", sop:"🛠️ 工作SOP",
-  daily:"📅 日计划台", todo:"✅ 待办清单", settings:"⚙️ 设置", library:"📖 读书·学习台",
+  daily:"📅 日计划台", todo:"✅ 待办清单", settings:"⚙️ 设置", library:"📖 读书·学习台", manifest:"🌟 显化·成长台", manifest:"🌟 显化·成长台", manifest:"🌟 显化·成长台",
   jobs:"🐾 岗位看板", companies:"🐈 目标公司池", timeline:"😺 每日日报",
   resume:"📄 简历库", knowledge:"📚 知识库"
 };
@@ -5435,6 +5441,15 @@ document.addEventListener("keydown", function(e){ if(e.key==="Escape") closeModa
     }
     if(document.getElementById("bookList")){
       renderBooks();
+    }
+    if(document.getElementById("goalList")){
+      renderManifest();
+    }
+    if(document.getElementById("goalList")){
+      renderManifest();
+    }
+    if(document.getElementById("goalList")){
+      renderManifest();
     }
     if(document.getElementById("todoList")){
       renderTodo();
@@ -7358,6 +7373,213 @@ function exportBookMD(){
   }
   md += "\n*由 Weh Atelier 读书·学习台导出 · "+new Date().toISOString().slice(0,10)+"*\n";
   downloadMD("《"+(b.title||"未命名")+"》读书复盘.md", md);
+}
+
+
+
+/* ========== 显化·成长台模块 ========== */
+var MAN_KEY = "weh_manifest_data_v1";
+var MAN_DEFAULTS = {goals:[], diary:[]};
+var currentGoalId = null;
+
+function loadManifest(){
+  try{
+    var d = JSON.parse(localStorage.getItem(MAN_KEY));
+    if(!d) return JSON.parse(JSON.stringify(MAN_DEFAULTS));
+    for(var k in MAN_DEFAULTS){ if(d[k]===undefined) d[k]=MAN_DEFAULTS[k]; }
+    return d;
+  }catch(e){ return JSON.parse(JSON.stringify(MAN_DEFAULTS)); }
+}
+function saveManifest(data){ markLocalChange(); localStorage.setItem(MAN_KEY, JSON.stringify(data)); }
+
+function todayStr(){
+  var n = new Date();
+  return n.getFullYear() + "-" + String(n.getMonth()+1).padStart(2,"0") + "-" + String(n.getDate()).padStart(2,"0");
+}
+function setText(id, v){ var el = document.getElementById(id); if(el) el.textContent = v; }
+
+function renderManifest(){
+  var data = loadManifest();
+  var dates = data.diary.map(function(d){ return d.date; }).filter(Boolean).sort();
+  var streak = 0;
+  var cur = new Date();
+  var ok = true;
+  while(ok){
+    var ds = cur.getFullYear() + "-" + String(cur.getMonth()+1).padStart(2,"0") + "-" + String(cur.getDate()).padStart(2,"0");
+    if(dates.indexOf(ds) >= 0){ streak++; cur.setDate(cur.getDate()-1); } else { ok = false; }
+  }
+  var t = todayStr();
+  var ym = t.slice(0,7);
+  var monthCnt = dates.filter(function(d){ return d.slice(0,7) === ym; }).length;
+  var goalActive = data.goals.filter(function(g){ return g.status !== "done" && g.status !== "drop"; }).length;
+  setText("streakDays", streak);
+  setText("monthDays", monthCnt);
+  setText("goalActive", goalActive);
+  setText("goalCount", data.goals.length + " 条");
+  renderGoals(data);
+  var todayDiary = data.diary.find(function(d){ return d.date === t; }) || null;
+  setText("diaryDate", t);
+  var di = document.getElementById("diaryInput");
+  if(di) di.value = todayDiary ? (todayDiary.text || "") : "";
+  renderScript(todayDiary);
+  renderEvidence(data);
+}
+
+function renderGoals(data){
+  var list = document.getElementById("goalList");
+  if(!list) return;
+  if(data.goals.length === 0){
+    list.innerHTML = '<div style="text-align:center;color:var(--muted);padding:20px;font-size:13px">还没有目标<br>点「添加目标」，记得写具体（对标未来支票）</div>';
+    return;
+  }
+  var sorted = data.goals.slice().sort(function(a,b){ return (b.id||0)-(a.id||0); });
+  list.innerHTML = sorted.map(function(g){
+    var pct = Math.max(0, Math.min(100, parseInt(g.progress||0,10)));
+    var st = g.status || "active";
+    var statusText = {active:"进行中", done:"达成", drop:"已放弃"}[st] || "进行中";
+    var statusColor = st==="done" ? "#2e7d32" : (st==="drop" ? "#999" : "var(--pink-deep)");
+    return '<div class="inspire-item" style="'+(st==="done"?"opacity:.7":"")+'">'
+      +'<div class="inspire-item-text">目标 '+esc(g.text||"未命名目标")+(g.due?' <span style="color:var(--muted);font-size:12px">截止'+esc(g.due)+'</span>':'')+'</div>'
+      +'<div style="height:6px;background:rgba(0,0,0,.08);border-radius:4px;margin:6px 0 4px;overflow:hidden"><div style="width:'+pct+'%;height:100%;background:linear-gradient(90deg,var(--pink-deep),#b48ed9)"></div></div>'
+      +'<div class="inspire-item-meta"><span style="color:'+statusColor+'">'+statusText+' · '+pct+'%</span>'
+      +'<span><button class="inspire-action-btn" style="font-size:12px;padding:2px 8px" onclick="bumpGoal('+g.id+')">+10%</button> '
+      +'<button class="inspire-action-btn" style="font-size:12px;padding:2px 8px" onclick="markGoalDone('+g.id+')">达成</button> '
+      +'<button class="inspire-action-btn" style="font-size:12px;padding:2px 8px" onclick="markGoalDrop('+g.id+')">放弃</button> '
+      +'<button class="inspire-action-btn" style="font-size:12px;padding:2px 8px" onclick="editGoal('+g.id+')">改</button> '
+      +'<button class="inspire-action-btn" style="font-size:12px;padding:2px 8px" onclick="deleteGoal('+g.id+')">删</button></span></div>'
+      +'</div>';
+  }).join("");
+}
+
+function showGoalEditor(id){
+  var ed = document.getElementById("goalEditor");
+  var title = document.getElementById("goalEditorTitle");
+  if(ed) ed.style.display = "block";
+  if(title) title.textContent = id ? "编辑目标" : "添加目标";
+  var data = loadManifest();
+  var g = id ? data.goals.find(function(x){ return x.id===id; }) : null;
+  document.getElementById("goalText").value = g ? (g.text||"") : "";
+  document.getElementById("goalDue").value = g ? (g.due||"") : "";
+  document.getElementById("goalProgress").value = g ? (g.progress||0) : 0;
+  document.getElementById("goalNote").value = g ? (g.note||"") : "";
+  currentGoalId = id || null;
+}
+function hideGoalEditor(){ var ed=document.getElementById("goalEditor"); if(ed) ed.style.display="none"; currentGoalId=null; }
+
+function saveGoal(){
+  var text = (document.getElementById("goalText").value||"").trim();
+  if(!text){ toast("请填写目标"); return; }
+  var data = loadManifest();
+  var id = currentGoalId;
+  var rec;
+  if(id){ rec = data.goals.find(function(x){ return x.id===id; }); if(!rec){ rec={id:id}; data.goals.push(rec); } }
+  else { rec={id:Date.now()}; data.goals.push(rec); }
+  rec.text = text;
+  rec.due = document.getElementById("goalDue").value;
+  rec.progress = Math.max(0, Math.min(100, parseInt(document.getElementById("goalProgress").value||"0",10)||0));
+  rec.note = (document.getElementById("goalNote").value||"").trim();
+  if(!id) rec.status = "active";
+  saveManifest(data);
+  hideGoalEditor();
+  renderManifest();
+  toast(id ? "已更新" : "目标已添加");
+}
+function editGoal(id){ showGoalEditor(id); }
+function deleteGoal(id){
+  showConfirm("确定删除这个目标？").then(function(ok){
+    if(!ok) return;
+    var data = loadManifest();
+    data.goals = data.goals.filter(function(x){ return x.id!==id; });
+    saveManifest(data);
+    renderManifest();
+    toast("已删除");
+  });
+}
+function bumpGoal(id){
+  var data = loadManifest();
+  var g = data.goals.find(function(x){ return x.id===id; });
+  if(!g) return;
+  g.progress = Math.min(100, (parseInt(g.progress||0,10)||0) + 10);
+  if(g.progress >= 100) g.status = "done";
+  saveManifest(data);
+  renderManifest();
+}
+function markGoalDone(id){ setGoalStatus(id, "done"); }
+function markGoalDrop(id){ setGoalStatus(id, "drop"); }
+function setGoalStatus(id, st){
+  var data = loadManifest();
+  var g = data.goals.find(function(x){ return x.id===id; });
+  if(!g) return;
+  g.status = st;
+  if(st==="done") g.progress = 100;
+  saveManifest(data);
+  renderManifest();
+  toast(st==="done" ? "目标达成！" : "已标记放弃");
+}
+
+function saveDiary(){
+  var t = todayStr();
+  var text = (document.getElementById("diaryInput").value||"").trim();
+  if(!text){ toast("写点什么再保存吧"); return; }
+  var data = loadManifest();
+  var d = data.diary.find(function(x){ return x.date===t; });
+  if(!d){ d = {date:t, id:t}; data.diary.push(d); }
+  d.text = text;
+  saveManifest(data);
+  renderManifest();
+  toast("今日感想已保存");
+}
+
+function renderScript(todayDiary){
+  var box = document.getElementById("scriptBox");
+  if(!box) return;
+  if(todayDiary && todayDiary.script){
+    box.innerHTML = '<div style="padding:12px;background:linear-gradient(135deg,rgba(219,112,147,.12),rgba(180,142,217,.12));border-radius:10px;font-size:14px;line-height:1.7"><b>我的人生剧本</b><br>'+esc(todayDiary.script)+'</div>';
+  } else {
+    box.innerHTML = '<div style="color:var(--muted);font-size:12px;text-align:center;padding:6px">还没有封存剧本，点 AI 一键封存剧本 生成一句属于你的宣言</div>';
+  }
+}
+
+function aiSealScript(){
+  var c = loadAIConfig();
+  if(!(c.key && c.base && c.model)){ toast("请先在设置里配置 AI"); return; }
+  var t = todayStr();
+  var data = loadManifest();
+  var d = data.diary.find(function(x){ return x.date===t; }) || {date:t, text:""};
+  var box = document.getElementById("scriptBox");
+  if(box) box.innerHTML = '<div style="text-align:center;color:var(--muted);padding:10px">AI 封存中</div>';
+  var sys = "你是一个人生剧本教练。帮用户把今天的状态凝练成一句有力量的宣言：第一人称、面向未来、具体、有画面感、不超过 50 字、不要客套、全部中文。"
+    + (c.persona ? ("\n\n【关于服务对象】"+c.persona) : "");
+  var user = "今天的感想：" + (d.text || "（今天还没写感想）") + "\n\n请直接输出这一句宣言（不要解释、不要引号、不要 markdown）。";
+  aiChat(c, [{role:"system",content:sys},{role:"user",content:user}], 30).then(function(res){
+    var script = (res.content||"").replace(/^["'『「]/,"").replace(/["'』」]$/,"").replace(/^```[a-zA-Z]*/,"").replace(/```$/,"").trim().slice(0,200);
+    if(!script){ throw new Error("AI 返回为空"); }
+    var dd = data.diary.find(function(x){ return x.date===t; });
+    if(!dd){ dd = {date:t, id:t}; data.diary.push(dd); }
+    dd.script = script;
+    saveManifest(data);
+    renderManifest();
+    toast("剧本已封存");
+  }).catch(function(err){
+    if(box) box.innerHTML = '<div style="color:#e74c3c;font-size:12px;text-align:center">封存失败：'+esc(err.message||"")+'</div>';
+  });
+}
+
+function renderEvidence(data){
+  var list = document.getElementById("evidenceWall");
+  if(!list) return;
+  var items = data.diary.slice().sort(function(a,b){ return (b.date||"").localeCompare(a.date||""); }).slice(0,15);
+  if(items.length === 0){
+    list.innerHTML = '<div style="text-align:center;color:var(--muted);padding:20px;font-size:13px">取证墙空着<br>每天写一句感想，就是给未来的自己留证据</div>';
+    return;
+  }
+  list.innerHTML = items.map(function(d){
+    return '<div class="inspire-item">'
+      +'<div class="inspire-item-meta"><span>'+esc(d.date||"")+'</span>'+(d.script?'<span style="color:var(--pink-deep)">已封存</span>':'')+'</div>'
+      +'<div class="inspire-item-text">'+esc(d.text||"（无文字）")+'</div>'
+      +(d.script?'<div style="font-size:12px;color:var(--muted);margin-top:4px">'+esc(d.script)+'</div>':'')
+      +'</div>';
+  }).join("");
 }
 
 })();
