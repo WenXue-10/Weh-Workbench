@@ -4034,7 +4034,8 @@ var DATA_KEYS = {
   daily: "weh_daily_data_v1",
   todo: "weh_todo_data_v1",
   job: "weh_job_data_v1",
-  company: "weh_company_data_v1"
+  company: "weh_company_data_v1",
+  library: "weh_library_data_v1"
 };
 
 function loadSettings(){
@@ -4541,7 +4542,8 @@ function writeAllData(data){
 var SYNC_LIST_FIELDS = {
   money: ["records"], health: ["records"], inspire: ["records"], todo: ["items"],
   report: ["history"], daily: ["tasks"], job: ["jobs", "logs"], company: ["companies"],
-  decision: ["history"]   /* 只合并「已打完分的存档」；进行中的 chatHistory 在本机键里，不随同步 */
+  decision: ["history"],
+  library: ["books"]   /* 只合并「已打完分的存档」；进行中的 chatHistory 在本机键里，不随同步 */
 };
 var SYNC_FORCE_LOCAL = { daily: { date: true } };
 var SYNC_BASE_KEY = "weh_sync_base_v1";
@@ -5331,7 +5333,7 @@ var TITLES = {
   home:"🏠 首页总览", money:"💰 存钱记账", health:"🍱 吃饭健康",
   inspiration:"💡 灵感捕捉", decision:"🎯 决策顾问", report:"📝 工作汇报台",
   baichuan:"📚 灵犀智库", career:"💼 SCM Career", cet6:"📖 CET-6备战", sop:"🛠️ 工作SOP",
-  daily:"📅 日计划台", todo:"✅ 待办清单", settings:"⚙️ 设置",
+  daily:"📅 日计划台", todo:"✅ 待办清单", settings:"⚙️ 设置", library:"📖 读书·学习台",
   jobs:"🐾 岗位看板", companies:"🐈 目标公司池", timeline:"😺 每日日报",
   resume:"📄 简历库", knowledge:"📚 知识库"
 };
@@ -5430,6 +5432,9 @@ document.addEventListener("keydown", function(e){ if(e.key==="Escape") closeModa
     }
     if(document.getElementById("inspireList")){
       renderInspire();
+    }
+    if(document.getElementById("bookList")){
+      renderBooks();
     }
     if(document.getElementById("todoList")){
       renderTodo();
@@ -7143,4 +7148,216 @@ function renderSopCategory(){
 }
 
   applyBg(); applyAv(); applyIcon();
+
+
+/* ========== 读书·学习台模块 ========== */
+var LIB_KEY = "weh_library_data_v1";
+var LIB_DEFAULTS = {books:[]};
+var currentBookId = null;
+
+function loadBooks(){
+  try{
+    var d = JSON.parse(localStorage.getItem(LIB_KEY));
+    if(!d) return JSON.parse(JSON.stringify(LIB_DEFAULTS));
+    for(var k in LIB_DEFAULTS){ if(d[k]===undefined) d[k]=LIB_DEFAULTS[k]; }
+    return d;
+  }catch(e){ return JSON.parse(JSON.stringify(LIB_DEFAULTS)); }
+}
+function saveBooks(data){ markLocalChange(); localStorage.setItem(LIB_KEY, JSON.stringify(data)); }
+
+function renderBooks(){
+  var data = loadBooks();
+  var list = document.getElementById("bookList");
+  var count = document.getElementById("bookCount");
+  if(count) count.textContent = data.books.length + " 本";
+  if(!list) return;
+  if(data.books.length === 0){
+    list.innerHTML = '<div style="text-align:center;color:var(--muted);padding:32px 16px;font-size:13px">书架还空着<br>点右上角「添加一本」，开始沉淀你的阅读～</div>';
+    return;
+  }
+  var sorted = data.books.slice().sort(function(a,b){ return (b.id||0)-(a.id||0); });
+  list.innerHTML = sorted.map(function(b){
+    var pct = Math.max(0, Math.min(100, parseInt(b.progress||0,10)));
+    var score = b.score ? (" ★"+b.score) : "";
+    var expect = b.expect ? (" 期待"+b.expect) : "";
+    var activeCls = b.id === currentBookId ? " active" : "";
+    var typeIcon = (b.type==="课")?"🎓":((b.type==="文章")?"📄":"📘");
+    return '<div class="inspire-item'+activeCls+'" onclick="openBook('+b.id+')">'
+      +'<div class="inspire-item-text">'+typeIcon+' '+esc(b.title||"未命名")+' <span style="color:var(--muted);font-size:12px">'+esc(b.status||"想读")+score+expect+'</span></div>'
+      +'<div style="height:6px;background:rgba(0,0,0,.08);border-radius:4px;margin:6px 0 4px;overflow:hidden"><div style="width:'+pct+'%;height:100%;background:linear-gradient(90deg,var(--pink-deep),#b48ed9)"></div></div>'
+      +'<div class="inspire-item-meta"><span>'+esc(b.author||"")+'</span><span>'+pct+'%</span></div>'
+      +'</div>';
+  }).join("");
+}
+
+function showBookEditor(id){
+  var ed = document.getElementById("bookEditor");
+  var title = document.getElementById("bookEditorTitle");
+  if(ed) ed.style.display = "block";
+  if(title) title.textContent = id ? "编辑这本书" : "添加一本书";
+  var data = loadBooks();
+  var b = id ? data.books.find(function(x){return x.id===id;}) : null;
+  document.getElementById("bookTitle").value   = b ? (b.title||"") : "";
+  document.getElementById("bookAuthor").value  = b ? (b.author||"") : "";
+  document.getElementById("bookType").value    = b ? (b.type||"书") : "书";
+  document.getElementById("bookStatus").value  = b ? (b.status||"想读") : "想读";
+  document.getElementById("bookExpect").value   = b ? (b.expect||"") : "";
+  document.getElementById("bookScore").value    = b ? (b.score||"") : "";
+  document.getElementById("bookStart").value    = b ? (b.startDate||"") : "";
+  document.getElementById("bookEnd").value      = b ? (b.endDate||"") : "";
+  document.getElementById("bookProgress").value = b ? (b.progress||0) : 0;
+  document.getElementById("bookNote").value     = b ? (b.note||"") : "";
+  currentBookId = id || null;
+}
+function hideBookEditor(){ var ed=document.getElementById("bookEditor"); if(ed) ed.style.display="none"; currentBookId=null; }
+
+function saveBook(){
+  var title = (document.getElementById("bookTitle").value||"").trim();
+  if(!title){ toast("请填写书名"); return; }
+  var data = loadBooks();
+  var id = currentBookId;
+  var rec;
+  if(id){
+    rec = data.books.find(function(x){return x.id===id;});
+    if(!rec){ rec = {id:id}; data.books.push(rec); }
+  } else {
+    rec = {id: Date.now()};
+    data.books.push(rec);
+  }
+  rec.title = title;
+  rec.author = (document.getElementById("bookAuthor").value||"").trim();
+  rec.type = document.getElementById("bookType").value;
+  rec.status = document.getElementById("bookStatus").value;
+  rec.expect = parseInt(document.getElementById("bookExpect").value||"0",10) || 0;
+  rec.score = parseInt(document.getElementById("bookScore").value||"0",10) || 0;
+  rec.startDate = document.getElementById("bookStart").value;
+  rec.endDate = document.getElementById("bookEnd").value;
+  rec.progress = Math.max(0, Math.min(100, parseInt(document.getElementById("bookProgress").value||"0",10)||0));
+  rec.note = (document.getElementById("bookNote").value||"").trim();
+  if(!id){ rec.aiExt = null; }
+  saveBooks(data);
+  hideBookEditor();
+  renderBooks();
+  toast(id ? "已更新" : "已添加");
+}
+
+function openBook(id){
+  var data = loadBooks();
+  var b = data.books.find(function(x){return x.id===id;});
+  if(!b) return;
+  currentBookId = id;
+  renderBooks();
+  var det = document.getElementById("bookDetail");
+  var dt = document.getElementById("bookDetailTitle");
+  if(det) det.style.display = "block";
+  if(dt) dt.textContent = "《"+(b.title||"未命名")+"》"+(b.status||"");
+  renderBookDigest();
+}
+
+function bookAction(kind){
+  var data = loadBooks();
+  var b = data.books.find(function(x){return x.id===currentBookId;});
+  if(!b) return;
+  if(kind==="reading"){ b.status="在读"; if(b.progress<1) b.progress=1; toast("标记为在读"); }
+  else if(kind==="finished"){ b.status="读完"; b.progress=100; toast("标记为读完，恭喜！"); }
+  else if(kind==="reread"){ b.status="重读"; toast("标记为重读"); }
+  saveBooks(data);
+  renderBooks();
+  var dt = document.getElementById("bookDetailTitle");
+  if(dt) dt.textContent = "《"+(b.title||"未命名")+"》"+(b.status||"");
+}
+
+function renderBookDigest(){
+  var box = document.getElementById("bookDigest");
+  if(!box) return;
+  var data = loadBooks();
+  var b = data.books.find(function(x){return x.id===currentBookId;});
+  if(!b){ box.innerHTML=""; return; }
+  if(!b.aiExt){
+    box.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:10px;text-align:center">还没有 AI 提炼<br>点「✨ AI 一键提炼」生成核心观点与知识脉络</div>';
+    return;
+  }
+  var e = b.aiExt;
+  var html = '<div style="font-size:13px;line-height:1.8">';
+  if(e.model) html += '<div style="color:var(--muted);font-size:12px;margin-bottom:6px">🤖 '+esc(e.model)+'</div>';
+  if(e.questions && e.questions.length) html += '<p style="margin:6px 0"><b>💡 核心观点</b><br>'+e.questions.map(function(t){return "· "+esc(t);}).join("<br>")+'</p>';
+  if(e.directions && e.directions.length) html += '<p style="margin:6px 0"><b>🕸 知识脉络</b><br>'+e.directions.map(function(t){return "· "+esc(t);}).join("<br>")+'</p>';
+  if(e.related) html += '<p style="margin:6px 0"><b>🎯 行动启发</b><br>'+esc(e.related)+'</p>';
+  if(e.judgment) html += '<p style="margin:6px 0"><b>📌 一句话判断</b><br>'+esc(e.judgment)+'</p>';
+  html += '</div>';
+  if(e.reasoning) html += '<details style="margin-top:8px"><summary style="cursor:pointer;color:var(--muted);font-size:12px">查看 AI 思考过程</summary><div style="white-space:pre-wrap;font-size:12px;color:var(--muted);padding:8px;background:rgba(0,0,0,.04);border-radius:8px">'+esc(e.reasoning)+'</div></details>';
+  box.innerHTML = html;
+}
+
+function aiDigestBook(){
+  var data = loadBooks();
+  var b = data.books.find(function(x){return x.id===currentBookId;});
+  if(!b){ toast("请先选一本书"); return; }
+  var c = loadAIConfig();
+  if(!(c.key && c.base && c.model)){ toast("请先在设置里配置 AI"); return; }
+  var box = document.getElementById("bookDigest");
+  if(box) box.innerHTML = '<div style="text-align:center;color:var(--muted);padding:20px">AI 提炼中…</div>';
+  var sys = "你是一个读书复盘助手，服务对象是一位中文用户（供应链管理专业、正在求职）。帮ta把读过的内容结构化：提炼核心观点、梳理知识脉络、给出行动启发。要求：具体、不空泛、每条不超过 40 字、全部中文。"
+    + (c.persona ? ("\n\n【关于服务对象】"+c.persona) : "");
+  var user = "书名：" + (b.title||"未命名") + "\n类型：" + (b.type||"书") + "\n作者：" + (b.author||"未知")
+    + "\n状态：" + (b.status||"") + "\n我的备注：" + (b.note||"无")
+    + "\n\n请只输出一个 JSON 对象（不要 markdown 代码块、不要解释文字），字段如下：\n"
+    + '{"questions":["核心观点1","核心观点2","核心观点3"],"directions":["知识脉络1","知识脉络2"],"judgment":"一句话判断这本书值不值得精读/重读","related":"可以立刻采取的行动启发一句话"}';
+  aiChat(c, [{role:"system",content:sys},{role:"user",content:user}], 45).then(function(res){
+    var o = parseExtJSON(res.content);
+    if(!o){ throw new Error("AI 返回无法解析成 JSON"); }
+    var ext = {
+      questions: o.questions || [],
+      directions: o.directions || [],
+      related: o.related || "",
+      judgment: o.judgment || "",
+      model: c.model, at: Date.now()
+    };
+    if(res.reasoning) ext.reasoning = res.reasoning.slice(0,4000);
+    b.aiExt = ext;
+    saveBooks(data);
+    renderBookDigest();
+    toast("✨ 提炼完成");
+  }).catch(function(err){
+    if(box) box.innerHTML = '<div style="color:#e74c3c;font-size:13px;padding:10px;text-align:center">提炼失败：'+esc(err.message||"")+'<br>（未配置AI或网络不通时可手动记笔记）</div>';
+  });
+}
+
+function deleteCurrentBook(){
+  if(!currentBookId) return;
+  showConfirm("确定删除这本书？").then(function(ok){
+    if(!ok) return;
+    var data = loadBooks();
+    data.books = data.books.filter(function(x){return x.id!==currentBookId;});
+    saveBooks(data);
+    currentBookId = null;
+    var det = document.getElementById("bookDetail");
+    if(det) det.style.display="none";
+    renderBooks();
+    toast("已删除");
+  });
+}
+
+function exportBookMD(){
+  var data = loadBooks();
+  var b = data.books.find(function(x){return x.id===currentBookId;});
+  if(!b){ toast("请先选一本书"); return; }
+  var md = "# 《"+(b.title||"未命名")+"》读书复盘\n\n";
+  md += "- 作者："+(b.author||"未知")+"\n- 类型："+(b.type||"书")+"\n- 状态："+(b.status||"")+"\n";
+  md += "- 期待值："+(b.expect||"-")+" ｜ 打分："+(b.score||"-")+" ｜ 进度："+(b.progress||0)+"%\n";
+  if(b.startDate) md += "- 开始："+b.startDate+"\n";
+  if(b.endDate) md += "- 结束："+b.endDate+"\n";
+  if(b.note) md += "\n## 我的备注\n"+b.note+"\n";
+  if(b.aiExt){
+    var e=b.aiExt;
+    md += "\n## AI 提炼（"+(e.model||"")+"）\n";
+    if(e.questions&&e.questions.length){ md += "### 核心观点\n"+e.questions.map(function(t){return "- "+t;}).join("\n")+"\n"; }
+    if(e.directions&&e.directions.length){ md += "### 知识脉络\n"+e.directions.map(function(t){return "- "+t;}).join("\n")+"\n"; }
+    if(e.related) md += "### 行动启发\n- "+e.related+"\n";
+    if(e.judgment) md += "\n> "+e.judgment+"\n";
+  }
+  md += "\n*由 Weh Atelier 读书·学习台导出 · "+new Date().toISOString().slice(0,10)+"*\n";
+  downloadMD("《"+(b.title||"未命名")+"》读书复盘.md", md);
+}
+
 })();
