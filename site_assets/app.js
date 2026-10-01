@@ -4036,8 +4036,6 @@ var DATA_KEYS = {
   job: "weh_job_data_v1",
   company: "weh_company_data_v1",
   library: "weh_library_data_v1",
-  manifest: "weh_manifest_data_v1",
-  manifest: "weh_manifest_data_v1",
   manifest: "weh_manifest_data_v1"
 };
 
@@ -4547,9 +4545,7 @@ var SYNC_LIST_FIELDS = {
   report: ["history"], daily: ["tasks"], job: ["jobs", "logs"], company: ["companies"],
   decision: ["history"],
   library: ["books"],
-  manifest: ["goals", "diary"],
-  manifest: ["goals", "diary"],
-  manifest: ["goals", "diary"]   /* 只合并「已打完分的存档」；进行中的 chatHistory 在本机键里，不随同步 */
+  manifest: ["goals", "diary", "cheque", "gratitude", "translator", "freq"]   /* 只合并「已打完分的存档」；进行中的 chatHistory 在本机键里，不随同步 */
 };
 var SYNC_FORCE_LOCAL = { daily: { date: true } };
 var SYNC_BASE_KEY = "weh_sync_base_v1";
@@ -5339,7 +5335,7 @@ var TITLES = {
   home:"🏠 首页总览", money:"💰 存钱记账", health:"🍱 吃饭健康",
   inspiration:"💡 灵感捕捉", decision:"🎯 决策顾问", report:"📝 工作汇报台",
   baichuan:"📚 灵犀智库", career:"💼 SCM Career", cet6:"📖 CET-6备战", sop:"🛠️ 工作SOP",
-  daily:"📅 日计划台", todo:"✅ 待办清单", settings:"⚙️ 设置", library:"📖 读书·学习台", manifest:"🌟 显化·成长台", manifest:"🌟 显化·成长台", manifest:"🌟 显化·成长台",
+  daily:"📅 日计划台", todo:"✅ 待办清单", settings:"⚙️ 设置", library:"📖 读书·学习台", manifest:"🌟 显化·成长台",
   jobs:"🐾 岗位看板", companies:"🐈 目标公司池", timeline:"😺 每日日报",
   resume:"📄 简历库", knowledge:"📚 知识库"
 };
@@ -7614,7 +7610,7 @@ document.addEventListener("click", function(e){
 
 /* ========== 显化·成长台模块 ========== */
 var MAN_KEY = "weh_manifest_data_v1";
-var MAN_DEFAULTS = {goals:[], diary:[]};
+var MAN_DEFAULTS = {goals:[], diary:[], cheque:null, gratitude:[], translator:[], freq:{}};
 var currentGoalId = null;
 
 function loadManifest(){
@@ -7658,6 +7654,10 @@ function renderManifest(){
   if(di) di.value = todayDiary ? (todayDiary.text || "") : "";
   renderScript(todayDiary);
   renderEvidence(data);
+  renderCheque(data);
+  renderGratitude(data);
+  renderTranslator(data);
+  renderFreq(data);
 }
 
 function renderGoals(data){
@@ -7769,7 +7769,9 @@ function renderScript(todayDiary){
   var box = document.getElementById("scriptBox");
   if(!box) return;
   if(todayDiary && todayDiary.script){
-    box.innerHTML = '<div style="padding:12px;background:linear-gradient(135deg,rgba(219,112,147,.12),rgba(180,142,217,.12));border-radius:10px;font-size:14px;line-height:1.7"><b>我的人生剧本</b><br>'+esc(todayDiary.script)+'</div>';
+    box.innerHTML = '<div class="script-sealed" onclick="toggleScriptReveal(this)" style="padding:12px;background:linear-gradient(135deg,rgba(219,112,147,.12),rgba(180,142,217,.12));border-radius:10px;font-size:14px;line-height:1.7;cursor:pointer">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center"><b>我的人生剧本</b><span style="font-size:11px;color:var(--muted)">已封存 · 点此看一眼（看完自动模糊）</span></div>'
+      +'<div class="script-text" style="margin-top:6px;filter:blur(5px);transition:filter .3s">'+esc(todayDiary.script)+'</div></div>';
   } else {
     box.innerHTML = '<div style="color:var(--muted);font-size:12px;text-align:center;padding:6px">还没有封存剧本，点 AI 一键封存剧本 生成一句属于你的宣言</div>';
   }
@@ -7792,6 +7794,7 @@ function aiSealScript(){
     var dd = data.diary.find(function(x){ return x.date===t; });
     if(!dd){ dd = {date:t, id:t}; data.diary.push(dd); }
     dd.script = script;
+    bumpFreq(t);
     saveManifest(data);
     renderManifest();
     toast("剧本已封存");
@@ -7815,6 +7818,181 @@ function renderEvidence(data){
       +(d.script?'<div style="font-size:12px;color:var(--muted);margin-top:4px">'+esc(d.script)+'</div>':'')
       +'</div>';
   }).join("");
+}
+
+
+// ---------- 显化台批4：未来支票 / 感恩日记 / 语言翻译器 / 频率热力图 ----------
+function bumpFreq(dateStr){
+  var data = loadManifest();
+  if(!data.freq) data.freq = {};
+  data.freq[dateStr] = (data.freq[dateStr]||0) + 1;
+  saveManifest(data);
+}
+
+function renderCheque(data){
+  var box = document.getElementById("chequeBox");
+  if(!box) return;
+  var c = data.cheque;
+  if(!c){
+    box.innerHTML = '<div style="color:var(--muted);font-size:12px;text-align:center;padding:8px">还没开过支票，<button class="inspire-action-btn" onclick="showChequeEditor()">开一张未来支票</button></div>';
+    return;
+  }
+  var stamps = c.stamps || [];
+  var total = stamps.length;
+  var today = todayStr();
+  var signedToday = stamps.indexOf(today) >= 0;
+  var barPct = Math.min(100, total * 4);
+  var line = '<div style="height:8px;background:rgba(0,0,0,.08);border-radius:6px;overflow:hidden;margin:8px 0"><div style="width:'+barPct+'%;height:100%;background:linear-gradient(90deg,#f1c40f,var(--pink-deep));transition:width .5s"></div></div>';
+  box.innerHTML =
+    '<div style="padding:12px;background:linear-gradient(135deg,rgba(241,196,15,.14),rgba(219,112,147,.12));border-radius:10px">'
+    +'<div style="display:flex;justify-content:space-between;align-items:baseline"><span style="color:var(--muted);font-size:12px">未来支票 · 收款人 '+esc(c.payee||"我")+(c.due?(' · 到期 '+esc(c.due)):'')+'</span><span style="font-weight:700;color:var(--pink-deep)">¥'+esc(String(c.amount||0))+'</span></div>'
+    + line
+    +'<div style="font-size:12px;color:var(--muted);margin-bottom:8px">已签名 <b style="color:var(--pink-deep)">'+total+'</b> 次 ｜ 每一次都是给「会有的」打卡</div>'
+    +'<div style="display:flex;gap:8px;flex-wrap:wrap">'
+    +'<button class="inspire-action-btn" style="border:none;background:linear-gradient(135deg,var(--pink-deep),#b48ed9);color:#fff" onclick="signCheque()">'+(signedToday?'✅ 今日已签':'✍️ 今日签名打卡')+'</button>'
+    +'<button class="inspire-action-btn" onclick="showChequeEditor()">✏️ 改支票</button>'
+    +'</div></div>';
+}
+
+function showChequeEditor(){
+  var data = loadManifest();
+  var c = data.cheque || {amount:47300, payee:"我", due:"", stamps:[]};
+  var amt = document.getElementById("chequeAmount");
+  var pay = document.getElementById("chequePayee");
+  var due = document.getElementById("chequeDue");
+  if(amt) amt.value = c.amount;
+  if(pay) pay.value = c.payee || "";
+  if(due) due.value = c.due || "";
+  var ed = document.getElementById("chequeEditor");
+  if(ed) ed.style.display = "block";
+}
+function hideChequeEditor(){ var ed=document.getElementById("chequeEditor"); if(ed) ed.style.display="none"; }
+function saveCheque(){
+  var amt = parseFloat(document.getElementById("chequeAmount").value||"0")||0;
+  var pay = (document.getElementById("chequePayee").value||"").trim() || "我";
+  var due = document.getElementById("chequeDue").value;
+  var data = loadManifest();
+  if(!data.cheque) data.cheque = {stamps:[]};
+  data.cheque.amount = amt;
+  data.cheque.payee = pay;
+  data.cheque.due = due;
+  saveManifest(data);
+  hideChequeEditor();
+  renderManifest();
+  toast("支票已更新");
+}
+function signCheque(){
+  var data = loadManifest();
+  if(!data.cheque) data.cheque = {amount:47300, payee:"我", due:"", stamps:[]};
+  var t = todayStr();
+  if(data.cheque.stamps.indexOf(t) < 0) data.cheque.stamps.push(t);
+  saveManifest(data);
+  bumpFreq(t);
+  renderManifest();
+  toast("今日已签名 ✍️");
+}
+
+function toggleScriptReveal(el){
+  var t = el.querySelector(".script-text");
+  if(!t) return;
+  var blurred = t.style.filter && t.style.filter.indexOf("blur") >= 0;
+  if(blurred){ t.style.filter = "none"; setTimeout(function(){ if(t)t.style.filter="blur(5px)"; }, 2500); }
+  else { t.style.filter = "blur(5px)"; }
+}
+
+function renderGratitude(data){
+  var box = document.getElementById("gratitudeBox");
+  if(!box) return;
+  var t = todayStr();
+  var g = (data.gratitude||[]).find(function(x){ return x.date===t; });
+  if(g){
+    box.innerHTML = '<div style="padding:10px;background:rgba(46,204,113,.12);border-radius:10px;font-size:13px;line-height:1.7">🙏 '+esc(g.text)+'</div>';
+  } else {
+    box.innerHTML = '<div style="color:var(--muted);font-size:12px;text-align:center;padding:8px">今天还没生成感恩日记</div>';
+  }
+}
+function aiGratitude(){
+  var c = loadAIConfig();
+  if(!(c.key && c.base && c.model)){ toast("请先在设置里配置 AI"); return; }
+  var t = todayStr();
+  var data = loadManifest();
+  var d = data.diary.find(function(x){ return x.date===t; });
+  var script = d ? d.script : "";
+  var goals = (data.goals||[]).map(function(g){ return g.text; }).join("、");
+  var box = document.getElementById("gratitudeBox");
+  if(box) box.innerHTML = '<div style="text-align:center;color:var(--muted);padding:8px">AI 生成感恩日记中…</div>';
+  var sys = "你是感恩日记教练。用『已经发生』的口吻写一段今日感恩（第一人称、具体、温暖、不超过 80 字）。用户写下的剧本或目标就是已经实现的证据，禁止用将来时。";
+  var user = "我的人生剧本：" + (script || "（未封存）") + "\n我的目标：" + (goals || "（暂无）") + "\n\n请直接输出今日感恩日记（不要解释、不要引号）。";
+  aiChat(c, [{role:"system",content:sys},{role:"user",content:user}], 30).then(function(res){
+    var text = (res.content||"").replace(/^["'『「]/,"").replace(/["'』」]$/,"").replace(/^```[a-zA-Z]*/,"").replace(/```$/,"").trim().slice(0,300);
+    if(!text){ throw new Error("AI 返回为空"); }
+    if(!data.gratitude) data.gratitude = [];
+    var gg = data.gratitude.find(function(x){ return x.date===t; });
+    if(!gg){ gg = {date:t}; data.gratitude.push(gg); }
+    gg.text = text;
+    saveManifest(data);
+    bumpFreq(t);
+    renderManifest();
+    toast("今日感恩已生成 🙏");
+  }).catch(function(err){
+    if(box) box.innerHTML = '<div style="color:#e74c3c;font-size:12px;text-align:center">生成失败：'+esc(err.message||"")+'</div>';
+  });
+}
+
+function renderTranslator(data){
+  var wall = document.getElementById("translatorWall");
+  if(!wall) return;
+  var arr = (data.translator||[]).slice().reverse().slice(0,8);
+  if(!arr.length){ wall.innerHTML = '<div style="color:var(--muted);font-size:12px;text-align:center;padding:8px">把一句自我怀疑翻译成笃定的表达</div>'; return; }
+  wall.innerHTML = arr.map(function(r){
+    return '<div class="inspire-item"><div class="inspire-item-text" style="color:var(--muted)">'+esc(r.from||"")+'</div><div class="inspire-item-text" style="color:var(--pink-deep);font-weight:600">'+esc(r.to||"")+'</div></div>';
+  }).join("");
+}
+function aiTranslate(){
+  var inp = document.getElementById("translatorInput");
+  var text = (inp.value||"").trim();
+  if(!text){ toast("写句话再翻译"); return; }
+  var c = loadAIConfig();
+  if(!(c.key && c.base && c.model)){ toast("请先在设置里配置 AI"); return; }
+  var wall = document.getElementById("translatorWall");
+  if(wall) wall.innerHTML = '<div style="text-align:center;color:var(--muted);padding:8px">翻译中…</div>';
+  var sys = "你是语言翻译器。把用户一句带自我怀疑或负面的口头禅，改写成笃定、正向、第一人称的表达（保留原意核心）。只输出改写后的一句话，不要解释。";
+  aiChat(c, [{role:"system",content:sys},{role:"user",content:text}], 25).then(function(res){
+    var to = (res.content||"").replace(/^["'『「]/,"").replace(/["'』」]$/,"").replace(/^```[a-zA-Z]*/,"").replace(/```$/,"").trim().slice(0,200);
+    if(!to){ throw new Error("AI 返回为空"); }
+    var data = loadManifest();
+    if(!data.translator) data.translator = [];
+    data.translator.push({from:text, to:to});
+    saveManifest(data);
+    if(inp) inp.value = "";
+    renderTranslator(data);
+    toast("已转为正向表达 ✨");
+  }).catch(function(err){
+    if(wall) wall.innerHTML = '<div style="color:#e74c3c;font-size:12px;text-align:center">失败：'+esc(err.message||"")+'</div>';
+  });
+}
+
+function renderFreq(data){
+  var box = document.getElementById("freqHeat");
+  if(!box) return;
+  var freq = data.freq || {};
+  var days = 70;
+  var cells = [];
+  var today = new Date();
+  for(var i=days-1;i>=0;i--){
+    var d = new Date(today); d.setDate(today.getDate()-i);
+    var ds = d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+    var v = freq[ds]||0;
+    var color = v<=0 ? "rgba(0,0,0,.06)" : (v===1 ? "#fce4b8" : (v===2 ? "#f7b733" : "#e84393"));
+    cells.push('<div title="'+ds+'：'+(v||0)+' 次" style="width:14px;height:14px;border-radius:3px;background:'+color+'"></div>');
+  }
+  box.innerHTML = '<div style="display:flex;flex-wrap:wrap;gap:3px;max-width:340px">'+cells.join("")+'</div><div style="font-size:11px;color:var(--muted);margin-top:6px">越红 = 当天打卡越密 ｜ 支票签名 / 感恩日记 / 剧本封存 / 自定义行为都会点亮</div>';
+}
+function addFreqCustom(){
+  var t = todayStr();
+  bumpFreq(t);
+  renderManifest();
+  toast("已记录一次行为 ✅");
 }
 
 })();
