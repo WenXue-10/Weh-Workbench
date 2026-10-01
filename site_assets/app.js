@@ -7166,9 +7166,13 @@ function renderSopCategory(){
 
 
 /* ========== 读书·学习台模块 ========== */
+/* ========== 读书·学习台模块 ========== */
 var LIB_KEY = "weh_library_data_v1";
-var LIB_DEFAULTS = {books:[]};
+var LIB_DEFAULTS = {books:[], streak:{date:"", count:0}};
 var currentBookId = null;
+var currentAuthorName = "";
+var libCatFilter = "全部";
+var libSearchFilter = "";
 
 function loadBooks(){
   try{
@@ -7180,27 +7184,79 @@ function loadBooks(){
 }
 function saveBooks(data){ markLocalChange(); localStorage.setItem(LIB_KEY, JSON.stringify(data)); }
 
+function yesterdayStr(){ var x=new Date(); x.setDate(x.getDate()-1); return x.getFullYear()+"-"+(x.getMonth()+1)+"-"+x.getDate(); }
+function bumpLibStreak(){
+  var d = loadBooks();
+  var t = todayStr();
+  if(d.streak.date === t){ /* same day, no change */ }
+  else if(d.streak.date === yesterdayStr()){ d.streak.count = (d.streak.count||0)+1; d.streak.date = t; }
+  else { d.streak.count = 1; d.streak.date = t; }
+  saveBooks(d);
+}
+
+function renderLibStats(){
+  var d = loadBooks();
+  var reading = d.books.filter(function(b){return (b.status||"")==="在读";}).length;
+  var hours = d.books.reduce(function(s,b){return s + (parseFloat(b.hours)||0);},0);
+  var quotes = d.books.reduce(function(s,b){return s + (b.quotes?b.quotes.length:0);},0);
+  setText("libReading", reading);
+  setText("libHours", hours);
+  setText("libQuotes", quotes);
+  setText("libStreak", d.streak.count||0);
+}
+
+function renderLibCats(){
+  var box = document.getElementById("libCats");
+  if(!box) return;
+  var d = loadBooks();
+  var cats = ["全部"];
+  d.books.forEach(function(b){ if(b.category && cats.indexOf(b.category)<0) cats.push(b.category); });
+  box.innerHTML = cats.map(function(c){
+    return '<span class="inspire-action-btn" data-act="lib-cat" data-cat="'+esc(c)+'" style="font-size:12px;padding:3px 10px">'+(c==="全部"?"📂 全部":c)+'</span>';
+  }).join("");
+}
+
+function bookPct(b){
+  if(b.partsTotal && b.partsTotal>0) return Math.max(0,Math.min(100, Math.round((b.partsRead||0)/b.partsTotal*100)));
+  return Math.max(0, Math.min(100, parseInt(b.progress||0,10)));
+}
+
 function renderBooks(){
-  var data = loadBooks();
+  var bs = document.getElementById("bookSearch");
+  libSearchFilter = bs ? (bs.value||"") : "";
+  var d = loadBooks();
+  renderLibStats();
+  renderLibCats();
   var list = document.getElementById("bookList");
   var count = document.getElementById("bookCount");
-  if(count) count.textContent = data.books.length + " 本";
+  if(count) count.textContent = d.books.length + " 本";
   if(!list) return;
-  if(data.books.length === 0){
+  if(d.books.length === 0){
     list.innerHTML = '<div style="text-align:center;color:var(--muted);padding:32px 16px;font-size:13px">书架还空着<br>点右上角「添加一本」，开始沉淀你的阅读～</div>';
     return;
   }
-  var sorted = data.books.slice().sort(function(a,b){ return (b.id||0)-(a.id||0); });
-  list.innerHTML = sorted.map(function(b){
-    var pct = Math.max(0, Math.min(100, parseInt(b.progress||0,10)));
-    var score = b.score ? (" ★"+b.score) : "";
-    var expect = b.expect ? (" 期待"+b.expect) : "";
-    var activeCls = b.id === currentBookId ? " active" : "";
+  var kw = (libSearchFilter||"").trim().toLowerCase();
+  var arr = d.books.filter(function(b){
+    if(libCatFilter!=="全部" && (b.category||"")!==libCatFilter) return false;
+    if(kw && ((b.title||"").toLowerCase().indexOf(kw)<0 && (b.author||"").toLowerCase().indexOf(kw)<0)) return false;
+    return true;
+  });
+  if(arr.length===0){
+    list.innerHTML = '<div style="text-align:center;color:var(--muted);padding:24px;font-size:13px">没有匹配的书 🔍</div>';
+    return;
+  }
+  arr.sort(function(a,b){ return (b.id||0)-(a.id||0); });
+  var C = 2*Math.PI*19;
+  list.innerHTML = arr.map(function(b){
+    var pct = bookPct(b);
+    var activeCls = b.id===currentBookId ? " active" : "";
     var typeIcon = (b.type==="课")?"🎓":((b.type==="文章")?"📄":"📘");
-    return '<div class="inspire-item'+activeCls+'" onclick="openBook('+b.id+')">'
-      +'<div class="inspire-item-text">'+typeIcon+' '+esc(b.title||"未命名")+' <span style="color:var(--muted);font-size:12px">'+esc(b.status||"想读")+score+expect+'</span></div>'
-      +'<div style="height:6px;background:rgba(0,0,0,.08);border-radius:4px;margin:6px 0 4px;overflow:hidden"><div style="width:'+pct+'%;height:100%;background:linear-gradient(90deg,var(--pink-deep),#b48ed9)"></div></div>'
-      +'<div class="inspire-item-meta"><span>'+esc(b.author||"")+'</span><span>'+pct+'%</span></div>'
+    var off = C*(1-pct/100);
+    var ring = '<svg width="46" height="46" viewBox="0 0 46 46"><circle cx="23" cy="23" r="19" fill="none" stroke="rgba(0,0,0,.08)" stroke-width="5"/><circle cx="23" cy="23" r="19" fill="none" stroke="#b48ed9" stroke-width="5" stroke-linecap="round" stroke-dasharray="'+C+'" stroke-dashoffset="'+off+'" transform="rotate(-90 23 23)"/></svg>';
+    var sub = (b.partsTotal?("第"+(b.partsRead||0)+"/"+b.partsTotal+"部分 · "):"") + (b.status||"想读");
+    return '<div class="inspire-item'+activeCls+'" data-act="openBook" data-id="'+b.id+'">'
+      +'<div style="position:relative;width:46px;height:46px;flex:0 0 auto">'+ring+'<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600">'+pct+'%</div></div>'
+      +'<div class="inspire-item-text" style="flex:1">'+typeIcon+' '+esc(b.title||"未命名")+' <span style="color:var(--muted);font-size:12px">'+esc(sub)+'</span><br><span style="color:var(--muted);font-size:12px">'+esc(b.author||"")+(b.hours?(" · "+b.hours+"h"):"")+'</span></div>'
       +'</div>';
   }).join("");
 }
@@ -7210,17 +7266,20 @@ function showBookEditor(id){
   var title = document.getElementById("bookEditorTitle");
   if(ed) ed.style.display = "block";
   if(title) title.textContent = id ? "编辑这本书" : "添加一本书";
-  var data = loadBooks();
-  var b = id ? data.books.find(function(x){return x.id===id;}) : null;
-  document.getElementById("bookTitle").value   = b ? (b.title||"") : "";
-  document.getElementById("bookAuthor").value  = b ? (b.author||"") : "";
-  document.getElementById("bookType").value    = b ? (b.type||"书") : "书";
-  document.getElementById("bookStatus").value  = b ? (b.status||"想读") : "想读";
+  var d = loadBooks();
+  var b = id ? d.books.find(function(x){return x.id===id;}) : null;
+  document.getElementById("bookTitle").value    = b ? (b.title||"") : "";
+  document.getElementById("bookAuthor").value   = b ? (b.author||"") : "";
+  document.getElementById("bookCategory").value = b ? (b.category||"") : "";
+  document.getElementById("bookType").value     = b ? (b.type||"书") : "书";
+  document.getElementById("bookStatus").value   = b ? (b.status||"想读") : "想读";
+  document.getElementById("bookHours").value    = b ? (b.hours||"") : "";
+  document.getElementById("bookPartsRead").value= b ? (b.partsRead||"") : "";
+  document.getElementById("bookPartsTotal").value=b ? (b.partsTotal||"") : "";
   document.getElementById("bookExpect").value   = b ? (b.expect||"") : "";
   document.getElementById("bookScore").value    = b ? (b.score||"") : "";
   document.getElementById("bookStart").value    = b ? (b.startDate||"") : "";
   document.getElementById("bookEnd").value      = b ? (b.endDate||"") : "";
-  document.getElementById("bookProgress").value = b ? (b.progress||0) : 0;
   document.getElementById("bookNote").value     = b ? (b.note||"") : "";
   currentBookId = id || null;
 }
@@ -7229,36 +7288,41 @@ function hideBookEditor(){ var ed=document.getElementById("bookEditor"); if(ed) 
 function saveBook(){
   var title = (document.getElementById("bookTitle").value||"").trim();
   if(!title){ toast("请填写书名"); return; }
-  var data = loadBooks();
+  var d = loadBooks();
   var id = currentBookId;
   var rec;
   if(id){
-    rec = data.books.find(function(x){return x.id===id;});
-    if(!rec){ rec = {id:id}; data.books.push(rec); }
+    rec = d.books.find(function(x){return x.id===id;});
+    if(!rec){ rec = {id:id}; d.books.push(rec); }
   } else {
     rec = {id: Date.now()};
-    data.books.push(rec);
+    d.books.push(rec);
   }
   rec.title = title;
   rec.author = (document.getElementById("bookAuthor").value||"").trim();
+  rec.category = (document.getElementById("bookCategory").value||"").trim();
   rec.type = document.getElementById("bookType").value;
   rec.status = document.getElementById("bookStatus").value;
-  rec.expect = parseInt(document.getElementById("bookExpect").value||"0",10) || 0;
-  rec.score = parseInt(document.getElementById("bookScore").value||"0",10) || 0;
+  rec.hours = parseFloat(document.getElementById("bookHours").value||"0")||0;
+  rec.partsRead = parseInt(document.getElementById("bookPartsRead").value||"0",10)||0;
+  rec.partsTotal = parseInt(document.getElementById("bookPartsTotal").value||"0",10)||0;
+  rec.expect = parseInt(document.getElementById("bookExpect").value||"0",10)||0;
+  rec.score = parseInt(document.getElementById("bookScore").value||"0",10)||0;
   rec.startDate = document.getElementById("bookStart").value;
   rec.endDate = document.getElementById("bookEnd").value;
-  rec.progress = Math.max(0, Math.min(100, parseInt(document.getElementById("bookProgress").value||"0",10)||0));
   rec.note = (document.getElementById("bookNote").value||"").trim();
-  if(!id){ rec.aiExt = null; }
-  saveBooks(data);
+  rec.progress = bookPct(rec);
+  if(!id){ rec.aiChars=null; rec.aiPlot=null; rec.aiPoints=null; rec.deepThink=[]; rec.quotes=[]; }
+  saveBooks(d);
+  bumpLibStreak();
   hideBookEditor();
   renderBooks();
   toast(id ? "已更新" : "已添加");
 }
 
 function openBook(id){
-  var data = loadBooks();
-  var b = data.books.find(function(x){return x.id===id;});
+  var d = loadBooks();
+  var b = d.books.find(function(x){return x.id===id;});
   if(!b) return;
   currentBookId = id;
   renderBooks();
@@ -7267,16 +7331,21 @@ function openBook(id){
   if(det) det.style.display = "block";
   if(dt) dt.textContent = "《"+(b.title||"未命名")+"》"+(b.status||"");
   renderBookDigest();
+  renderBookRead();
+  renderDeepThink();
+  renderQuotes();
 }
 
 function bookAction(kind){
-  var data = loadBooks();
-  var b = data.books.find(function(x){return x.id===currentBookId;});
+  var d = loadBooks();
+  var b = d.books.find(function(x){return x.id===currentBookId;});
   if(!b) return;
-  if(kind==="reading"){ b.status="在读"; if(b.progress<1) b.progress=1; toast("标记为在读"); }
-  else if(kind==="finished"){ b.status="读完"; b.progress=100; toast("标记为读完，恭喜！"); }
-  else if(kind==="reread"){ b.status="重读"; toast("标记为重读"); }
-  saveBooks(data);
+  if(kind==="reading"){ b.status="在读"; if(bookPct(b)<1){ if(b.partsTotal>0) b.partsRead=1; else b.progress=1; } toast("标记为在读"); }
+  else if(kind==="finished"){ b.status="读完"; if(b.partsTotal>0){ b.partsRead=b.partsTotal; } else b.progress=100; toast("标记读完，恭喜！"); }
+  else if(kind==="reread"){ b.status="重读"; toast("标记重读"); }
+  b.progress = bookPct(b);
+  saveBooks(d);
+  bumpLibStreak();
   renderBooks();
   var dt = document.getElementById("bookDetailTitle");
   if(dt) dt.textContent = "《"+(b.title||"未命名")+"》"+(b.status||"");
@@ -7285,66 +7354,211 @@ function bookAction(kind){
 function renderBookDigest(){
   var box = document.getElementById("bookDigest");
   if(!box) return;
-  var data = loadBooks();
-  var b = data.books.find(function(x){return x.id===currentBookId;});
+  var d = loadBooks();
+  var b = d.books.find(function(x){return x.id===currentBookId;});
   if(!b){ box.innerHTML=""; return; }
-  if(!b.aiExt){
-    box.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:10px;text-align:center">还没有 AI 提炼<br>点「✨ AI 一键提炼」生成核心观点与知识脉络</div>';
-    return;
-  }
-  var e = b.aiExt;
-  var html = '<div style="font-size:13px;line-height:1.8">';
-  if(e.model) html += '<div style="color:var(--muted);font-size:12px;margin-bottom:6px">🤖 '+esc(e.model)+'</div>';
-  if(e.questions && e.questions.length) html += '<p style="margin:6px 0"><b>💡 核心观点</b><br>'+e.questions.map(function(t){return "· "+esc(t);}).join("<br>")+'</p>';
-  if(e.directions && e.directions.length) html += '<p style="margin:6px 0"><b>🕸 知识脉络</b><br>'+e.directions.map(function(t){return "· "+esc(t);}).join("<br>")+'</p>';
-  if(e.related) html += '<p style="margin:6px 0"><b>🎯 行动启发</b><br>'+esc(e.related)+'</p>';
-  if(e.judgment) html += '<p style="margin:6px 0"><b>📌 一句话判断</b><br>'+esc(e.judgment)+'</p>';
-  html += '</div>';
-  if(e.reasoning) html += '<details style="margin-top:8px"><summary style="cursor:pointer;color:var(--muted);font-size:12px">查看 AI 思考过程</summary><div style="white-space:pre-wrap;font-size:12px;color:var(--muted);padding:8px;background:rgba(0,0,0,.04);border-radius:8px">'+esc(e.reasoning)+'</div></details>';
-  box.innerHTML = html;
+  var summ = [];
+  [["人物关系",b.aiChars],["全书重点",b.aiPlot],["讲了什么",b.aiPoints]].forEach(function(p){
+    if(p[1]&&p[1].summary) summ.push("<b>"+p[0]+"：</b>"+esc(p[1].summary));
+  });
+  box.innerHTML = summ.length ? ('<div style="font-size:13px;line-height:1.8">'+summ.join("<br>")+'</div>') : '<div style="color:var(--muted);font-size:13px;padding:10px">还没有 AI 精读<br>点下方「AI 精读（三选一）」生成人物关系 / 全书重点 / 讲清这本书</div>';
 }
 
-function aiDigestBook(){
-  var data = loadBooks();
-  var b = data.books.find(function(x){return x.id===currentBookId;});
+function aiReadOption(type){
+  var d = loadBooks();
+  var b = d.books.find(function(x){return x.id===currentBookId;});
   if(!b){ toast("请先选一本书"); return; }
   var c = loadAIConfig();
   if(!(c.key && c.base && c.model)){ toast("请先在设置里配置 AI"); return; }
-  var box = document.getElementById("bookDigest");
-  if(box) box.innerHTML = '<div style="text-align:center;color:var(--muted);padding:20px">AI 提炼中…</div>';
-  var sys = "你是一个读书复盘助手，服务对象是一位中文用户（供应链管理专业、正在求职）。帮ta把读过的内容结构化：提炼核心观点、梳理知识脉络、给出行动启发。要求：具体、不空泛、每条不超过 40 字、全部中文。"
-    + (c.persona ? ("\n\n【关于服务对象】"+c.persona) : "");
-  var user = "书名：" + (b.title||"未命名") + "\n类型：" + (b.type||"书") + "\n作者：" + (b.author||"未知")
-    + "\n状态：" + (b.status||"") + "\n我的备注：" + (b.note||"无")
-    + "\n\n请只输出一个 JSON 对象（不要 markdown 代码块、不要解释文字），字段如下：\n"
-    + '{"questions":["核心观点1","核心观点2","核心观点3"],"directions":["知识脉络1","知识脉络2"],"judgment":"一句话判断这本书值不值得精读/重读","related":"可以立刻采取的行动启发一句话"}';
+  var box = document.getElementById("bookReadOut");
+  if(box) box.innerHTML = '<div style="color:var(--muted);padding:10px">AI 精读中…</div>';
+  var label = type==="chars"?"一口气理清全书人物关系":type==="plot"?"一口气提炼全书重点":"一口气讲清这本书讲了什么";
+  var sys = "你是读书复盘助手，中文输出。要求：先给一句不超过40字的高亮结论，再用编号列表逐条展开（每条不超过60字），禁止糊成一大段。";
+  var user = "书名：《"+(b.title||"未命名")+"》\n作者："+(b.author||"未知")+"\n类型："+(b.type||"书")+"\n我的备注："+(b.note||"无")+"\n\n任务："+label+"\n只输出一个JSON：{\"summary\":\"一句结论\",\"items\":[\"要点1\",\"要点2\"]}";
   aiChat(c, [{role:"system",content:sys},{role:"user",content:user}], 45).then(function(res){
     var o = parseExtJSON(res.content);
     if(!o){ throw new Error("AI 返回无法解析成 JSON"); }
-    var ext = {
-      questions: o.questions || [],
-      directions: o.directions || [],
-      related: o.related || "",
-      judgment: o.judgment || "",
-      model: c.model, at: Date.now()
-    };
-    if(res.reasoning) ext.reasoning = res.reasoning.slice(0,4000);
-    b.aiExt = ext;
-    saveBooks(data);
-    renderBookDigest();
-    toast("✨ 提炼完成");
+    if(type==="chars") b.aiChars=o; else if(type==="plot") b.aiPlot=o; else b.aiPoints=o;
+    saveBooks(d); bumpLibStreak(); renderBookDigest(); renderBookRead();
+    toast("✨ 精读完成");
   }).catch(function(err){
-    if(box) box.innerHTML = '<div style="color:#e74c3c;font-size:13px;padding:10px;text-align:center">提炼失败：'+esc(err.message||"")+'<br>（未配置AI或网络不通时可手动记笔记）</div>';
+    if(box) box.innerHTML = '<div style="color:#e74c3c;font-size:13px;padding:10px">精读失败：'+esc(err.message||"")+'（未配置AI或网络不通时可手动记笔记）</div>';
   });
+}
+function renderBookRead(){
+  var box = document.getElementById("bookReadOut");
+  if(!box) return;
+  var d = loadBooks();
+  var b = d.books.find(function(x){return x.id===currentBookId;});
+  if(!b){ box.innerHTML=""; return; }
+  var parts = [];
+  [["👥 人物关系",b.aiChars],["📌 全书重点",b.aiPlot],["📖 讲了什么",b.aiPoints]].forEach(function(p){
+    if(p[1]){
+      parts.push("<p style='margin:8px 0'><b>"+p[0]+"</b><br><span style='color:var(--pink-deep)'>"+esc(p[1].summary||"")+"</span></p>");
+      if(p[1].items) parts.push("<ol style='margin:4px 0 4px 18px'>"+p[1].items.map(function(t){return "<li>"+esc(t)+"</li>";}).join("")+"</ol>");
+    }
+  });
+  box.innerHTML = parts.length ? parts.join("") : '<div style="color:var(--muted);font-size:13px">点上方三个按钮，让 AI 帮你精读这本书</div>';
+}
+
+function sendDeepThink(){
+  var d = loadBooks();
+  var b = d.books.find(function(x){return x.id===currentBookId;});
+  if(!b){ toast("请先选一本书"); return; }
+  var inp = document.getElementById("deepThinkInput");
+  var text = (inp.value||"").trim();
+  if(!text){ toast("写点想法再发"); return; }
+  if(!b.deepThink) b.deepThink = [];
+  b.deepThink.push({role:"user", text:text});
+  inp.value="";
+  renderDeepThink();
+  var c = loadAIConfig();
+  if(!(c.key && c.base && c.model)){ toast("未配置AI，想法已记录"); saveBooks(d); return; }
+  var hist = b.deepThink.map(function(m){ return {role:m.role, content:m.text}; });
+  var sys = "你是深度陪读伙伴，和读者就《"+(b.title||"未命名")+"》持续对话。读者作答后，你顺着他的回答提出更尖锐的下一个追问（不超过50字），像和自己对练。不要长篇大论，只输出追问本身。";
+  aiChat(c, [{role:"system",content:sys}].concat(hist), 40).then(function(res){
+    b.deepThink.push({role:"ai", text:res.content.trim()});
+    saveBooks(d); bumpLibStreak(); renderDeepThink();
+  }).catch(function(err){
+    b.deepThink.push({role:"ai", text:"（追问失败："+(err.message||"")+"）"});
+    saveBooks(d); renderDeepThink();
+  });
+}
+function renderDeepThink(){
+  var box = document.getElementById("deepThinkBox");
+  if(!box) return;
+  var d = loadBooks();
+  var b = d.books.find(function(x){return x.id===currentBookId;});
+  if(!b || !b.deepThink || !b.deepThink.length){ box.innerHTML = '<div style="color:var(--muted);font-size:13px">答过才算读懂。先随便写点想法，AI 会接着追问你。</div>'; return; }
+  box.innerHTML = b.deepThink.map(function(m){
+    if(m.role==="user") return '<div style="margin:6px 0;padding:8px 10px;background:#fff;border-radius:8px"><b>🙋 我：</b>'+esc(m.text)+'</div>';
+    return '<div style="margin:6px 0;padding:8px 10px;background:rgba(180,142,217,.12);border-radius:8px"><b>🤖 AI：</b>'+esc(m.text)+'</div>';
+  }).join("");
+  box.scrollTop = box.scrollHeight;
+}
+
+function aiQuotes(){
+  var d = loadBooks();
+  var b = d.books.find(function(x){return x.id===currentBookId;});
+  if(!b){ toast("请先选一本书"); return; }
+  var c = loadAIConfig();
+  if(!(c.key && c.base && c.model)){ toast("请先在设置里配置 AI"); return; }
+  var wall = document.getElementById("quoteWall");
+  if(wall) wall.innerHTML = '<div style="color:var(--muted);padding:10px">AI 挑金句中…</div>';
+  var sys = "你是金句猎人。从《"+(b.title||"未命名")+"》中挑出 3-5 句值得摘抄的话，附作者/出处。只输出JSON：{\"quotes\":[{\"text\":\"原句\",\"source\":\"出处\"}]}";
+  aiChat(c, [{role:"system",content:sys},{role:"user",content:"挑金句"}], 40).then(function(res){
+    var o = parseExtJSON(res.content);
+    if(!o || !o.quotes){ throw new Error("无法解析"); }
+    b.quotes = (b.quotes||[]).concat(o.quotes);
+    saveBooks(d); bumpLibStreak(); renderLibStats(); renderQuotes();
+    toast("✨ 已收入金句墙");
+  }).catch(function(err){
+    if(wall) wall.innerHTML = '<div style="color:#e74c3c;font-size:13px;padding:10px">失败：'+esc(err.message||"")+'</div>';
+  });
+}
+function renderQuotes(){
+  var wall = document.getElementById("quoteWall");
+  if(!wall) return;
+  var d = loadBooks();
+  var b = d.books.find(function(x){return x.id===currentBookId;});
+  if(!b || !b.quotes || !b.quotes.length){ wall.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:10px">点「✨ 金句墙」让 AI 帮你摘抄值得记的话</div>'; return; }
+  wall.innerHTML = b.quotes.map(function(q,i){
+    return '<div class="inspire-item"><div class="inspire-item-text">💎 '+esc(q.text||"")+'<br><span style="color:var(--muted);font-size:12px">— '+esc(q.source||"")+'</span></div><button class="inspire-action-btn" data-act="copy-quote" data-i="'+i+'">复制</button></div>';
+  }).join("");
+}
+function copyQuote(i){
+  var d = loadBooks();
+  var b = d.books.find(function(x){return x.id===currentBookId;});
+  if(!b||!b.quotes||!b.quotes[i]) return;
+  copyText(b.quotes[i].text);
+  toast("已复制");
+}
+function copyText(t){
+  try{ if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(t); return; } }catch(e){}
+  try{ var ta=document.createElement("textarea"); ta.value=t; document.body.appendChild(ta); ta.select(); document.execCommand("copy"); document.body.removeChild(ta); }catch(e){}
+}
+
+function searchAuthor(){
+  var inp = document.getElementById("authorSearch");
+  var name = (inp.value||"").trim();
+  if(!name){ toast("输入作家名"); return; }
+  var panel = document.getElementById("authorPanel");
+  if(panel) panel.innerHTML = '<div style="color:var(--muted);padding:10px">扒档案中…</div>';
+  var cache = loadAuthorCache();
+  if(cache[name]){ renderAuthor(cache[name]); return; }
+  var c = loadAIConfig();
+  if(!(c.key && c.base && c.model)){
+    if(panel) panel.innerHTML = '<div style="color:#e74c3c;font-size:13px;padding:10px">请先在设置配置 AI 才能扒作家底细</div>';
+    return;
+  }
+  var sys = "你是文学八卦小报主编。给一位作家做『吃瓜式』档案，幽默但有依据。输出JSON：{\"name\":\"\",\"zodiac\":\"星座\",\"mbti\":\"MBTI猜测\",\"mbtiReason\":\"一句话理由\",\"hiddenSkill\":\"隐藏技能\",\"timeline\":[{\"year\":\"年份/时期\",\"text\":\"奇闻/翻车/成就\"}],\"relations\":[{\"name\":\"相关作家\",\"type\":\"like|hate|reconcile|mentor\",\"note\":\"两人恩怨一句话\"}],\"booklist\":[{\"title\":\"代表作\",\"stars\":4,\"reason\":\"推荐理由一句\"}]}";
+  var user = "作家："+name+"\n给出完整吃瓜档案，时间线至少4条，关系至少3个，书单至少3本。";
+  aiChat(c, [{role:"system",content:sys},{role:"user",content:user}], 50).then(function(res){
+    var o = parseExtJSON(res.content);
+    if(!o){ throw new Error("无法解析"); }
+    o.name = name;
+    cache[name] = o; saveAuthorCache(cache);
+    renderAuthor(o);
+  }).catch(function(err){
+    if(panel) panel.innerHTML = '<div style="color:#e74c3c;font-size:13px;padding:10px">扒取失败：'+esc(err.message||"")+'</div>';
+  });
+}
+function loadAuthorCache(){ try{ return JSON.parse(localStorage.getItem("weh_lib_authors_v1")||"{}"); }catch(e){ return {}; } }
+function saveAuthorCache(c){ localStorage.setItem("weh_lib_authors_v1", JSON.stringify(c)); }
+function chip(t){ return '<span style="font-size:12px;padding:3px 10px;background:rgba(180,142,217,.15);border-radius:20px">'+esc(t)+'</span>'; }
+function renderAuthor(a){
+  currentAuthorName = a.name||"";
+  var panel = document.getElementById("authorPanel");
+  if(!panel) return;
+  var tl = (a.timeline||[]).map(function(t){ return '<div style="margin:6px 0;padding:8px 10px;background:rgba(0,0,0,.03);border-radius:8px"><b style="color:var(--pink-deep)">'+(t.year||"")+'</b> '+(t.text||"")+'</div>'; }).join("");
+  var meta = '<div style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0">'
+    + chip("🔮 "+(a.zodiac||"未知星座"))
+    + chip("🧠 MBTI: "+(a.mbti||"?")+(a.mbtiReason?(" ("+a.mbtiReason+")"):""))
+    + chip("🎯 隐藏技能: "+(a.hiddenSkill||"无"))
+    + '</div>';
+  var svg = renderAuthorGraph(a);
+  var legend = '<div style="font-size:12px;color:var(--muted);margin:6px 0">🔴喜欢 🟠讨厌 🟢和解 🟣亦师亦友 ｜ 点节点看恩怨</div>';
+  var relNote = '<div id="authorRelNote" style="font-size:13px;min-height:20px;color:var(--muted)"></div>';
+  var bl = (a.booklist||[]).map(function(bk){
+    var s = (bk.stars||0); var stars = "★★★★★".slice(0,s) + "☆☆☆☆☆".slice(0,5-s);
+    return '<div style="margin:6px 0;padding:8px 10px;background:rgba(0,0,0,.03);border-radius:8px"><b>'+esc(bk.title||"")+'</b> <span style="color:#f1c40f">'+stars+'</span><br><span style="color:var(--muted);font-size:12px">'+esc(bk.reason||"")+'</span></div>';
+  }).join("");
+  panel.innerHTML = '<div style="font-weight:700;font-size:15px;margin-bottom:4px">🗂 '+esc(a.name||"")+' 的吃瓜档案</div>'+meta+'<div style="font-weight:600;margin:8px 0 4px">📜 时间线</div>'+tl+'<div style="font-weight:600;margin:10px 0 4px">🕸 文坛关系图</div>'+svg+legend+relNote+'<div style="font-weight:600;margin:10px 0 4px">📚 恩怨书单</div>'+bl;
+}
+function renderAuthorGraph(a){
+  var rel = a.relations||[];
+  if(!rel.length) return '<div style="color:var(--muted);font-size:13px">暂无关系数据</div>';
+  var cx=300, cy=150, r=110, n=rel.length;
+  var parts = ['<svg viewBox="0 0 600 300" width="100%" style="max-width:600px">'];
+  parts.push('<circle cx="'+cx+'" cy="'+cy+'" r="34" fill="#b48ed9"/><text x="'+cx+'" y="'+(cy+5)+'" text-anchor="middle" fill="#fff" font-size="12">'+esc(a.name||"")+'</text>');
+  rel.forEach(function(rl,i){
+    var ang = (Math.PI*2/n)*i - Math.PI/2;
+    var x = cx + Math.cos(ang)*r, y = cy + Math.sin(ang)*r;
+    var color = rl.type==="like"?"#e74c3c":rl.type==="hate"?"#f39c12":rl.type==="reconcile"?"#2ecc71":"#8e44ad";
+    var dash = rl.type==="like"?"":rl.type==="hate"?"stroke-dasharray=\"6 5\"":rl.type==="reconcile"?"stroke-dasharray=\"2 6\"":"";
+    parts.push('<line x1="'+cx+'" y1="'+cy+'" x2="'+x+'" y2="'+y+'" stroke="'+color+'" stroke-width="2" '+dash+'/>');
+    parts.push('<circle cx="'+x+'" cy="'+y+'" r="26" fill="#fff" stroke="'+color+'" stroke-width="2" data-rel="'+esc(rl.name)+'" style="cursor:pointer"/>');
+    parts.push('<text x="'+x+'" y="'+(y+4)+'" text-anchor="middle" font-size="11">'+esc(rl.name)+'</text>');
+  });
+  parts.push('</svg>');
+  return parts.join("");
+}
+function showRelNote(name){
+  var cache = loadAuthorCache();
+  var a = cache[currentAuthorName];
+  var box = document.getElementById("authorRelNote");
+  if(!a || !box) return;
+  var rl = (a.relations||[]).find(function(r){return r.name===name;});
+  box.innerHTML = rl ? ("<b>"+esc(a.name)+" × "+esc(name)+"：</b>"+esc(rl.note||"")) : "";
 }
 
 function deleteCurrentBook(){
   if(!currentBookId) return;
   showConfirm("确定删除这本书？").then(function(ok){
     if(!ok) return;
-    var data = loadBooks();
-    data.books = data.books.filter(function(x){return x.id!==currentBookId;});
-    saveBooks(data);
+    var d = loadBooks();
+    d.books = d.books.filter(function(x){return x.id!==currentBookId;});
+    saveBooks(d);
     currentBookId = null;
     var det = document.getElementById("bookDetail");
     if(det) det.style.display="none";
@@ -7354,28 +7568,49 @@ function deleteCurrentBook(){
 }
 
 function exportBookMD(){
-  var data = loadBooks();
-  var b = data.books.find(function(x){return x.id===currentBookId;});
+  var d = loadBooks();
+  var b = d.books.find(function(x){return x.id===currentBookId;});
   if(!b){ toast("请先选一本书"); return; }
   var md = "# 《"+(b.title||"未命名")+"》读书复盘\n\n";
-  md += "- 作者："+(b.author||"未知")+"\n- 类型："+(b.type||"书")+"\n- 状态："+(b.status||"")+"\n";
-  md += "- 期待值："+(b.expect||"-")+" ｜ 打分："+(b.score||"-")+" ｜ 进度："+(b.progress||0)+"%\n";
+  md += "- 作者："+(b.author||"未知")+"\n- 类型："+(b.type||"书")+"\n- 分类："+(b.category||"-")+"\n- 状态："+(b.status||"")+"\n";
+  if(b.partsTotal) md += "- 进度：第"+(b.partsRead||0)+"/"+b.partsTotal+"部分（"+bookPct(b)+"%）\n"; else md += "- 进度："+bookPct(b)+"%\n";
+  md += "- 阅读时长："+(b.hours||0)+"h ｜ 期待值："+(b.expect||"-")+" ｜ 打分："+(b.score||"-")+"\n";
   if(b.startDate) md += "- 开始："+b.startDate+"\n";
   if(b.endDate) md += "- 结束："+b.endDate+"\n";
   if(b.note) md += "\n## 我的备注\n"+b.note+"\n";
-  if(b.aiExt){
-    var e=b.aiExt;
-    md += "\n## AI 提炼（"+(e.model||"")+"）\n";
-    if(e.questions&&e.questions.length){ md += "### 核心观点\n"+e.questions.map(function(t){return "- "+t;}).join("\n")+"\n"; }
-    if(e.directions&&e.directions.length){ md += "### 知识脉络\n"+e.directions.map(function(t){return "- "+t;}).join("\n")+"\n"; }
-    if(e.related) md += "### 行动启发\n- "+e.related+"\n";
-    if(e.judgment) md += "\n> "+e.judgment+"\n";
-  }
+  [["人物关系","aiChars"],["全书重点","aiPlot"],["讲了什么","aiPoints"]].forEach(function(p){
+    var o = b[p[1]];
+    if(o){ md += "\n## AI "+p[0]+"\n"; if(o.summary) md += "> "+o.summary+"\n"; if(o.items&&o.items.length){ md += o.items.map(function(t){return "- "+t;}).join("\n")+"\n"; } }
+  });
+  if(b.quotes&&b.quotes.length){ md += "\n## 金句墙\n"+b.quotes.map(function(q){return "- "+(q.text||"")+" — "+(q.source||"");}).join("\n")+"\n"; }
+  if(b.deepThink&&b.deepThink.length){ md += "\n## 深度思考对话\n"+b.deepThink.map(function(m){return (m.role==="user"?"**我**：":"**AI**：")+m.text;}).join("\n")+"\n"; }
   md += "\n*由 Weh Atelier 读书·学习台导出 · "+new Date().toISOString().slice(0,10)+"*\n";
   downloadMD("《"+(b.title||"未命名")+"》读书复盘.md", md);
 }
 
-
+document.addEventListener("click", function(e){
+  if(!e.target || !e.target.closest) return;
+  var n = e.target.closest("[data-rel]");
+  if(n){ showRelNote(n.getAttribute("data-rel")); return; }
+  var el = e.target.closest("[data-act]");
+  if(!el) return;
+  var act = el.getAttribute("data-act");
+  if(act==="addBook") showBookEditor();
+  else if(act==="saveBook") saveBook();
+  else if(act==="hideBookEditor") hideBookEditor();
+  else if(act==="openBook") openBook(+el.getAttribute("data-id"));
+  else if(act==="lib-cat"){ libCatFilter = el.getAttribute("data-cat"); renderBooks(); }
+  else if(act==="read-opt") aiReadOption(el.getAttribute("data-opt"));
+  else if(act==="send-deep") sendDeepThink();
+  else if(act==="copy-quote") copyQuote(+el.getAttribute("data-i"));
+  else if(act==="bk-reading") bookAction("reading");
+  else if(act==="bk-finished") bookAction("finished");
+  else if(act==="bk-reread") bookAction("reread");
+  else if(act==="bk-quotes") aiQuotes();
+  else if(act==="bk-export") exportBookMD();
+  else if(act==="bk-delete") deleteCurrentBook();
+  else if(act==="searchAuthor") searchAuthor();
+});
 
 /* ========== 显化·成长台模块 ========== */
 var MAN_KEY = "weh_manifest_data_v1";
