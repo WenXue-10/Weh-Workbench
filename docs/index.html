@@ -1488,6 +1488,49 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
   textarea.ai-input{width:100%}
 }
 
+/* ===== 读书台 / 显化台 · 视觉对齐（第一步） ===== */
+/* 仅软化「带标题的内容卡片」，顶部统计小卡与其他模块保持一致 */
+#module-library > .card:has(.card-head),
+#module-manifest > .card:has(.card-head){
+  background:rgba(255,244,248,.6);
+  border:1px solid rgba(255,200,222,.42);
+  border-radius:22px;
+  box-shadow:0 3px 14px rgba(224,122,166,.07);
+  backdrop-filter:blur(var(--blur-radius)) saturate(1.2);
+  -webkit-backdrop-filter:blur(var(--blur-radius)) saturate(1.2);
+  transition:transform .18s,box-shadow .18s,border-color .18s;
+}
+#module-library > .card:has(.card-head):hover,
+#module-manifest > .card:has(.card-head):hover{
+  transform:translateY(-2px);
+  box-shadow:0 8px 22px rgba(224,122,166,.12);
+  border-color:rgba(255,190,214,.6);
+}
+/* 标题上方英文小标签 + 模块内字号统一下调一档 */
+#module-library,
+#module-manifest{font-size:13.5px;line-height:1.7}
+#module-library .card-head,
+#module-manifest .card-head{
+  flex-direction:column;
+  align-items:flex-start;
+  gap:3px;
+  font-size:15px;
+  line-height:1.35;
+}
+#module-library .card-head::before,
+#module-manifest .card-head::before{
+  content:attr(data-en);
+  font-size:11px;
+  letter-spacing:1.6px;
+  font-weight:700;
+  text-transform:uppercase;
+  color:var(--pink-deep);
+  opacity:.6;
+}
+/* 标题 + 计数保持同行（我的书架 / 我的目标） */
+#module-library .ch-title,
+#module-manifest .ch-title{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap}
+
 </style>
 </head>
 <body>
@@ -5002,7 +5045,7 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
         </div>
 
         <div class="card" style="margin-bottom:14px">
-          <div class="card-head">🔍 作家吃瓜档案 <small style="color:var(--muted)">搜作家，扒他的底细</small></div>
+          <div class="card-head" data-en="AUTHOR FILES">🔍 作家吃瓜档案 <small style="color:var(--muted)">搜作家，扒他的底细</small></div>
           <div style="display:flex;gap:8px;padding:12px">
             <input id="authorSearch" placeholder="陀思妥耶夫斯基 / 卡夫卡 / 张爱玲…" style="flex:1" onkeydown="if(event.key==='Enter')searchAuthor()">
             <button class="inspire-action-btn" style="border:none;background:linear-gradient(135deg,var(--pink-deep),#b48ed9);color:#fff" data-act="searchAuthor">🔎 开扒</button>
@@ -5011,7 +5054,7 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
         </div>
 
         <div id="bookEditor" class="card" style="display:none;margin-bottom:14px">
-          <div class="card-head">📝 <span id="bookEditorTitle">添加一本书</span></div>
+          <div class="card-head" data-en="ADD A BOOK">📝 <span id="bookEditorTitle">添加一本书</span></div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px">
             <input id="bookTitle" placeholder="书名 / 课程名">
             <input id="bookAuthor" placeholder="作者 / 讲师">
@@ -5039,12 +5082,12 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
         </div>
 
         <div class="card">
-          <div class="card-head">📚 我的书架 <span class="m-count" id="bookCount"></span></div>
+          <div class="card-head" data-en="MY SHELF"><span class="ch-title">📚 我的书架 <span class="m-count" id="bookCount"></span></span></div>
           <div id="bookList" class="inspire-list"></div>
         </div>
 
         <div id="bookDetail" class="card" style="display:none;margin-top:14px">
-          <div class="card-head">📖 这本书 <small id="bookDetailTitle"></small></div>
+          <div class="card-head" data-en="BOOK DETAIL">📖 这本书 <small id="bookDetailTitle"></small></div>
           <div style="display:flex;gap:8px;flex-wrap:wrap;padding:12px">
             <button class="inspire-action-btn" data-act="bk-reading">📖 标记在读</button>
             <button class="inspire-action-btn" data-act="bk-finished">✅ 标记读完</button>
@@ -5100,7 +5143,7 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
 
         <div id="goalEditor" class="card" style="display:none;margin-bottom:14px">
 
-          <div class="card-head">🎯 <span id="goalEditorTitle">添加目标</span></div>
+          <div class="card-head" data-en="SET A GOAL">🎯 <span id="goalEditorTitle">添加目标</span></div>
 
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px">
 
@@ -5126,7 +5169,7 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
 
         <div class="card" style="margin-bottom:14px">
 
-          <div class="card-head">🎯 我的目标 <span class="m-count" id="goalCount"></span></div>
+          <div class="card-head" data-en="MY GOALS"><span class="ch-title">🎯 我的目标 <span class="m-count" id="goalCount"></span></span></div>
 
           <div id="goalList" class="inspire-list"></div>
 
@@ -5134,7 +5177,7 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
 
         <div class="card" style="margin-bottom:14px">
 
-          <div class="card-head">📝 今日感想 / 日记 <small id="diaryDate" style="color:var(--muted)"></small></div>
+          <div class="card-head" data-en="DAILY SCRIPT">📝 今日感想 / 日记 <small id="diaryDate" style="color:var(--muted)"></small></div>
 
           <textarea id="diaryInput" placeholder="今天想成为谁？做了什么？感恩什么？写具体一点…" style="width:100%;min-height:70px;border:1px solid var(--line);border-radius:10px;padding:10px;font:inherit;resize:vertical"></textarea>
 
@@ -5152,14 +5195,14 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
 
         <div class="card">
 
-          <div class="card-head">📸 取证墙（每日记录）</div>
+          <div class="card-head" data-en="PROOF WALL">📸 取证墙（每日记录）</div>
 
           <div id="evidenceWall" class="inspire-list"></div>
 
         </div>
 
         <div class="card" style="margin-bottom:14px">
-          <div class="card-head">🎫 未来支票 <small style="color:var(--muted)">每天签名，给「会有的」打卡</small></div>
+          <div class="card-head" data-en="FUTURE CHEQUE">🎫 未来支票 <small style="color:var(--muted)">每天签名，给「会有的」打卡</small></div>
           <div id="chequeBox" style="padding:0 12px 12px"></div>
           <div id="chequeEditor" style="display:none;padding:0 12px 12px">
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
@@ -5175,7 +5218,7 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
         </div>
 
         <div class="card" style="margin-bottom:14px">
-          <div class="card-head">🙏 感恩日记 <small style="color:var(--muted)">AI 以「已发生」口吻生成，每天一条</small></div>
+          <div class="card-head" data-en="GRATITUDE">🙏 感恩日记 <small style="color:var(--muted)">AI 以「已发生」口吻生成，每天一条</small></div>
           <div style="padding:0 12px 12px">
             <button class="inspire-action-btn" style="border:none;background:linear-gradient(135deg,var(--pink-deep),#b48ed9);color:#fff" onclick="aiGratitude()">✨ 生成今日感恩日记</button>
             <div id="gratitudeBox" style="margin-top:10px"></div>
@@ -5183,7 +5226,7 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
         </div>
 
         <div class="card" style="margin-bottom:14px">
-          <div class="card-head">🔄 语言翻译器 <small style="color:var(--muted)">把自我怀疑翻成笃定</small></div>
+          <div class="card-head" data-en="REFRAME">🔄 语言翻译器 <small style="color:var(--muted)">把自我怀疑翻成笃定</small></div>
           <div style="padding:0 12px 12px">
             <div style="display:flex;gap:8px">
               <input id="translatorInput" placeholder="我想成为作家…" style="flex:1" onkeydown="if(event.key==='Enter')aiTranslate()">
@@ -5194,7 +5237,7 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
         </div>
 
         <div class="card" style="margin-bottom:14px">
-          <div class="card-head">🔥 显化频率热力图 <small style="color:var(--muted)">最近 70 天打卡密度</small></div>
+          <div class="card-head" data-en="FREQUENCY MAP">🔥 显化频率热力图 <small style="color:var(--muted)">最近 70 天打卡密度</small></div>
           <div style="padding:0 12px 12px">
             <div id="freqHeat" style="margin-top:6px"></div>
             <button class="inspire-action-btn" style="margin-top:10px" onclick="addFreqCustom()">➕ 记录一次行为（泡脚/手帐/运动…）</button>
@@ -6083,7 +6126,7 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
 
 <script>
 window.SITE_DATA = {
- "updated": "2026-10-02 02:18",
+ "updated": "2026-10-02 02:19",
  "stats": {
   "jobs": 58,
   "rec": 0,
