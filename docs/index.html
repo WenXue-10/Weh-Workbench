@@ -1488,14 +1488,15 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
   textarea.ai-input{width:100%}
 }
 
-/* ===== 读书台 / 显化台 · 视觉对齐（第一步） ===== */
+/* ===== 读书台 / 显化台 · 卡片软化 ===== */
 /* 仅软化「带标题的内容卡片」，顶部统计小卡与其他模块保持一致 */
 #module-library > .card:has(.card-head),
 #module-manifest > .card:has(.card-head){
-  background:rgba(255,244,248,.6);
-  border:1px solid rgba(255,200,222,.42);
+  background:rgba(255,246,250,.62);
+  border:1px solid rgba(255,203,224,.5);
   border-radius:22px;
-  box-shadow:0 3px 14px rgba(224,122,166,.07);
+  padding:18px 18px 16px;
+  box-shadow:0 3px 16px rgba(224,122,166,.07);
   backdrop-filter:blur(var(--blur-radius)) saturate(1.2);
   -webkit-backdrop-filter:blur(var(--blur-radius)) saturate(1.2);
   transition:transform .18s,box-shadow .18s,border-color .18s;
@@ -1503,8 +1504,8 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
 #module-library > .card:has(.card-head):hover,
 #module-manifest > .card:has(.card-head):hover{
   transform:translateY(-2px);
-  box-shadow:0 8px 22px rgba(224,122,166,.12);
-  border-color:rgba(255,190,214,.6);
+  box-shadow:0 10px 26px rgba(224,122,166,.13);
+  border-color:rgba(255,190,214,.65);
 }
 
 /* ===== 第二步：模块标题区（对齐「灵犀智库」版式：标题+渐变下划线+副标题） ===== */
@@ -1622,31 +1623,37 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
 /* 显化台统计卡：三张一行 */
 #module-manifest .stat-grid{grid-template-columns:repeat(3,1fr)}
 
-/* ===== 卡片标题：英文小标签独占一行，标题与副标题保持同行 ===== */
+/* ===== 卡片标题：左侧英文小标签 + 中文标题同行，副标题靠右 ===== */
 #module-library,
 #module-manifest{font-size:13.5px;line-height:1.7}
 #module-library .card-head,
 #module-manifest .card-head{
+  display:flex;
   flex-direction:row;
   flex-wrap:wrap;
   align-items:baseline;
-  gap:2px 8px;
-  font-size:14.5px;
+  gap:4px 10px;
+  font-size:16px;
+  font-weight:700;
   line-height:1.4;
+  margin-bottom:12px;
 }
 #module-library .card-head::before,
 #module-manifest .card-head::before{
   content:attr(data-en);
-  flex:0 0 100%;
+  flex:0 0 auto;
   font-size:10.5px;
-  letter-spacing:1.6px;
-  font-weight:700;
+  letter-spacing:1.7px;
+  font-weight:800;
   text-transform:uppercase;
   color:var(--pink-deep);
-  opacity:.55;
+  opacity:.72;
+  white-space:nowrap;
 }
+#module-library .card-head small,
+#module-manifest .card-head small{margin-left:auto;font-size:11.5px;color:var(--muted);font-weight:400}
 #module-library .ch-title,
-#module-manifest .ch-title{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap}
+#module-manifest .ch-title{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;font-size:16px}
 
 /* ===== 手机端微调 ===== */
 @media(max-width:640px){
@@ -1655,6 +1662,175 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
   #module-library .page-sub,
   #module-manifest .page-sub{font-size:12.5px}
   .mod-add-btn{top:0;right:0;padding:8px 14px;font-size:12px}
+}
+
+
+/* ================= 读书台 · 顶部搜索 + 分类栏 ================= */
+.lib-searchbar{
+  display:flex;align-items:center;gap:9px;
+  background:rgba(255,255,255,.78);
+  border:1px solid rgba(255,203,224,.6);
+  border-radius:16px;
+  padding:11px 15px;
+  margin:0 0 12px;
+  box-shadow:0 2px 10px rgba(224,122,166,.06);
+}
+.lib-searchbar .ls-ico{font-size:14px;opacity:.55}
+.lib-searchbar input{flex:1;border:none;background:transparent;outline:none;font-size:13.5px;color:inherit}
+#module-library .lib-cats{display:flex;gap:7px;flex-wrap:wrap;margin:0 0 14px}
+#module-library .lib-cat-pill{
+  font-size:12px;padding:5px 13px;border-radius:20px;cursor:pointer;white-space:nowrap;
+  background:rgba(255,255,255,.65);
+  border:1px solid rgba(255,203,224,.55);
+  color:#8a5f79;transition:.16s;
+}
+#module-library .lib-cat-pill:hover{background:rgba(255,255,255,.95)}
+#module-library .lib-cat-pill.active{
+  background:linear-gradient(135deg,#c0559a,#8f6fd0);
+  color:#fff;border-color:transparent;
+  box-shadow:0 3px 10px rgba(192,85,154,.28);
+}
+
+/* ================= 读书台 · 书架卡片网格 ================= */
+#module-library .lib-shelf{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(148px,1fr));
+  gap:10px;
+}
+#module-library .lib-book{
+  display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px;
+  padding:14px 12px;border-radius:16px;cursor:pointer;transition:.18s;
+  background:rgba(255,255,255,.62);
+  border:1px solid rgba(255,203,224,.45);
+}
+#module-library .lib-book:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(224,122,166,.13)}
+#module-library .lib-book.active{border-color:#c0559a;box-shadow:0 0 0 1.5px rgba(192,85,154,.32)}
+#module-library .lb-pct{font-size:11.5px;font-weight:700;color:#c0559a}
+#module-library .lb-title{font-size:13.5px;font-weight:600;line-height:1.35}
+#module-library .lb-sub{font-size:11px;color:var(--muted)}
+#module-library .lb-go{font-size:11px;color:#c0559a;margin-top:1px;opacity:.85}
+
+/* ================= 读书台 · 添加一本书 ================= */
+.lib-addbook{
+  display:flex;flex-direction:column;align-items:center;gap:1px;
+  padding:15px;margin-top:12px;border-radius:16px;cursor:pointer;transition:.18s;
+  border:1.5px dashed rgba(192,85,154,.38);
+  background:rgba(255,255,255,.35);
+}
+.lib-addbook:hover{background:rgba(255,255,255,.65);border-color:rgba(192,85,154,.6)}
+.lib-addbook .la-plus{font-size:20px;line-height:1;color:#c0559a}
+.lib-addbook .la-t{font-size:13.5px;font-weight:600}
+.lib-addbook .la-s{font-size:11px;color:var(--muted)}
+
+/* ================= 读书台 · 点开一本书 三个选项 ================= */
+#module-library .bk-picker-row{
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  margin-bottom:12px;font-size:12.5px;color:var(--muted);
+}
+#module-library .bk-picker-row select{
+  font-size:12.5px;padding:6px 10px;border-radius:11px;
+  border:1px solid rgba(192,85,154,.32);
+  background:rgba(255,255,255,.85);color:inherit;max-width:230px;
+}
+#module-library .bk-hint{margin-left:auto;font-size:12px}
+#module-library .bk-opts{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+#module-library .bk-opt{
+  display:flex;flex-direction:column;align-items:center;gap:1px;
+  padding:14px 6px;border-radius:14px;cursor:pointer;transition:.16s;
+  border:1px solid rgba(192,85,154,.24);
+  background:rgba(255,255,255,.6);
+  font-size:12.5px;color:inherit;line-height:1.4;
+}
+#module-library .bk-opt b{font-size:13px}
+#module-library .bk-opt span{font-size:11.5px;color:var(--muted)}
+#module-library .bk-opt:hover{background:rgba(255,255,255,.95)}
+#module-library .bk-opt.on{
+  background:linear-gradient(135deg,#c0559a,#8f6fd0);
+  color:#fff;border-color:transparent;
+  box-shadow:0 5px 14px rgba(192,85,154,.28);
+}
+#module-library .bk-opt.on span{color:rgba(255,255,255,.88)}
+#module-library .bk-out{margin-top:14px}
+#module-library .bk-sec{
+  font-size:11.5px;font-weight:800;letter-spacing:.8px;color:#c0559a;opacity:.9;
+  margin:14px 0 6px;text-transform:uppercase;
+}
+#module-library .bk-sec:first-child{margin-top:0}
+.bk-quote{
+  background:rgba(255,235,243,.9);
+  border-left:3px solid #d9608f;
+  border-radius:0 12px 12px 0;
+  padding:10px 14px;margin:0 0 10px;
+  font-size:13.5px;line-height:1.65;font-weight:600;
+}
+.bk-quote .bq-tag{display:block;font-size:10.5px;font-weight:700;color:#c0559a;letter-spacing:.5px;margin-bottom:3px}
+.bk-item{display:flex;gap:10px;padding:9px 0;border-bottom:1px dashed rgba(192,85,154,.16)}
+.bk-item:last-child{border-bottom:none}
+.bk-item .bi-ico{flex:0 0 26px;text-align:center;font-size:15px;line-height:1.45}
+.bk-item .bi-t{font-size:13px;font-weight:700;margin-bottom:1px}
+.bk-item .bi-d{font-size:12.5px;color:#7a6472;line-height:1.6}
+#module-library .bk-tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:14px;padding-top:12px;border-top:1px dashed rgba(192,85,154,.18)}
+
+/* ================= 读书台 · 深度思考 ================= */
+#module-library .dt-box{
+  font-size:13px;line-height:1.7;max-height:260px;overflow:auto;
+  background:rgba(255,255,255,.5);border-radius:14px;padding:10px;
+}
+
+/* ================= 读书台 · 金句墙 ================= */
+#module-library .qwall-bar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:9px}
+#module-library .qwall-bar .qb-hint{font-size:11.5px;color:var(--muted)}
+#module-library .quote-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(205px,1fr));gap:10px}
+#module-library .quote-card{
+  padding:13px 15px;border-radius:14px;
+  background:rgba(255,255,255,.66);
+  border:1px solid rgba(255,203,224,.5);
+}
+#module-library .quote-card .qc-mark{font-family:Georgia,serif;font-size:20px;line-height:1;color:rgba(192,85,154,.35)}
+#module-library .quote-card .qc-t{font-size:13.5px;font-weight:600;line-height:1.6;margin:2px 0 7px}
+#module-library .quote-card .qc-s{display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--muted)}
+
+/* ================= 读书台 · 作家档案 ================= */
+#module-library .au-head{display:flex;gap:12px;align-items:center;margin-bottom:10px}
+#module-library .au-avatar{
+  width:46px;height:46px;border-radius:13px;flex:0 0 auto;
+  display:flex;align-items:center;justify-content:center;font-size:23px;
+  background:linear-gradient(135deg,rgba(219,112,147,.2),rgba(180,142,217,.22));
+}
+#module-library .au-name{font-size:16px;font-weight:700;line-height:1.3}
+#module-library .au-en{font-size:11.5px;color:var(--muted);margin-top:1px}
+#module-library .au-chips{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 12px}
+#module-library .au-sec{font-size:13px;font-weight:700;margin:14px 0 8px}
+#module-library .au-sec small{font-size:11px;color:var(--muted);font-weight:400;margin-left:4px}
+#module-library .au-tl{position:relative;padding-left:18px}
+#module-library .au-tl::before{
+  content:"";position:absolute;left:4px;top:6px;bottom:8px;width:1.5px;
+  background:linear-gradient(to bottom,rgba(192,85,154,.5),rgba(192,85,154,.06));
+}
+#module-library .au-tl-item{position:relative;margin-bottom:11px}
+#module-library .au-tl-item::before{
+  content:"";position:absolute;left:-17px;top:5px;width:8px;height:8px;border-radius:50%;
+  background:#c0559a;box-shadow:0 0 0 3px rgba(255,246,250,.95);
+}
+#module-library .au-tl-y{font-size:11px;font-weight:700;color:#c0559a;letter-spacing:.3px}
+#module-library .au-tl-t{font-size:13px;line-height:1.62}
+#module-library .au-legend{font-size:11.5px;color:var(--muted);margin:8px 0 0}
+#module-library .au-relnote{font-size:12.5px;min-height:18px;color:var(--muted);margin-top:6px;line-height:1.6}
+#module-library .au-book{
+  display:flex;justify-content:space-between;gap:12px;align-items:flex-start;
+  padding:9px 0;border-bottom:1px dashed rgba(192,85,154,.16);
+}
+#module-library .au-book:last-child{border-bottom:none}
+#module-library .au-bk-l{font-size:13.5px}
+#module-library .au-bk-r{font-size:11.5px;color:var(--muted);text-align:right;max-width:48%;line-height:1.5}
+
+/* ================= 读书台 · 手机端 ================= */
+@media(max-width:640px){
+  #module-library .lib-shelf{grid-template-columns:repeat(auto-fill,minmax(126px,1fr))}
+  #module-library .bk-opts{grid-template-columns:1fr}
+  #module-library .bk-opt{flex-direction:row;gap:6px;justify-content:center;padding:11px 6px}
+  #module-library .quote-grid{grid-template-columns:1fr}
+  #module-library .bk-hint{margin-left:0;width:100%}
 }
 
 </style>
@@ -5171,8 +5347,14 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
           <div class="stat-card p4"><div class="em">🔥</div><div class="lab">连续打卡(天)</div><div class="num" id="libStreak">0</div></div>
         </div>
 
+        <div class="lib-searchbar">
+          <span class="ls-ico">🔍</span>
+          <input id="libTopSearch" placeholder="搜一本书 / 一个作家，试试「陀思妥耶夫斯基」「卡夫卡」…" oninput="renderBooks()">
+        </div>
+        <div id="libCats" class="lib-cats"></div>
+
         <div class="card" style="margin-bottom:14px">
-          <div class="card-head" data-en="AUTHOR FILES">🔍 作家吃瓜档案 <small style="color:var(--muted)">搜作家，扒他的底细</small></div>
+          <div class="card-head" data-en="AUTHOR FILE">🔍 作家档案 · 吃瓜区 <small style="color:var(--muted)">搜作家，扒他的底细</small></div>
           <div class="mod-search-row">
             <input id="authorSearch" placeholder="陀思妥耶夫斯基 / 卡夫卡 / 张爱玲…" onkeydown="if(event.key==='Enter')searchAuthor()">
             <button class="mod-btn-primary" data-act="searchAuthor">🔎 开扒</button>
@@ -5203,48 +5385,47 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
           </div>
         </div>
 
-        <div class="lib-toolbar">
-          <div id="libCats" class="lib-cats"></div>
-          <input id="bookSearch" class="lib-search" placeholder="搜书名 / 作者…" oninput="renderBooks()">
-        </div>
-
         <div class="card">
-          <div class="card-head" data-en="MY SHELF"><span class="ch-title">📚 我的书架 <span class="m-count" id="bookCount"></span></span></div>
-          <div id="bookList" class="inspire-list"></div>
+          <div class="card-head" data-en="MY SHELF"><span class="ch-title">📚 我的书架 · 进度条 <span class="m-count" id="bookCount"></span></span> <small style="color:var(--muted)">点进度环记进度</small></div>
+          <div id="bookList" class="lib-shelf"></div>
+          <div class="lib-addbook" data-act="addBook"><div class="la-plus">＋</div><div class="la-t">添加一本书</div><div class="la-s">最近在读什么 · 记进来</div></div>
         </div>
 
-        <div id="bookDetail" class="card" style="display:none;margin-top:14px">
-          <div class="card-head" data-en="BOOK DETAIL">📖 这本书 <small id="bookDetailTitle"></small></div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;padding:12px">
-            <button class="inspire-action-btn" data-act="bk-reading">📖 标记在读</button>
-            <button class="inspire-action-btn" data-act="bk-finished">✅ 标记读完</button>
-            <button class="inspire-action-btn" data-act="bk-reread">🔁 标记重读</button>
-            <button class="inspire-action-btn" style="border:none;background:linear-gradient(135deg,var(--pink-deep),#b48ed9);color:#fff" data-act="bk-quotes">✨ 金句墙</button>
+        <div id="bookDetail" class="card" style="margin-top:14px">
+          <div class="card-head" data-en="AI READER"><span class="ch-title">📖 点开一本书 · 三个选项</span> <small style="color:var(--muted)">先选书 · 三个选项随便点</small></div>
+          <div class="bk-picker-row">
+            <span>📚 选一本书：</span>
+            <select id="bookPicker"></select>
+            <span class="bk-hint" id="bookDetailTitle"></span>
+          </div>
+          <div class="bk-opts">
+            <button class="bk-opt" data-act="read-opt" data-opt="chars"><b>👥 一口气理清</b><span>人物关系</span></button>
+            <button class="bk-opt" data-act="read-opt" data-opt="plot"><b>📌 一口气提炼</b><span>全书重点</span></button>
+            <button class="bk-opt" data-act="read-opt" data-opt="points"><b>📖 一口气讲清</b><span>这本书</span></button>
+          </div>
+          <div id="bookReadOut" class="bk-out"></div>
+          <div class="bk-tools">
+            <button class="inspire-action-btn" data-act="bk-reading">📖 在读</button>
+            <button class="inspire-action-btn" data-act="bk-finished">✅ 读完</button>
+            <button class="inspire-action-btn" data-act="bk-reread">🔁 重读</button>
             <button class="inspire-action-btn" data-act="bk-export">📥 导出MD</button>
             <button class="inspire-action-btn" data-act="bk-delete">🗑️ 删除</button>
           </div>
-          <div id="bookDigest" class="inspire-detail" style="padding:0 12px 12px"></div>
-          <div style="padding:0 12px 12px">
-            <div style="font-weight:600;margin:8px 0 6px">🤖 AI 精读（三选一）</div>
-            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">
-              <button class="inspire-action-btn" data-act="read-opt" data-opt="chars">👥 理清人物关系</button>
-              <button class="inspire-action-btn" data-act="read-opt" data-opt="plot">📌 提炼全书重点</button>
-              <button class="inspire-action-btn" data-act="read-opt" data-opt="points">📖 讲清这本书</button>
-            </div>
-            <div id="bookReadOut" style="font-size:13px;line-height:1.8"></div>
+        </div>
+
+        <div class="card" style="margin-top:14px">
+          <div class="card-head" data-en="DEEP THINK">🧠 深度思考区 · AI 追问式陪读 <small style="color:var(--muted)">答过才算读懂</small></div>
+          <div id="deepThinkBox" class="dt-box"></div>
+          <div class="mod-search-row" style="margin-top:8px">
+            <input id="deepThinkInput" placeholder="写下你的想法，AI 会接着追问…" onkeydown="if(event.key==='Enter')sendDeepThink()">
+            <button class="mod-btn-primary" data-act="send-deep">发送</button>
           </div>
-          <div style="padding:0 12px 12px">
-            <div style="font-weight:600;margin:8px 0 6px">🧠 深度思考·AI 追问陪读</div>
-            <div id="deepThinkBox" style="font-size:13px;line-height:1.7;max-height:220px;overflow:auto;background:rgba(0,0,0,.03);border-radius:10px;padding:10px"></div>
-            <div class="mod-search-row" style="margin-top:8px">
-              <input id="deepThinkInput" placeholder="写下你的想法，AI 会接着追问…" onkeydown="if(event.key==='Enter')sendDeepThink()">
-              <button class="mod-btn-primary" data-act="send-deep">发送</button>
-            </div>
-          </div>
-          <div style="padding:0 12px 12px">
-            <div style="font-weight:600;margin:8px 0 6px">💎 金句墙</div>
-            <div id="quoteWall" class="inspire-list"></div>
-          </div>
+        </div>
+
+        <div class="card" style="margin-top:14px">
+          <div class="card-head" data-en="QUOTE WALL">💎 金句墙</div>
+          <div class="qwall-bar"><span class="qb-hint">AI 从书里挑的 · 点这里换一批</span><button class="inspire-action-btn" style="font-size:12px;padding:3px 10px" data-act="bk-quotes">✨ 换一批</button></div>
+          <div id="quoteWall" class="quote-grid"></div>
         </div>
       </section>
 
@@ -6245,7 +6426,7 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
 
 <script>
 window.SITE_DATA = {
- "updated": "2026-10-02 14:48",
+ "updated": "2026-10-02 14:57",
  "stats": {
   "jobs": 58,
   "rec": 0,
@@ -28718,7 +28899,8 @@ function renderLibCats(){
   var cats = ["全部"];
   d.books.forEach(function(b){ if(b.category && cats.indexOf(b.category)<0) cats.push(b.category); });
   box.innerHTML = cats.map(function(c){
-    return '<span class="inspire-action-btn" data-act="lib-cat" data-cat="'+esc(c)+'" style="font-size:12px;padding:3px 10px">'+(c==="全部"?"📂 全部":c)+'</span>';
+    var on = (c===libCatFilter) ? " active" : "";
+    return '<span class="lib-cat-pill'+on+'" data-act="lib-cat" data-cat="'+esc(c)+'">'+(c==="全部"?"📂 全部":esc(c))+'</span>';
   }).join("");
 }
 
@@ -28728,17 +28910,18 @@ function bookPct(b){
 }
 
 function renderBooks(){
-  var bs = document.getElementById("bookSearch");
+  var bs = document.getElementById("libTopSearch");
   libSearchFilter = bs ? (bs.value||"") : "";
   var d = loadBooks();
   renderLibStats();
   renderLibCats();
+  renderBookPicker();
   var list = document.getElementById("bookList");
   var count = document.getElementById("bookCount");
   if(count) count.textContent = d.books.length + " 本";
   if(!list) return;
   if(d.books.length === 0){
-    list.innerHTML = '<div style="text-align:center;color:var(--muted);padding:32px 16px;font-size:13px">书架还空着<br>点右上角「添加一本」，开始沉淀你的阅读～</div>';
+    list.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--muted);padding:26px 16px;font-size:13px">书架还空着<br>点下方「＋ 添加一本书」，开始沉淀你的阅读～</div>';
     return;
   }
   var kw = (libSearchFilter||"").trim().toLowerCase();
@@ -28748,7 +28931,7 @@ function renderBooks(){
     return true;
   });
   if(arr.length===0){
-    list.innerHTML = '<div style="text-align:center;color:var(--muted);padding:24px;font-size:13px">没有匹配的书 🔍</div>';
+    list.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--muted);padding:20px;font-size:13px">没有匹配的书 🔍</div>';
     return;
   }
   arr.sort(function(a,b){ return (b.id||0)-(a.id||0); });
@@ -28756,15 +28939,27 @@ function renderBooks(){
   list.innerHTML = arr.map(function(b){
     var pct = bookPct(b);
     var activeCls = b.id===currentBookId ? " active" : "";
-    var typeIcon = (b.type==="课")?"🎓":((b.type==="文章")?"📄":"📘");
     var off = C*(1-pct/100);
-    var ring = '<svg width="46" height="46" viewBox="0 0 46 46"><circle cx="23" cy="23" r="19" fill="none" stroke="rgba(0,0,0,.08)" stroke-width="5"/><circle cx="23" cy="23" r="19" fill="none" stroke="#b48ed9" stroke-width="5" stroke-linecap="round" stroke-dasharray="'+C+'" stroke-dashoffset="'+off+'" transform="rotate(-90 23 23)"/></svg>';
-    var sub = (b.partsTotal?("第"+(b.partsRead||0)+"/"+b.partsTotal+"部分 · "):"") + (b.status||"想读");
-    return '<div class="inspire-item'+activeCls+'" data-act="openBook" data-id="'+b.id+'">'
-      +'<div style="position:relative;width:46px;height:46px;flex:0 0 auto">'+ring+'<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600">'+pct+'%</div></div>'
-      +'<div class="inspire-item-text" style="flex:1">'+typeIcon+' '+esc(b.title||"未命名")+' <span style="color:var(--muted);font-size:12px">'+esc(sub)+'</span><br><span style="color:var(--muted);font-size:12px">'+esc(b.author||"")+(b.hours?(" · "+b.hours+"h"):"")+'</span></div>'
+    var ring = '<svg width="54" height="54" viewBox="0 0 46 46"><circle cx="23" cy="23" r="19" fill="none" stroke="rgba(0,0,0,.07)" stroke-width="4"/><circle cx="23" cy="23" r="19" fill="none" stroke="#c0559a" stroke-width="4" stroke-linecap="round" stroke-dasharray="'+C+'" stroke-dashoffset="'+off+'" transform="rotate(-90 23 23)"/></svg>';
+    var sub = b.partsTotal ? ("在读 · 第"+(b.partsRead||0)+"/"+b.partsTotal+"部分") : (b.status||"想读");
+    return '<div class="lib-book'+activeCls+'" data-act="openBook" data-id="'+b.id+'">'
+      +'<div style="position:relative;width:54px;height:54px">'+ring+'<div class="lb-pct" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">'+pct+'%</div></div>'
+      +'<div class="lb-title">'+esc(b.title||"未命名")+'</div>'
+      +'<div class="lb-sub">'+esc(sub)+'</div>'
+      +'<div class="lb-go">✏️ 记进度</div>'
       +'</div>';
   }).join("");
+}
+
+function renderBookPicker(){
+  var sel = document.getElementById("bookPicker");
+  if(!sel) return;
+  var d = loadBooks();
+  var opts = '<option value="">— 选一本在读的书 —</option>';
+  d.books.slice().sort(function(a,b){ return (b.id||0)-(a.id||0); }).forEach(function(b){
+    opts += '<option value="'+b.id+'"'+(b.id===currentBookId?" selected":"")+'>'+esc(b.title||"未命名")+'</option>';
+  });
+  sel.innerHTML = opts;
 }
 
 function showBookEditor(id){
@@ -28879,8 +29074,9 @@ function aiReadOption(type){
   var box = document.getElementById("bookReadOut");
   if(box) box.innerHTML = '<div style="color:var(--muted);padding:10px">AI 精读中…</div>';
   var label = type==="chars"?"一口气理清全书人物关系":type==="plot"?"一口气提炼全书重点":"一口气讲清这本书讲了什么";
-  var sys = "你是读书复盘助手，中文输出。要求：先给一句不超过40字的高亮结论，再用编号列表逐条展开（每条不超过60字），禁止糊成一大段。";
-  var user = "书名：《"+(b.title||"未命名")+"》\n作者："+(b.author||"未知")+"\n类型："+(b.type||"书")+"\n我的备注："+(b.note||"无")+"\n\n任务："+label+"\n只输出一个JSON：{\"summary\":\"一句结论\",\"items\":[\"要点1\",\"要点2\"]}";
+  document.querySelectorAll("#module-library .bk-opt").forEach(function(x){ x.classList.toggle("on", x.getAttribute("data-opt")===type); });
+  var sys = "你是读书复盘助手，中文输出。要求：先给一句不超过 40 字的高亮结论；再给 3-5 条要点，每条含一个最贴切的 emoji 图标、一个不超过 12 字的小标题、一句不超过 50 字的说明。禁止糊成一大段。";
+  var user = "书名：《"+(b.title||"未命名")+"》\n作者："+(b.author||"未知")+"\n类型："+(b.type||"书")+"\n我的备注："+(b.note||"无")+"\n\n任务："+label+"\n只输出一个JSON：{\"summary\":\"一句结论\",\"items\":[{\"icon\":\"emoji\",\"title\":\"小标题\",\"desc\":\"一句说明\"}]}";
   aiChat(c, [{role:"system",content:sys},{role:"user",content:user}], 45).then(function(res){
     var o = parseExtJSON(res.content);
     if(!o){ throw new Error("AI 返回无法解析成 JSON"); }
@@ -28899,12 +29095,18 @@ function renderBookRead(){
   if(!b){ box.innerHTML=""; return; }
   var parts = [];
   [["👥 人物关系",b.aiChars],["📌 全书重点",b.aiPlot],["📖 讲了什么",b.aiPoints]].forEach(function(p){
-    if(p[1]){
-      parts.push("<p style='margin:8px 0'><b>"+p[0]+"</b><br><span style='color:var(--pink-deep)'>"+esc(p[1].summary||"")+"</span></p>");
-      if(p[1].items) parts.push("<ol style='margin:4px 0 4px 18px'>"+p[1].items.map(function(t){return "<li>"+esc(t)+"</li>";}).join("")+"</ol>");
+    var o = p[1];
+    if(!o) return;
+    parts.push('<div class="bk-sec">'+p[0]+'</div>');
+    if(o.summary) parts.push('<div class="bk-quote"><span class="bq-tag">💡 一句话版</span>'+esc(o.summary)+'</div>');
+    if(o.items && o.items.length){
+      parts.push(o.items.map(function(it,i){
+        if(typeof it === "string") return '<div class="bk-item"><div class="bi-ico">'+(i+1)+'</div><div><div class="bi-d">'+esc(it)+'</div></div></div>';
+        return '<div class="bk-item"><div class="bi-ico">'+esc(it.icon||String(i+1))+'</div><div><div class="bi-t">'+esc(it.title||"")+'</div><div class="bi-d">'+esc(it.desc||"")+'</div></div></div>';
+      }).join(""));
     }
   });
-  box.innerHTML = parts.length ? parts.join("") : '<div style="color:var(--muted);font-size:13px">点上方三个按钮，让 AI 帮你精读这本书</div>';
+  box.innerHTML = parts.length ? parts.join("") : '<div style="color:var(--muted);font-size:13px;padding:8px 0">先在上一行选一本书，再点上面三个选项 👆</div>';
 }
 
 function sendDeepThink(){
@@ -28967,9 +29169,9 @@ function renderQuotes(){
   if(!wall) return;
   var d = loadBooks();
   var b = d.books.find(function(x){return x.id===currentBookId;});
-  if(!b || !b.quotes || !b.quotes.length){ wall.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:10px">点「✨ 金句墙」让 AI 帮你摘抄值得记的话</div>'; return; }
+  if(!b || !b.quotes || !b.quotes.length){ wall.innerHTML = '<div style="grid-column:1/-1;color:var(--muted);font-size:12.5px;padding:6px 0">点右上角「✨ 换一批」，让 AI 从这本书里挑几句值得记的话</div>'; return; }
   wall.innerHTML = b.quotes.map(function(q,i){
-    return '<div class="inspire-item"><div class="inspire-item-text">💎 '+esc(q.text||"")+'<br><span style="color:var(--muted);font-size:12px">— '+esc(q.source||"")+'</span></div><button class="inspire-action-btn" data-act="copy-quote" data-i="'+i+'">复制</button></div>';
+    return '<div class="quote-card"><div class="qc-mark">\u201c</div><div class="qc-t">'+esc(q.text||"")+'</div><div class="qc-s"><span>\u2014 '+esc(q.source||"")+'</span><button class="inspire-action-btn" style="font-size:11px;padding:1px 8px;margin-left:auto" data-act="copy-quote" data-i="'+i+'">复制</button></div></div>';
   }).join("");
 }
 function copyQuote(i){
@@ -28997,7 +29199,7 @@ function searchAuthor(){
     if(panel) panel.innerHTML = '<div style="color:#e74c3c;font-size:13px;padding:10px">请先在设置配置 AI 才能扒作家底细</div>';
     return;
   }
-  var sys = "你是文学八卦小报主编。给一位作家做『吃瓜式』档案，幽默但有依据。输出JSON：{\"name\":\"\",\"zodiac\":\"星座\",\"mbti\":\"MBTI猜测\",\"mbtiReason\":\"一句话理由\",\"hiddenSkill\":\"隐藏技能\",\"timeline\":[{\"year\":\"年份/时期\",\"text\":\"奇闻/翻车/成就\"}],\"relations\":[{\"name\":\"相关作家\",\"type\":\"like|hate|reconcile|mentor\",\"note\":\"两人恩怨一句话\"}],\"booklist\":[{\"title\":\"代表作\",\"stars\":4,\"reason\":\"推荐理由一句\"}]}";
+  var sys = "你是文学八卦小报主编。给一位作家做『吃瓜式』档案，幽默但有依据。输出JSON：{\"name\":\"\",\"enName\":\"英文名\",\"years\":\"生卒年 例 1821-1881\",\"avatar\":\"一个最贴切的 emoji\",\"zodiac\":\"星座\",\"mbti\":\"MBTI猜测\",\"mbtiReason\":\"一句话理由\",\"hiddenSkill\":\"隐藏技能\",\"timeline\":[{\"year\":\"年份/时期\",\"text\":\"奇闻/翻车/成就\"}],\"relations\":[{\"name\":\"相关作家\",\"type\":\"like|hate|reconcile|mentor\",\"note\":\"两人恩怨一句话\"}],\"booklist\":[{\"title\":\"代表作\",\"stars\":4,\"reason\":\"推荐理由一句\"}]}";
   var user = "作家："+name+"\n给出完整吃瓜档案，时间线至少4条，关系至少3个，书单至少3本。";
   aiChat(c, [{role:"system",content:sys},{role:"user",content:user}], 50).then(function(res){
     var o = parseExtJSON(res.content);
@@ -29016,35 +29218,47 @@ function renderAuthor(a){
   currentAuthorName = a.name||"";
   var panel = document.getElementById("authorPanel");
   if(!panel) return;
-  var tl = (a.timeline||[]).map(function(t){ return '<div style="margin:6px 0;padding:8px 10px;background:rgba(0,0,0,.03);border-radius:8px"><b style="color:var(--pink-deep)">'+(t.year||"")+'</b> '+(t.text||"")+'</div>'; }).join("");
-  var meta = '<div style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0">'
+  var tl = (a.timeline||[]).map(function(t){
+    return '<div class="au-tl-item"><div class="au-tl-y">'+esc(t.year||"")+'</div><div class="au-tl-t">'+esc(t.text||"")+'</div></div>';
+  }).join("");
+  var meta = '<div class="au-chips">'
     + chip("🔮 "+(a.zodiac||"未知星座"))
-    + chip("🧠 MBTI: "+(a.mbti||"?")+(a.mbtiReason?(" ("+a.mbtiReason+")"):""))
+    + chip("🧠 MBTI 预测: "+(a.mbti||"?")+(a.mbtiReason?("（"+a.mbtiReason+"）"):""))
     + chip("🎯 隐藏技能: "+(a.hiddenSkill||"无"))
     + '</div>';
+  var head = '<div class="au-head"><div class="au-avatar">'+esc(a.avatar||"✍️")+'</div><div>'
+    + '<div class="au-name">'+esc(a.name||"")+'</div>'
+    + '<div class="au-en">'+esc(a.enName||"")+(a.years?(' · '+esc(a.years)):'')+'</div>'
+    + '</div></div>';
   var svg = renderAuthorGraph(a);
-  var legend = '<div style="font-size:12px;color:var(--muted);margin:6px 0">🔴喜欢 🟠讨厌 🟢和解 🟣亦师亦友 ｜ 点节点看恩怨</div>';
-  var relNote = '<div id="authorRelNote" style="font-size:13px;min-height:20px;color:var(--muted)"></div>';
+  var legend = '<div class="au-legend">🔴 喜欢 ｜ 🟣 亦师亦友 ｜ 🟠 讨厌 ｜ 🟢 和解</div>';
+  var relNote = '<div id="authorRelNote" class="au-relnote"></div>';
   var bl = (a.booklist||[]).map(function(bk){
-    var s = (bk.stars||0); var stars = "★★★★★".slice(0,s) + "☆☆☆☆☆".slice(0,5-s);
-    return '<div style="margin:6px 0;padding:8px 10px;background:rgba(0,0,0,.03);border-radius:8px"><b>'+esc(bk.title||"")+'</b> <span style="color:#f1c40f">'+stars+'</span><br><span style="color:var(--muted);font-size:12px">'+esc(bk.reason||"")+'</span></div>';
+    var st = (bk.stars||0); var stars = "★★★★★".slice(0,st) + "☆☆☆☆☆".slice(0,5-st);
+    return '<div class="au-book"><div class="au-bk-l"><b>'+esc(bk.title||"")+'</b> <span style="color:#f1c40f">'+stars+'</span></div><div class="au-bk-r">'+esc(bk.reason||"")+'</div></div>';
   }).join("");
-  panel.innerHTML = '<div style="font-weight:700;font-size:15px;margin-bottom:4px">🗂 '+esc(a.name||"")+' 的吃瓜档案</div>'+meta+'<div style="font-weight:600;margin:8px 0 4px">📜 时间线</div>'+tl+'<div style="font-weight:600;margin:10px 0 4px">🕸 文坛关系图</div>'+svg+legend+relNote+'<div style="font-weight:600;margin:10px 0 4px">📚 恩怨书单</div>'+bl;
+  panel.innerHTML = head + meta
+    + '<div class="au-sec">📜 时间线</div><div class="au-tl">' + tl + '</div>'
+    + '<div class="au-sec">🕸 文坛爱恨情仇图 <small>点节点看恩怨</small></div>' + svg + legend + relNote
+    + '<div class="au-sec">⚔️ 恩怨书单 · 顺着关系图往下读</div>' + bl;
 }
+function relLabel(t){ return t==="like"?"❤️ 喜欢":t==="hate"?"💥 撕过":t==="reconcile"?"🕊 和解":"🤝 亦师亦友"; }
 function renderAuthorGraph(a){
   var rel = a.relations||[];
   if(!rel.length) return '<div style="color:var(--muted);font-size:13px">暂无关系数据</div>';
-  var cx=300, cy=150, r=110, n=rel.length;
-  var parts = ['<svg viewBox="0 0 600 300" width="100%" style="max-width:600px">'];
-  parts.push('<circle cx="'+cx+'" cy="'+cy+'" r="34" fill="#b48ed9"/><text x="'+cx+'" y="'+(cy+5)+'" text-anchor="middle" fill="#fff" font-size="12">'+esc(a.name||"")+'</text>');
+  var cx=300, cy=160, r=122, n=rel.length;
+  var parts = ['<svg viewBox="0 0 600 320" width="100%" style="max-width:600px">'];
+  parts.push('<circle cx="'+cx+'" cy="'+cy+'" r="40" fill="#8f6fd0"/><text x="'+cx+'" y="'+(cy+5)+'" text-anchor="middle" fill="#fff" font-size="12" style="pointer-events:none">'+esc(a.name||"")+'</text>');
   rel.forEach(function(rl,i){
     var ang = (Math.PI*2/n)*i - Math.PI/2;
     var x = cx + Math.cos(ang)*r, y = cy + Math.sin(ang)*r;
-    var color = rl.type==="like"?"#e74c3c":rl.type==="hate"?"#f39c12":rl.type==="reconcile"?"#2ecc71":"#8e44ad";
+    var color = rl.type==="like"?"#e8446b":rl.type==="hate"?"#f39c12":rl.type==="reconcile"?"#2ecc71":"#8f6fd0";
     var dash = rl.type==="like"?"":rl.type==="hate"?"stroke-dasharray=\"6 5\"":rl.type==="reconcile"?"stroke-dasharray=\"2 6\"":"";
-    parts.push('<line x1="'+cx+'" y1="'+cy+'" x2="'+x+'" y2="'+y+'" stroke="'+color+'" stroke-width="2" '+dash+'/>');
-    parts.push('<circle cx="'+x+'" cy="'+y+'" r="26" fill="#fff" stroke="'+color+'" stroke-width="2" data-rel="'+esc(rl.name)+'" style="cursor:pointer"/>');
-    parts.push('<text x="'+x+'" y="'+(y+4)+'" text-anchor="middle" font-size="11">'+esc(rl.name)+'</text>');
+    parts.push('<line x1="'+cx+'" y1="'+cy+'" x2="'+x+'" y2="'+y+'" stroke="'+color+'" stroke-width="1.8" '+dash+' opacity=".85"/>');
+    parts.push('<circle cx="'+x+'" cy="'+y+'" r="28" fill="#fff" stroke="'+color+'" stroke-width="1.8" data-rel="'+esc(rl.name)+'" style="cursor:pointer"/>');
+    parts.push('<text x="'+x+'" y="'+(y+4)+'" text-anchor="middle" font-size="11" fill="#5a4652" style="pointer-events:none">'+esc(rl.name)+'</text>');
+    var lx = cx + Math.cos(ang)*r*0.6, ly = cy + Math.sin(ang)*r*0.6;
+    parts.push('<text x="'+lx+'" y="'+ly+'" text-anchor="middle" font-size="9.5" fill="'+color+'" style="pointer-events:none">'+esc(relLabel(rl.type))+'</text>');
   });
   parts.push('</svg>');
   return parts.join("");
@@ -29116,6 +29330,13 @@ document.addEventListener("click", function(e){
   else if(act==="bk-export") exportBookMD();
   else if(act==="bk-delete") deleteCurrentBook();
   else if(act==="searchAuthor") searchAuthor();
+});
+
+document.addEventListener("change", function(e){
+  if(e.target && e.target.id === "bookPicker"){
+    var v = parseInt(e.target.value, 10);
+    if(v) openBook(v);
+  }
 });
 
 /* ========== 显化·成长台模块 ========== */
