@@ -1843,91 +1843,127 @@
         </div>
       </section>
 
-      <section id="module-manifest" class="view">
+      <section id="module-manifest" class="view">
         <div class="page-head">
           <div class="page-title">🌟 显化·成长台</div>
-          <div class="page-sub">先相信，再看见 · 目标 / 剧本 / 取证 / 频率</div>
-          <button class="mod-add-btn" onclick="showGoalEditor()">＋ 添加目标</button>
+          <div class="page-sub">先相信，再看见 · 支票 / 剧本 / 排练 / 见证</div>
         </div>
+
         <div class="stat-grid">
-          <div class="stat-card p1"><div class="em">🔥</div><div class="lab">连续记录(天)</div><div class="num" id="streakDays">0</div></div>
-          <div class="stat-card p2"><div class="em">📅</div><div class="lab">本月记录(天)</div><div class="num" id="monthDays">0</div></div>
-          <div class="stat-card p3"><div class="em">🎯</div><div class="lab">进行中目标</div><div class="num" id="goalActive">0</div></div>
+          <div class="stat-card p1"><div class="em">🔥</div><div class="lab">连续显化打卡(天)</div><div class="num" id="streakDays">0</div></div>
+          <div class="stat-card p2"><div class="em">🏦</div><div class="lab">已开未来支票(张)</div><div class="num" id="chequeCount">0</div></div>
+          <div class="stat-card p3"><div class="em">📜</div><div class="lab">人生剧本条目(条)</div><div class="num" id="scriptCount">0</div></div>
         </div>
-        <div id="goalEditor" class="card" style="display:none;margin-bottom:14px">
-          <div class="card-head" data-en="SET A GOAL">🎯 <span id="goalEditorTitle">添加目标</span></div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px">
-            <input id="goalText" placeholder="目标（写具体！越具体越容易显化）" style="grid-column:1/3">
-            <input id="goalDue" type="date" placeholder="截止日">
-            <input id="goalProgress" type="number" min="0" max="100" placeholder="进展 %">
-            <textarea id="goalNote" placeholder="为什么重要 / 达成后的画面" style="grid-column:1/3;min-height:48px"></textarea>
-          </div>
-          <div style="display:flex;gap:10px;padding:0 12px 12px">
-            <button class="inspire-action-btn" style="border:none;background:linear-gradient(135deg,var(--pink-deep),#b48ed9);color:#fff" onclick="saveGoal()">💾 保存</button>
-            <button class="inspire-action-btn" onclick="hideGoalEditor()">取消</button>
-          </div>
-        </div>
-        <div class="card" style="margin-bottom:14px">
-          <div class="card-head" data-en="MY GOALS"><span class="ch-title">🎯 我的目标 <span class="m-count" id="goalCount"></span></span></div>
-          <div id="goalList" class="inspire-list"></div>
-        </div>
-        <div class="card" style="margin-bottom:14px">
-          <div class="card-head" data-en="DAILY SCRIPT">📝 今日感想 / 日记 <small id="diaryDate" style="color:var(--muted)"></small></div>
-          <textarea id="diaryInput" placeholder="今天想成为谁？做了什么？感恩什么？写具体一点…" style="min-height:70px;resize:vertical"></textarea>
-          <div style="display:flex;gap:10px;margin-top:8px;flex-wrap:wrap">
-            <button class="inspire-action-btn" style="border:none;background:linear-gradient(135deg,var(--pink-deep),#b48ed9);color:#fff" onclick="saveDiary()">💾 保存感想</button>
-            <button class="inspire-action-btn" onclick="aiSealScript()">✨ AI 一键封存剧本</button>
-          </div>
-          <div id="scriptBox" style="margin-top:10px"></div>
-        </div>
-        <div class="card">
-          <div class="card-head" data-en="PROOF WALL">📸 取证墙（每日记录）</div>
-          <div id="evidenceWall" class="inspire-list"></div>
-        </div>
-        <div class="card" style="margin-bottom:14px">
-          <div class="card-head" data-en="FUTURE CHEQUE">🎫 未来支票 <small style="color:var(--muted)">每天签名，给「会有的」打卡</small></div>
-          <div id="chequeBox" style="padding:0 12px 12px"></div>
-          <div id="chequeEditor" style="display:none;padding:0 12px 12px">
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-              <input id="chequeAmount" type="number" placeholder="金额（别写整数，写 47300 这类）" style="grid-column:1/3">
-              <input id="chequePayee" placeholder="收款人（写你的名字）">
-              <input id="chequeDue" type="date" placeholder="到期日">
+
+        <div class="mod-sec-head"><span class="ms-en">FUTURE CHEQUE</span><span class="ms-cn">💰 未来支票</span></div>
+        <div class="man-grid">
+          <div class="card card-soft">
+            <div id="chequeBox"></div>
+            <div id="chequeEditor" style="display:none">
+              <div class="goal-form">
+                <input id="chequeAmount" type="number" class="gf-full" placeholder="金额（别写整数，写 47300 这类）">
+                <input id="chequePayee" placeholder="收款人（写你的名字）">
+                <input id="chequeDue" type="date">
+                <input id="chequePurpose" placeholder="用途（如：写给未来的我）">
+                <input id="chequeNo" placeholder="票据号（可留空）">
+              </div>
+              <div class="mod-search-row">
+                <button class="mod-btn-primary" onclick="saveCheque()">💾 保存支票</button>
+                <button class="mod-btn-ghost" onclick="hideChequeEditor()">取消</button>
+              </div>
             </div>
-            <div style="display:flex;gap:10px;margin-top:10px">
-              <button class="inspire-action-btn" style="border:none;background:linear-gradient(135deg,var(--pink-deep),#b48ed9);color:#fff" onclick="saveCheque()">💾 保存支票</button>
-              <button class="inspire-action-btn" onclick="hideChequeEditor()">取消</button>
-            </div>
+          </div>
+          <div class="card card-soft">
+            <div class="card-head" data-en="POWER OF REPEAT">🔁 重复的力量</div>
+            <div id="chequeChart"></div>
           </div>
         </div>
 
-        <div class="card" style="margin-bottom:14px">
-          <div class="card-head" data-en="GRATITUDE">🙏 感恩日记 <small style="color:var(--muted)">AI 以「已发生」口吻生成，每天一条</small></div>
-          <div style="padding:0 12px 12px">
-            <button class="inspire-action-btn" style="border:none;background:linear-gradient(135deg,var(--pink-deep),#b48ed9);color:#fff" onclick="aiGratitude()">✨ 生成今日感恩日记</button>
-            <div id="gratitudeBox" style="margin-top:10px"></div>
+        <div class="mod-sec-head"><span class="ms-en">LIFE SCRIPT</span><span class="ms-cn">📜 人生剧本 × 今日感恩日记</span></div>
+        <div class="man-grid">
+          <div class="card card-soft">
+            <div class="card-head" data-en="MY LIFE SCRIPT"><span class="ch-title">📜 我的人生剧本</span><span class="m-badge" id="scriptBadge">✍️ 撰写中 · 未封存</span></div>
+            <p class="mod-desc">不叫愿望清单——愿望暗示「不会实现」。这里是剧本：写下来，就等着被拍出来。</p>
+            <div id="scriptList" class="script-list"></div>
+            <div id="scriptAddWrap">
+              <div class="mod-search-row">
+                <input id="scriptInput" placeholder="给剧本加一场戏…（如：和妈妈去一次三亚）" onkeydown="if(event.key==='Enter')addScriptItem()">
+                <button class="mod-btn-ghost" onclick="addScriptItem()">＋ 加戏</button>
+              </div>
+              <button class="mod-btn-wide" onclick="sealScript()">🔒 一键封存剧本</button>
+            </div>
+          </div>
+          <div class="card card-soft">
+            <div class="card-head" data-en="TODAY'S GRATITUDE"><span class="ch-title">🌙 今日感恩日记</span><span class="m-badge warm">AI 代笔 · 你负责读</span></div>
+            <p class="mod-desc">AI 从封存的剧本里取景，把未来写成「已经发生的今天」。每天只有一次。</p>
+            <div id="gratitudeBox"></div>
+            <div id="gratBtnWrap"></div>
+            <div class="mod-foot-hint">每天只有一次 · 生成后大声读出来</div>
+            <div class="mod-foot-hint dim">怀疑的时候回头看 · 睡前过一遍</div>
           </div>
         </div>
 
-        <div class="card" style="margin-bottom:14px">
-          <div class="card-head" data-en="REFRAME">🔄 语言翻译器 <small style="color:var(--muted)">把自我怀疑翻成笃定</small></div>
-          <div style="padding:0 12px 12px">
+        <div class="mod-sec-head"><span class="ms-en">EVIDENCE &amp; REHEARSAL</span><span class="ms-cn">🏆 证据墙 × 每日排练</span></div>
+        <div class="man-grid">
+          <div class="card card-soft">
+            <div class="card-head" data-en="EVIDENCE">🏆 证据墙 · 已经发生的</div>
+            <p class="mod-desc">显化不是自欺的证据库——一年后打开封存的剧本，在这里对照。</p>
+            <div id="evidenceWall" class="ev-list"></div>
             <div class="mod-search-row">
-              <input id="translatorInput" placeholder="我想成为作家…" onkeydown="if(event.key==='Enter')aiTranslate()">
-              <button class="mod-btn-primary" onclick="aiTranslate()">翻译</button>
+              <input id="evidenceInput" placeholder="记下今天刚发生的小证据…（标题 ｜ 补充，可只写标题）" onkeydown="if(event.key==='Enter')addEvidence()">
+              <button class="mod-btn-green" onclick="addEvidence()">＋ 记一笔</button>
             </div>
-            <div id="translatorWall" class="inspire-list" style="margin-top:10px"></div>
+          </div>
+          <div class="man-col">
+            <div class="card rehearsal-card">
+              <div class="reh-head"><span>🌙 每日排练 · DAY <b id="rehDay">1</b> · 5 MIN</span></div>
+              <div id="rehearsalBox"></div>
+              <div id="rehBtnWrap"></div>
+              <div class="reh-foot"><span>🏊 运动员同款 · 想象训练法</span><span>⏱ 建议时长 5 分钟</span></div>
+            </div>
+            <div class="card card-soft">
+              <div class="card-head" data-en="IDENTITY TRANSLATOR">🔄 身份翻译器</div>
+              <div class="mod-search-row">
+                <input id="translatorInput" placeholder="输入你的愿望…（如：我想成为作家）" onkeydown="if(event.key==='Enter')aiTranslate()">
+                <button class="mod-btn-primary" onclick="aiTranslate()">翻译</button>
+              </div>
+              <div class="id-note">愿望说「我想要什么」，身份说「我是什么人」 🙌<div class="dim">心理学原理：改变行为的从来不是目标，是身份认知</div></div>
+              <div id="translatorWall" class="id-list"></div>
+            </div>
           </div>
         </div>
 
-        <div class="card" style="margin-bottom:14px">
-          <div class="card-head" data-en="FREQUENCY MAP">🔥 显化频率热力图 <small style="color:var(--muted)">最近 70 天打卡密度</small></div>
-          <div style="padding:0 12px 12px">
-            <div id="freqHeat" style="margin-top:6px"></div>
-            <button class="inspire-action-btn" style="margin-top:10px" onclick="addFreqCustom()">➕ 记录一次行为（泡脚/手帐/运动…）</button>
+        <div class="mod-sec-head"><span class="ms-en">DAILY STREAK</span><span class="ms-cn">🔥 频率打卡</span></div>
+        <div class="card card-soft">
+          <div id="freqGrid" class="freq-grid"></div>
+          <div class="mod-search-row" style="margin-top:10px">
+            <input id="freqInput" placeholder="＋ 加一个自己的行为…（如：晨间冥想 / 手帐，在工作台外完成的也记进来）" onkeydown="if(event.key==='Enter')addFreqCustom()">
+            <button class="mod-btn-ghost" onclick="addFreqCustom()">＋ 添加</button>
+          </div>
+          <div class="freq-head"><span class="fh-l">最近 10 周显化频率</span><span class="fh-r">🔥 连续 <b id="freqStreak">0</b> 天</span></div>
+          <div id="freqHeat"></div>
+        </div>
+
+        <div class="mod-sec-head"><span class="ms-en">EXTRA</span><span class="ms-cn">🎯 我的目标</span></div>
+        <div class="card card-soft">
+          <div class="card-head" data-en="MY GOALS"><span class="ch-title">🎯 我的目标</span><span class="m-count" id="goalCount"></span></div>
+          <div id="goalList" class="inspire-list"></div>
+        </div>
+        <div id="goalEditor" class="card card-soft" style="display:none">
+          <div class="card-head" data-en="SET A GOAL">🎯 <span id="goalEditorTitle">添加目标</span></div>
+          <div class="goal-form">
+            <input id="goalText" class="gf-full" placeholder="目标（写具体！越具体越容易显化）">
+            <input id="goalDue" type="date">
+            <input id="goalProgress" type="number" min="0" max="100" placeholder="进展 %">
+            <textarea id="goalNote" class="gf-full" placeholder="为什么重要 / 达成后的画面"></textarea>
+          </div>
+          <div class="mod-search-row">
+            <button class="mod-btn-primary" onclick="saveGoal()">💾 保存</button>
+            <button class="mod-btn-ghost" onclick="hideGoalEditor()">取消</button>
           </div>
         </div>
-</section>
-<section id="module-todo" class="view">
+      </section>
+      <section id="module-todo" class="view">
         <div class="todo-stats">
           <div class="todo-stat-card">
             <div class="todo-stat-num" id="todoTotal">0</div>

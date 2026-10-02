@@ -4545,8 +4545,12 @@ var SYNC_LIST_FIELDS = {
   report: ["history"], daily: ["tasks"], job: ["jobs", "logs"], company: ["companies"],
   decision: ["history"],
   library: ["books"],
-  manifest: ["goals", "diary", "cheque", "gratitude", "translator", "freq"]   /* 只合并「已打完分的存档」；进行中的 chatHistory 在本机键里，不随同步 */
+  /* 显化台：只列真·数组字段（按 id 求并集）。对象字段（cheque / freq / freqDone）不能走列表合并，
+     否则 _mergeListById 会对 object 调 forEach 抛 TypeError，导致整次同步失败。 */
+  manifest: ["goals", "script", "diary", "gratitude", "translator", "rehearsal", "evidence", "freqCustom"]
 };
+/* 对象/映射型字段：按键级并集合并 */
+var SYNC_MAP_FIELDS = { manifest: ["freq", "freqDone"] };
 var SYNC_FORCE_LOCAL = { daily: { date: true } };
 var SYNC_BASE_KEY = "weh_sync_base_v1";
 var _syncMergeRemoved = 0;
@@ -4570,7 +4574,8 @@ function saveSyncBase(data){
     var m = {};
     SYNC_LIST_FIELDS[key].forEach(function(field){
       var ids = [];
-      (mod[field] || []).forEach(function(it){ var k = _recKey(it); if(k !== null) ids.push(k); });
+      if(!Array.isArray(mod[field])){ m[field] = ids; return; }
+      mod[field].forEach(function(it){ var k = _recKey(it); if(k !== null) ids.push(k); });
       m[field] = ids;
     });
     b[key] = m;
@@ -4581,6 +4586,13 @@ function clearSyncBase(){ try{ localStorage.removeItem(SYNC_BASE_KEY); }catch(e)
 
 /* 并集合并；传入基准 id 清单时，「基准里有、某一侧没有」判定为该侧删过，结果中一并剔除 */
 function _mergeListById(localArr, remoteArr, baseIds, localWins){
+  /* 守卫：非数组（历史数据里 cheque/freq 曾是对象）不按 id 合并，直接按赢家取整块 */
+  var _la = Array.isArray(localArr), _ra = Array.isArray(remoteArr);
+  if(!_la || !_ra){
+    if(_la) return localArr;
+    if(_ra) return remoteArr;
+    return localWins ? localArr : remoteArr;
+  }
   var localIds = {}, remoteIds = {}, counted = {}, k;
   (localArr || []).forEach(function(it){ k = _recKey(it); if(k !== null) localIds[k] = true; });
   (remoteArr || []).forEach(function(it){ k = _recKey(it); if(k !== null) remoteIds[k] = true; });
@@ -4637,7 +4649,7 @@ function _mergeListById(localArr, remoteArr, baseIds, localWins){
   }
   return out;
 }
-function _mergeModule(localMod, remoteMod, listFields, forceLocal, localWins, baseMod){
+function _mergeModule(localMod, remoteMod, listFields, forceLocal, localWins, baseMod, mapFields){
   if(localMod === undefined) return remoteMod;
   if(remoteMod === undefined) return localMod;
   var out = {}, k;
@@ -4648,6 +4660,10 @@ function _mergeModule(localMod, remoteMod, listFields, forceLocal, localWins, ba
   if(forceLocal){ for(k in forceLocal){ if(localMod[k] !== undefined) out[k] = localMod[k]; } }
   (listFields || []).forEach(function(f){
     out[f] = _mergeListById(localMod[f], remoteMod[f], baseMod ? baseMod[f] : null, localWins);
+  });
+  (mapFields || []).forEach(function(f){
+    if(localMod[f] === undefined && remoteMod[f] === undefined) return;
+    out[f] = _mergeMap(localMod[f], remoteMod[f], localWins);
   });
   return out;
 }
@@ -4677,7 +4693,7 @@ function mergeAllData(remote, localWins){
   for(key in DATA_KEYS){
     var lm = local[key], rm = remote ? remote[key] : undefined;
     if(lm === undefined && rm === undefined) continue;
-    out[key] = _mergeModule(lm, rm, SYNC_LIST_FIELDS[key], SYNC_FORCE_LOCAL[key], localWins, base ? base[key] : null);
+    out[key] = _mergeModule(lm, rm, SYNC_LIST_FIELDS[key], SYNC_FORCE_LOCAL[key], localWins, base ? base[key] : null, SYNC_MAP_FIELDS[key]);
   }
   out.settings = _mergeSettings(local.settings, remote ? remote.settings : null, localWins);
   out.jobOverrides = _mergeMap(local.jobOverrides, remote ? remote.jobOverrides : null, localWins);
@@ -7650,17 +7666,43 @@ document.addEventListener("change", function(e){
 
 /* ========== 显化·成长台模块 ========== */
 var MAN_KEY = "weh_manifest_data_v1";
-var MAN_DEFAULTS = {goals:[], diary:[], cheque:null, gratitude:[], translator:[], freq:{}};
+var MAN_DEFAULTS = {goals:[], script:[], sealed:false, sealedAt:"", cheque:null, gratitude:[], rehearsal:[], evidence:[], translator:[], freq:{}, freqDone:{}, freqCustom:[], diary:[], migEv:false};
 var currentGoalId = null;
+var FREQ_DEFAULTS = [
+  {key:"cheque", em:"🏦", name:"开未来支票", sub:"30秒 · 重复到账"},
+  {key:"gratitude", em:"📖", name:"读感恩日记", sub:"读出声音，让耳朵听见"},
+  {key:"rehearsal", em:"🌙", name:"每日排练", sub:"5分钟 · 睡前过剧本"}
+];
+
+function _manBlank(){
+  var d = {};
+  for(var k in MAN_DEFAULTS){
+    d[k] = (MAN_DEFAULTS[k] && typeof MAN_DEFAULTS[k] === "object") ? JSON.parse(JSON.stringify(MAN_DEFAULTS[k])) : MAN_DEFAULTS[k];
+  }
+  return d;
+}
 
 function loadManifest(){
-  if(typeof MAN_DEFAULTS === "undefined"){ MAN_DEFAULTS = {goals:[], diary:[], cheque:null, gratitude:[], translator:[], freq:{}}; }
-  try{
-    var d = JSON.parse(localStorage.getItem(MAN_KEY));
-    if(!d) return JSON.parse(JSON.stringify(MAN_DEFAULTS));
-    for(var k in MAN_DEFAULTS){ if(d[k]===undefined) d[k]=MAN_DEFAULTS[k]; }
-    return d;
-  }catch(e){ return JSON.parse(JSON.stringify(MAN_DEFAULTS)); }
+  if(typeof MAN_DEFAULTS === "undefined"){
+    MAN_DEFAULTS = {goals:[], script:[], sealed:false, sealedAt:"", cheque:null, gratitude:[], rehearsal:[], evidence:[], translator:[], freq:{}, freqDone:{}, freqCustom:[], diary:[], migEv:false};
+  }
+  var d = null;
+  try{ d = JSON.parse(localStorage.getItem(MAN_KEY)); }catch(e){ d = null; }
+  if(!d || typeof d !== "object") return _manBlank();
+  for(var k in MAN_DEFAULTS){
+    if(d[k] === undefined){
+      d[k] = (MAN_DEFAULTS[k] && typeof MAN_DEFAULTS[k] === "object") ? JSON.parse(JSON.stringify(MAN_DEFAULTS[k])) : MAN_DEFAULTS[k];
+    }
+  }
+  /* 一次性迁移：老版「今日感想 / 日记」→ 证据墙 */
+  if(!d.migEv && (d.diary || []).length){
+    var conv = d.diary.filter(function(x){ return x && x.text; })
+      .map(function(x){ return {id:"ev-" + x.date, date:x.date, text:x.text, sub:""}; });
+    d.evidence = (d.evidence || []).concat(conv);
+    d.migEv = true;
+    try{ localStorage.setItem(MAN_KEY, JSON.stringify(d)); }catch(e2){}
+  }
+  return d;
 }
 function saveManifest(data){ markLocalChange(); localStorage.setItem(MAN_KEY, JSON.stringify(data)); }
 
@@ -7668,44 +7710,109 @@ function todayStr(){
   var n = new Date();
   return n.getFullYear() + "-" + String(n.getMonth()+1).padStart(2,"0") + "-" + String(n.getDate()).padStart(2,"0");
 }
+function mYMD(dt){
+  return dt.getFullYear() + "-" + String(dt.getMonth()+1).padStart(2,"0") + "-" + String(dt.getDate()).padStart(2,"0");
+}
+function mWD(dt){ return ["星期日","星期一","星期二","星期三","星期四","星期五","星期六"][dt.getDay()]; }
+function mShort(s){ s = String(s || ""); return s.length >= 10 ? s.slice(5) : s; }
+function mMoney(n){
+  n = Math.round(parseFloat(n) || 0);
+  return n.toLocaleString("en-US");
+}
+function mNextYear(t){
+  var p = String(t || todayStr()).split("-");
+  return (parseInt(p[0],10) + 1) + "-" + p[1] + "-" + p[2];
+}
+/* 阿拉伯数字 → 中文大写金额（肆万柒仟叁佰元整） */
+function mCN(n){
+  n = Math.round(Math.abs(parseFloat(n) || 0));
+  if(!n) return "零元整";
+  var DG = "零壹贰叁肆伍陆柒捌玖", POS = ["","拾","佰","仟"], UNIT = ["","万","亿","万亿"];
+  function grp(g){
+    var pos = 0, parts = [], zero = false;
+    while(g > 0){
+      var dg = g % 10;
+      if(dg === 0){ if(parts.length) zero = true; }
+      else {
+        if(zero){ parts.push("零"); zero = false; }
+        parts.push(DG.charAt(dg) + POS[pos]);
+      }
+      pos++; g = Math.floor(g / 10);
+    }
+    return parts.reverse().join("");
+  }
+  var groups = [], num = n;
+  while(num > 0){ groups.push(num % 10000); num = Math.floor(num / 10000); }
+  var s = "";
+  for(var gi = groups.length - 1; gi >= 0; gi--){
+    var g4 = groups[gi];
+    if(g4 === 0){
+      var higher = false;
+      for(var h = gi - 1; h >= 0; h--){ if(groups[h] > 0){ higher = true; break; } }
+      if(s && higher && s.charAt(s.length - 1) !== "零") s += "零";
+      continue;
+    }
+    if(s && s.charAt(s.length - 1) !== "零" && g4 < 1000) s += "零";
+    s += grp(g4) + UNIT[gi];
+  }
+  s = s.replace(/零+/g, "零").replace(/零$/, "");
+  return s + "元整";
+}
 function setText(id, v){ var el = document.getElementById(id); if(el) el.textContent = v; }
+
+/* 按关键词给剧本条目配 emoji */
+function mEmoji(t){
+  var s = String(t || "");
+  if(/潜水|旅行|三亚|旅游|出国|海岛|海边|机票|环游/.test(s)) return "🏊";
+  if(/房|家|装修|搬家|公寓|小屋/.test(s)) return "🏠";
+  if(/钱|款|收入|奖金|年框|合作费|赚|薪|万|元/.test(s)) return "💰";
+  if(/妈妈|爸爸|家人|父母|爱人|孩子|陪|带/.test(s)) return "🎁";
+  if(/电脑|手机|相机|车|Mac|设备|装备|镜头/.test(s)) return "💻";
+  if(/播客|视频|写作|出版|书|专辑|作品|公号|小红书|演讲/.test(s)) return "🎙";
+  if(/跑|健身|瘦|健康|身体|马拉松|瑜伽/.test(s)) return "🏃";
+  if(/学|考|证|英语|留学|读研|MBA/.test(s)) return "📚";
+  if(/自信|平静|自由|勇敢|松弛|心态/.test(s)) return "🌿";
+  return "🎬";
+}
+/* 高亮「」引文与 ¥ 金额 */
+function mHl(s){
+  s = esc(String(s || ""));
+  s = s.replace(/「([^」]{1,40})」/g, '<em class="hl-q">「$1」</em>');
+  s = s.replace(/¥\s?([0-9][0-9,\.]*)/g, '<em class="hl-num">¥$1</em>');
+  return s;
+}
+/* 连续显化打卡天数：按有打卡记录的连续日期回溯 */
+function mManSum(data){
+  var freq = data.freq || {}, streak = 0, cur = new Date();
+  while(freq[mYMD(cur)]){ streak++; cur.setDate(cur.getDate() - 1); }
+  return streak;
+}
 
 function renderManifest(){
   var data = loadManifest();
-  var dates = data.diary.map(function(d){ return d.date; }).filter(Boolean).sort();
-  var streak = 0;
-  var cur = new Date();
-  var ok = true;
-  while(ok){
-    var ds = cur.getFullYear() + "-" + String(cur.getMonth()+1).padStart(2,"0") + "-" + String(cur.getDate()).padStart(2,"0");
-    if(dates.indexOf(ds) >= 0){ streak++; cur.setDate(cur.getDate()-1); } else { ok = false; }
-  }
-  var t = todayStr();
-  var ym = t.slice(0,7);
-  var monthCnt = dates.filter(function(d){ return d.slice(0,7) === ym; }).length;
-  var goalActive = data.goals.filter(function(g){ return g.status !== "done" && g.status !== "drop"; }).length;
+  var streak = mManSum(data);
   setText("streakDays", streak);
-  setText("monthDays", monthCnt);
-  setText("goalActive", goalActive);
-  setText("goalCount", data.goals.length + " 条");
+  setText("freqStreak", streak);
+  setText("chequeCount", (data.cheque && data.cheque.stamps) ? data.cheque.stamps.length : 0);
+  setText("scriptCount", (data.script || []).length);
+  setText("goalCount", (data.goals || []).length + " 条");
   renderGoals(data);
-  var todayDiary = data.diary.find(function(d){ return d.date === t; }) || null;
-  setText("diaryDate", t);
-  var di = document.getElementById("diaryInput");
-  if(di) di.value = todayDiary ? (todayDiary.text || "") : "";
-  renderScript(todayDiary);
-  renderEvidence(data);
   renderCheque(data);
+  renderChequeChart(data);
+  renderScript(data);
   renderGratitude(data);
+  renderEvidence(data);
+  renderRehearsal(data, streak || 1);
   renderTranslator(data);
   renderFreq(data);
 }
 
+/* ---------- 我的目标（保留：进度 / 达成 / 放弃） ---------- */
 function renderGoals(data){
   var list = document.getElementById("goalList");
   if(!list) return;
   if(data.goals.length === 0){
-    list.innerHTML = '<div style="text-align:center;color:var(--muted);padding:20px;font-size:13px">还没有目标<br>点「添加目标」，记得写具体（对标未来支票）</div>';
+    list.innerHTML = '<div style="text-align:center;color:var(--muted);padding:18px;font-size:13px">还没有目标<br>点右上角「＋ 添加目标」，记得写具体</div>';
     return;
   }
   var sorted = data.goals.slice().sort(function(a,b){ return (b.id||0)-(a.id||0); });
@@ -7715,7 +7822,7 @@ function renderGoals(data){
     var statusText = {active:"进行中", done:"达成", drop:"已放弃"}[st] || "进行中";
     var statusColor = st==="done" ? "#2e7d32" : (st==="drop" ? "#999" : "var(--pink-deep)");
     return '<div class="inspire-item" style="'+(st==="done"?"opacity:.7":"")+'">'
-      +'<div class="inspire-item-text">目标 '+esc(g.text||"未命名目标")+(g.due?' <span style="color:var(--muted);font-size:12px">截止'+esc(g.due)+'</span>':'')+'</div>'
+      +'<div class="inspire-item-text">'+esc(g.text||"未命名目标")+(g.due?' <span style="color:var(--muted);font-size:12px">截止'+esc(g.due)+'</span>':'')+'</div>'
       +'<div style="height:6px;background:rgba(0,0,0,.08);border-radius:4px;margin:6px 0 4px;overflow:hidden"><div style="width:'+pct+'%;height:100%;background:linear-gradient(90deg,var(--pink-deep),#b48ed9)"></div></div>'
       +'<div class="inspire-item-meta"><span style="color:'+statusColor+'">'+statusText+' · '+pct+'%</span>'
       +'<span><button class="inspire-action-btn" style="font-size:12px;padding:2px 8px" onclick="bumpGoal('+g.id+')">+10%</button> '
@@ -7793,247 +7900,485 @@ function setGoalStatus(id, st){
   toast(st==="done" ? "目标达成！" : "已标记放弃");
 }
 
-function saveDiary(){
-  var t = todayStr();
-  var text = (document.getElementById("diaryInput").value||"").trim();
-  if(!text){ toast("写点什么再保存吧"); return; }
-  var data = loadManifest();
-  var d = data.diary.find(function(x){ return x.date===t; });
-  if(!d){ d = {date:t, id:t}; data.diary.push(d); }
-  d.text = text;
-  saveManifest(data);
-  renderManifest();
-  toast("今日感想已保存");
-}
-
-function renderScript(todayDiary){
-  var box = document.getElementById("scriptBox");
-  if(!box) return;
-  if(todayDiary && todayDiary.script){
-    box.innerHTML = '<div class="script-sealed" onclick="toggleScriptReveal(this)" style="padding:12px;background:linear-gradient(135deg,rgba(219,112,147,.12),rgba(180,142,217,.12));border-radius:10px;font-size:14px;line-height:1.7;cursor:pointer">'
-      +'<div style="display:flex;justify-content:space-between;align-items:center"><b>我的人生剧本</b><span style="font-size:11px;color:var(--muted)">已封存 · 点此看一眼（看完自动模糊）</span></div>'
-      +'<div class="script-text" style="margin-top:6px;filter:blur(5px);transition:filter .3s">'+esc(todayDiary.script)+'</div></div>';
-  } else {
-    box.innerHTML = '<div style="color:var(--muted);font-size:12px;text-align:center;padding:6px">还没有封存剧本，点 AI 一键封存剧本 生成一句属于你的宣言</div>';
-  }
-}
-
-function aiSealScript(){
-  var c = loadAIConfig();
-  if(!(c.key && c.base && c.model)){ toast("请先在设置里配置 AI"); return; }
-  var t = todayStr();
-  var data = loadManifest();
-  var d = data.diary.find(function(x){ return x.date===t; }) || {date:t, text:""};
-  var box = document.getElementById("scriptBox");
-  if(box) box.innerHTML = '<div style="text-align:center;color:var(--muted);padding:10px">AI 封存中</div>';
-  var sys = "你是一个人生剧本教练。帮用户把今天的状态凝练成一句有力量的宣言：第一人称、面向未来、具体、有画面感、不超过 50 字、不要客套、全部中文。"
-    + (c.persona ? ("\n\n【关于服务对象】"+c.persona) : "");
-  var user = "今天的感想：" + (d.text || "（今天还没写感想）") + "\n\n请直接输出这一句宣言（不要解释、不要引号、不要 markdown）。";
-  aiChat(c, [{role:"system",content:sys},{role:"user",content:user}], 30).then(function(res){
-    var script = (res.content||"").replace(/^["'『「]/,"").replace(/["'』」]$/,"").replace(/^```[a-zA-Z]*/,"").replace(/```$/,"").trim().slice(0,200);
-    if(!script){ throw new Error("AI 返回为空"); }
-    var dd = data.diary.find(function(x){ return x.date===t; });
-    if(!dd){ dd = {date:t, id:t}; data.diary.push(dd); }
-    dd.script = script;
-    bumpFreq(t);
-    saveManifest(data);
-    renderManifest();
-    toast("剧本已封存");
-  }).catch(function(err){
-    if(box) box.innerHTML = '<div style="color:#e74c3c;font-size:12px;text-align:center">封存失败：'+esc(err.message||"")+'</div>';
-  });
-}
-
-function renderEvidence(data){
-  var list = document.getElementById("evidenceWall");
-  if(!list) return;
-  var items = data.diary.slice().sort(function(a,b){ return (b.date||"").localeCompare(a.date||""); }).slice(0,15);
-  if(items.length === 0){
-    list.innerHTML = '<div style="text-align:center;color:var(--muted);padding:20px;font-size:13px">取证墙空着<br>每天写一句感想，就是给未来的自己留证据</div>';
-    return;
-  }
-  list.innerHTML = items.map(function(d){
-    return '<div class="inspire-item">'
-      +'<div class="inspire-item-meta"><span>'+esc(d.date||"")+'</span>'+(d.script?'<span style="color:var(--pink-deep)">已封存</span>':'')+'</div>'
-      +'<div class="inspire-item-text">'+esc(d.text||"（无文字）")+'</div>'
-      +(d.script?'<div style="font-size:12px;color:var(--muted);margin-top:4px">'+esc(d.script)+'</div>':'')
-      +'</div>';
-  }).join("");
-}
-
-
-// ---------- 显化台批4：未来支票 / 感恩日记 / 语言翻译器 / 频率热力图 ----------
-function bumpFreq(dateStr){
-  var data = loadManifest();
-  if(!data.freq) data.freq = {};
-  data.freq[dateStr] = (data.freq[dateStr]||0) + 1;
-  saveManifest(data);
-}
-
+/* ---------- 未来支票（仿真支票 + 重复的力量折线图） ---------- */
 function renderCheque(data){
   var box = document.getElementById("chequeBox");
   if(!box) return;
   var c = data.cheque;
+  var t = todayStr();
+  var stamps = (c && c.stamps) ? c.stamps.slice() : [];
+  var signedToday = stamps.indexOf(t) >= 0;
+  var last = stamps.length ? stamps[stamps.length-1] : "";
   if(!c){
-    box.innerHTML = '<div style="color:var(--muted);font-size:12px;text-align:center;padding:8px">还没开过支票，<button class="inspire-action-btn" onclick="showChequeEditor()">开一张未来支票</button></div>';
+    box.innerHTML = '<div class="chq-empty">'
+      + '<div class="chq-empty-em">🏦</div>'
+      + '<div class="chq-empty-t">还没开出第一张未来支票</div>'
+      + '<div class="chq-empty-s">写下一个「有零有整」的金额，每天签一次名——重复本身就是信心。</div>'
+      + '<button class="mod-btn-primary" onclick="showChequeEditor()">🏦 开一张未来支票</button>'
+      + '</div>';
     return;
   }
-  var stamps = c.stamps || [];
-  var total = stamps.length;
-  var today = todayStr();
-  var signedToday = stamps.indexOf(today) >= 0;
-  var barPct = Math.min(100, total * 4);
-  var line = '<div style="height:8px;background:rgba(0,0,0,.08);border-radius:6px;overflow:hidden;margin:8px 0"><div style="width:'+barPct+'%;height:100%;background:linear-gradient(90deg,#f1c40f,var(--pink-deep));transition:width .5s"></div></div>';
-  box.innerHTML =
-    '<div style="padding:12px;background:linear-gradient(135deg,rgba(241,196,15,.14),rgba(219,112,147,.12));border-radius:10px">'
-    +'<div style="display:flex;justify-content:space-between;align-items:baseline"><span style="color:var(--muted);font-size:12px">未来支票 · 收款人 '+esc(c.payee||"我")+(c.due?(' · 到期 '+esc(c.due)):'')+'</span><span style="font-weight:700;color:var(--pink-deep)">¥'+esc(String(c.amount||0))+'</span></div>'
-    + line
-    +'<div style="font-size:12px;color:var(--muted);margin-bottom:8px">已签名 <b style="color:var(--pink-deep)">'+total+'</b> 次 ｜ 每一次都是给「会有的」打卡</div>'
-    +'<div style="display:flex;gap:8px;flex-wrap:wrap">'
-    +'<button class="inspire-action-btn" style="border:none;background:linear-gradient(135deg,var(--pink-deep),#b48ed9);color:#fff" onclick="signCheque()">'+(signedToday?'✅ 今日已签':'✍️ 今日签名打卡')+'</button>'
-    +'<button class="inspire-action-btn" onclick="showChequeEditor()">✏️ 改支票</button>'
-    +'</div></div>';
+  var due = c.due || mNextYear(t);
+  var no = c.no || ("No." + t.replace(/-/g,"").slice(2));
+  box.innerHTML = '<div class="chq">'
+    + '<div class="chq-top">'
+    +   '<div class="chq-bank"><b>宇宙未来银行</b><span>UNIVERSE FUTURE BANK · 无上限额度</span></div>'
+    +   '<div class="chq-meta"><span>票据号 ' + esc(no) + '</span><span>兑现日期 ' + esc(due) + '</span></div>'
+    + '</div>'
+    + '<div class="chq-rows">'
+    +   '<div class="chq-field"><label>PAY TO 收款人</label><div class="chq-val" onclick="showChequeEditor()">' + esc(c.payee || "一年后的我自己") + '</div></div>'
+    +   '<div class="chq-field"><label>用途</label><div class="chq-val">' + esc(c.purpose || "写给未来的我") + '</div></div>'
+    +   '<div class="chq-field"><label>AMOUNT 金额（点我修改）</label><div class="chq-amt" onclick="showChequeEditor()">' + mMoney(c.amount) + '</div></div>'
+    +   '<div class="chq-field"><label>大写金额</label><div class="chq-val">' + esc(mCN(c.amount)) + '</div></div>'
+    + '</div>'
+    + '<div class="chq-sign">'
+    +   '<div class="chq-sig-l"><label>AUTHORIZED SIGNATURE 签名</label>'
+    +     '<div class="chq-sig">' + (last ? '<span class="chq-sig-name">' + esc(c.signName || c.payee || "我") + '</span>' : '<span class="chq-sig-hint">还没有签过名</span>') + '</div>'
+    +   '</div>'
+    +   (last ? '<div class="chq-seal"><b>宇宙已盖章</b><span>MANIFESTED</span><i>' + esc(last) + '</i></div>' : '')
+    + '</div>'
+    + '<div class="chq-tip">💡 金额一定要有零有整——大脑不信整数，信细节</div>'
+    + '<div class="chq-actions">'
+    +   '<button class="mod-btn-primary" onclick="signCheque()">' + (signedToday ? '✅ 今日已盖章' : '✍️ 签下今日这张') + '</button>'
+    +   '<button class="mod-btn-ghost" onclick="showChequeEditor()">✏️ 改支票</button>'
+    +   '<span class="chq-count">已签名 <b>' + stamps.length + '</b> 次</span>'
+    + '</div></div>';
+}
+
+function renderChequeChart(data){
+  var box = document.getElementById("chequeChart");
+  if(!box) return;
+  var freq = data.freq || {};
+  var N = 21, total = 0, pts = [], today = new Date();
+  for(var i = N-1; i >= 0; i--){
+    var d = new Date(today); d.setDate(today.getDate() - i);
+    total += (freq[mYMD(d)] || 0);
+    pts.push(total);
+  }
+  var max = Math.max(1, pts[pts.length-1] || 1);
+  var W = 280, H = 108, PX = 8, PY = 12;
+  var stepX = (W - PX*2) / (N - 1);
+  function ax(i){ return PX + i*stepX; }
+  function ay(v){ return H - PY - (v/max) * (H - PY*2); }
+  var line = pts.map(function(v,i){ return (i ? "L" : "M") + ax(i).toFixed(1) + " " + ay(v).toFixed(1); }).join(" ");
+  var area = line + " L" + ax(N-1).toFixed(1) + " " + (H-PY) + " L" + ax(0).toFixed(1) + " " + (H-PY) + " Z";
+  box.innerHTML = '<div class="chq-chart-top"><span>近 3 周确定感</span><b>连续开票 ' + mManSum(data) + ' 天</b></div>'
+    + '<svg class="chq-chart" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none">'
+    +   '<defs><linearGradient id="chqGrad" x1="0" y1="0" x2="0" y2="1">'
+    +     '<stop offset="0%" stop-color="#e84393" stop-opacity=".26"/>'
+    +     '<stop offset="100%" stop-color="#e84393" stop-opacity="0"/>'
+    +   '</linearGradient></defs>'
+    +   '<path d="' + area + '" fill="url(#chqGrad)"/>'
+    +   '<path d="' + line + '" fill="none" stroke="#e84393" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>'
+    +   '<circle cx="' + ax(N-1).toFixed(1) + '" cy="' + ay(pts[N-1]).toFixed(1) + '" r="3.6" fill="#fff" stroke="#e84393" stroke-width="2"/>'
+    + '</svg>'
+    + '<div class="chq-chart-x"><span>Day 1</span><span>Day ' + N + '</span></div>'
+    + '<div class="chq-chart-hint">' + (total ? '每一次打卡，都在这条线上留下一格' : '今天先签一张支票，这条线就开始往上爬') + '</div>';
 }
 
 function showChequeEditor(){
   var data = loadManifest();
-  var c = data.cheque || {amount:47300, payee:"我", due:"", stamps:[]};
+  var c = data.cheque || {amount:47300, payee:"一年后的我自己", due:mNextYear(todayStr()), purpose:"写给未来的我", stamps:[]};
   var amt = document.getElementById("chequeAmount");
   var pay = document.getElementById("chequePayee");
   var due = document.getElementById("chequeDue");
-  if(amt) amt.value = c.amount;
+  var pur = document.getElementById("chequePurpose");
+  var no  = document.getElementById("chequeNo");
+  if(amt) amt.value = c.amount || "";
   if(pay) pay.value = c.payee || "";
-  if(due) due.value = c.due || "";
+  if(due) due.value = c.due || mNextYear(todayStr());
+  if(pur) pur.value = c.purpose || "写给未来的我";
+  if(no)  no.value  = c.no || "";
   var ed = document.getElementById("chequeEditor");
   if(ed) ed.style.display = "block";
 }
 function hideChequeEditor(){ var ed=document.getElementById("chequeEditor"); if(ed) ed.style.display="none"; }
 function saveCheque(){
   var amt = parseFloat(document.getElementById("chequeAmount").value||"0")||0;
-  var pay = (document.getElementById("chequePayee").value||"").trim() || "我";
-  var due = document.getElementById("chequeDue").value;
+  var pay = (document.getElementById("chequePayee").value||"").trim() || "一年后的我自己";
+  var due = document.getElementById("chequeDue").value || mNextYear(todayStr());
+  var pur = (document.getElementById("chequePurpose").value||"").trim() || "写给未来的我";
+  var no  = (document.getElementById("chequeNo").value||"").trim();
+  if(amt <= 0){ toast("金额要大于 0"); return; }
   var data = loadManifest();
   if(!data.cheque) data.cheque = {stamps:[]};
-  data.cheque.amount = amt;
-  data.cheque.payee = pay;
-  data.cheque.due = due;
+  var stamps = data.cheque.stamps || [];
+  data.cheque = {amount:amt, payee:pay, due:due, purpose:pur, no:no, signName:data.cheque.signName||pay, stamps:stamps};
   saveManifest(data);
   hideChequeEditor();
   renderManifest();
-  toast("支票已更新");
+  toast("支票已更新 🏦");
 }
 function signCheque(){
   var data = loadManifest();
-  if(!data.cheque) data.cheque = {amount:47300, payee:"我", due:"", stamps:[]};
+  if(!data.cheque) data.cheque = {amount:47300, payee:"一年后的我自己", due:mNextYear(todayStr()), purpose:"写给未来的我", stamps:[]};
+  if(!data.cheque.stamps) data.cheque.stamps = [];
+  if(!data.cheque.signName) data.cheque.signName = data.cheque.payee || "我";
   var t = todayStr();
   if(data.cheque.stamps.indexOf(t) < 0) data.cheque.stamps.push(t);
   saveManifest(data);
-  bumpFreq(t);
+  bumpFreq(t, "cheque");
   renderManifest();
-  toast("今日已签名 ✍️");
+  toast("今日已盖章 ✍️ 重复到账");
 }
 
-function toggleScriptReveal(el){
-  var t = el.querySelector(".script-text");
-  if(!t) return;
-  var blurred = t.style.filter && t.style.filter.indexOf("blur") >= 0;
-  if(blurred){ t.style.filter = "none"; setTimeout(function(){ if(t)t.style.filter="blur(5px)"; }, 2500); }
-  else { t.style.filter = "blur(5px)"; }
+/* ---------- 人生剧本（写完 → 一键封存 → 模糊） ---------- */
+function renderScript(data){
+  var list = document.getElementById("scriptList");
+  var badge = document.getElementById("scriptBadge");
+  var addWrap = document.getElementById("scriptAddWrap");
+  if(!list) return;
+  var items = data.script || [];
+  var sealed = !!data.sealed;
+  if(badge){
+    badge.textContent = sealed ? '🔒 已封存 · 宇宙排片中' : '✍️ 撰写中 · 未封存';
+    badge.className = "m-badge" + (sealed ? " sealed" : "");
+  }
+  if(addWrap) addWrap.style.display = sealed ? "none" : "block";
+  if(!items.length){
+    list.innerHTML = '<div class="script-empty">剧本还是空的。写下 3～6 件「已经发生」的具体画面——别写「变有钱」，写「收到一笔 47,300 元的项目款」。</div>';
+    return;
+  }
+  list.innerHTML = items.map(function(it){
+    return '<div class="script-item' + (sealed ? " blur" : "") + '">'
+      + '<span class="sc-em">' + esc(it.em || "🎬") + '</span>'
+      + '<span class="sc-t">' + esc(it.text) + '</span>'
+      + (sealed ? '' : '<button class="sc-x" onclick="delScriptItem(' + it.id + ')">✕</button>')
+      + '</div>';
+  }).join("");
+  if(sealed){
+    list.innerHTML += '<div class="script-sealed-box">'
+      + '<div class="ssb-t">🎬 剧本已封存 · 宇宙正在排片</div>'
+      + '<div class="ssb-s">解锁唯一条件：右侧每天生成感恩日记，把剧本读成「已经发生」</div>'
+      + '<button class="mod-btn-ghost" onclick="unsealScript()">🔓 打开剧本（建议一年后再开）</button>'
+      + '</div>';
+  }
+}
+function addScriptItem(){
+  var inp = document.getElementById("scriptInput");
+  var text = ((inp && inp.value) || "").trim();
+  if(!text){ toast("写一件想做成的具体的事"); return; }
+  var data = loadManifest();
+  if(data.sealed){ toast("剧本已封存，先打开再改"); return; }
+  data.script = data.script || [];
+  data.script.push({id:Date.now(), text:text, em:mEmoji(text)});
+  saveManifest(data);
+  if(inp) inp.value = "";
+  renderManifest();
+  toast("已加进剧本 🎬");
+}
+function delScriptItem(id){
+  var data = loadManifest();
+  data.script = (data.script || []).filter(function(x){ return x.id !== id; });
+  saveManifest(data);
+  renderManifest();
+  toast("已删掉这一场戏");
+}
+function sealScript(){
+  var data = loadManifest();
+  if(!(data.script || []).length){ toast("剧本还是空的，先写几件具体的事"); return; }
+  showConfirm("封存后清单会变模糊、不能再改——这是刻意设计，防止反复查看反而生疑。确定封存？").then(function(ok){
+    if(!ok) return;
+    var d2 = loadManifest();
+    d2.sealed = true;
+    d2.sealedAt = todayStr();
+    saveManifest(d2);
+    renderManifest();
+    toast("剧本已封存 🔒 交给每天的排练");
+  });
+}
+function unsealScript(){
+  showConfirm("打开剧本意味着你会反复看到它——确认要看吗？").then(function(ok){
+    if(!ok) return;
+    var d = loadManifest();
+    d.sealed = false;
+    saveManifest(d);
+    renderManifest();
+    toast("已打开剧本");
+  });
 }
 
+/* ---------- 今日感恩日记（AI 代笔 · 每天一次） ---------- */
 function renderGratitude(data){
   var box = document.getElementById("gratitudeBox");
+  var wrap = document.getElementById("gratBtnWrap");
   if(!box) return;
-  var t = todayStr();
-  var g = (data.gratitude||[]).find(function(x){ return x.date===t; });
+  var t = todayStr(), d = new Date();
+  var g = (data.gratitude || []).find(function(x){ return x.date === t; });
   if(g){
-    box.innerHTML = '<div style="padding:10px;background:rgba(46,204,113,.12);border-radius:10px;font-size:13px;line-height:1.7">🙏 '+esc(g.text)+'</div>';
-  } else {
-    box.innerHTML = '<div style="color:var(--muted);font-size:12px;text-align:center;padding:8px">今天还没生成感恩日记</div>';
+    var ps = String(g.text || "").split(/\n+/).filter(function(x){ return x.trim(); });
+    box.innerHTML = '<div class="grat-letter">'
+      + '<div class="grat-date">📅 ' + esc(t.replace(/-/g,".")) + ' · ' + mWD(d) + ' · 天气晴</div>'
+      + ps.map(function(p){ return '<p class="grat-p">' + mHl(p) + '</p>'; }).join("")
+      + '<div class="grat-sign">—— 写给未来的我，也写给正在读出声的你 🔔</div>'
+      + '</div>';
+    if(wrap) wrap.innerHTML = '<div class="grat-done">🌙 今天的日记已生成 · 明天再来</div>';
+    return;
   }
+  if(!data.sealed){
+    box.innerHTML = '<div class="grat-lock"><span>🔒</span>剧本还没封存<div class="gl-s">先写剧本、封存，再让 AI 把未来念给你听</div></div>';
+    if(wrap) wrap.innerHTML = '<button class="mod-btn-warm" style="opacity:.55;cursor:not-allowed" onclick="toast(\'先封存剧本，再生成日记\')">🌙 生成今日感恩日记</button>';
+    return;
+  }
+  box.innerHTML = '<div class="grat-wait">AI 会从你封存的剧本里取 2～3 件事，用「已经发生的今天」的口吻，把时间、金额、别人说的话都写具体。点下面这颗按钮。</div>';
+  if(wrap) wrap.innerHTML = '<button class="mod-btn-warm" onclick="aiGratitude()">🌙 生成今日感恩日记</button>';
 }
 function aiGratitude(){
   var c = loadAIConfig();
   if(!(c.key && c.base && c.model)){ toast("请先在设置里配置 AI"); return; }
-  var t = todayStr();
   var data = loadManifest();
-  var d = data.diary.find(function(x){ return x.date===t; });
-  var script = d ? d.script : "";
-  var goals = (data.goals||[]).map(function(g){ return g.text; }).join("、");
+  if(!data.sealed){ toast("先封存剧本，再生成日记"); return; }
+  var t = todayStr(), d = new Date();
+  var items = (data.script || []).map(function(x){ return x.text; });
   var box = document.getElementById("gratitudeBox");
-  if(box) box.innerHTML = '<div style="text-align:center;color:var(--muted);padding:8px">AI 生成感恩日记中…</div>';
-  var sys = "你是感恩日记教练。用『已经发生』的口吻写一段今日感恩（第一人称、具体、温暖、不超过 80 字）。用户写下的剧本或目标就是已经实现的证据，禁止用将来时。";
-  var user = "我的人生剧本：" + (script || "（未封存）") + "\n我的目标：" + (goals || "（暂无）") + "\n\n请直接输出今日感恩日记（不要解释、不要引号）。";
-  aiChat(c, [{role:"system",content:sys},{role:"user",content:user}], 30).then(function(res){
-    var text = (res.content||"").replace(/^["'『「]/,"").replace(/["'』」]$/,"").replace(/^```[a-zA-Z]*/,"").replace(/```$/,"").trim().slice(0,300);
+  if(box) box.innerHTML = '<div class="grat-wait">AI 正在取景…</div>';
+  var sys = "你是「人生剧本排练员」。用户已封存一份未来剧本，你要以『已经发生的今天』的口吻写一篇第一人称排练日记。"
+    + "硬性要求：① 全篇用完成式/过去时，禁止任何将来时；② 从剧本里挑 2～3 条，自然融进具体场景（地点、时间、一个感官细节、一句别人说的话）；"
+    + "③ 至少出现一次带零有整的金额，写成「¥24,590」这种带千分位的格式；④ 4～6 个短段落，每段一行，段与段之间用换行分隔；"
+    + "⑤ 把剧本原句用「」包起来，并加粗到自然；⑥ 不要标题、不要解释、不要 markdown 记号、不要引号包裹整段。"
+    + (c.persona ? ("\n\n【关于服务对象】" + c.persona) : "");
+  var user = "我封存的剧本：\n" + items.map(function(x,i){ return (i+1) + ". " + x; }).join("\n")
+    + "\n\n今天是 " + t + " " + mWD(d) + "。请直接输出今天的日记正文。";
+  aiChat(c, [{role:"system",content:sys},{role:"user",content:user}], 35).then(function(res){
+    var text = (res.content || "").replace(/^```[a-zA-Z]*/,"").replace(/```$/,"").replace(/^\s+|\s+$/g,"");
     if(!text){ throw new Error("AI 返回为空"); }
-    if(!data.gratitude) data.gratitude = [];
-    var gg = data.gratitude.find(function(x){ return x.date===t; });
-    if(!gg){ gg = {date:t}; data.gratitude.push(gg); }
-    gg.text = text;
-    saveManifest(data);
-    bumpFreq(t);
+    var data2 = loadManifest();
+    data2.gratitude = data2.gratitude || [];
+    var gg = data2.gratitude.find(function(x){ return x.date === t; });
+    if(!gg){ gg = {date:t, id:t}; data2.gratitude.push(gg); }
+    gg.text = text.slice(0, 1200);
+    saveManifest(data2);
+    bumpFreq(t, "gratitude");
     renderManifest();
-    toast("今日感恩已生成 🙏");
+    toast("今日日记已生成 🌙 大声读出来");
   }).catch(function(err){
-    if(box) box.innerHTML = '<div style="color:#e74c3c;font-size:12px;text-align:center">生成失败：'+esc(err.message||"")+'</div>';
+    if(box) box.innerHTML = '<div class="grat-wait" style="color:#e74c3c">生成失败：' + esc(err.message || "") + '</div>';
   });
 }
 
+/* ---------- 证据墙（只记已经发生的好事） ---------- */
+function renderEvidence(data){
+  var list = document.getElementById("evidenceWall");
+  if(!list) return;
+  var arr = (data.evidence || []).slice().sort(function(a,b){
+    return String(b.date||"").localeCompare(String(a.date||"")) || ((b.id||0) - (a.id||0));
+  });
+  if(!arr.length){
+    list.innerHTML = '<div class="ev-empty">这里只记「已经发生的好事」。记下第一笔，让证据开始积累。</div>';
+    return;
+  }
+  list.innerHTML = arr.map(function(e){
+    return '<div class="ev-item"><span class="ev-date">' + esc(mShort(e.date)) + '</span>'
+      + '<div class="ev-body"><div class="ev-t">' + esc(e.text) + '</div>'
+      + (e.sub ? '<div class="ev-s">' + esc(e.sub) + '</div>' : '')
+      + '</div><button class="ev-x" onclick="delEvidence(' + e.id + ')">✕</button></div>';
+  }).join("");
+}
+function addEvidence(){
+  var inp = document.getElementById("evidenceInput");
+  var raw = ((inp && inp.value) || "").trim();
+  if(!raw){ toast("写下刚发生的一件好事"); return; }
+  var parts = raw.split(/[｜|]/);
+  var data = loadManifest();
+  data.evidence = data.evidence || [];
+  data.evidence.unshift({id:Date.now(), date:todayStr(), text:(parts[0]||"").trim(), sub:(parts[1]||"").trim()});
+  saveManifest(data);
+  if(inp) inp.value = "";
+  renderManifest();
+  toast("已记进证据墙 🏆");
+}
+function delEvidence(id){
+  var data = loadManifest();
+  data.evidence = (data.evidence || []).filter(function(x){ return x.id !== id; });
+  saveManifest(data);
+  renderManifest();
+  toast("已删除");
+}
+
+/* ---------- 每日排练（带感官细节的场景脚本） ---------- */
+function renderRehearsal(data, dayN){
+  var box = document.getElementById("rehearsalBox");
+  var dayEl = document.getElementById("rehDay");
+  var wrap = document.getElementById("rehBtnWrap");
+  if(!box) return;
+  if(dayEl) dayEl.textContent = String(dayN || 1);
+  var t = todayStr();
+  var r = (data.rehearsal || []).find(function(x){ return x.date === t; });
+  if(r && r.text){
+    box.innerHTML = '<div class="reh-title">今晚的剧本场景：' + esc(r.title || "推开那扇门") + '</div>'
+      + String(r.text).split(/\n+/).filter(function(x){ return x.trim(); })
+          .map(function(p){ return '<p class="reh-p">' + mHl(p) + '</p>'; }).join("");
+    if(wrap) wrap.innerHTML = '<button class="mod-btn-dim" onclick="aiRehearsal()">🔁 换一个今晚的场景</button>';
+  } else {
+    box.innerHTML = '<div class="reh-wait">' + (data.sealed
+      ? '闭眼前，让 AI 按你的剧本给你造今晚的场景：有温度、有声音、有一句你会对自己说的话。'
+      : '先封存剧本，再让 AI 按剧本给你造今晚的场景。') + '</div>';
+    if(wrap) wrap.innerHTML = '<button class="mod-btn-dim" onclick="aiRehearsal()">🌙 生成今晚的排练场景</button>';
+  }
+}
+function aiRehearsal(){
+  var c = loadAIConfig();
+  if(!(c.key && c.base && c.model)){ toast("请先在设置里配置 AI"); return; }
+  var data = loadManifest();
+  if(!data.sealed){ toast("先封存剧本，再生成排练场景"); return; }
+  var t = todayStr();
+  var items = (data.script || []).map(function(x){ return x.text; });
+  var box = document.getElementById("rehearsalBox");
+  if(box) box.innerHTML = '<div class="reh-wait">AI 正在写今晚的场景…</div>';
+  var sys = "你是运动员式的「想象训练」教练。请按用户的剧本，写一个今晚可以闭眼预演 5 分钟的场景脚本。"
+    + "硬性要求：① 第二人称「你」，现在时，像正在发生；② 必须有 3 个以上具体感官细节（温度、声音、气味、触感、光线）；③ 出现 1～2 个剧本里的具体物件或数字；"
+    + "④ 3～5 个短句，一段写完，句间用中文分号或句号；⑤ 结尾一句是你会对自己说的话；⑥ 不要标题、不要解释、不要 markdown。"
+    + (c.persona ? ("\n\n【关于服务对象】" + c.persona) : "");
+  var user = "我的剧本：\n" + items.map(function(x,i){ return (i+1) + ". " + x; }).join("\n")
+    + "\n\n今天是 " + t + "。请先输出一句场景标题（不超过 12 字），换行后再输出场景正文。";
+  aiChat(c, [{role:"system",content:sys},{role:"user",content:user}], 35).then(function(res){
+    var txt = (res.content || "").replace(/^```[a-zA-Z]*/,"").replace(/```$/,"").replace(/^\s+|\s+$/g,"");
+    if(!txt){ throw new Error("AI 返回为空"); }
+    var lines = txt.split(/\n+/).filter(function(x){ return x.trim(); });
+    var title = lines.length > 1 ? lines[0].replace(/^[「『"]?|["』」]?$/g,"").replace(/^场景标题[:：]?/,"").slice(0,20) : "推开那扇门";
+    var bodyArr = lines.length > 1 ? lines.slice(1) : lines;
+    var data2 = loadManifest();
+    data2.rehearsal = data2.rehearsal || [];
+    var rr = data2.rehearsal.find(function(x){ return x.date === t; });
+    if(!rr){ rr = {date:t, id:t}; data2.rehearsal.push(rr); }
+    rr.title = title;
+    rr.text = bodyArr.join("\n").slice(0, 600);
+    saveManifest(data2);
+    bumpFreq(t, "rehearsal");
+    renderManifest();
+    toast("今晚的排练场景好了 🌙");
+  }).catch(function(err){
+    if(box) box.innerHTML = '<div class="reh-wait" style="color:#e74c3c">生成失败：' + esc(err.message || "") + '</div>';
+  });
+}
+
+/* ---------- 身份翻译器 ---------- */
 function renderTranslator(data){
   var wall = document.getElementById("translatorWall");
   if(!wall) return;
-  var arr = (data.translator||[]).slice().reverse().slice(0,8);
-  if(!arr.length){ wall.innerHTML = '<div style="color:var(--muted);font-size:12px;text-align:center;padding:8px">把一句自我怀疑翻译成笃定的表达</div>'; return; }
+  var arr = (data.translator || []).slice().reverse().slice(0, 8);
+  if(!arr.length){ wall.innerHTML = '<div class="id-empty">把一句自我怀疑，翻译成笃定的身份陈述</div>'; return; }
   wall.innerHTML = arr.map(function(r){
-    return '<div class="inspire-item"><div class="inspire-item-text" style="color:var(--muted)">'+esc(r.from||"")+'</div><div class="inspire-item-text" style="color:var(--pink-deep);font-weight:600">'+esc(r.to||"")+'</div></div>';
+    return '<div class="id-item"><div class="id-from">' + esc(r.from || "") + '</div>'
+      + '<div class="id-arrow">↓</div>'
+      + '<div class="id-to">' + esc(r.to || "") + '</div></div>';
   }).join("");
 }
 function aiTranslate(){
   var inp = document.getElementById("translatorInput");
-  var text = (inp.value||"").trim();
+  var text = ((inp && inp.value) || "").trim();
   if(!text){ toast("写句话再翻译"); return; }
   var c = loadAIConfig();
   if(!(c.key && c.base && c.model)){ toast("请先在设置里配置 AI"); return; }
   var wall = document.getElementById("translatorWall");
-  if(wall) wall.innerHTML = '<div style="text-align:center;color:var(--muted);padding:8px">翻译中…</div>';
-  var sys = "你是语言翻译器。把用户一句带自我怀疑或负面的口头禅，改写成笃定、正向、第一人称的表达（保留原意核心）。只输出改写后的一句话，不要解释。";
+  if(wall) wall.innerHTML = '<div class="id-empty">翻译中…</div>';
+  var sys = "你是身份翻译器。把用户一句带自我怀疑或负面的口头禅，改写成笃定、正向、第一人称的身份陈述（不是目标，是身份）。"
+    + "例如「我想成为作家」→「我是一个每天都在写的人」。只输出改写后的这一句，不要解释、不要引号。";
   aiChat(c, [{role:"system",content:sys},{role:"user",content:text}], 25).then(function(res){
-    var to = (res.content||"").replace(/^["'『「]/,"").replace(/["'』」]$/,"").replace(/^```[a-zA-Z]*/,"").replace(/```$/,"").trim().slice(0,200);
+    var to = (res.content || "").replace(/^["'「『]/,"").replace(/["'」』]$/,"").replace(/^```[a-zA-Z]*/,"").replace(/```$/,"").replace(/^\s+|\s+$/g,"").slice(0,200);
     if(!to){ throw new Error("AI 返回为空"); }
     var data = loadManifest();
-    if(!data.translator) data.translator = [];
-    data.translator.push({from:text, to:to});
+    data.translator = data.translator || [];
+    data.translator.push({id:Date.now(), from:text, to:to});
     saveManifest(data);
     if(inp) inp.value = "";
     renderTranslator(data);
-    toast("已转为正向表达 ✨");
+    toast("已转成身份陈述 ✨");
   }).catch(function(err){
-    if(wall) wall.innerHTML = '<div style="color:#e74c3c;font-size:12px;text-align:center">失败：'+esc(err.message||"")+'</div>';
+    if(wall) wall.innerHTML = '<div class="id-empty" style="color:#e74c3c">失败：' + esc(err.message || "") + '</div>';
   });
 }
 
+/* ---------- 频率打卡（网格 + 最近 10 周热力图） ---------- */
 function renderFreq(data){
-  var box = document.getElementById("freqHeat");
-  if(!box) return;
-  var freq = data.freq || {};
-  var days = 70;
-  var cells = [];
-  var today = new Date();
-  for(var i=days-1;i>=0;i--){
-    var d = new Date(today); d.setDate(today.getDate()-i);
-    var ds = d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
-    var v = freq[ds]||0;
-    var color = v<=0 ? "rgba(0,0,0,.06)" : (v===1 ? "#fce4b8" : (v===2 ? "#f7b733" : "#e84393"));
-    cells.push('<div title="'+ds+'：'+(v||0)+' 次" style="width:14px;height:14px;border-radius:3px;background:'+color+'"></div>');
+  var grid = document.getElementById("freqGrid");
+  var heat = document.getElementById("freqHeat");
+  var t = todayStr();
+  var doneToday = ((data.freqDone || {})[t]) || {};
+  var custom = data.freqCustom || [];
+  if(grid){
+    var cells = FREQ_DEFAULTS.concat(custom.map(function(name){
+      return {key:"c:" + name, em:"✨", name:name, sub:"工作台外完成 · 自己打勾", custom:true};
+    }));
+    grid.innerHTML = cells.map(function(it){
+      var on = !!doneToday[it.key];
+      return '<div class="freq-cell' + (on ? " on" : "") + '" onclick="toggleFreq(\'' + esc(it.key) + '\')">'
+        + '<span class="fc-box">' + (on ? "✓" : "") + '</span>'
+        + '<span class="fc-txt"><b>' + esc((it.em || "") + " " + it.name) + '</b><i>' + esc(it.sub) + '</i></span>'
+        + (it.custom ? '<span class="fc-x" onclick="event.stopPropagation();delFreqCustom(\'' + esc(it.name) + '\')">✕</span>' : '')
+        + '</div>';
+    }).join("");
   }
-  box.innerHTML = '<div style="display:flex;flex-wrap:wrap;gap:3px;max-width:340px">'+cells.join("")+'</div><div style="font-size:11px;color:var(--muted);margin-top:6px">越红 = 当天打卡越密 ｜ 支票签名 / 感恩日记 / 剧本封存 / 自定义行为都会点亮</div>';
+  if(heat) heat.innerHTML = mHeat(data.freq || {}, 10);
+}
+function mHeat(freq, weeks){
+  var today = new Date(); today.setHours(0,0,0,0);
+  var end = new Date(today);
+  end.setDate(end.getDate() + (6 - end.getDay()));
+  var cols = [], w, d;
+  for(w = weeks-1; w >= 0; w--){
+    var cells = [];
+    for(d = 0; d < 7; d++){
+      var dt = new Date(end);
+      dt.setDate(end.getDate() - w*7 - (6 - d));
+      var ds = mYMD(dt);
+      var v = freq[ds] || 0;
+      var lv = v <= 0 ? 0 : (v <= 1 ? 1 : (v <= 2 ? 2 : (v <= 3 ? 3 : 4)));
+      var cls = dt > today ? "ft" : ("fl" + lv);
+      cells.push('<i class="' + cls + '" title="' + ds + '：' + v + ' 次"></i>');
+    }
+    cols.push('<span class="fweek">' + cells.join("") + '</span>');
+  }
+  return '<div class="fheat">' + cols.join("") + '</div>'
+    + '<div class="fheat-lg"><span>少</span><i class="fl0"></i><i class="fl1"></i><i class="fl2"></i><i class="fl3"></i><i class="fl4"></i><span>多</span></div>';
+}
+function mRecomputeFreq(data){
+  var t = todayStr();
+  data.freq = data.freq || {};
+  var n = Object.keys(((data.freqDone || {})[t]) || {}).length;
+  if(n > 0) data.freq[t] = n; else delete data.freq[t];
+  saveManifest(data);
+}
+function bumpFreq(dateStr, key){
+  var data = loadManifest();
+  data.freqDone = data.freqDone || {};
+  data.freqDone[dateStr] = data.freqDone[dateStr] || {};
+  if(key) data.freqDone[dateStr][key] = true;
+  saveManifest(data);
+  mRecomputeFreq(data);
+}
+function toggleFreq(key){
+  var data = loadManifest();
+  var t = todayStr();
+  data.freqDone = data.freqDone || {};
+  data.freqDone[t] = data.freqDone[t] || {};
+  if(data.freqDone[t][key]) delete data.freqDone[t][key];
+  else data.freqDone[t][key] = true;
+  saveManifest(data);
+  mRecomputeFreq(data);
+  renderManifest();
 }
 function addFreqCustom(){
-  var t = todayStr();
-  bumpFreq(t);
+  var inp = document.getElementById("freqInput");
+  var name = ((inp && inp.value) || "").trim();
+  if(!name){ toast("先写一个想记录的行为"); return; }
+  var data = loadManifest();
+  data.freqCustom = data.freqCustom || [];
+  if(data.freqCustom.indexOf(name) < 0) data.freqCustom.push(name);
+  saveManifest(data);
+  if(inp) inp.value = "";
   renderManifest();
-  toast("已记录一次行为 ✅");
+  toast("已加入打卡项 ✨");
+}
+function delFreqCustom(name){
+  var data = loadManifest();
+  data.freqCustom = (data.freqCustom || []).filter(function(x){ return x !== name; });
+  var t = todayStr();
+  if(data.freqDone && data.freqDone[t]) delete data.freqDone[t]["c:" + name];
+  saveManifest(data);
+  mRecomputeFreq(data);
+  renderManifest();
+  toast("已删除这一项");
 }
 
 })();
