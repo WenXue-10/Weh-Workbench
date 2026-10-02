@@ -2060,6 +2060,19 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
 .bk-smart-hint{font-size:11.5px;color:var(--muted);margin-left:auto}
 @media(max-width:640px){.bk-smart-hint{margin-left:0;width:100%}}
 
+/* 按主题搜书 */
+.bk-topic{margin-top:12px;border-top:1px dashed rgba(255,190,214,.5);padding-top:12px}
+.bk-topic-row{display:flex;gap:8px;margin-top:8px}
+.bk-topic-input{flex:1;min-width:0;padding:8px 10px;border:1px solid rgba(255,190,214,.7);border-radius:10px;font-size:13px;outline:none}
+.bk-topic-input:focus{border-color:var(--pink-deep)}
+.bk-topic-results{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-top:12px}
+.topic-card{background:rgba(255,255,255,.72);border:1px solid rgba(255,190,214,.5);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:6px}
+.topic-card img{width:100%;height:120px;object-fit:cover;border-radius:8px;background:#f3e9ff}
+.topic-card .tc-noimg{width:100%;height:120px;display:flex;align-items:center;justify-content:center;font-size:34px;border-radius:8px;background:#f3e9ff}
+.topic-card .tc-title{font-weight:600;font-size:13px;line-height:1.35;color:#3a2a4a}
+.topic-card .tc-sub{font-size:11.5px;color:#8a7a99;line-height:1.4}
+.topic-card .tc-add{margin-top:auto;align-self:flex-start;padding:5px 10px;font-size:12px;border:none;border-radius:8px;color:#fff;background:linear-gradient(135deg,var(--grad-from),var(--grad-to));cursor:pointer}
+
 </style>
 </head>
 <body>
@@ -2995,6 +3008,15 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
               <button class="inspire-action-btn bk-smart-primary" data-act="smart-fill">✨ 识别并填入表单</button>
               <button class="inspire-action-btn" data-act="smart-batch">📚 批量导入书架</button>
               <span class="bk-smart-hint" id="bookSmartHint"></span>
+            </div>
+            <div class="bk-topic">
+              <div class="bk-smart-head" style="margin-top:14px">🔍 按主题搜书 <small>不知道具体书名？输入意图，如「希腊神话」「想看讲时间管理的书」</small></div>
+              <div class="bk-topic-row">
+                <input id="bookTopicInput" class="bk-topic-input" placeholder="例如：希腊神话 / 想看关于心理学的入门书" />
+                <button class="inspire-action-btn bk-smart-primary" data-act="topic-search">🔍 搜一下</button>
+              </div>
+              <div class="bk-smart-hint" id="bookTopicHint"></div>
+              <div class="bk-topic-results" id="bookTopicResults"></div>
             </div>
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px">
@@ -6667,7 +6689,7 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
 
 <script>
 window.SITE_DATA = {
- "updated": "2026-10-03 01:29",
+ "updated": "2026-10-03 03:24",
  "stats": {
   "jobs": 58,
   "rec": 0,
@@ -29281,6 +29303,92 @@ function saveBook(){
   toast(id ? "已更新" : "已添加");
 }
 
+/* ---------- 按主题搜书：模糊意图 → 真实API优先 + AI 兜底 ---------- */
+function topicSearch(){
+  var q = (document.getElementById("bookTopicInput").value||"").trim();
+  if(!q){ toast("请输入想看的主题或意图"); return; }
+  var hint = document.getElementById("bookTopicHint");
+  var box = document.getElementById("bookTopicResults");
+  if(box) box.innerHTML = "";
+  if(hint) hint.textContent = "🔍 搜索中…";
+  fetchOpenLibrary(q).then(function(list){
+    if(hint) hint.textContent = "来自 Open Library 的真实书单（共 "+list.length+" 本）";
+    renderTopicResults(list);
+  }).catch(function(){
+    if(hint) hint.textContent = "联网搜索不可用，改用 AI 推荐…";
+    return aiTopicSearch(q).then(function(list){
+      if(hint) hint.textContent = "AI 推荐（共 "+list.length+" 本，点选加入）";
+      renderTopicResults(list);
+    }).catch(function(err){
+      if(hint) hint.textContent = "搜索失败：" + (err && err.message ? err.message : "请检查网络或 AI 配置");
+    });
+  });
+}
+function fetchOpenLibrary(q){
+  var url = "https://openlibrary.org/search.json?q=" + encodeURIComponent(q) + "&limit=12&fields=title,author_name,first_publish_year,cover_i,key";
+  var ctrl = (typeof AbortController!=="undefined") ? new AbortController() : null;
+  var to = ctrl ? setTimeout(function(){ ctrl.abort(); }, 8000) : null;
+  return fetch(url, {signal: ctrl?ctrl.signal:undefined}).then(function(r){
+    if(to) clearTimeout(to);
+    if(!r.ok) throw new Error("HTTP "+r.status);
+    return r.json();
+  }).then(function(d){
+    var docs = (d && d.docs) || [];
+    return docs.map(function(x){
+      return {
+        title: x.title || "",
+        author: (x.author_name && x.author_name[0]) || "",
+        year: x.first_publish_year || "",
+        cover: x.cover_i ? ("https://covers.openlibrary.org/b/id/"+x.cover_i+"-M.jpg") : "",
+        source: "ol"
+      };
+    }).filter(function(x){ return x.title; }).slice(0, 12);
+  });
+}
+function aiTopicSearch(q){
+  var cfg = loadAIConfig();
+  if(!cfg || !cfg.key){ return Promise.reject(new Error("未配置 AI（设置页「🤖 AI 延伸」）")); }
+  var sys = "你是阅读推荐助手。用户可能用模糊意图描述想看的书（如主题、情绪、领域），而非具体书名。请推荐 8-10 本真实存在的、最经典或最具代表性的书。只返回 JSON 数组，每个元素：{\"title\":书名,\"author\":作者,\"year\":出版年(可选,不确定留空),\"why\":一句话推荐理由}。不要编造不存在的书；只输出 JSON 数组，不要解释文字。";
+  var user = "我想看关于「"+q+"」的书，请推荐。";
+  return aiChat(cfg, [{role:"system",content:sys},{role:"user",content:user}], 25).then(function(res){
+    var arr = parseAIArray(res.content || "");
+    if(!arr || !arr.length) throw new Error("AI 未返回有效书单");
+    return arr.map(function(x){
+      return { title: x.title||"", author: x.author||"", year: x.year||"", why: x.why||"", cover:"", source:"ai" };
+    }).filter(function(x){ return x.title; });
+  });
+}
+function renderTopicResults(list){
+  var box = document.getElementById("bookTopicResults");
+  if(!box) return;
+  if(!list || !list.length){ box.innerHTML = '<div style="font-size:12.5px;color:var(--muted)">没有找到匹配的书 🔍</div>'; return; }
+  box.innerHTML = list.map(function(b){
+    var cover = b.cover ? '<img src="'+esc(b.cover)+'" alt="" onerror="this.style.display=\'none\'">'
+                        : '<div class="tc-noimg">📖</div>';
+    var sub = (b.author ? esc(b.author) : "") + (b.year ? " · "+esc(String(b.year)) : "") + (b.why ? "<br>"+esc(b.why) : "");
+    return '<div class="topic-card">'+cover
+      + '<div class="tc-title">'+esc(b.title)+'</div>'
+      + '<div class="tc-sub">'+sub+'</div>'
+      + '<button class="tc-add" data-act="topic-add" data-title="'+esc(b.title)+'" data-author="'+esc(b.author||"")+'" data-year="'+esc(String(b.year||""))+'">＋ 加入书架</button>'
+      + '</div>';
+  }).join("");
+}
+function topicAddBook(el){
+  var title = (el.getAttribute("data-title")||"").trim();
+  if(!title){ toast("缺少书名"); return; }
+  var d = loadBooks();
+  if(d.books.some(function(b){ return (b.title||"").trim() === title; })){ toast("书架上已有《"+title+"》"); return; }
+  d.books.push({
+    id: Date.now(), title: title, author: (el.getAttribute("data-author")||"").trim(),
+    category: "", type: "书", status: "想读", hours:0, partsRead:0, partsTotal:0, expect:0, score:0,
+    startDate:"", endDate:"", note:"", aiChars:null, aiPlot:null, aiPoints:null, deepThink:[], quotes:[], progress:0
+  });
+  saveBooks(d);
+  bumpLibStreak();
+  renderBooks();
+  toast("已加入《"+title+"》");
+}
+
 /* ---------- 智能添加：书名 / ISBN / 图书链接 → AI 识别 ---------- */
 /* 容错解析：只要数组（容忍 ``` 围栏、前后解释文字，以及 {"books":[...]} 这类外层包装） */
 function parseAIArray(txt){
@@ -29739,6 +29847,8 @@ document.addEventListener("click", function(e){
   else if(act==="saveBook") saveBook();
   else if(act==="smart-fill") smartFillBook();
   else if(act==="smart-batch") smartBatchImport();
+  else if(act==="topic-search") topicSearch();
+  else if(act==="topic-add") topicAddBook(el);
   else if(act==="hideBookEditor") hideBookEditor();
   else if(act==="openBook") openBook(+el.getAttribute("data-id"));
   else if(act==="lib-cat"){ libCatFilter = el.getAttribute("data-cat"); renderBooks(); }
