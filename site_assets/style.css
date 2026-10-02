@@ -1823,7 +1823,7 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
   #module-library .bk-hint{margin-left:0;width:100%}
 }
 
-/* ================= 显化·成长台 · 板块标题（英文 kicker + 中文名） ================= */
+/* ================= 显化成长台 板块标题（英文 kicker + 中文名） ================= */
 #module-manifest .mod-sec-head{display:flex;align-items:baseline;gap:10px;margin:26px 0 12px;padding-left:2px}
 #module-manifest .mod-sec-head:first-of-type{margin-top:8px}
 #module-manifest .ms-en{font-size:10.5px;letter-spacing:2px;font-weight:800;color:#c0559a;text-transform:uppercase;opacity:.85}

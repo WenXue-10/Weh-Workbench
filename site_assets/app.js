@@ -5351,7 +5351,7 @@ var TITLES = {
   home:"🏠 首页总览", money:"💰 存钱记账", health:"🍱 吃饭健康",
   inspiration:"💡 灵感捕捉", decision:"🎯 决策顾问", report:"📝 工作汇报台",
   baichuan:"📚 灵犀智库", career:"💼 SCM Career", cet6:"📖 CET-6备战", sop:"🛠️ 工作SOP",
-  daily:"📅 日计划台", todo:"✅ 待办清单", settings:"⚙️ 设置", library:"📖 读书·学习台", manifest:"🌟 显化·成长台",
+  daily:"📅 日计划台", todo:"✅ 待办清单", settings:"⚙️ 设置", library:"📖 读书学习台", manifest:"🌟 显化成长台",
   jobs:"🐾 岗位看板", companies:"🐈 目标公司池", timeline:"😺 每日日报",
   resume:"📄 简历库", knowledge:"📚 知识库"
 };
@@ -7178,8 +7178,8 @@ function renderSopCategory(){
   applyBg(); applyAv(); applyIcon();
 
 
-/* ========== 读书·学习台模块 ========== */
-/* ========== 读书·学习台模块 ========== */
+/* ========== 读书学习台模块 ========== */
+/* ========== 读书学习台模块 ========== */
 var LIB_KEY = "weh_library_data_v1";
 var LIB_DEFAULTS = {books:[], streak:{date:"", count:0}};
 var currentBookId = null;
@@ -7631,7 +7631,7 @@ function exportBookMD(){
   });
   if(b.quotes&&b.quotes.length){ md += "\n## 金句墙\n"+b.quotes.map(function(q){return "- "+(q.text||"")+" — "+(q.source||"");}).join("\n")+"\n"; }
   if(b.deepThink&&b.deepThink.length){ md += "\n## 深度思考对话\n"+b.deepThink.map(function(m){return (m.role==="user"?"**我**：":"**AI**：")+m.text;}).join("\n")+"\n"; }
-  md += "\n*由 Weh Atelier 读书·学习台导出 · "+new Date().toISOString().slice(0,10)+"*\n";
+  md += "\n*由 Weh Atelier 读书学习台导出 · "+new Date().toISOString().slice(0,10)+"*\n";
   downloadMD("《"+(b.title||"未命名")+"》读书复盘.md", md);
 }
 
@@ -7666,7 +7666,7 @@ document.addEventListener("change", function(e){
   }
 });
 
-/* ========== 显化·成长台模块 ========== */
+/* ========== 显化成长台模块 ========== */
 
 function _manBlank(){
   var d = {};
