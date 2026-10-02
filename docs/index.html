@@ -1506,30 +1506,156 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
   box-shadow:0 8px 22px rgba(224,122,166,.12);
   border-color:rgba(255,190,214,.6);
 }
-/* 标题上方英文小标签 + 模块内字号统一下调一档 */
+
+/* ===== 第二步：模块标题区（对齐「灵犀智库」版式：标题+渐变下划线+副标题） ===== */
+#module-library .page-head,
+#module-manifest .page-head{
+  position:relative;
+  margin:6px 0 20px;
+  padding:2px 4px 0;
+}
+#module-library .page-title,
+#module-manifest .page-title{
+  font-size:26px;
+  font-weight:800;
+  color:var(--text);
+  display:inline-block;
+  position:relative;
+  padding-bottom:10px;
+  letter-spacing:.3px;
+}
+#module-library .page-title::after,
+#module-manifest .page-title::after{
+  content:'';
+  position:absolute;
+  left:0;
+  bottom:0;
+  width:120px;
+  height:3px;
+  border-radius:2px;
+  background:linear-gradient(90deg,var(--pink-deep),var(--purple,var(--lav)));
+}
+#module-library .page-sub,
+#module-manifest .page-sub{
+  font-size:13px;
+  color:var(--muted);
+  margin-top:9px;
+  line-height:1.6;
+}
+/* 右上角「添加」小按钮（不再被 flex:1 拉成通栏长条） */
+.mod-add-btn{
+  position:absolute;
+  top:2px;
+  right:2px;
+  border:none;
+  border-radius:30px;
+  padding:9px 18px;
+  font-size:13px;
+  font-weight:700;
+  color:#fff;
+  cursor:pointer;
+  white-space:nowrap;
+  background:linear-gradient(135deg,var(--grad-from),var(--grad-to));
+  box-shadow:0 6px 16px var(--grad-shadow);
+  transition:transform .15s,box-shadow .15s;
+}
+.mod-add-btn:hover{transform:translateY(-1px);box-shadow:0 9px 22px var(--grad-shadow)}
+
+/* ===== 第二步：模块内表单控件（去掉浏览器默认方框，改圆角柔和） ===== */
+#module-library input:not([type="checkbox"]):not([type="radio"]),
+#module-library select,
+#module-library textarea,
+#module-manifest input:not([type="checkbox"]):not([type="radio"]),
+#module-manifest select,
+#module-manifest textarea{
+  font:inherit;
+  font-size:13px;
+  color:var(--text);
+  width:100%;
+  min-width:0;
+  padding:11px 14px;
+  border:1px solid rgba(255,200,222,.55);
+  border-radius:14px;
+  background:rgba(255,255,255,.66);
+  outline:none;
+  transition:border-color .15s,background .15s,box-shadow .15s;
+}
+#module-library input:not([type="checkbox"]):not([type="radio"]):focus,
+#module-library select:focus,
+#module-library textarea:focus,
+#module-manifest input:not([type="checkbox"]):not([type="radio"]):focus,
+#module-manifest select:focus,
+#module-manifest textarea:focus{
+  border-color:var(--pink);
+  background:#fff;
+  box-shadow:0 0 0 3px rgba(219,112,147,.12);
+}
+#module-library ::placeholder,
+#module-manifest ::placeholder{color:#c9a8ba}
+
+/* 搜索行：输入框自适应，按钮保持自身宽度（不再各占一半） */
+#module-library .mod-search-row,
+#module-manifest .mod-search-row{display:flex;gap:10px;align-items:stretch}
+#module-library .mod-search-row input,
+#module-manifest .mod-search-row input{flex:1 1 auto}
+.mod-btn-primary{
+  flex:0 0 auto;
+  border:none;
+  border-radius:14px;
+  padding:0 20px;
+  font-size:13px;
+  font-weight:700;
+  color:#fff;
+  cursor:pointer;
+  white-space:nowrap;
+  background:linear-gradient(135deg,var(--grad-from),var(--grad-to));
+  box-shadow:0 6px 16px var(--grad-shadow);
+  transition:transform .15s,box-shadow .15s;
+}
+.mod-btn-primary:hover{transform:translateY(-1px);box-shadow:0 9px 22px var(--grad-shadow)}
+
+/* 书架筛选：分类独占一行 + 搜索框整行铺满（解决过窄） */
+#module-library .lib-toolbar{display:flex;flex-direction:column;gap:10px;margin:0 0 12px}
+#module-library .lib-cats{display:flex;gap:6px;flex-wrap:wrap}
+#module-library .lib-search{width:100%}
+
+/* 显化台统计卡：三张一行 */
+#module-manifest .stat-grid{grid-template-columns:repeat(3,1fr)}
+
+/* ===== 卡片标题：英文小标签独占一行，标题与副标题保持同行 ===== */
 #module-library,
 #module-manifest{font-size:13.5px;line-height:1.7}
 #module-library .card-head,
 #module-manifest .card-head{
-  flex-direction:column;
-  align-items:flex-start;
-  gap:3px;
-  font-size:15px;
-  line-height:1.35;
+  flex-direction:row;
+  flex-wrap:wrap;
+  align-items:baseline;
+  gap:2px 8px;
+  font-size:14.5px;
+  line-height:1.4;
 }
 #module-library .card-head::before,
 #module-manifest .card-head::before{
   content:attr(data-en);
-  font-size:11px;
+  flex:0 0 100%;
+  font-size:10.5px;
   letter-spacing:1.6px;
   font-weight:700;
   text-transform:uppercase;
   color:var(--pink-deep);
-  opacity:.6;
+  opacity:.55;
 }
-/* 标题 + 计数保持同行（我的书架 / 我的目标） */
 #module-library .ch-title,
 #module-manifest .ch-title{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap}
+
+/* ===== 手机端微调 ===== */
+@media(max-width:640px){
+  #module-library .page-title,
+  #module-manifest .page-title{font-size:21px}
+  #module-library .page-sub,
+  #module-manifest .page-sub{font-size:12.5px}
+  .mod-add-btn{top:0;right:0;padding:8px 14px;font-size:12px}
+}
 
 </style>
 </head>
@@ -5032,23 +5158,24 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
 <!-- ✅ 待办清单 -->
 
       <section id="module-library" class="view">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-          <h2 style="margin:0">📖 读书·学习台</h2>
-          <button class="inspire-action-btn" style="border:none;background:linear-gradient(135deg,var(--pink-deep),#b48ed9);color:#fff" data-act="addBook">➕ 添加一本</button>
+        <div class="page-head">
+          <div class="page-title">📖 读书·学习台</div>
+          <div class="page-sub">读过的都长在身上 · 书架 / 精读 / 金句 / 作家档案</div>
+          <button class="mod-add-btn" data-act="addBook">＋ 添加一本</button>
         </div>
 
-        <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap">
-          <div class="card" style="flex:1;min-width:120px;text-align:center;padding:12px"><div style="font-size:24px;font-weight:700;color:var(--pink-deep)" id="libReading">0</div><div style="color:var(--muted);font-size:12px">在读书目</div></div>
-          <div class="card" style="flex:1;min-width:120px;text-align:center;padding:12px"><div style="font-size:24px;font-weight:700;color:var(--pink-deep)" id="libHours">0</div><div style="color:var(--muted);font-size:12px">本月阅读(h)</div></div>
-          <div class="card" style="flex:1;min-width:120px;text-align:center;padding:12px"><div style="font-size:24px;font-weight:700;color:var(--pink-deep)" id="libQuotes">0</div><div style="color:var(--muted);font-size:12px">收藏金句</div></div>
-          <div class="card" style="flex:1;min-width:120px;text-align:center;padding:12px"><div style="font-size:24px;font-weight:700;color:var(--pink-deep)" id="libStreak">0</div><div style="color:var(--muted);font-size:12px">连续打卡(天)</div></div>
+        <div class="stat-grid">
+          <div class="stat-card p1"><div class="em">📖</div><div class="lab">在读书目</div><div class="num" id="libReading">0</div></div>
+          <div class="stat-card p2"><div class="em">⏱️</div><div class="lab">本月阅读(h)</div><div class="num" id="libHours">0</div></div>
+          <div class="stat-card p3"><div class="em">💎</div><div class="lab">收藏金句</div><div class="num" id="libQuotes">0</div></div>
+          <div class="stat-card p4"><div class="em">🔥</div><div class="lab">连续打卡(天)</div><div class="num" id="libStreak">0</div></div>
         </div>
 
         <div class="card" style="margin-bottom:14px">
           <div class="card-head" data-en="AUTHOR FILES">🔍 作家吃瓜档案 <small style="color:var(--muted)">搜作家，扒他的底细</small></div>
-          <div style="display:flex;gap:8px;padding:12px">
-            <input id="authorSearch" placeholder="陀思妥耶夫斯基 / 卡夫卡 / 张爱玲…" style="flex:1" onkeydown="if(event.key==='Enter')searchAuthor()">
-            <button class="inspire-action-btn" style="border:none;background:linear-gradient(135deg,var(--pink-deep),#b48ed9);color:#fff" data-act="searchAuthor">🔎 开扒</button>
+          <div class="mod-search-row">
+            <input id="authorSearch" placeholder="陀思妥耶夫斯基 / 卡夫卡 / 张爱玲…" onkeydown="if(event.key==='Enter')searchAuthor()">
+            <button class="mod-btn-primary" data-act="searchAuthor">🔎 开扒</button>
           </div>
           <div id="authorPanel" style="padding:0 12px 12px"></div>
         </div>
@@ -5076,9 +5203,9 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
           </div>
         </div>
 
-        <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;align-items:center">
-          <div id="libCats" style="display:flex;gap:6px;flex-wrap:wrap"></div>
-          <input id="bookSearch" placeholder="搜书名/作者…" style="flex:1;min-width:120px" oninput="renderBooks()">
+        <div class="lib-toolbar">
+          <div id="libCats" class="lib-cats"></div>
+          <input id="bookSearch" class="lib-search" placeholder="搜书名 / 作者…" oninput="renderBooks()">
         </div>
 
         <div class="card">
@@ -5109,9 +5236,9 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
           <div style="padding:0 12px 12px">
             <div style="font-weight:600;margin:8px 0 6px">🧠 深度思考·AI 追问陪读</div>
             <div id="deepThinkBox" style="font-size:13px;line-height:1.7;max-height:220px;overflow:auto;background:rgba(0,0,0,.03);border-radius:10px;padding:10px"></div>
-            <div style="display:flex;gap:8px;margin-top:8px">
-              <input id="deepThinkInput" placeholder="写下你的想法，AI 会接着追问…" style="flex:1" onkeydown="if(event.key==='Enter')sendDeepThink()">
-              <button class="inspire-action-btn" style="border:none;background:linear-gradient(135deg,var(--pink-deep),#b48ed9);color:#fff" data-act="send-deep">发送</button>
+            <div class="mod-search-row" style="margin-top:8px">
+              <input id="deepThinkInput" placeholder="写下你的想法，AI 会接着追问…" onkeydown="if(event.key==='Enter')sendDeepThink()">
+              <button class="mod-btn-primary" data-act="send-deep">发送</button>
             </div>
           </div>
           <div style="padding:0 12px 12px">
@@ -5123,24 +5250,16 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
 
       <section id="module-manifest" class="view">
 
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-
-          <h2 style="margin:0">🌟 显化·成长台</h2>
-
-          <button class="inspire-action-btn" style="border:none;background:linear-gradient(135deg,var(--pink-deep),#b48ed9);color:#fff" onclick="showGoalEditor()">➕ 添加目标</button>
-
+        <div class="page-head">
+          <div class="page-title">🌟 显化·成长台</div>
+          <div class="page-sub">先相信，再看见 · 目标 / 剧本 / 取证 / 频率</div>
+          <button class="mod-add-btn" onclick="showGoalEditor()">＋ 添加目标</button>
         </div>
-
-        <div style="display:flex;gap:12px;margin-bottom:14px">
-
-          <div class="card" style="flex:1;text-align:center;padding:14px"><div style="font-size:28px;font-weight:700;color:var(--pink-deep)" id="streakDays">0</div><div style="color:var(--muted);font-size:12px">连续记录(天)</div></div>
-
-          <div class="card" style="flex:1;text-align:center;padding:14px"><div style="font-size:28px;font-weight:700;color:var(--pink-deep)" id="monthDays">0</div><div style="color:var(--muted);font-size:12px">本月记录(天)</div></div>
-
-          <div class="card" style="flex:1;text-align:center;padding:14px"><div style="font-size:28px;font-weight:700;color:var(--pink-deep)" id="goalActive">0</div><div style="color:var(--muted);font-size:12px">进行中目标</div></div>
-
+        <div class="stat-grid">
+          <div class="stat-card p1"><div class="em">🔥</div><div class="lab">连续记录(天)</div><div class="num" id="streakDays">0</div></div>
+          <div class="stat-card p2"><div class="em">📅</div><div class="lab">本月记录(天)</div><div class="num" id="monthDays">0</div></div>
+          <div class="stat-card p3"><div class="em">🎯</div><div class="lab">进行中目标</div><div class="num" id="goalActive">0</div></div>
         </div>
-
         <div id="goalEditor" class="card" style="display:none;margin-bottom:14px">
 
           <div class="card-head" data-en="SET A GOAL">🎯 <span id="goalEditorTitle">添加目标</span></div>
@@ -5179,7 +5298,7 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
 
           <div class="card-head" data-en="DAILY SCRIPT">📝 今日感想 / 日记 <small id="diaryDate" style="color:var(--muted)"></small></div>
 
-          <textarea id="diaryInput" placeholder="今天想成为谁？做了什么？感恩什么？写具体一点…" style="width:100%;min-height:70px;border:1px solid var(--line);border-radius:10px;padding:10px;font:inherit;resize:vertical"></textarea>
+          <textarea id="diaryInput" placeholder="今天想成为谁？做了什么？感恩什么？写具体一点…" style="min-height:70px;resize:vertical"></textarea>
 
           <div style="display:flex;gap:10px;margin-top:8px;flex-wrap:wrap">
 
@@ -5228,9 +5347,9 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
         <div class="card" style="margin-bottom:14px">
           <div class="card-head" data-en="REFRAME">🔄 语言翻译器 <small style="color:var(--muted)">把自我怀疑翻成笃定</small></div>
           <div style="padding:0 12px 12px">
-            <div style="display:flex;gap:8px">
-              <input id="translatorInput" placeholder="我想成为作家…" style="flex:1" onkeydown="if(event.key==='Enter')aiTranslate()">
-              <button class="inspire-action-btn" style="border:none;background:linear-gradient(135deg,var(--pink-deep),#b48ed9);color:#fff" onclick="aiTranslate()">翻译</button>
+            <div class="mod-search-row">
+              <input id="translatorInput" placeholder="我想成为作家…" onkeydown="if(event.key==='Enter')aiTranslate()">
+              <button class="mod-btn-primary" onclick="aiTranslate()">翻译</button>
             </div>
             <div id="translatorWall" class="inspire-list" style="margin-top:10px"></div>
           </div>
@@ -6126,7 +6245,7 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
 
 <script>
 window.SITE_DATA = {
- "updated": "2026-10-02 02:19",
+ "updated": "2026-10-02 13:56",
  "stats": {
   "jobs": 58,
   "rec": 0,
