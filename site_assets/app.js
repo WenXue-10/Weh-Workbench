@@ -7349,6 +7349,157 @@ function saveBook(){
   toast(id ? "已更新" : "已添加");
 }
 
+/* ---------- 智能添加：书名 / ISBN / 图书链接 → AI 识别 ---------- */
+/* 容错解析：只要数组（容忍 ``` 围栏、前后解释文字，以及 {"books":[...]} 这类外层包装） */
+function parseAIArray(txt){
+  if(!txt) return null;
+  var s = String(txt).trim().replace(/^```[a-zA-Z]*/, "").replace(/```$/, "").trim();
+  var i = s.indexOf("["), j = s.lastIndexOf("]");
+  if(i >= 0 && j > i){ s = s.slice(i, j + 1); }
+  var a = null;
+  try{ a = JSON.parse(s); }catch(e){ return null; }
+  if(Object.prototype.toString.call(a) === "[object Array]") return a;
+  if(a && typeof a === "object"){
+    for(var k in a){ if(Object.prototype.toString.call(a[k]) === "[object Array]") return a[k]; }
+  }
+  return null;
+}
+
+function smartInputLines(){
+  var el = document.getElementById("bookSmartInput");
+  var raw = (el && el.value) || "";
+  return raw.split(/\r?\n/).map(function(x){ return x.trim(); }).filter(function(x){ return x; });
+}
+function smartHint(t, color){
+  var h = document.getElementById("bookSmartHint");
+  if(!h) return;
+  h.textContent = t || "";
+  h.style.color = color || "var(--muted)";
+}
+function normBookType(t){
+  var s = String(t || "").trim();
+  if(/课|课程/.test(s)) return "课";
+  if(/文章|网文|公众号|博客|帖/.test(s)) return "文章";
+  return "书";
+}
+
+/* 链接：尽力抓网页标题（多数书站无 CORS 头，失败就忽略，交给 AI 推断） */
+function fetchPageTitle(url){
+  return new Promise(function(resolve){
+    var ctl = (typeof AbortController !== "undefined") ? new AbortController() : null;
+    var timer = setTimeout(function(){ if(ctl){ try{ ctl.abort(); }catch(e){} } }, 8000);
+    fetch(url, { signal: ctl ? ctl.signal : undefined }).then(function(r){ return r.text(); })
+      .then(function(html){
+        clearTimeout(timer);
+        var m = /<title[^>]*>([\s\S]*?)<\/title>/i.exec(html || "");
+        resolve(m ? m[1].replace(/\s+/g, " ").trim().slice(0, 120) : "");
+      }).catch(function(){ clearTimeout(timer); resolve(""); });
+  });
+}
+
+var BOOK_SMART_SYS = "你是图书信息识别助手，服务对象是一位中文用户。用户给你的每一行文本可能是：书名、ISBN（10 位或 13 位数字）、或图书页面链接（豆瓣 / 微信读书 / 京东等），也可能带一句简介。"
+  + "请识别出图书信息。信息不确定时按你的知识合理补全，拿不准的字段就留空，不要编造不存在的细节，也不要写解释。";
+
+function buildSmartMessages(lines, batch, urlTitles){
+  var extra = "";
+  if(urlTitles && urlTitles.length){
+    extra = "\n【链接抓到的网页标题（有噪音，仅供参考）】\n" + urlTitles.map(function(t, i){ return (i + 1) + ". " + t; }).join("\n");
+  }
+  var body2 = lines.map(function(x, i){ return (batch ? (i + 1) + ". " : "") + x; }).join("\n");
+  var schema = batch
+    ? "只输出一个 JSON 数组，条数与输入行数**完全一致**："
+      + '[{"title":"书名","author":"作者","category":"分类","type":"书|课|文章"}]'
+      + "\n识别不出的行，title 填原文、其余字段填空字符串。"
+    : "只输出一个 JSON 对象："
+      + '{"title":"书名","author":"作者","category":"分类（如 俄国文学 / 心理成长）","type":"书|课|文章","partsTotal":总部分数(整数,不确定填0),"expect":期待值1-5的整数,"note":"一句话简介，不超过 40 字"}';
+  var user = "要识别的文本：\n" + body2 + extra + "\n\n" + schema
+    + "\n注意：不要输出解释文字、不要 markdown 代码块、不要出现「JSON」「字段」这些字样。";
+  return [{ role: "system", content: BOOK_SMART_SYS }, { role: "user", content: user }];
+}
+
+function aiBookLookup(lines, batch){
+  var c = loadAIConfig();
+  if(!(c.key && c.base && c.model)){ return Promise.reject(new Error("请先在设置里配置 AI")); }
+  var urls = lines.filter(function(x){ return /^https?:\/\//i.test(x); }).slice(0, 5);
+  var pre = urls.length ? Promise.all(urls.map(fetchPageTitle)) : Promise.resolve([]);
+  return pre.then(function(titles){
+    var good = (titles || []).filter(function(t){ return t; });
+    return aiChat(c, buildSmartMessages(lines, batch, good), 50);
+  }).then(function(res){
+    if(batch){
+      var a = parseAIArray(res.content);
+      if(!a || !a.length){ throw new Error("AI 返回无法解析成列表"); }
+      return a;
+    }
+    var o = parseAIJSON(res.content);
+    if(!o){ throw new Error("AI 返回无法解析成 JSON"); }
+    return o;
+  });
+}
+
+/* 单本：识别后填入表单，用户核对再保存 */
+function smartFillBook(){
+  var lines = smartInputLines();
+  if(!lines.length){ toast("先输入书名 / ISBN / 链接"); return; }
+  if(lines.length > 1){ smartBatchImport(); return; }
+  smartHint("识别中…");
+  aiBookLookup(lines, false).then(function(o){
+    showBookEditor();
+    if(o.title) document.getElementById("bookTitle").value = String(o.title).trim();
+    if(o.author) document.getElementById("bookAuthor").value = String(o.author).trim();
+    if(o.category) document.getElementById("bookCategory").value = String(o.category).trim();
+    var selT = document.getElementById("bookType");
+    if(selT && o.type) selT.value = normBookType(o.type);
+    var pt = parseInt(o.partsTotal, 10) || 0;
+    if(pt > 0) document.getElementById("bookPartsTotal").value = pt;
+    var ex = parseInt(o.expect, 10) || 0;
+    if(ex > 0) document.getElementById("bookExpect").value = Math.min(Math.max(ex, 1), 5);
+    var noteEl = document.getElementById("bookNote");
+    if(noteEl && !String(noteEl.value || "").trim() && o.note) noteEl.value = String(o.note).trim();
+    var t = document.getElementById("bookSmartInput"); if(t) t.value = "";
+    smartHint("✅ 已填入，核对后点「💾 保存」", "#2e7d32");
+    toast("✨ 已识别，对一下再保存");
+  }).catch(function(err){ smartHint("失败：" + (err.message || ""), "#e74c3c"); });
+}
+
+/* 批量：一次建多条「想读」，同名自动跳过 */
+function smartBatchImport(){
+  var lines = smartInputLines();
+  if(!lines.length){ toast("先输入书名 / ISBN / 链接，一行一本"); return; }
+  if(lines.length === 1){ smartFillBook(); return; }
+  if(lines.length > 60){ toast("一次最多 60 本"); return; }
+  smartHint("正在识别 " + lines.length + " 本…");
+  aiBookLookup(lines, true).then(function(arr){
+    var d = loadBooks();
+    var have = {};
+    d.books.forEach(function(b){ have[String(b.title || "").trim()] = 1; });
+    var added = 0, skipped = 0, base = Date.now();
+    arr.slice(0, lines.length).forEach(function(o, i){
+      var title = String((o && (o.title || o.name)) || "").trim();
+      if(!title || have[title]){ skipped++; return; }
+      have[title] = 1;
+      var rec = {
+        id: base + i, title: title,
+        author: String(o.author || "").trim(),
+        category: String(o.category || "").trim(),
+        type: normBookType(o.type),
+        status: "想读", hours: 0, partsRead: 0, partsTotal: 0,
+        expect: 0, score: 0, startDate: "", endDate: "", note: "",
+        aiChars: null, aiPlot: null, aiPoints: null, deepThink: [], quotes: []
+      };
+      rec.progress = bookPct(rec);
+      d.books.push(rec);
+      added++;
+    });
+    saveBooks(d);
+    bumpLibStreak();
+    renderBooks(); renderLibStats(); renderBookPicker();
+    var t = document.getElementById("bookSmartInput"); if(t) t.value = "";
+    smartHint("✅ 已导入 " + added + " 本" + (skipped ? ("，跳过 " + skipped + " 本（重名或识别为空）") : ""), "#2e7d32");
+    toast("📚 已导入 " + added + " 本");
+  }).catch(function(err){ smartHint("失败：" + (err.message || ""), "#e74c3c"); });
+}
+
 function openBook(id){
   var d = loadBooks();
   var b = d.books.find(function(x){return x.id===id;});
@@ -7654,6 +7805,8 @@ document.addEventListener("click", function(e){
   var act = el.getAttribute("data-act");
   if(act==="addBook") showBookEditor();
   else if(act==="saveBook") saveBook();
+  else if(act==="smart-fill") smartFillBook();
+  else if(act==="smart-batch") smartBatchImport();
   else if(act==="hideBookEditor") hideBookEditor();
   else if(act==="openBook") openBook(+el.getAttribute("data-id"));
   else if(act==="lib-cat"){ libCatFilter = el.getAttribute("data-cat"); renderBooks(); }

@@ -477,6 +477,15 @@
 
         <div id="bookEditor" class="card" style="display:none;margin-bottom:14px">
           <div class="card-head" data-en="ADD A BOOK">📝 <span id="bookEditorTitle">添加一本书</span></div>
+          <div class="bk-smart">
+            <div class="bk-smart-head">✨ 智能添加 <small>书名 / ISBN / 豆瓣·微信读书链接，一行一本（多行＝批量导入）</small></div>
+            <textarea id="bookSmartInput" placeholder="例：&#10;罪与罚&#10;9787532725694&#10;https://book.douban.com/subject/1001733/&#10;（粘多行就一次导入多本）"></textarea>
+            <div class="bk-smart-btns">
+              <button class="inspire-action-btn bk-smart-primary" data-act="smart-fill">✨ 识别并填入表单</button>
+              <button class="inspire-action-btn" data-act="smart-batch">📚 批量导入书架</button>
+              <span class="bk-smart-hint" id="bookSmartHint"></span>
+            </div>
+          </div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px">
             <input id="bookTitle" placeholder="书名 / 课程名">
             <input id="bookAuthor" placeholder="作者 / 讲师">
