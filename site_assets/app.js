@@ -7208,7 +7208,8 @@ function renderLibCats(){
   var cats = ["全部"];
   d.books.forEach(function(b){ if(b.category && cats.indexOf(b.category)<0) cats.push(b.category); });
   box.innerHTML = cats.map(function(c){
-    return '<span class="inspire-action-btn" data-act="lib-cat" data-cat="'+esc(c)+'" style="font-size:12px;padding:3px 10px">'+(c==="全部"?"📂 全部":c)+'</span>';
+    var on = (c===libCatFilter) ? " active" : "";
+    return '<span class="lib-cat-pill'+on+'" data-act="lib-cat" data-cat="'+esc(c)+'">'+(c==="全部"?"📂 全部":esc(c))+'</span>';
   }).join("");
 }
 
@@ -7218,17 +7219,18 @@ function bookPct(b){
 }
 
 function renderBooks(){
-  var bs = document.getElementById("bookSearch");
+  var bs = document.getElementById("libTopSearch");
   libSearchFilter = bs ? (bs.value||"") : "";
   var d = loadBooks();
   renderLibStats();
   renderLibCats();
+  renderBookPicker();
   var list = document.getElementById("bookList");
   var count = document.getElementById("bookCount");
   if(count) count.textContent = d.books.length + " 本";
   if(!list) return;
   if(d.books.length === 0){
-    list.innerHTML = '<div style="text-align:center;color:var(--muted);padding:32px 16px;font-size:13px">书架还空着<br>点右上角「添加一本」，开始沉淀你的阅读～</div>';
+    list.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--muted);padding:26px 16px;font-size:13px">书架还空着<br>点下方「＋ 添加一本书」，开始沉淀你的阅读～</div>';
     return;
   }
   var kw = (libSearchFilter||"").trim().toLowerCase();
@@ -7238,7 +7240,7 @@ function renderBooks(){
     return true;
   });
   if(arr.length===0){
-    list.innerHTML = '<div style="text-align:center;color:var(--muted);padding:24px;font-size:13px">没有匹配的书 🔍</div>';
+    list.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--muted);padding:20px;font-size:13px">没有匹配的书 🔍</div>';
     return;
   }
   arr.sort(function(a,b){ return (b.id||0)-(a.id||0); });
@@ -7246,15 +7248,27 @@ function renderBooks(){
   list.innerHTML = arr.map(function(b){
     var pct = bookPct(b);
     var activeCls = b.id===currentBookId ? " active" : "";
-    var typeIcon = (b.type==="课")?"🎓":((b.type==="文章")?"📄":"📘");
     var off = C*(1-pct/100);
-    var ring = '<svg width="46" height="46" viewBox="0 0 46 46"><circle cx="23" cy="23" r="19" fill="none" stroke="rgba(0,0,0,.08)" stroke-width="5"/><circle cx="23" cy="23" r="19" fill="none" stroke="#b48ed9" stroke-width="5" stroke-linecap="round" stroke-dasharray="'+C+'" stroke-dashoffset="'+off+'" transform="rotate(-90 23 23)"/></svg>';
-    var sub = (b.partsTotal?("第"+(b.partsRead||0)+"/"+b.partsTotal+"部分 · "):"") + (b.status||"想读");
-    return '<div class="inspire-item'+activeCls+'" data-act="openBook" data-id="'+b.id+'">'
-      +'<div style="position:relative;width:46px;height:46px;flex:0 0 auto">'+ring+'<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600">'+pct+'%</div></div>'
-      +'<div class="inspire-item-text" style="flex:1">'+typeIcon+' '+esc(b.title||"未命名")+' <span style="color:var(--muted);font-size:12px">'+esc(sub)+'</span><br><span style="color:var(--muted);font-size:12px">'+esc(b.author||"")+(b.hours?(" · "+b.hours+"h"):"")+'</span></div>'
+    var ring = '<svg width="54" height="54" viewBox="0 0 46 46"><circle cx="23" cy="23" r="19" fill="none" stroke="rgba(0,0,0,.07)" stroke-width="4"/><circle cx="23" cy="23" r="19" fill="none" stroke="#c0559a" stroke-width="4" stroke-linecap="round" stroke-dasharray="'+C+'" stroke-dashoffset="'+off+'" transform="rotate(-90 23 23)"/></svg>';
+    var sub = b.partsTotal ? ("在读 · 第"+(b.partsRead||0)+"/"+b.partsTotal+"部分") : (b.status||"想读");
+    return '<div class="lib-book'+activeCls+'" data-act="openBook" data-id="'+b.id+'">'
+      +'<div style="position:relative;width:54px;height:54px">'+ring+'<div class="lb-pct" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">'+pct+'%</div></div>'
+      +'<div class="lb-title">'+esc(b.title||"未命名")+'</div>'
+      +'<div class="lb-sub">'+esc(sub)+'</div>'
+      +'<div class="lb-go">✏️ 记进度</div>'
       +'</div>';
   }).join("");
+}
+
+function renderBookPicker(){
+  var sel = document.getElementById("bookPicker");
+  if(!sel) return;
+  var d = loadBooks();
+  var opts = '<option value="">— 选一本在读的书 —</option>';
+  d.books.slice().sort(function(a,b){ return (b.id||0)-(a.id||0); }).forEach(function(b){
+    opts += '<option value="'+b.id+'"'+(b.id===currentBookId?" selected":"")+'>'+esc(b.title||"未命名")+'</option>';
+  });
+  sel.innerHTML = opts;
 }
 
 function showBookEditor(id){
@@ -7369,8 +7383,9 @@ function aiReadOption(type){
   var box = document.getElementById("bookReadOut");
   if(box) box.innerHTML = '<div style="color:var(--muted);padding:10px">AI 精读中…</div>';
   var label = type==="chars"?"一口气理清全书人物关系":type==="plot"?"一口气提炼全书重点":"一口气讲清这本书讲了什么";
-  var sys = "你是读书复盘助手，中文输出。要求：先给一句不超过40字的高亮结论，再用编号列表逐条展开（每条不超过60字），禁止糊成一大段。";
-  var user = "书名：《"+(b.title||"未命名")+"》\n作者："+(b.author||"未知")+"\n类型："+(b.type||"书")+"\n我的备注："+(b.note||"无")+"\n\n任务："+label+"\n只输出一个JSON：{\"summary\":\"一句结论\",\"items\":[\"要点1\",\"要点2\"]}";
+  document.querySelectorAll("#module-library .bk-opt").forEach(function(x){ x.classList.toggle("on", x.getAttribute("data-opt")===type); });
+  var sys = "你是读书复盘助手，中文输出。要求：先给一句不超过 40 字的高亮结论；再给 3-5 条要点，每条含一个最贴切的 emoji 图标、一个不超过 12 字的小标题、一句不超过 50 字的说明。禁止糊成一大段。";
+  var user = "书名：《"+(b.title||"未命名")+"》\n作者："+(b.author||"未知")+"\n类型："+(b.type||"书")+"\n我的备注："+(b.note||"无")+"\n\n任务："+label+"\n只输出一个JSON：{\"summary\":\"一句结论\",\"items\":[{\"icon\":\"emoji\",\"title\":\"小标题\",\"desc\":\"一句说明\"}]}";
   aiChat(c, [{role:"system",content:sys},{role:"user",content:user}], 45).then(function(res){
     var o = parseExtJSON(res.content);
     if(!o){ throw new Error("AI 返回无法解析成 JSON"); }
@@ -7389,12 +7404,18 @@ function renderBookRead(){
   if(!b){ box.innerHTML=""; return; }
   var parts = [];
   [["👥 人物关系",b.aiChars],["📌 全书重点",b.aiPlot],["📖 讲了什么",b.aiPoints]].forEach(function(p){
-    if(p[1]){
-      parts.push("<p style='margin:8px 0'><b>"+p[0]+"</b><br><span style='color:var(--pink-deep)'>"+esc(p[1].summary||"")+"</span></p>");
-      if(p[1].items) parts.push("<ol style='margin:4px 0 4px 18px'>"+p[1].items.map(function(t){return "<li>"+esc(t)+"</li>";}).join("")+"</ol>");
+    var o = p[1];
+    if(!o) return;
+    parts.push('<div class="bk-sec">'+p[0]+'</div>');
+    if(o.summary) parts.push('<div class="bk-quote"><span class="bq-tag">💡 一句话版</span>'+esc(o.summary)+'</div>');
+    if(o.items && o.items.length){
+      parts.push(o.items.map(function(it,i){
+        if(typeof it === "string") return '<div class="bk-item"><div class="bi-ico">'+(i+1)+'</div><div><div class="bi-d">'+esc(it)+'</div></div></div>';
+        return '<div class="bk-item"><div class="bi-ico">'+esc(it.icon||String(i+1))+'</div><div><div class="bi-t">'+esc(it.title||"")+'</div><div class="bi-d">'+esc(it.desc||"")+'</div></div></div>';
+      }).join(""));
     }
   });
-  box.innerHTML = parts.length ? parts.join("") : '<div style="color:var(--muted);font-size:13px">点上方三个按钮，让 AI 帮你精读这本书</div>';
+  box.innerHTML = parts.length ? parts.join("") : '<div style="color:var(--muted);font-size:13px;padding:8px 0">先在上一行选一本书，再点上面三个选项 👆</div>';
 }
 
 function sendDeepThink(){
@@ -7457,9 +7478,9 @@ function renderQuotes(){
   if(!wall) return;
   var d = loadBooks();
   var b = d.books.find(function(x){return x.id===currentBookId;});
-  if(!b || !b.quotes || !b.quotes.length){ wall.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:10px">点「✨ 金句墙」让 AI 帮你摘抄值得记的话</div>'; return; }
+  if(!b || !b.quotes || !b.quotes.length){ wall.innerHTML = '<div style="grid-column:1/-1;color:var(--muted);font-size:12.5px;padding:6px 0">点右上角「✨ 换一批」，让 AI 从这本书里挑几句值得记的话</div>'; return; }
   wall.innerHTML = b.quotes.map(function(q,i){
-    return '<div class="inspire-item"><div class="inspire-item-text">💎 '+esc(q.text||"")+'<br><span style="color:var(--muted);font-size:12px">— '+esc(q.source||"")+'</span></div><button class="inspire-action-btn" data-act="copy-quote" data-i="'+i+'">复制</button></div>';
+    return '<div class="quote-card"><div class="qc-mark">\u201c</div><div class="qc-t">'+esc(q.text||"")+'</div><div class="qc-s"><span>\u2014 '+esc(q.source||"")+'</span><button class="inspire-action-btn" style="font-size:11px;padding:1px 8px;margin-left:auto" data-act="copy-quote" data-i="'+i+'">复制</button></div></div>';
   }).join("");
 }
 function copyQuote(i){
@@ -7487,7 +7508,7 @@ function searchAuthor(){
     if(panel) panel.innerHTML = '<div style="color:#e74c3c;font-size:13px;padding:10px">请先在设置配置 AI 才能扒作家底细</div>';
     return;
   }
-  var sys = "你是文学八卦小报主编。给一位作家做『吃瓜式』档案，幽默但有依据。输出JSON：{\"name\":\"\",\"zodiac\":\"星座\",\"mbti\":\"MBTI猜测\",\"mbtiReason\":\"一句话理由\",\"hiddenSkill\":\"隐藏技能\",\"timeline\":[{\"year\":\"年份/时期\",\"text\":\"奇闻/翻车/成就\"}],\"relations\":[{\"name\":\"相关作家\",\"type\":\"like|hate|reconcile|mentor\",\"note\":\"两人恩怨一句话\"}],\"booklist\":[{\"title\":\"代表作\",\"stars\":4,\"reason\":\"推荐理由一句\"}]}";
+  var sys = "你是文学八卦小报主编。给一位作家做『吃瓜式』档案，幽默但有依据。输出JSON：{\"name\":\"\",\"enName\":\"英文名\",\"years\":\"生卒年 例 1821-1881\",\"avatar\":\"一个最贴切的 emoji\",\"zodiac\":\"星座\",\"mbti\":\"MBTI猜测\",\"mbtiReason\":\"一句话理由\",\"hiddenSkill\":\"隐藏技能\",\"timeline\":[{\"year\":\"年份/时期\",\"text\":\"奇闻/翻车/成就\"}],\"relations\":[{\"name\":\"相关作家\",\"type\":\"like|hate|reconcile|mentor\",\"note\":\"两人恩怨一句话\"}],\"booklist\":[{\"title\":\"代表作\",\"stars\":4,\"reason\":\"推荐理由一句\"}]}";
   var user = "作家："+name+"\n给出完整吃瓜档案，时间线至少4条，关系至少3个，书单至少3本。";
   aiChat(c, [{role:"system",content:sys},{role:"user",content:user}], 50).then(function(res){
     var o = parseExtJSON(res.content);
@@ -7506,35 +7527,47 @@ function renderAuthor(a){
   currentAuthorName = a.name||"";
   var panel = document.getElementById("authorPanel");
   if(!panel) return;
-  var tl = (a.timeline||[]).map(function(t){ return '<div style="margin:6px 0;padding:8px 10px;background:rgba(0,0,0,.03);border-radius:8px"><b style="color:var(--pink-deep)">'+(t.year||"")+'</b> '+(t.text||"")+'</div>'; }).join("");
-  var meta = '<div style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0">'
+  var tl = (a.timeline||[]).map(function(t){
+    return '<div class="au-tl-item"><div class="au-tl-y">'+esc(t.year||"")+'</div><div class="au-tl-t">'+esc(t.text||"")+'</div></div>';
+  }).join("");
+  var meta = '<div class="au-chips">'
     + chip("🔮 "+(a.zodiac||"未知星座"))
-    + chip("🧠 MBTI: "+(a.mbti||"?")+(a.mbtiReason?(" ("+a.mbtiReason+")"):""))
+    + chip("🧠 MBTI 预测: "+(a.mbti||"?")+(a.mbtiReason?("（"+a.mbtiReason+"）"):""))
     + chip("🎯 隐藏技能: "+(a.hiddenSkill||"无"))
     + '</div>';
+  var head = '<div class="au-head"><div class="au-avatar">'+esc(a.avatar||"✍️")+'</div><div>'
+    + '<div class="au-name">'+esc(a.name||"")+'</div>'
+    + '<div class="au-en">'+esc(a.enName||"")+(a.years?(' · '+esc(a.years)):'')+'</div>'
+    + '</div></div>';
   var svg = renderAuthorGraph(a);
-  var legend = '<div style="font-size:12px;color:var(--muted);margin:6px 0">🔴喜欢 🟠讨厌 🟢和解 🟣亦师亦友 ｜ 点节点看恩怨</div>';
-  var relNote = '<div id="authorRelNote" style="font-size:13px;min-height:20px;color:var(--muted)"></div>';
+  var legend = '<div class="au-legend">🔴 喜欢 ｜ 🟣 亦师亦友 ｜ 🟠 讨厌 ｜ 🟢 和解</div>';
+  var relNote = '<div id="authorRelNote" class="au-relnote"></div>';
   var bl = (a.booklist||[]).map(function(bk){
-    var s = (bk.stars||0); var stars = "★★★★★".slice(0,s) + "☆☆☆☆☆".slice(0,5-s);
-    return '<div style="margin:6px 0;padding:8px 10px;background:rgba(0,0,0,.03);border-radius:8px"><b>'+esc(bk.title||"")+'</b> <span style="color:#f1c40f">'+stars+'</span><br><span style="color:var(--muted);font-size:12px">'+esc(bk.reason||"")+'</span></div>';
+    var st = (bk.stars||0); var stars = "★★★★★".slice(0,st) + "☆☆☆☆☆".slice(0,5-st);
+    return '<div class="au-book"><div class="au-bk-l"><b>'+esc(bk.title||"")+'</b> <span style="color:#f1c40f">'+stars+'</span></div><div class="au-bk-r">'+esc(bk.reason||"")+'</div></div>';
   }).join("");
-  panel.innerHTML = '<div style="font-weight:700;font-size:15px;margin-bottom:4px">🗂 '+esc(a.name||"")+' 的吃瓜档案</div>'+meta+'<div style="font-weight:600;margin:8px 0 4px">📜 时间线</div>'+tl+'<div style="font-weight:600;margin:10px 0 4px">🕸 文坛关系图</div>'+svg+legend+relNote+'<div style="font-weight:600;margin:10px 0 4px">📚 恩怨书单</div>'+bl;
+  panel.innerHTML = head + meta
+    + '<div class="au-sec">📜 时间线</div><div class="au-tl">' + tl + '</div>'
+    + '<div class="au-sec">🕸 文坛爱恨情仇图 <small>点节点看恩怨</small></div>' + svg + legend + relNote
+    + '<div class="au-sec">⚔️ 恩怨书单 · 顺着关系图往下读</div>' + bl;
 }
+function relLabel(t){ return t==="like"?"❤️ 喜欢":t==="hate"?"💥 撕过":t==="reconcile"?"🕊 和解":"🤝 亦师亦友"; }
 function renderAuthorGraph(a){
   var rel = a.relations||[];
   if(!rel.length) return '<div style="color:var(--muted);font-size:13px">暂无关系数据</div>';
-  var cx=300, cy=150, r=110, n=rel.length;
-  var parts = ['<svg viewBox="0 0 600 300" width="100%" style="max-width:600px">'];
-  parts.push('<circle cx="'+cx+'" cy="'+cy+'" r="34" fill="#b48ed9"/><text x="'+cx+'" y="'+(cy+5)+'" text-anchor="middle" fill="#fff" font-size="12">'+esc(a.name||"")+'</text>');
+  var cx=300, cy=160, r=122, n=rel.length;
+  var parts = ['<svg viewBox="0 0 600 320" width="100%" style="max-width:600px">'];
+  parts.push('<circle cx="'+cx+'" cy="'+cy+'" r="40" fill="#8f6fd0"/><text x="'+cx+'" y="'+(cy+5)+'" text-anchor="middle" fill="#fff" font-size="12" style="pointer-events:none">'+esc(a.name||"")+'</text>');
   rel.forEach(function(rl,i){
     var ang = (Math.PI*2/n)*i - Math.PI/2;
     var x = cx + Math.cos(ang)*r, y = cy + Math.sin(ang)*r;
-    var color = rl.type==="like"?"#e74c3c":rl.type==="hate"?"#f39c12":rl.type==="reconcile"?"#2ecc71":"#8e44ad";
+    var color = rl.type==="like"?"#e8446b":rl.type==="hate"?"#f39c12":rl.type==="reconcile"?"#2ecc71":"#8f6fd0";
     var dash = rl.type==="like"?"":rl.type==="hate"?"stroke-dasharray=\"6 5\"":rl.type==="reconcile"?"stroke-dasharray=\"2 6\"":"";
-    parts.push('<line x1="'+cx+'" y1="'+cy+'" x2="'+x+'" y2="'+y+'" stroke="'+color+'" stroke-width="2" '+dash+'/>');
-    parts.push('<circle cx="'+x+'" cy="'+y+'" r="26" fill="#fff" stroke="'+color+'" stroke-width="2" data-rel="'+esc(rl.name)+'" style="cursor:pointer"/>');
-    parts.push('<text x="'+x+'" y="'+(y+4)+'" text-anchor="middle" font-size="11">'+esc(rl.name)+'</text>');
+    parts.push('<line x1="'+cx+'" y1="'+cy+'" x2="'+x+'" y2="'+y+'" stroke="'+color+'" stroke-width="1.8" '+dash+' opacity=".85"/>');
+    parts.push('<circle cx="'+x+'" cy="'+y+'" r="28" fill="#fff" stroke="'+color+'" stroke-width="1.8" data-rel="'+esc(rl.name)+'" style="cursor:pointer"/>');
+    parts.push('<text x="'+x+'" y="'+(y+4)+'" text-anchor="middle" font-size="11" fill="#5a4652" style="pointer-events:none">'+esc(rl.name)+'</text>');
+    var lx = cx + Math.cos(ang)*r*0.6, ly = cy + Math.sin(ang)*r*0.6;
+    parts.push('<text x="'+lx+'" y="'+ly+'" text-anchor="middle" font-size="9.5" fill="'+color+'" style="pointer-events:none">'+esc(relLabel(rl.type))+'</text>');
   });
   parts.push('</svg>');
   return parts.join("");
@@ -7606,6 +7639,13 @@ document.addEventListener("click", function(e){
   else if(act==="bk-export") exportBookMD();
   else if(act==="bk-delete") deleteCurrentBook();
   else if(act==="searchAuthor") searchAuthor();
+});
+
+document.addEventListener("change", function(e){
+  if(e.target && e.target.id === "bookPicker"){
+    var v = parseInt(e.target.value, 10);
+    if(v) openBook(v);
+  }
 });
 
 /* ========== 显化·成长台模块 ========== */

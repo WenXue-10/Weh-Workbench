@@ -1478,14 +1478,15 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
   textarea.ai-input{width:100%}
 }
 
-/* ===== 读书台 / 显化台 · 视觉对齐（第一步） ===== */
+/* ===== 读书台 / 显化台 · 卡片软化 ===== */
 /* 仅软化「带标题的内容卡片」，顶部统计小卡与其他模块保持一致 */
 #module-library > .card:has(.card-head),
 #module-manifest > .card:has(.card-head){
-  background:rgba(255,244,248,.6);
-  border:1px solid rgba(255,200,222,.42);
+  background:rgba(255,246,250,.62);
+  border:1px solid rgba(255,203,224,.5);
   border-radius:22px;
-  box-shadow:0 3px 14px rgba(224,122,166,.07);
+  padding:18px 18px 16px;
+  box-shadow:0 3px 16px rgba(224,122,166,.07);
   backdrop-filter:blur(var(--blur-radius)) saturate(1.2);
   -webkit-backdrop-filter:blur(var(--blur-radius)) saturate(1.2);
   transition:transform .18s,box-shadow .18s,border-color .18s;
@@ -1493,8 +1494,8 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
 #module-library > .card:has(.card-head):hover,
 #module-manifest > .card:has(.card-head):hover{
   transform:translateY(-2px);
-  box-shadow:0 8px 22px rgba(224,122,166,.12);
-  border-color:rgba(255,190,214,.6);
+  box-shadow:0 10px 26px rgba(224,122,166,.13);
+  border-color:rgba(255,190,214,.65);
 }
 
 /* ===== 第二步：模块标题区（对齐「灵犀智库」版式：标题+渐变下划线+副标题） ===== */
@@ -1612,31 +1613,37 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
 /* 显化台统计卡：三张一行 */
 #module-manifest .stat-grid{grid-template-columns:repeat(3,1fr)}
 
-/* ===== 卡片标题：英文小标签独占一行，标题与副标题保持同行 ===== */
+/* ===== 卡片标题：左侧英文小标签 + 中文标题同行，副标题靠右 ===== */
 #module-library,
 #module-manifest{font-size:13.5px;line-height:1.7}
 #module-library .card-head,
 #module-manifest .card-head{
+  display:flex;
   flex-direction:row;
   flex-wrap:wrap;
   align-items:baseline;
-  gap:2px 8px;
-  font-size:14.5px;
+  gap:4px 10px;
+  font-size:16px;
+  font-weight:700;
   line-height:1.4;
+  margin-bottom:12px;
 }
 #module-library .card-head::before,
 #module-manifest .card-head::before{
   content:attr(data-en);
-  flex:0 0 100%;
+  flex:0 0 auto;
   font-size:10.5px;
-  letter-spacing:1.6px;
-  font-weight:700;
+  letter-spacing:1.7px;
+  font-weight:800;
   text-transform:uppercase;
   color:var(--pink-deep);
-  opacity:.55;
+  opacity:.72;
+  white-space:nowrap;
 }
+#module-library .card-head small,
+#module-manifest .card-head small{margin-left:auto;font-size:11.5px;color:var(--muted);font-weight:400}
 #module-library .ch-title,
-#module-manifest .ch-title{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap}
+#module-manifest .ch-title{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;font-size:16px}
 
 /* ===== 手机端微调 ===== */
 @media(max-width:640px){
@@ -1645,4 +1652,173 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
   #module-library .page-sub,
   #module-manifest .page-sub{font-size:12.5px}
   .mod-add-btn{top:0;right:0;padding:8px 14px;font-size:12px}
+}
+
+
+/* ================= 读书台 · 顶部搜索 + 分类栏 ================= */
+.lib-searchbar{
+  display:flex;align-items:center;gap:9px;
+  background:rgba(255,255,255,.78);
+  border:1px solid rgba(255,203,224,.6);
+  border-radius:16px;
+  padding:11px 15px;
+  margin:0 0 12px;
+  box-shadow:0 2px 10px rgba(224,122,166,.06);
+}
+.lib-searchbar .ls-ico{font-size:14px;opacity:.55}
+.lib-searchbar input{flex:1;border:none;background:transparent;outline:none;font-size:13.5px;color:inherit}
+#module-library .lib-cats{display:flex;gap:7px;flex-wrap:wrap;margin:0 0 14px}
+#module-library .lib-cat-pill{
+  font-size:12px;padding:5px 13px;border-radius:20px;cursor:pointer;white-space:nowrap;
+  background:rgba(255,255,255,.65);
+  border:1px solid rgba(255,203,224,.55);
+  color:#8a5f79;transition:.16s;
+}
+#module-library .lib-cat-pill:hover{background:rgba(255,255,255,.95)}
+#module-library .lib-cat-pill.active{
+  background:linear-gradient(135deg,#c0559a,#8f6fd0);
+  color:#fff;border-color:transparent;
+  box-shadow:0 3px 10px rgba(192,85,154,.28);
+}
+
+/* ================= 读书台 · 书架卡片网格 ================= */
+#module-library .lib-shelf{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(148px,1fr));
+  gap:10px;
+}
+#module-library .lib-book{
+  display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px;
+  padding:14px 12px;border-radius:16px;cursor:pointer;transition:.18s;
+  background:rgba(255,255,255,.62);
+  border:1px solid rgba(255,203,224,.45);
+}
+#module-library .lib-book:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(224,122,166,.13)}
+#module-library .lib-book.active{border-color:#c0559a;box-shadow:0 0 0 1.5px rgba(192,85,154,.32)}
+#module-library .lb-pct{font-size:11.5px;font-weight:700;color:#c0559a}
+#module-library .lb-title{font-size:13.5px;font-weight:600;line-height:1.35}
+#module-library .lb-sub{font-size:11px;color:var(--muted)}
+#module-library .lb-go{font-size:11px;color:#c0559a;margin-top:1px;opacity:.85}
+
+/* ================= 读书台 · 添加一本书 ================= */
+.lib-addbook{
+  display:flex;flex-direction:column;align-items:center;gap:1px;
+  padding:15px;margin-top:12px;border-radius:16px;cursor:pointer;transition:.18s;
+  border:1.5px dashed rgba(192,85,154,.38);
+  background:rgba(255,255,255,.35);
+}
+.lib-addbook:hover{background:rgba(255,255,255,.65);border-color:rgba(192,85,154,.6)}
+.lib-addbook .la-plus{font-size:20px;line-height:1;color:#c0559a}
+.lib-addbook .la-t{font-size:13.5px;font-weight:600}
+.lib-addbook .la-s{font-size:11px;color:var(--muted)}
+
+/* ================= 读书台 · 点开一本书 三个选项 ================= */
+#module-library .bk-picker-row{
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  margin-bottom:12px;font-size:12.5px;color:var(--muted);
+}
+#module-library .bk-picker-row select{
+  font-size:12.5px;padding:6px 10px;border-radius:11px;
+  border:1px solid rgba(192,85,154,.32);
+  background:rgba(255,255,255,.85);color:inherit;max-width:230px;
+}
+#module-library .bk-hint{margin-left:auto;font-size:12px}
+#module-library .bk-opts{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+#module-library .bk-opt{
+  display:flex;flex-direction:column;align-items:center;gap:1px;
+  padding:14px 6px;border-radius:14px;cursor:pointer;transition:.16s;
+  border:1px solid rgba(192,85,154,.24);
+  background:rgba(255,255,255,.6);
+  font-size:12.5px;color:inherit;line-height:1.4;
+}
+#module-library .bk-opt b{font-size:13px}
+#module-library .bk-opt span{font-size:11.5px;color:var(--muted)}
+#module-library .bk-opt:hover{background:rgba(255,255,255,.95)}
+#module-library .bk-opt.on{
+  background:linear-gradient(135deg,#c0559a,#8f6fd0);
+  color:#fff;border-color:transparent;
+  box-shadow:0 5px 14px rgba(192,85,154,.28);
+}
+#module-library .bk-opt.on span{color:rgba(255,255,255,.88)}
+#module-library .bk-out{margin-top:14px}
+#module-library .bk-sec{
+  font-size:11.5px;font-weight:800;letter-spacing:.8px;color:#c0559a;opacity:.9;
+  margin:14px 0 6px;text-transform:uppercase;
+}
+#module-library .bk-sec:first-child{margin-top:0}
+.bk-quote{
+  background:rgba(255,235,243,.9);
+  border-left:3px solid #d9608f;
+  border-radius:0 12px 12px 0;
+  padding:10px 14px;margin:0 0 10px;
+  font-size:13.5px;line-height:1.65;font-weight:600;
+}
+.bk-quote .bq-tag{display:block;font-size:10.5px;font-weight:700;color:#c0559a;letter-spacing:.5px;margin-bottom:3px}
+.bk-item{display:flex;gap:10px;padding:9px 0;border-bottom:1px dashed rgba(192,85,154,.16)}
+.bk-item:last-child{border-bottom:none}
+.bk-item .bi-ico{flex:0 0 26px;text-align:center;font-size:15px;line-height:1.45}
+.bk-item .bi-t{font-size:13px;font-weight:700;margin-bottom:1px}
+.bk-item .bi-d{font-size:12.5px;color:#7a6472;line-height:1.6}
+#module-library .bk-tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:14px;padding-top:12px;border-top:1px dashed rgba(192,85,154,.18)}
+
+/* ================= 读书台 · 深度思考 ================= */
+#module-library .dt-box{
+  font-size:13px;line-height:1.7;max-height:260px;overflow:auto;
+  background:rgba(255,255,255,.5);border-radius:14px;padding:10px;
+}
+
+/* ================= 读书台 · 金句墙 ================= */
+#module-library .qwall-bar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:9px}
+#module-library .qwall-bar .qb-hint{font-size:11.5px;color:var(--muted)}
+#module-library .quote-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(205px,1fr));gap:10px}
+#module-library .quote-card{
+  padding:13px 15px;border-radius:14px;
+  background:rgba(255,255,255,.66);
+  border:1px solid rgba(255,203,224,.5);
+}
+#module-library .quote-card .qc-mark{font-family:Georgia,serif;font-size:20px;line-height:1;color:rgba(192,85,154,.35)}
+#module-library .quote-card .qc-t{font-size:13.5px;font-weight:600;line-height:1.6;margin:2px 0 7px}
+#module-library .quote-card .qc-s{display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--muted)}
+
+/* ================= 读书台 · 作家档案 ================= */
+#module-library .au-head{display:flex;gap:12px;align-items:center;margin-bottom:10px}
+#module-library .au-avatar{
+  width:46px;height:46px;border-radius:13px;flex:0 0 auto;
+  display:flex;align-items:center;justify-content:center;font-size:23px;
+  background:linear-gradient(135deg,rgba(219,112,147,.2),rgba(180,142,217,.22));
+}
+#module-library .au-name{font-size:16px;font-weight:700;line-height:1.3}
+#module-library .au-en{font-size:11.5px;color:var(--muted);margin-top:1px}
+#module-library .au-chips{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 12px}
+#module-library .au-sec{font-size:13px;font-weight:700;margin:14px 0 8px}
+#module-library .au-sec small{font-size:11px;color:var(--muted);font-weight:400;margin-left:4px}
+#module-library .au-tl{position:relative;padding-left:18px}
+#module-library .au-tl::before{
+  content:"";position:absolute;left:4px;top:6px;bottom:8px;width:1.5px;
+  background:linear-gradient(to bottom,rgba(192,85,154,.5),rgba(192,85,154,.06));
+}
+#module-library .au-tl-item{position:relative;margin-bottom:11px}
+#module-library .au-tl-item::before{
+  content:"";position:absolute;left:-17px;top:5px;width:8px;height:8px;border-radius:50%;
+  background:#c0559a;box-shadow:0 0 0 3px rgba(255,246,250,.95);
+}
+#module-library .au-tl-y{font-size:11px;font-weight:700;color:#c0559a;letter-spacing:.3px}
+#module-library .au-tl-t{font-size:13px;line-height:1.62}
+#module-library .au-legend{font-size:11.5px;color:var(--muted);margin:8px 0 0}
+#module-library .au-relnote{font-size:12.5px;min-height:18px;color:var(--muted);margin-top:6px;line-height:1.6}
+#module-library .au-book{
+  display:flex;justify-content:space-between;gap:12px;align-items:flex-start;
+  padding:9px 0;border-bottom:1px dashed rgba(192,85,154,.16);
+}
+#module-library .au-book:last-child{border-bottom:none}
+#module-library .au-bk-l{font-size:13.5px}
+#module-library .au-bk-r{font-size:11.5px;color:var(--muted);text-align:right;max-width:48%;line-height:1.5}
+
+/* ================= 读书台 · 手机端 ================= */
+@media(max-width:640px){
+  #module-library .lib-shelf{grid-template-columns:repeat(auto-fill,minmax(126px,1fr))}
+  #module-library .bk-opts{grid-template-columns:1fr}
+  #module-library .bk-opt{flex-direction:row;gap:6px;justify-content:center;padding:11px 6px}
+  #module-library .quote-grid{grid-template-columns:1fr}
+  #module-library .bk-hint{margin-left:0;width:100%}
 }
