@@ -1496,27 +1496,153 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
   box-shadow:0 8px 22px rgba(224,122,166,.12);
   border-color:rgba(255,190,214,.6);
 }
-/* 标题上方英文小标签 + 模块内字号统一下调一档 */
+
+/* ===== 第二步：模块标题区（对齐「灵犀智库」版式：标题+渐变下划线+副标题） ===== */
+#module-library .page-head,
+#module-manifest .page-head{
+  position:relative;
+  margin:6px 0 20px;
+  padding:2px 4px 0;
+}
+#module-library .page-title,
+#module-manifest .page-title{
+  font-size:26px;
+  font-weight:800;
+  color:var(--text);
+  display:inline-block;
+  position:relative;
+  padding-bottom:10px;
+  letter-spacing:.3px;
+}
+#module-library .page-title::after,
+#module-manifest .page-title::after{
+  content:'';
+  position:absolute;
+  left:0;
+  bottom:0;
+  width:120px;
+  height:3px;
+  border-radius:2px;
+  background:linear-gradient(90deg,var(--pink-deep),var(--purple,var(--lav)));
+}
+#module-library .page-sub,
+#module-manifest .page-sub{
+  font-size:13px;
+  color:var(--muted);
+  margin-top:9px;
+  line-height:1.6;
+}
+/* 右上角「添加」小按钮（不再被 flex:1 拉成通栏长条） */
+.mod-add-btn{
+  position:absolute;
+  top:2px;
+  right:2px;
+  border:none;
+  border-radius:30px;
+  padding:9px 18px;
+  font-size:13px;
+  font-weight:700;
+  color:#fff;
+  cursor:pointer;
+  white-space:nowrap;
+  background:linear-gradient(135deg,var(--grad-from),var(--grad-to));
+  box-shadow:0 6px 16px var(--grad-shadow);
+  transition:transform .15s,box-shadow .15s;
+}
+.mod-add-btn:hover{transform:translateY(-1px);box-shadow:0 9px 22px var(--grad-shadow)}
+
+/* ===== 第二步：模块内表单控件（去掉浏览器默认方框，改圆角柔和） ===== */
+#module-library input:not([type="checkbox"]):not([type="radio"]),
+#module-library select,
+#module-library textarea,
+#module-manifest input:not([type="checkbox"]):not([type="radio"]),
+#module-manifest select,
+#module-manifest textarea{
+  font:inherit;
+  font-size:13px;
+  color:var(--text);
+  width:100%;
+  min-width:0;
+  padding:11px 14px;
+  border:1px solid rgba(255,200,222,.55);
+  border-radius:14px;
+  background:rgba(255,255,255,.66);
+  outline:none;
+  transition:border-color .15s,background .15s,box-shadow .15s;
+}
+#module-library input:not([type="checkbox"]):not([type="radio"]):focus,
+#module-library select:focus,
+#module-library textarea:focus,
+#module-manifest input:not([type="checkbox"]):not([type="radio"]):focus,
+#module-manifest select:focus,
+#module-manifest textarea:focus{
+  border-color:var(--pink);
+  background:#fff;
+  box-shadow:0 0 0 3px rgba(219,112,147,.12);
+}
+#module-library ::placeholder,
+#module-manifest ::placeholder{color:#c9a8ba}
+
+/* 搜索行：输入框自适应，按钮保持自身宽度（不再各占一半） */
+#module-library .mod-search-row,
+#module-manifest .mod-search-row{display:flex;gap:10px;align-items:stretch}
+#module-library .mod-search-row input,
+#module-manifest .mod-search-row input{flex:1 1 auto}
+.mod-btn-primary{
+  flex:0 0 auto;
+  border:none;
+  border-radius:14px;
+  padding:0 20px;
+  font-size:13px;
+  font-weight:700;
+  color:#fff;
+  cursor:pointer;
+  white-space:nowrap;
+  background:linear-gradient(135deg,var(--grad-from),var(--grad-to));
+  box-shadow:0 6px 16px var(--grad-shadow);
+  transition:transform .15s,box-shadow .15s;
+}
+.mod-btn-primary:hover{transform:translateY(-1px);box-shadow:0 9px 22px var(--grad-shadow)}
+
+/* 书架筛选：分类独占一行 + 搜索框整行铺满（解决过窄） */
+#module-library .lib-toolbar{display:flex;flex-direction:column;gap:10px;margin:0 0 12px}
+#module-library .lib-cats{display:flex;gap:6px;flex-wrap:wrap}
+#module-library .lib-search{width:100%}
+
+/* 显化台统计卡：三张一行 */
+#module-manifest .stat-grid{grid-template-columns:repeat(3,1fr)}
+
+/* ===== 卡片标题：英文小标签独占一行，标题与副标题保持同行 ===== */
 #module-library,
 #module-manifest{font-size:13.5px;line-height:1.7}
 #module-library .card-head,
 #module-manifest .card-head{
-  flex-direction:column;
-  align-items:flex-start;
-  gap:3px;
-  font-size:15px;
-  line-height:1.35;
+  flex-direction:row;
+  flex-wrap:wrap;
+  align-items:baseline;
+  gap:2px 8px;
+  font-size:14.5px;
+  line-height:1.4;
 }
 #module-library .card-head::before,
 #module-manifest .card-head::before{
   content:attr(data-en);
-  font-size:11px;
+  flex:0 0 100%;
+  font-size:10.5px;
   letter-spacing:1.6px;
   font-weight:700;
   text-transform:uppercase;
   color:var(--pink-deep);
-  opacity:.6;
+  opacity:.55;
 }
-/* 标题 + 计数保持同行（我的书架 / 我的目标） */
 #module-library .ch-title,
 #module-manifest .ch-title{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap}
+
+/* ===== 手机端微调 ===== */
+@media(max-width:640px){
+  #module-library .page-title,
+  #module-manifest .page-title{font-size:21px}
+  #module-library .page-sub,
+  #module-manifest .page-sub{font-size:12.5px}
+  .mod-add-btn{top:0;right:0;padding:8px 14px;font-size:12px}
+}
