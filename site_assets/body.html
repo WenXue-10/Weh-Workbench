@@ -485,6 +485,15 @@
               <button class="inspire-action-btn" data-act="smart-batch">📚 批量导入书架</button>
               <span class="bk-smart-hint" id="bookSmartHint"></span>
             </div>
+            <div class="bk-topic">
+              <div class="bk-smart-head" style="margin-top:14px">🔍 按主题搜书 <small>不知道具体书名？输入意图，如「希腊神话」「想看讲时间管理的书」</small></div>
+              <div class="bk-topic-row">
+                <input id="bookTopicInput" class="bk-topic-input" placeholder="例如：希腊神话 / 想看关于心理学的入门书" />
+                <button class="inspire-action-btn bk-smart-primary" data-act="topic-search">🔍 搜一下</button>
+              </div>
+              <div class="bk-smart-hint" id="bookTopicHint"></div>
+              <div class="bk-topic-results" id="bookTopicResults"></div>
+            </div>
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px">
             <input id="bookTitle" placeholder="书名 / 课程名">
