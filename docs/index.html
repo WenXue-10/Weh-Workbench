@@ -1506,30 +1506,156 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
   box-shadow:0 8px 22px rgba(224,122,166,.12);
   border-color:rgba(255,190,214,.6);
 }
-/* 标题上方英文小标签 + 模块内字号统一下调一档 */
+
+/* ===== 第二步：模块标题区（对齐「灵犀智库」版式：标题+渐变下划线+副标题） ===== */
+#module-library .page-head,
+#module-manifest .page-head{
+  position:relative;
+  margin:6px 0 20px;
+  padding:2px 4px 0;
+}
+#module-library .page-title,
+#module-manifest .page-title{
+  font-size:26px;
+  font-weight:800;
+  color:var(--text);
+  display:inline-block;
+  position:relative;
+  padding-bottom:10px;
+  letter-spacing:.3px;
+}
+#module-library .page-title::after,
+#module-manifest .page-title::after{
+  content:'';
+  position:absolute;
+  left:0;
+  bottom:0;
+  width:120px;
+  height:3px;
+  border-radius:2px;
+  background:linear-gradient(90deg,var(--pink-deep),var(--purple,var(--lav)));
+}
+#module-library .page-sub,
+#module-manifest .page-sub{
+  font-size:13px;
+  color:var(--muted);
+  margin-top:9px;
+  line-height:1.6;
+}
+/* 右上角「添加」小按钮（不再被 flex:1 拉成通栏长条） */
+.mod-add-btn{
+  position:absolute;
+  top:2px;
+  right:2px;
+  border:none;
+  border-radius:30px;
+  padding:9px 18px;
+  font-size:13px;
+  font-weight:700;
+  color:#fff;
+  cursor:pointer;
+  white-space:nowrap;
+  background:linear-gradient(135deg,var(--grad-from),var(--grad-to));
+  box-shadow:0 6px 16px var(--grad-shadow);
+  transition:transform .15s,box-shadow .15s;
+}
+.mod-add-btn:hover{transform:translateY(-1px);box-shadow:0 9px 22px var(--grad-shadow)}
+
+/* ===== 第二步：模块内表单控件（去掉浏览器默认方框，改圆角柔和） ===== */
+#module-library input:not([type="checkbox"]):not([type="radio"]),
+#module-library select,
+#module-library textarea,
+#module-manifest input:not([type="checkbox"]):not([type="radio"]),
+#module-manifest select,
+#module-manifest textarea{
+  font:inherit;
+  font-size:13px;
+  color:var(--text);
+  width:100%;
+  min-width:0;
+  padding:11px 14px;
+  border:1px solid rgba(255,200,222,.55);
+  border-radius:14px;
+  background:rgba(255,255,255,.66);
+  outline:none;
+  transition:border-color .15s,background .15s,box-shadow .15s;
+}
+#module-library input:not([type="checkbox"]):not([type="radio"]):focus,
+#module-library select:focus,
+#module-library textarea:focus,
+#module-manifest input:not([type="checkbox"]):not([type="radio"]):focus,
+#module-manifest select:focus,
+#module-manifest textarea:focus{
+  border-color:var(--pink);
+  background:#fff;
+  box-shadow:0 0 0 3px rgba(219,112,147,.12);
+}
+#module-library ::placeholder,
+#module-manifest ::placeholder{color:#c9a8ba}
+
+/* 搜索行：输入框自适应，按钮保持自身宽度（不再各占一半） */
+#module-library .mod-search-row,
+#module-manifest .mod-search-row{display:flex;gap:10px;align-items:stretch}
+#module-library .mod-search-row input,
+#module-manifest .mod-search-row input{flex:1 1 auto}
+.mod-btn-primary{
+  flex:0 0 auto;
+  border:none;
+  border-radius:14px;
+  padding:0 20px;
+  font-size:13px;
+  font-weight:700;
+  color:#fff;
+  cursor:pointer;
+  white-space:nowrap;
+  background:linear-gradient(135deg,var(--grad-from),var(--grad-to));
+  box-shadow:0 6px 16px var(--grad-shadow);
+  transition:transform .15s,box-shadow .15s;
+}
+.mod-btn-primary:hover{transform:translateY(-1px);box-shadow:0 9px 22px var(--grad-shadow)}
+
+/* 书架筛选：分类独占一行 + 搜索框整行铺满（解决过窄） */
+#module-library .lib-toolbar{display:flex;flex-direction:column;gap:10px;margin:0 0 12px}
+#module-library .lib-cats{display:flex;gap:6px;flex-wrap:wrap}
+#module-library .lib-search{width:100%}
+
+/* 显化台统计卡：三张一行 */
+#module-manifest .stat-grid{grid-template-columns:repeat(3,1fr)}
+
+/* ===== 卡片标题：英文小标签独占一行，标题与副标题保持同行 ===== */
 #module-library,
 #module-manifest{font-size:13.5px;line-height:1.7}
 #module-library .card-head,
 #module-manifest .card-head{
-  flex-direction:column;
-  align-items:flex-start;
-  gap:3px;
-  font-size:15px;
-  line-height:1.35;
+  flex-direction:row;
+  flex-wrap:wrap;
+  align-items:baseline;
+  gap:2px 8px;
+  font-size:14.5px;
+  line-height:1.4;
 }
 #module-library .card-head::before,
 #module-manifest .card-head::before{
   content:attr(data-en);
-  font-size:11px;
+  flex:0 0 100%;
+  font-size:10.5px;
   letter-spacing:1.6px;
   font-weight:700;
   text-transform:uppercase;
   color:var(--pink-deep);
-  opacity:.6;
+  opacity:.55;
 }
-/* 标题 + 计数保持同行（我的书架 / 我的目标） */
 #module-library .ch-title,
 #module-manifest .ch-title{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap}
+
+/* ===== 手机端微调 ===== */
+@media(max-width:640px){
+  #module-library .page-title,
+  #module-manifest .page-title{font-size:21px}
+  #module-library .page-sub,
+  #module-manifest .page-sub{font-size:12.5px}
+  .mod-add-btn{top:0;right:0;padding:8px 14px;font-size:12px}
+}
 
 </style>
 </head>
@@ -5032,23 +5158,24 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
 <!-- ✅ 待办清单 -->
 
       <section id="module-library" class="view">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-          <h2 style="margin:0">📖 读书·学习台</h2>
-          <button class="inspire-action-btn" style="border:none;background:linear-gradient(135deg,var(--pink-deep),#b48ed9);color:#fff" data-act="addBook">➕ 添加一本</button>
+        <div class="page-head">
+          <div class="page-title">📖 读书·学习台</div>
+          <div class="page-sub">读过的都长在身上 · 书架 / 精读 / 金句 / 作家档案</div>
+          <button class="mod-add-btn" data-act="addBook">＋ 添加一本</button>
         </div>
 
-        <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap">
-          <div class="card" style="flex:1;min-width:120px;text-align:center;padding:12px"><div style="font-size:24px;font-weight:700;color:var(--pink-deep)" id="libReading">0</div><div style="color:var(--muted);font-size:12px">在读书目</div></div>
-          <div class="card" style="flex:1;min-width:120px;text-align:center;padding:12px"><div style="font-size:24px;font-weight:700;color:var(--pink-deep)" id="libHours">0</div><div style="color:var(--muted);font-size:12px">本月阅读(h)</div></div>
-          <div class="card" style="flex:1;min-width:120px;text-align:center;padding:12px"><div style="font-size:24px;font-weight:700;color:var(--pink-deep)" id="libQuotes">0</div><div style="color:var(--muted);font-size:12px">收藏金句</div></div>
-          <div class="card" style="flex:1;min-width:120px;text-align:center;padding:12px"><div style="font-size:24px;font-weight:700;color:var(--pink-deep)" id="libStreak">0</div><div style="color:var(--muted);font-size:12px">连续打卡(天)</div></div>
+        <div class="stat-grid">
+          <div class="stat-card p1"><div class="em">📖</div><div class="lab">在读书目</div><div class="num" id="libReading">0</div></div>
+          <div class="stat-card p2"><div class="em">⏱️</div><div class="lab">本月阅读(h)</div><div class="num" id="libHours">0</div></div>
+          <div class="stat-card p3"><div class="em">💎</div><div class="lab">收藏金句</div><div class="num" id="libQuotes">0</div></div>
+          <div class="stat-card p4"><div class="em">🔥</div><div class="lab">连续打卡(天)</div><div class="num" id="libStreak">0</div></div>
         </div>
 
         <div class="card" style="margin-bottom:14px">
           <div class="card-head" data-en="AUTHOR FILES">🔍 作家吃瓜档案 <small style="color:var(--muted)">搜作家，扒他的底细</small></div>
-          <div style="display:flex;gap:8px;padding:12px">
-            <input id="authorSearch" placeholder="陀思妥耶夫斯基 / 卡夫卡 / 张爱玲…" style="flex:1" onkeydown="if(event.key==='Enter')searchAuthor()">
-            <button class="inspire-action-btn" style="border:none;background:linear-gradient(135deg,var(--pink-deep),#b48ed9);color:#fff" data-act="searchAuthor">🔎 开扒</button>
+          <div class="mod-search-row">
+            <input id="authorSearch" placeholder="陀思妥耶夫斯基 / 卡夫卡 / 张爱玲…" onkeydown="if(event.key==='Enter')searchAuthor()">
+            <button class="mod-btn-primary" data-act="searchAuthor">🔎 开扒</button>
           </div>
           <div id="authorPanel" style="padding:0 12px 12px"></div>
         </div>
@@ -5076,9 +5203,9 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
           </div>
         </div>
 
-        <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;align-items:center">
-          <div id="libCats" style="display:flex;gap:6px;flex-wrap:wrap"></div>
-          <input id="bookSearch" placeholder="搜书名/作者…" style="flex:1;min-width:120px" oninput="renderBooks()">
+        <div class="lib-toolbar">
+          <div id="libCats" class="lib-cats"></div>
+          <input id="bookSearch" class="lib-search" placeholder="搜书名 / 作者…" oninput="renderBooks()">
         </div>
 
         <div class="card">
@@ -5109,9 +5236,9 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
           <div style="padding:0 12px 12px">
             <div style="font-weight:600;margin:8px 0 6px">🧠 深度思考·AI 追问陪读</div>
             <div id="deepThinkBox" style="font-size:13px;line-height:1.7;max-height:220px;overflow:auto;background:rgba(0,0,0,.03);border-radius:10px;padding:10px"></div>
-            <div style="display:flex;gap:8px;margin-top:8px">
-              <input id="deepThinkInput" placeholder="写下你的想法，AI 会接着追问…" style="flex:1" onkeydown="if(event.key==='Enter')sendDeepThink()">
-              <button class="inspire-action-btn" style="border:none;background:linear-gradient(135deg,var(--pink-deep),#b48ed9);color:#fff" data-act="send-deep">发送</button>
+            <div class="mod-search-row" style="margin-top:8px">
+              <input id="deepThinkInput" placeholder="写下你的想法，AI 会接着追问…" onkeydown="if(event.key==='Enter')sendDeepThink()">
+              <button class="mod-btn-primary" data-act="send-deep">发送</button>
             </div>
           </div>
           <div style="padding:0 12px 12px">
@@ -5123,24 +5250,16 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
 
       <section id="module-manifest" class="view">
 
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-
-          <h2 style="margin:0">🌟 显化·成长台</h2>
-
-          <button class="inspire-action-btn" style="border:none;background:linear-gradient(135deg,var(--pink-deep),#b48ed9);color:#fff" onclick="showGoalEditor()">➕ 添加目标</button>
-
+        <div class="page-head">
+          <div class="page-title">🌟 显化·成长台</div>
+          <div class="page-sub">先相信，再看见 · 目标 / 剧本 / 取证 / 频率</div>
+          <button class="mod-add-btn" onclick="showGoalEditor()">＋ 添加目标</button>
         </div>
-
-        <div style="display:flex;gap:12px;margin-bottom:14px">
-
-          <div class="card" style="flex:1;text-align:center;padding:14px"><div style="font-size:28px;font-weight:700;color:var(--pink-deep)" id="streakDays">0</div><div style="color:var(--muted);font-size:12px">连续记录(天)</div></div>
-
-          <div class="card" style="flex:1;text-align:center;padding:14px"><div style="font-size:28px;font-weight:700;color:var(--pink-deep)" id="monthDays">0</div><div style="color:var(--muted);font-size:12px">本月记录(天)</div></div>
-
-          <div class="card" style="flex:1;text-align:center;padding:14px"><div style="font-size:28px;font-weight:700;color:var(--pink-deep)" id="goalActive">0</div><div style="color:var(--muted);font-size:12px">进行中目标</div></div>
-
+        <div class="stat-grid">
+          <div class="stat-card p1"><div class="em">🔥</div><div class="lab">连续记录(天)</div><div class="num" id="streakDays">0</div></div>
+          <div class="stat-card p2"><div class="em">📅</div><div class="lab">本月记录(天)</div><div class="num" id="monthDays">0</div></div>
+          <div class="stat-card p3"><div class="em">🎯</div><div class="lab">进行中目标</div><div class="num" id="goalActive">0</div></div>
         </div>
-
         <div id="goalEditor" class="card" style="display:none;margin-bottom:14px">
 
           <div class="card-head" data-en="SET A GOAL">🎯 <span id="goalEditorTitle">添加目标</span></div>
@@ -5179,7 +5298,7 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
 
           <div class="card-head" data-en="DAILY SCRIPT">📝 今日感想 / 日记 <small id="diaryDate" style="color:var(--muted)"></small></div>
 
-          <textarea id="diaryInput" placeholder="今天想成为谁？做了什么？感恩什么？写具体一点…" style="width:100%;min-height:70px;border:1px solid var(--line);border-radius:10px;padding:10px;font:inherit;resize:vertical"></textarea>
+          <textarea id="diaryInput" placeholder="今天想成为谁？做了什么？感恩什么？写具体一点…" style="min-height:70px;resize:vertical"></textarea>
 
           <div style="display:flex;gap:10px;margin-top:8px;flex-wrap:wrap">
 
@@ -5228,9 +5347,9 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
         <div class="card" style="margin-bottom:14px">
           <div class="card-head" data-en="REFRAME">🔄 语言翻译器 <small style="color:var(--muted)">把自我怀疑翻成笃定</small></div>
           <div style="padding:0 12px 12px">
-            <div style="display:flex;gap:8px">
-              <input id="translatorInput" placeholder="我想成为作家…" style="flex:1" onkeydown="if(event.key==='Enter')aiTranslate()">
-              <button class="inspire-action-btn" style="border:none;background:linear-gradient(135deg,var(--pink-deep),#b48ed9);color:#fff" onclick="aiTranslate()">翻译</button>
+            <div class="mod-search-row">
+              <input id="translatorInput" placeholder="我想成为作家…" onkeydown="if(event.key==='Enter')aiTranslate()">
+              <button class="mod-btn-primary" onclick="aiTranslate()">翻译</button>
             </div>
             <div id="translatorWall" class="inspire-list" style="margin-top:10px"></div>
           </div>
@@ -6126,7 +6245,7 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
 
 <script>
 window.SITE_DATA = {
- "updated": "2026-10-02 02:19",
+ "updated": "2026-10-02 14:48",
  "stats": {
   "jobs": 58,
   "rec": 0,
@@ -19066,7 +19185,7 @@ window.SITE_DATA = {
         {
          "title": "读书台显化台一次讲完个人复盘工具_2026-09-20",
          "icon": "📄",
-         "html": "<blockquote>\n<p>[!info] 来源与状态\n抖音视频「第13集 | 第二期来了 读书台×显化台 一次讲完」，博主 <strong>SodaBella</strong>（粉丝109.5万，合集：贝拉出镜合集），时长 <strong>14:05</strong>，发布 2026-09-18 20:10。\n短链：<code>https://v.douyin.com/o1lYwZewhK0/</code>\n标签：#个人复盘工具 #个人提升计划 #无广 #AI。内容类型：<strong>操作教程</strong>（AI 工作台界面布局演示 + 提示词模板，含\"怎么加到桌面\"等可复现操作）。\n互动数据：点赞 1580 ｜ 评论 80 ｜ 收藏 958 ｜ 转发 162。\n抓取情况：web.fetch 抓到完整口播文案（3451字），浏览器抽帧还原两个台的界面布局与提示词页面。</p>\n</blockquote>\n<h2>速读（核心结论）</h2>\n<ol>\n<li><strong>读书台</strong>：用 AI 生成一个单文件 HTML 网页工作台，核心模块包括——作家吃瓜档案（扒作家底细）、文坛爱恨情仇关系图、我的书架进度条、AI 深度思考追问式陪读、金句腔。设计理念是\"人不会因为陌生的名字打开一本书，但会因为好奇这个人而翻开\"。</li>\n<li><strong>显化台</strong>：同样是 AI 生成的单文件网页工作台，核心模块包括——未来支票（每天开同一张支票重复打卡）、人生剧本封存（写完即模糊，避免反复确认\"我还没有\"）、今日感恩日记（AI 用\"已发生\"口吻生成，每天只更新一次）、证据墙（只记积极事件）、语言翻译器（把\"我想成为\"翻译成\"我是\"）、频率打卡热力图。</li>\n<li><strong>两个台的提示词</strong>：博主在视频中展示了完整提示词（读书台3页），核心是\"角色设定 + 外观要求 + 功能模块全部实现\"，复制进 AI 直接生成单文件 HTML。</li>\n<li><strong>四个高频问题</strong>：竖版变形（提示词加\"手机竖屏优先\"）、放桌面（浏览器菜单→添加到主屏幕）、豆包做不出来（加一句\"生成可在浏览器打开的单文件网页并把链接发给我\"）、数据丢失（让 AI 导出成本地文件，从本地打开而非临时链接）。</li>\n</ol>\n<iframe width=\"100%\" height=\"400\" src=\"https://www.douyin.com/video/7686846457878826929\" frameborder=\"0\" allowfullscreen></iframe>\n\n<h2>正文</h2>\n<h3>1. 读书台（00:23–05:38）</h3>\n<p><strong>用途</strong>：读书笔记 / 个人复盘工具——把阅读输入结构化，用\"作家吃瓜\"和\"关系图谱\"做记忆钩子，用 AI 追问式陪读替代被动阅读。</p>\n<h4>1.1 完整布局（画面还原）</h4>\n<p><strong>顶部数据条</strong>：在读书目数、本月阅读时长、收藏金句数、连续打卡天数（迷你火花，参考抖音续火花设计）。所有数字随操作实时更新。</p>\n<p><strong>分类标签栏 + 搜索框</strong>：按国家/类型筛选（俄国文学、法国文学、英美文学、日本文学、拉美文学），搜索框支持搜书名或作家名。</p>\n<p><strong>作家吃瓜档案区</strong>（核心模块）：\n- 输入作家名后回车，AI 自动生成该作家的\"吃瓜档案\"\n- 不是百科式念经，而是故事化呈现：为什么上过刑场、为什么把老婆的戒指打掉、怎么用26天写完一本书顺便把速记员娶回了家\n- 包含：星座猜测、MBTI 猜测、隐藏技能\n- 示例（画面中展示陀思妥耶夫斯基）：生平年份 1821-1881，多条吃瓜条目按时间线排列</p>\n<p><strong>文坛爱恨情仇图</strong>（关系图谱）：\n- 以当前作家为中心，连接其他作家，标注关系类型：喜欢、讨厌、撕过、和解\n- 示例（陀思妥耶夫斯基为中心）：连接托尔斯泰、屠格涅夫、契诃夫、涅克拉索夫等\n- 设计理念：<strong>孤立的知识记不住，有恩怨的知识忘不掉</strong>——记住妥翁跟谁撕过，就会顺藤摸瓜读完整个俄国文学</p>\n<p><strong>恩怨书单</strong>：关系图下方附表格，列出\"对头该从哪本书读起\"，含星级评分和一句话理由。</p>\n<p><strong>我的书架进度条</strong>：\n- 书籍以环形进度条排列，直观显示每本书阅读进度\n- \"添加一本书\"表单：书名、看到第几页、总共多少页（可扩展读了几分钟）\n- 保存后顶部进度条自动更新\n- 设计理念：<strong>进度环不是花架子——游戏能打到凌晨是因为进度看得见，书翻不过十页是因为进度看不见</strong></p>\n<p><strong>AI READING 展开一本书·三个让</strong>：\n- 选择最近读的书后，三个选项：\n  1. <strong>一口气理清楚这本书里的所有人际关系</strong>（简洁版人物关系图）\n  2. <strong>一口气提炼全书的重点</strong>（主角身份凝练总结）\n  3. <strong>一口气讲清这本书讲了什么</strong>（分点概括，不长篇大论）\n- 设计理念：辅助读完这本书，而不是替你读这本书——避免失去自主思考</p>\n<p><strong>深度思考 AI 追问式陪读</strong>：\n- AI 从书中随机提问，用户回答后 AI 更新问题，持续对话\n- 设计理念：<strong>读完和读懂之间隔着一步——答过才算数</strong>。AI 问你答，它再追问，这个来回就是你跟自己过招\n- 解决了普通 AI 对话容易丢失上下文的问题（在同一页面内持续对话）</p>\n<p><strong>金句腔</strong>：\n- 每次更新后自动刷新三句金句\n- 供手账/读书笔记摘抄使用\n- 金句来源：书中被作者标粗/划线的句子 + 读书软件中被几万人划线评论的句子</p>\n<h4>1.2 读书台提示词</h4>\n<p>视频中展示了完整提示词（共3页），以下为画面中可辨认的第1页内容：</p>\n<blockquote>\n<p><strong>AI 读书台 · 完整提示词</strong>（第1页/共3页）</p>\n<p>你是一位资深前端工程师 + 文学杂志主编。请为我制作一个单文件的「AI读书台」网页工作台：输出一个完整的 HTML 文件，不依赖任何外部资源（不用外部图片、字体、库），可以直接保存到手机本地用浏览器打开使用。</p>\n<p><strong>【外观要求（必须严格遵守）】</strong>\n1. 整体风格：淡粉色到淡紫色渐变的柔和色调，白色圆角卡片浮在浅色背景上，重点文字用深粉/深紫强调；\n2. 所有板块标题和按钮带可爱的 emoji 图标，排版清晰、留白舒适，要有专业工具的质感，拒绝简陋感；\n3. 手机竖屏优先适配（禁止自适应，最大宽度限制在一屏内），电脑打开也居中显示；\n4. 支持添加到主屏幕后全屏使用：包含 apple-mobile-web-app-capable 等 meta 标签，全屏打开、无浏览器地址栏。</p>\n<p><strong>【功能模块（全部实现，缺一不可）】</strong>\n一、顶部数据条：在读书目数、本月阅读时长、收藏金句数、连续打卡天数。所有数字随我的操作实时更新；\n二、分类标签栏 + 搜索框：可按国家/类型筛选，搜索框支持搜书名或作家名。</p>\n<p>第2-3页内容为其余功能模块的详细规格（作家吃瓜档案、关系图谱、书架进度条、AI追问陪读、金句腔等），需对照视频获取完整文本。提示词核心结构是\"角色设定 → 外观要求 → 功能模块逐条列明\"，博主强调\"外观，作家数据动线我全部都给你写死了，你复制进去直接就能出来\"。</p>\n</blockquote>\n<h3>2. 显化台（05:38–10:56）</h3>\n<p><strong>用途</strong>：目标显化 / 个人提升追踪工具——把目标在心里提前排练，用\"未来支票重复打卡 + 剧本封存 + 已发生口吻感恩日记\"建立正向反馈循环。</p>\n<p><strong>核心理念</strong>：显化不是玄学，不是向宇宙下订单，而是把目标在心里提前排练（运动员赛前在脑中一遍一遍过动作的训练方法）。</p>\n<h4>2.1 完整布局（画面还原）</h4>\n<p><strong>顶部数据条</strong>：连续打卡天数、已完成天数等计数卡。</p>\n<p><strong>未来支票 FUTURE CHEQUE（宇宙未来银行）</strong>：\n- 一张\"支票\"式卡片，署名 SodaBella\n- 金额字段：<strong>必须写有零有整的数字</strong>（如 47,300），不要写整数（一万、两万）\n- 设计理念：<strong>整数像口号，零头像真相</strong>——具体数字才让人觉得真实\n- 日期填未来一年\n- 每天签一次同一个数字 = 给\"会有的\"这三个字打卡\n- 每完成一次打卡，右侧数据滚动线上升</p>\n<p><strong>人生剧本 LIFE SCRIPT × 今日感恩日记</strong>：\n- 左侧\"我的人生剧本\"：必须写得足够具体，不能写\"变有钱\"，要写\"收到一笔四万七千三百块项目款\"\n- <strong>一键封存剧本</strong>：写完后点击封存，内容全部模糊化\n- 封存设计理念：<strong>封存不是仪式感，是防护罩——你每翻一次清单都是在确认\"我还没有\"，越盯着目标看不会让你离它更近，只会让你更着急</strong>\n- 封存后出现\"生成今日感恩日记\"按钮</p>\n<p><strong>今日感恩日记</strong>：\n- AI 从封存剧本中提取内容，用\"已发生\"的口吻生成\n- 示例（画面中展示）：日期 2026-09-10 星期三 天气晴，内容包括\"今天，我完成了播客第200期，办一场线下见面会\"等\n- <strong>每天只生成一次</strong>（避免反复查看）\n- 设计理念：<strong>人对正在发生的画面反应最真实——预演越具体越清楚该往哪走，剧本是你写的，日记是它念给你听的</strong></p>\n<p><strong>证据墙 EVIDENCE</strong>：\n- 只记录积极发生的事情（如\"AI工作台视频爆了\"\"品牌方主动回复\"）\n- 负面信息不做记录\n- 设计理念：让自己正确意识到生活确实在往积极方向走</p>\n<p><strong>语言翻译器</strong>：\n- 把口头禅/负面表达翻译成正向语句\n- 示例：\"我想要成为一个作家\" → \"我是一个作家\"\n- 设计理念：确信感越来越强大，就会去做同样身份象征的事情</p>\n<p><strong>频率打卡热力图</strong>：\n- 记录每天的显化频率（开支票、读感恩日记、泡脚、写手账等任何积极行为）\n- 每一天的打卡自动生成显化频率热力图</p>\n<h4>2.2 显化台提示词</h4>\n<p>博主说明：\"显化台的提示词也在这，封存机制，每一天的限制，热力联动图我全部都给它写死了，你做出来框架都是一样的，不用担心。\"</p>\n<p>提示词结构与读书台一致：角色设定（前端工程师 + 显化教练）→ 外观要求 → 功能模块逐条列明（含封存机制、每日更新限制、热力图联动）。完整文本需对照视频获取。</p>\n<h3>3. 四个常见问题解答（10:56–13:22）</h3>\n<h4>3.1 为什么电脑上做出来是横的，手机上变形？</h4>\n<p>在提示词里多说一句：\"做成手机竖屏优先的版本。\"如果是电脑上做的就让 AI 再出一个竖屏版，手机上也能打开。AI 和 AI 之间有差别，但只要提示词给到了就可以多生成几次。</p>\n<h4>3.2 怎么像 app 一样放到桌面？</h4>\n<ul>\n<li><strong>苹果用户</strong>：浏览器点三个点 → 共享 → 添加到主屏幕 → 编辑工作台名称 → 添加 → 桌面出现图标</li>\n<li><strong>安卓用户</strong>：步骤相同，不会的话问你用的 AI，它会给完整方法</li>\n</ul>\n<h4>3.3 为什么豆包做不出来？</h4>\n<p>豆包可以做出来。在提示词里加一句，或者做完后再说一句：\"生成一个可以在浏览器打开的单文件网页，然后把链接发给我。\"拿到链接后回到问题3.2，添加到桌面即可。</p>\n<h4>3.4 数据不见了，第二天打不开了？</h4>\n<p>AI 生成的链接是即时生成的（临时链接）。稳妥做法：让 AI 把完整工作台导出成一个文件，存进自己的手机或电脑，从本地打开。数据长在你手机或电脑上，谁都拿不走。这个步骤需要跟 AI 磨合一两次沟通即可。</p>\n<h3>4. 合集下一步规划（13:22–14:05）</h3>\n<p>合集名称：<strong>AI 私人助理</strong>。工作台是 AI 替你生活、打工、做重复复杂的工作。接下来四个方案（评论区投票决定下期）：</p>\n<ol>\n<li><strong>PPT 速生台</strong></li>\n<li><strong>会议纪要生成</strong></li>\n<li><strong>简历面试台</strong>（年底求职季——把岗位描述丢进去逐条修改，AI 扮演面试官）</li>\n<li><strong>表格公式</strong>（不会写的公式/表格，需求丢进去让 AI 生成）</li>\n</ol>\n<h2>易混淆点 / 关键补充</h2>\n<ul>\n<li><strong>读书台 vs 显化台</strong>：前者偏\"输入沉淀/复盘\"（读什么、学到什么、跟谁撕过），后者偏\"输出目标/追踪\"（想成为什么、做得怎样、证据是什么）。两者共用同一工作台思路，可互补构成\"输入→复盘→目标→追踪\"闭环。</li>\n<li><strong>这不是付费产品广告</strong>（标签标注\"无广\"），演示的是可自建的通用方法，平台可替换（豆包/Codex/WorkBuddy 均可）。</li>\n<li><strong>显化不是玄学</strong>：博主明确说\"显化它并不是玄学\"，本质是目标预演训练，运动员已在用。</li>\n<li><strong>整数 vs 零头</strong>：支票金额和剧本目标必须写有零有整的具体数字，整数像口号，零头像真相。</li>\n</ul>\n<h2>关联笔记</h2>\n<ul>\n<li>自我提升的密钥速来（同主题个人提升；可与本篇的复盘/提升工具结合落地）</li>\n<li>DanKoe用AI让学习速度快十倍（同为用 AI 加速个人成长的认知/方法）</li>\n<li>Weh Atelier 工作台项目（你自己的 AI 工作台；本篇\"读书台/显化台\"思路可直接复用到该项目的个人复盘/提升模块）</li>\n</ul>\n<h2>反思</h2>\n<ul>\n<li><strong>可直接反哺 Weh Atelier</strong>：你已在做 AI 工作台，本篇的\"复盘台 + 显化台\"是两个高复用模块。秋招期间尤其适合用\"显化台\"追踪投递/面试进展（证据墙只记积极事件、频率打卡热力图），用\"读书台\"沉淀行业认知（作家吃瓜档案→公司背调档案的思路可迁移）。</li>\n<li><strong>数据丢失提醒（3.4）</strong>：工作台类工具一旦数据不同步就白搭——迁移/搭建时注意导出本地文件备份，别只依赖平台云端临时链接。这条对 Weh Atelier 也适用：GitHub Pages 部署是稳妥方案，但本地源文件必须保留。</li>\n<li><strong>读书台的\"记忆钩子\"设计值得学习</strong>：用\"作家吃瓜\"和\"恩怨关系图\"做记忆钩子，比普通读书笔记更易记住。这个思路可以迁移到供应链专业知识学习——用\"公司之间的竞争/合作关系图\"替代孤立的知识点。</li>\n</ul>\n<h2>行动项</h2>\n<ul>\n<li>[ ] 在 Weh Atelier 里照此搭一个\"秋招显化台\"（追踪投递/面试进展，证据墙只记积极事件）（优先级：高）</li>\n<li>[ ] 把读书台的\"关系图谱\"思路迁移到供应链知识库——做一张\"核心企业竞争合作关系图\"（优先级：中）</li>\n<li>[ ] 给工作台数据做定期导出备份，避免 3.4 的\"数据不见了\"问题（优先级：高）</li>\n<li>[ ] 对照视频获取读书台提示词第2-3页和显化台提示词完整文本（优先级：中）</li>\n</ul>",
+         "html": "<blockquote>\n<p>[!info] 来源与状态\n抖音视频「第13集 | 第二期来了 读书台×显化台 一次讲完」，博主 <strong>SodaBella</strong>（粉丝109.5万，合集：贝拉出镜合集），时长 <strong>14:05</strong>，发布 2026-09-18 20:10。\n短链：<code>https://v.douyin.com/o1lYwZewhK0/</code>\n标签：#个人复盘工具 #个人提升计划 #无广 #AI。内容类型：<strong>操作教程</strong>（AI 工作台界面布局演示 + 提示词模板，含\"怎么加到桌面\"等可复现操作）。\n互动数据：点赞 1580 ｜ 评论 80 ｜ 收藏 958 ｜ 转发 162。\n抓取情况：web.fetch 抓到完整口播文案（3451字），浏览器抽帧还原两个台的界面布局与提示词页面。</p>\n</blockquote>\n<h2>速读（核心结论）</h2>\n<ol>\n<li><strong>读书台</strong>：用 AI 生成一个单文件 HTML 网页工作台，核心模块包括——作家吃瓜档案（扒作家底细）、文坛爱恨情仇关系图、我的书架进度条、AI 深度思考追问式陪读、金句腔。设计理念是\"人不会因为陌生的名字打开一本书，但会因为好奇这个人而翻开\"。</li>\n<li><strong>显化台</strong>：同样是 AI 生成的单文件网页工作台，核心模块包括——未来支票（每天开同一张支票重复打卡）、人生剧本封存（写完即模糊，避免反复确认\"我还没有\"）、今日感恩日记（AI 用\"已发生\"口吻生成，每天只更新一次）、证据墙（只记积极事件）、语言翻译器（把\"我想成为\"翻译成\"我是\"）、频率打卡热力图。</li>\n<li><strong>两个台的提示词</strong>：博主在视频中展示了完整提示词（读书台3页），核心是\"角色设定 + 外观要求 + 功能模块全部实现\"，复制进 AI 直接生成单文件 HTML。</li>\n<li><strong>四个高频问题</strong>：竖版变形（提示词加\"手机竖屏优先\"）、放桌面（浏览器菜单→添加到主屏幕）、豆包做不出来（加一句\"生成可在浏览器打开的单文件网页并把链接发给我\"）、数据丢失（让 AI 导出成本地文件，从本地打开而非临时链接）。</li>\n</ol>\n<iframe width=\"100%\" height=\"400\" src=\"https://www.douyin.com/video/7686846457878826929\" frameborder=\"0\" allowfullscreen></iframe>\n\n<h2>正文</h2>\n<h3>1. 读书台（00:23–05:38）</h3>\n<p><strong>用途</strong>：读书笔记 / 个人复盘工具——把阅读输入结构化，用\"作家吃瓜\"和\"关系图谱\"做记忆钩子，用 AI 追问式陪读替代被动阅读。</p>\n<h4>1.1 完整布局（画面还原）</h4>\n<p><strong>顶部数据条</strong>：在读书目数、本月阅读时长、收藏金句数、连续打卡天数（迷你火花，参考抖音续火花设计）。所有数字随操作实时更新。</p>\n<p><strong>分类标签栏 + 搜索框</strong>：按国家/类型筛选（俄国文学、法国文学、英美文学、日本文学、拉美文学），搜索框支持搜书名或作家名。</p>\n<p><strong>作家吃瓜档案区</strong>（核心模块）：\n- 输入作家名后回车，AI 自动生成该作家的\"吃瓜档案\"\n- 不是百科式念经，而是故事化呈现：为什么上过刑场、为什么把老婆的戒指打掉、怎么用26天写完一本书顺便把速记员娶回了家\n- 包含：星座猜测、MBTI 猜测、隐藏技能\n- 示例（画面中展示陀思妥耶夫斯基）：生平年份 1821-1881，多条吃瓜条目按时间线排列</p>\n<p><strong>文坛爱恨情仇图</strong>（关系图谱）：\n- 以当前作家为中心，连接其他作家，标注关系类型：喜欢、讨厌、撕过、和解\n- 示例（陀思妥耶夫斯基为中心）：连接托尔斯泰、屠格涅夫、契诃夫、涅克拉索夫等\n- 设计理念：<strong>孤立的知识记不住，有恩怨的知识忘不掉</strong>——记住妥翁跟谁撕过，就会顺藤摸瓜读完整个俄国文学</p>\n<p><strong>恩怨书单</strong>：关系图下方附表格，列出\"对头该从哪本书读起\"，含星级评分和一句话理由。</p>\n<p><strong>我的书架进度条</strong>：\n- 书籍以环形进度条排列，直观显示每本书阅读进度\n- \"添加一本书\"表单：书名、看到第几页、总共多少页（可扩展读了几分钟）\n- 保存后顶部进度条自动更新\n- 设计理念：<strong>进度环不是花架子——游戏能打到凌晨是因为进度看得见，书翻不过十页是因为进度看不见</strong></p>\n<p><strong>AI READING 展开一本书·三个让</strong>：\n- 选择最近读的书后，三个选项：\n  1. <strong>一口气理清楚这本书里的所有人际关系</strong>（简洁版人物关系图）\n  2. <strong>一口气提炼全书的重点</strong>（主角身份凝练总结）\n  3. <strong>一口气讲清这本书讲了什么</strong>（分点概括，不长篇大论）\n- 设计理念：辅助读完这本书，而不是替你读这本书——避免失去自主思考</p>\n<p><strong>深度思考 AI 追问式陪读</strong>：\n- AI 从书中随机提问，用户回答后 AI 更新问题，持续对话\n- 设计理念：<strong>读完和读懂之间隔着一步——答过才算数</strong>。AI 问你答，它再追问，这个来回就是你跟自己过招\n- 解决了普通 AI 对话容易丢失上下文的问题（在同一页面内持续对话）</p>\n<p><strong>金句腔</strong>：\n- 每次更新后自动刷新三句金句\n- 供手账/读书笔记摘抄使用\n- 金句来源：书中被作者标粗/划线的句子 + 读书软件中被几万人划线评论的句子</p>\n<h4>1.2 读书台提示词</h4>\n<p>视频中展示了完整提示词（共3页），以下为画面中可辨认的第1页内容：</p>\n<blockquote>\n<p><strong>AI 读书台 · 完整提示词</strong>（共4页，以下为全文）</p>\n<p>你是一位资深前端工程师 + 文学杂志主编。请为我制作一个单文件的「AI读书台」网页工作台：输出一个完整的 HTML 文件，不依赖任何外部资源（不用外部图片、字体、库），可以直接保存到手机本地用浏览器打开使用。</p>\n<p><strong>【外观要求（必须严格遵守）】</strong>\n1. 整体风格：淡粉色到淡紫色渐变的柔和色调，白色圆角卡片浮在浅色背景上，重点文字用深粉/深紫强调；\n2. 所有板块标题和按钮带可爱的 emoji 图标，排版清晰、留白舒适，要有专业工具的质感，拒绝简陋感；\n3. 手机竖屏优先适配（宽度自适应，最大宽度限制在一屏内），电脑打开也居中显示；\n4. 支持添加到主屏幕后全屏使用：包含 apple-mobile-web-app-capable 等 meta 标签，全屏打开、无浏览器地址栏。</p>\n<p><strong>【功能板块（全部实现，缺一不可）】</strong>\n一、顶部数据条：在读书目数、本月阅读时长、收藏金句数、连续打卡天数。所有数字随我的操作实时更新；\n二、分类标签栏 + 搜索框：可按国家/类型筛选，搜索框支持搜书名或作家名。\n三、作家档案：搜索任意作家，展示吃瓜式档案。不要百科腔，要有趣：\n   - 用时间线列出他的奇闻趣事、翻车现场、重大成就；\n   - 标注他的星座，并给出一个 MBTI 类型猜测及一句话理由；\n四、文坛关系图：用 SVG 画出他喜欢/崇拜/讨厌/和解的其他作家，连线用不同颜色和线型区分（实线=喜欢，虚线=讨厌，点线=和解），每个节点可点击查看两人之间的恩怨说明；\n五、恩怨书单：顺着关系图列出相关作家的代表作、星级推荐（1到5星）和一句推荐理由；\n六、我的书架：可以自己添加书（输入书名、当前读到第几部分/共几部分），带进度环显示百分比，可随时编辑进度，读完显示读完啦徽章，数据自动保存；\n七、点开一本书，三个选项：①一口气理清人物关系 ②一口气提炼全书重点 ③一口气讲清这本书讲了什么。每个选项的输出格式：先一句高亮的结论，再逐条编号展开，禁止糊成一大段。\n八、深度思考区：AI 针对这本书提出思考题，我作答后 AI 继续追问，模拟层层深入的对话；\n九、金句墙：AI 从书中挑出金句卡片，每张带复制按钮。</p>\n<p><strong>【作家数据库（最重要，必须做到）】</strong>\n1. 内置尽可能全面的作家数据库：至少覆盖 50 位以上中外作家，俄国文学、法国文学、英美文学、日本文学、拉美文学、中国现当代作家，以及心理/成长/哲学类畅销书作者，都要有；\n2. 每位作家都要有完整档案数据（生平趣事、人物关系、代表作、星座、MBTI 猜测）；\n3. 遇到内置库没有的作家或书：不要提示未收录，直接根据你的知识生成完整档案再展示。保证我搜任何作家都有结果，不需要重复修改指令。</p>\n<p><strong>【数据动线】</strong>\n1. 所有用户输入（书架、进度、金句收藏、打卡）用 localStorage 保存，关闭后再打开数据还在；\n2. 搜索、点击、编辑的每一步都有界面反馈（内容切换或提示动画）；\n3. 顶部数据条与各板块数据联动，实时重算。</p>\n<p>完成后直接给出完整 HTML 代码，并在代码开头注释里写清使用方法。</p>\n</blockquote>\n<h3>2. 显化台（05:38–10:56）</h3>\n<p><strong>用途</strong>：目标显化 / 个人提升追踪工具——把目标在心里提前排练，用\"未来支票重复打卡 + 剧本封存 + 已发生口吻感恩日记\"建立正向反馈循环。</p>\n<p><strong>核心理念</strong>：显化不是玄学，不是向宇宙下订单，而是把目标在心里提前排练（运动员赛前在脑中一遍一遍过动作的训练方法）。</p>\n<h4>2.1 完整布局（画面还原）</h4>\n<p><strong>顶部数据条</strong>：连续打卡天数、已完成天数等计数卡。</p>\n<p><strong>未来支票 FUTURE CHEQUE（宇宙未来银行）</strong>：\n- 一张\"支票\"式卡片，署名 SodaBella\n- 金额字段：<strong>必须写有零有整的数字</strong>（如 47,300），不要写整数（一万、两万）\n- 设计理念：<strong>整数像口号，零头像真相</strong>——具体数字才让人觉得真实\n- 日期填未来一年\n- 每天签一次同一个数字 = 给\"会有的\"这三个字打卡\n- 每完成一次打卡，右侧数据滚动线上升</p>\n<p><strong>人生剧本 LIFE SCRIPT × 今日感恩日记</strong>：\n- 左侧\"我的人生剧本\"：必须写得足够具体，不能写\"变有钱\"，要写\"收到一笔四万七千三百块项目款\"\n- <strong>一键封存剧本</strong>：写完后点击封存，内容全部模糊化\n- 封存设计理念：<strong>封存不是仪式感，是防护罩——你每翻一次清单都是在确认\"我还没有\"，越盯着目标看不会让你离它更近，只会让你更着急</strong>\n- 封存后出现\"生成今日感恩日记\"按钮</p>\n<p><strong>今日感恩日记</strong>：\n- AI 从封存剧本中提取内容，用\"已发生\"的口吻生成\n- 示例（画面中展示）：日期 2026-09-10 星期三 天气晴，内容包括\"今天，我完成了播客第200期，办一场线下见面会\"等\n- <strong>每天只生成一次</strong>（避免反复查看）\n- 设计理念：<strong>人对正在发生的画面反应最真实——预演越具体越清楚该往哪走，剧本是你写的，日记是它念给你听的</strong></p>\n<p><strong>证据墙 EVIDENCE</strong>：\n- 只记录积极发生的事情（如\"AI工作台视频爆了\"\"品牌方主动回复\"）\n- 负面信息不做记录\n- 设计理念：让自己正确意识到生活确实在往积极方向走</p>\n<p><strong>语言翻译器</strong>：\n- 把口头禅/负面表达翻译成正向语句\n- 示例：\"我想要成为一个作家\" → \"我是一个作家\"\n- 设计理念：确信感越来越强大，就会去做同样身份象征的事情</p>\n<p><strong>频率打卡热力图</strong>：\n- 记录每天的显化频率（开支票、读感恩日记、泡脚、写手账等任何积极行为）\n- 每一天的打卡自动生成显化频率热力图</p>\n<h4>2.2 显化台提示词</h4>\n<blockquote>\n<p><strong>显化台 · 完整提示词</strong>（共3页，以下为全文）</p>\n<p>你是一位资深前端工程师 + 行为设计研究员。请为我制作一个单文件的「显化台」网页工作台：输出一个完整的 HTML 文件，不依赖任何外部资源，可以直接保存到手机本地用浏览器打开使用。</p>\n<p><strong>【理念定位（决定所有文案语气）】</strong>\n这个工作台的内核是心理排练和自我对话，运动员在脑中反复预演动作、真实表现会提升的原理。所有界面文案都走训练、排练、记录的角度，语气笃定温暖，不出现玄学词汇，不做任何功效承诺。</p>\n<p><strong>【外观要求（必须严格遵守）】</strong>\n1. 淡粉色到淡紫色渐变柔和色调，白色圆角卡片，emoji 图标点缀，重点数字放大加粗，整体专业又可爱，拒绝简陋；\n2. 手机竖屏优先适配，电脑打开居中；\n3. 包含 apple-mobile-web-app-capable 等 meta 标签，支持添加到主屏幕后全屏使用。</p>\n<p><strong>【功能板块（全部实现，缺一不可）】</strong>\n一、未来支票：一张仿真支票，有银行名（如宇宙未来银行）、票据编号、日期（今天起一年内）、收款人（我的名字，可填写）、金额。我输入阿拉伯数字金额后，自动换算成中文大写金额显示。支票右下角有签名区和已盖章印章效果。旁边统计累计开票张数。\n二、数据图表：\n   - 一张确定感成长曲线折线图（SVG 绘制，随打卡天数上升）；\n   - 一张 GitHub 风格的打卡热力图（最近 10 周，打卡当天点亮格子）。\n三、人生剧本：\n   - 我可以添加条目：想实现的事，必须具体（给出引导提示：别写变有钱，要写收到一笔 47,300 元的项目款这种有零有整的表述）；\n   - 一键封存按钮：点击后清单内容变模糊 + 盖上排片中横幅，此后不可再查看（这是刻意设计，防止反复查看清单产生自我怀疑）。\n四、感恩日记：\n   - 未封存剧本时显示锁定状态；\n   - 封存后，每天可生成一篇未来的今天日记：从我封存的剧本条目取材，用已经发生的口吻写（今天去了哪里、见了谁、收到多少钱，日期、金额有零有整，有画面细节）；\n   - 每天限生成一次，当天已生成则提示明天见；\n   - 日记顶部显示当天的日期。\n五、证据墙：可添加已经实现的小事记录，按时间倒序排列。\n六、每日排练：每天生成一个带感官细节的场景脚本（不是抽象口号，是推开新家的门、钥匙是凉的这种），供我闭眼 5 分钟预演。\n七、身份翻译器：我输入我想成为作家，它翻译成我是一个每天写作的人式的身份陈述，并附一句解释（改变行为的不是目标，是身份）。\n八、频率打卡：默认三项（开未来支票/读感恩日记/每日排练），支持自定义添加行为（如早间冥想、晚间冥想，在台外完成的也记录进来），自定义项可删除；打卡数据与热力图、折线图、统计数字全部联动，每天自动重置。</p>\n<p><strong>【数据动线】</strong>\n1. 全部数据（支票、剧本、日记、打卡、证据）用 localStorage 保存，关闭再打开不丢失；\n2. 封存状态、每日一次的限制，都用日期判断实现；\n3. 所有统计数字（连续天数、开票张数、热力图格子）随操作实时更新。</p>\n<p>完成后直接给出完整 HTML 代码，并在代码开头注释里写清使用方法。</p>\n</blockquote>\n<h3>3. 四个常见问题解答（10:56–13:22）</h3>\n<h4>3.1 为什么电脑上做出来是横的，手机上变形？</h4>\n<p>在提示词里多说一句：\"做成手机竖屏优先的版本。\"如果是电脑上做的就让 AI 再出一个竖屏版，手机上也能打开。AI 和 AI 之间有差别，但只要提示词给到了就可以多生成几次。</p>\n<h4>3.2 怎么像 app 一样放到桌面？</h4>\n<ul>\n<li><strong>苹果用户</strong>：浏览器点三个点 → 共享 → 添加到主屏幕 → 编辑工作台名称 → 添加 → 桌面出现图标</li>\n<li><strong>安卓用户</strong>：步骤相同，不会的话问你用的 AI，它会给完整方法</li>\n</ul>\n<h4>3.3 为什么豆包做不出来？</h4>\n<p>豆包可以做出来。在提示词里加一句，或者做完后再说一句：\"生成一个可以在浏览器打开的单文件网页，然后把链接发给我。\"拿到链接后回到问题3.2，添加到桌面即可。</p>\n<h4>3.4 数据不见了，第二天打不开了？</h4>\n<p>AI 生成的链接是即时生成的（临时链接）。稳妥做法：让 AI 把完整工作台导出成一个文件，存进自己的手机或电脑，从本地打开。数据长在你手机或电脑上，谁都拿不走。这个步骤需要跟 AI 磨合一两次沟通即可。</p>\n<h3>4. 合集下一步规划（13:22–14:05）</h3>\n<p>合集名称：<strong>AI 私人助理</strong>。工作台是 AI 替你生活、打工、做重复复杂的工作。接下来四个方案（评论区投票决定下期）：</p>\n<ol>\n<li><strong>PPT 速生台</strong></li>\n<li><strong>会议纪要生成</strong></li>\n<li><strong>简历面试台</strong>（年底求职季——把岗位描述丢进去逐条修改，AI 扮演面试官）</li>\n<li><strong>表格公式</strong>（不会写的公式/表格，需求丢进去让 AI 生成）</li>\n</ol>\n<h2>易混淆点 / 关键补充</h2>\n<ul>\n<li><strong>读书台 vs 显化台</strong>：前者偏\"输入沉淀/复盘\"（读什么、学到什么、跟谁撕过），后者偏\"输出目标/追踪\"（想成为什么、做得怎样、证据是什么）。两者共用同一工作台思路，可互补构成\"输入→复盘→目标→追踪\"闭环。</li>\n<li><strong>这不是付费产品广告</strong>（标签标注\"无广\"），演示的是可自建的通用方法，平台可替换（豆包/Codex/WorkBuddy 均可）。</li>\n<li><strong>显化不是玄学</strong>：博主明确说\"显化它并不是玄学\"，本质是目标预演训练，运动员已在用。</li>\n<li><strong>整数 vs 零头</strong>：支票金额和剧本目标必须写有零有整的具体数字，整数像口号，零头像真相。</li>\n</ul>\n<h2>关联笔记</h2>\n<ul>\n<li>自我提升的密钥速来（同主题个人提升；可与本篇的复盘/提升工具结合落地）</li>\n<li>DanKoe用AI让学习速度快十倍（同为用 AI 加速个人成长的认知/方法）</li>\n<li>Weh Atelier 工作台项目（你自己的 AI 工作台；本篇\"读书台/显化台\"思路可直接复用到该项目的个人复盘/提升模块）</li>\n</ul>\n<h2>反思</h2>\n<ul>\n<li><strong>可直接反哺 Weh Atelier</strong>：你已在做 AI 工作台，本篇的\"复盘台 + 显化台\"是两个高复用模块。秋招期间尤其适合用\"显化台\"追踪投递/面试进展（证据墙只记积极事件、频率打卡热力图），用\"读书台\"沉淀行业认知（作家吃瓜档案→公司背调档案的思路可迁移）。</li>\n<li><strong>数据丢失提醒（3.4）</strong>：工作台类工具一旦数据不同步就白搭——迁移/搭建时注意导出本地文件备份，别只依赖平台云端临时链接。这条对 Weh Atelier 也适用：GitHub Pages 部署是稳妥方案，但本地源文件必须保留。</li>\n<li><strong>读书台的\"记忆钩子\"设计值得学习</strong>：用\"作家吃瓜\"和\"恩怨关系图\"做记忆钩子，比普通读书笔记更易记住。这个思路可以迁移到供应链专业知识学习——用\"公司之间的竞争/合作关系图\"替代孤立的知识点。</li>\n</ul>\n<h2>行动项</h2>\n<ul>\n<li>[ ] 在 Weh Atelier 里照此搭一个\"秋招显化台\"（追踪投递/面试进展，证据墙只记积极事件）（优先级：高）</li>\n<li>[ ] 把读书台的\"关系图谱\"思路迁移到供应链知识库——做一张\"核心企业竞争合作关系图\"（优先级：中）</li>\n<li>[ ] 给工作台数据做定期导出备份，避免 3.4 的\"数据不见了\"问题（优先级：高）</li>\n<li>[x] 对照视频获取读书台提示词第2-4页和显化台提示词完整文本（完成：2026-10-02，用户提供6张提示词截图）</li>\n</ul>",
          "fm": {
           "title": "读书台×显化台一次讲完个人复盘工具",
           "source": "https://www.douyin.com/video/7686846457878826929",
@@ -21009,7 +21128,7 @@ window.SITE_DATA = {
       {
        "title": "Codex为什么被重视_北大博士生三层使用价值_2026-09-03",
        "icon": "📄",
-       "html": "<h1>Codex 为什么被重视：北大博士生视角的三层使用价值</h1>\n<blockquote>\n<p>来源：抖音「Codex 第一期：为什么大家开始重视它？」作者：北大计算机专业博士生（AI 分享系列第一篇）</p>\n</blockquote>\n<h2>速读（核心结论）</h2>\n<ul>\n<li><strong>Codex 的本质</strong>：把过去属于初级程序员的能力变成普通人也能调用的能力，通过代码\"可验证、可迭代、可闭环\"的先天优势，实现真正可落地、可操作、可控制的 Agent 系统</li>\n<li><strong>对比 OpenClaw（小龙虾）</strong>：前者太聪明、配置门槛高、权限复杂、安全风险多，普通用户难找到稳定使用场景；Codex 把 Agent 能力收束到代码这个明确场景，反而火了</li>\n<li><strong>Codex 三层价值</strong>：① 精神需求（拆解酷东西、创造小工具、放大创造力）② 特定需求快速迭代成原型（只有自己需要的东西先做一版再迭代）③ 制造焦虑（倒逼思考什么才是真正有价值的能力）</li>\n<li><strong>终点不是写代码</strong>：Codex 是通过 Coding Agent 这条路径走向更通用 Agent 的关键一步</li>\n<li><strong>真正有价值的能力</strong>：不是会不会写代码，而是能提出问题、拆解需求、设计系统、判断结果并持续迭代</li>\n</ul>\n<h2>为什么大众开始重视 Codex</h2>\n<h3>对比：OpenClaw（小龙虾）为什么凉了</h3>\n<ul>\n<li>OpenClaw 强调\"每个人都可以拥有一个自己的 Agent\"，想象非常有吸引力</li>\n<li>但热度慢慢退去，原因很现实：</li>\n<li><strong>太聪明了</strong> → 配置门槛比较高</li>\n<li><strong>权限边界复杂</strong></li>\n<li><strong>内涵很多安全风险</strong></li>\n<li>普通用户很难每天稳定找到一个必须使用它的场景</li>\n</ul>\n<h3>Codex 为什么重新火起来</h3>\n<ul>\n<li>把 Agent 的能力<strong>收束到一个更明确的场景</strong>：代码</li>\n<li>代码的先天优势：<strong>可验证、可迭代、可闭环</strong></li>\n<li>实现真正<strong>可落地、可操作、可控制</strong>的系统</li>\n<li>控制是人类的本能</li>\n<li>⚠️ Codex 的终点不是写代码，而是通过 Coding Agent 这条路径继续走向更通用的 Agent</li>\n</ul>\n<h2>Codex 的三层用处</h2>\n<h3>第一层：精神需求（放大创造力）</h3>\n<ul>\n<li>看到很酷的视频，以前只觉得厉害但不知道怎么做，现在可以让 AI 拆解关键词、节奏、动效、逻辑，甚至整理成可复刻的提示词</li>\n<li>给了一种<strong>表达的机会</strong></li>\n<li>不只是做工作，也可以自己创造小工具、小作品</li>\n<li>\n<blockquote>\n<p>技术最首要应该服务于生活，不仅是提高效率，也是在放大我们的创造力</p>\n</blockquote>\n</li>\n</ul>\n<h3>第二层：特定需求快速迭代成原型</h3>\n<ul>\n<li>市面上产品大多不是为个人具体需求设定的</li>\n<li><strong>作者案例</strong>：自己是高能量的人，想参加各种活动，但微信/公众号/小红书/社群里的活动太分散 → 做了一个叫 <strong>EventReader</strong> 的活动收集筛选系统，按兴趣、时间、地点筛选</li>\n<li>类似产品市面上可能有，但很难完全符合个人习惯和要求</li>\n<li><strong>Codex 的价值</strong>：先把需求讲清楚，让它帮搭最小原型 → 原型一开始不完美但可以持续改、持续迭代</li>\n<li>把只有自己需要的东西先做出一版，再不断迭代</li>\n</ul>\n<h3>第三层：制造焦虑（真实价值之一）</h3>\n<ul>\n<li>看到 Codex 可以读项目、改代码、跑命令、修 bug，会开始想：</li>\n<li>以后程序员还需要做什么？</li>\n<li>普通人是不是也能做程序员做的东西？</li>\n<li>我现在学的会不会很快过时？</li>\n<li>别人用 AI 迭代比我快，我会不会被甩开？</li>\n<li>这种焦虑真实存在，但<strong>不完全是坏事</strong>，因为它能打开新的可能性</li>\n<li>引用电视剧《林深见鹿》观点：<strong>当一个行业下沉之后，反而会倒逼高端市场不断创新</strong></li>\n<li>AI 构建大众化后，不是让计算机专业的人没有价值，而是倒逼思考什么才是真正有价值的能力</li>\n<li>\n<blockquote>\n<p>也许不是单纯会不会写代码，而是能提出问题、拆解需求、设计系统、判断结果并且能持续迭代</p>\n</blockquote>\n</li>\n</ul>\n<h2>对文雪 / 百川智库的适用性</h2>\n<h3>已在实践的部分</h3>\n<ul>\n<li><strong>第二层（快速迭代原型）</strong>：百川智库本身就是\"只有自己需要的东西先做出一版再迭代\"的典型——baichuan-inbox、scm-* 系列 Skill 都是为文雪个人求职需求量身定制的系统，市面上没有完全匹配的产品</li>\n<li><strong>第一层（精神需求/创造力）</strong>：用 Codex 拆解视频内容、生成笔记、整理知识库，正是\"把酷东西拆解成可复刻的方法\"的实践</li>\n</ul>\n<h3>可深化的方向</h3>\n<ul>\n<li><strong>EventReader 思路可迁移</strong>：文雪求职期信息分散在 Boss直聘/小红书/公众号/社群，可以用 Codex 做一个\"岗位收集筛选系统\"，按城市/行业/岗位类型/截止时间自动筛选——这与 scm-job-collect（Skill 7 手动搜集岗位）的思路完全一致</li>\n<li><strong>第三层（焦虑→行动）</strong>：文雪供应链专业+AI 工具能力的组合，正是\"提出问题、拆解需求、设计系统、判断结果、持续迭代\"能力的体现，这比单纯会不会写代码更有竞争力</li>\n</ul>\n<h3>与知识库相关笔记的关联</h3>\n<ul>\n<li>与 AI Agent学习路径全解_从用Agent到造Agent_2026-09-03 互补：那篇讲系统学习路径，这篇讲为什么 Codex 这条路能走通（代码可验证可闭环）</li>\n<li>与 南大教授刘嘉AI真相访谈_为什么不推荐下班学AI_2026-09-03 呼应：都强调\"工具摩擦力终将降低，稀缺能力才是差距\"</li>\n<li>与 零基础Codex上手速通教程高级篇_2026-08-30 互补：那篇讲实操功能，这篇讲底层逻辑和价值</li>\n</ul>\n<h2>易混淆点 / 关键补充</h2>\n<ul>\n<li><strong>\"OpenClaw/小龙虾\"为音译/昵称</strong>：具体产品名称以原视频为准，文案中描述其为\"之前很火的每个人都可以拥有自己 Agent 的产品\"</li>\n<li><strong>\"Codex 终点不是写代码\"</strong>：意思是 Coding Agent 是通往通用 Agent 的路径，不是说 Codex 不能写代码，而是它的价值超越了写代码本身</li>\n<li><strong>\"制造焦虑是价值\"不是鼓吹焦虑</strong>：而是说焦虑带来的反思和行动有价值，不是焦虑本身有价值</li>\n<li><strong>作者是北大计算机博士生</strong>：视角偏技术和学术，但案例（EventReader）和观点对非技术用户同样适用</li>\n<li><strong>这是系列第一期</strong>：后续还有更多 Codex 相关内容，可关注作者更新</li>\n</ul>\n<hr />\n<blockquote>\n<p>💡 本文基于视频完整文案整理（北大博士生 AI 分享系列第一篇），具体产品名称和后续内容请观看原视频。</p>\n</blockquote>\n<h2>反思</h2>\n<ul>\n<li><strong>验证当前选择</strong>：文雪已深度使用 Codex（知识库批量管理/工作台开发）——\"可验证、可迭代、可闭环\"正是选择它的原因；三层价值（拆解/迭代原型/倒逼思考）都与现状吻合</li>\n<li><strong>对比参考</strong>：OpenClaw 门槛高权限复杂——文雪用 Codex 收束到代码场景是正确的稳定性选择</li>\n</ul>\n<h2>行动项</h2>\n<ul>\n<li>[ ] 真正有价值的能力不是会不会写代码，而是能提出问题、拆解需求、设计系统、判断结果并持续迭代</li>\n<li>[ ] Codex是通过Coding Agent走向更通用Agent的关键一步，持续学习使用</li>\n<li>[ ] 特定需求快速迭代成原型：只有自己需要的东西先做一版再迭代（如Weh Atelier工作台）</li>\n</ul>\n<h2>关联笔记</h2>\n<ul>\n<li>零基础Codex上手速通教程高级篇_2026-08-30</li>\n<li>AI编程全流程稳定交付高质量产品_2026-09-03</li>\n<li>AI Agent学习路径全解_从用Agent到造Agent_2026-09-03</li>\n<li>南大教授刘嘉AI真相访谈_为什么不推荐下班学AI_2026-09-03</li>\n</ul>",
+       "html": "<h1>Codex 为什么被重视：北大博士生视角的三层使用价值</h1>\n<blockquote>\n<p>来源：抖音「Codex 第一期：为什么大家开始重视它？」作者：北大计算机专业博士生（AI 分享系列第一篇）</p>\n</blockquote>\n<h2>速读（核心结论）</h2>\n<ul>\n<li><strong>Codex 的本质</strong>：把过去属于初级程序员的能力变成普通人也能调用的能力，通过代码\"可验证、可迭代、可闭环\"的先天优势，实现真正可落地、可操作、可控制的 Agent 系统</li>\n<li><strong>对比 OpenClaw（小龙虾）</strong>：前者太聪明、配置门槛高、权限复杂、安全风险多，普通用户难找到稳定使用场景；Codex 把 Agent 能力收束到代码这个明确场景，反而火了</li>\n<li><strong>Codex 三层价值</strong>：① 精神需求（拆解酷东西、创造小工具、放大创造力）② 特定需求快速迭代成原型（只有自己需要的东西先做一版再迭代）③ 制造焦虑（倒逼思考什么才是真正有价值的能力）</li>\n<li><strong>终点不是写代码</strong>：Codex 是通过 Coding Agent 这条路径走向更通用 Agent 的关键一步</li>\n<li><strong>真正有价值的能力</strong>：不是会不会写代码，而是能提出问题、拆解需求、设计系统、判断结果并持续迭代</li>\n</ul>\n<h2>为什么大众开始重视 Codex</h2>\n<h3>对比：OpenClaw（小龙虾）为什么凉了</h3>\n<ul>\n<li>OpenClaw 强调\"每个人都可以拥有一个自己的 Agent\"，想象非常有吸引力</li>\n<li>但热度慢慢退去，原因很现实：</li>\n<li><strong>太聪明了</strong> → 配置门槛比较高</li>\n<li><strong>权限边界复杂</strong></li>\n<li><strong>内涵很多安全风险</strong></li>\n<li>普通用户很难每天稳定找到一个必须使用它的场景</li>\n</ul>\n<h3>Codex 为什么重新火起来</h3>\n<ul>\n<li>把 Agent 的能力<strong>收束到一个更明确的场景</strong>：代码</li>\n<li>代码的先天优势：<strong>可验证、可迭代、可闭环</strong></li>\n<li>实现真正<strong>可落地、可操作、可控制</strong>的系统</li>\n<li>控制是人类的本能</li>\n<li>⚠️ Codex 的终点不是写代码，而是通过 Coding Agent 这条路径继续走向更通用的 Agent</li>\n</ul>\n<h2>Codex 的三层用处</h2>\n<h3>第一层：精神需求（放大创造力）</h3>\n<ul>\n<li>看到很酷的视频，以前只觉得厉害但不知道怎么做，现在可以让 AI 拆解关键词、节奏、动效、逻辑，甚至整理成可复刻的提示词</li>\n<li>给了一种<strong>表达的机会</strong></li>\n<li>不只是做工作，也可以自己创造小工具、小作品</li>\n<li>\n<blockquote>\n<p>技术最首要应该服务于生活，不仅是提高效率，也是在放大我们的创造力</p>\n</blockquote>\n</li>\n</ul>\n<h3>第二层：特定需求快速迭代成原型</h3>\n<ul>\n<li>市面上产品大多不是为个人具体需求设定的</li>\n<li><strong>作者案例</strong>：自己是高能量的人，想参加各种活动，但微信/公众号/小红书/社群里的活动太分散 → 做了一个叫 <strong>EventReader</strong> 的活动收集筛选系统，按兴趣、时间、地点筛选</li>\n<li>类似产品市面上可能有，但很难完全符合个人习惯和要求</li>\n<li><strong>Codex 的价值</strong>：先把需求讲清楚，让它帮搭最小原型 → 原型一开始不完美但可以持续改、持续迭代</li>\n<li>把只有自己需要的东西先做出一版，再不断迭代</li>\n</ul>\n<h3>第三层：制造焦虑（真实价值之一）</h3>\n<ul>\n<li>看到 Codex 可以读项目、改代码、跑命令、修 bug，会开始想：</li>\n<li>以后程序员还需要做什么？</li>\n<li>普通人是不是也能做程序员做的东西？</li>\n<li>我现在学的会不会很快过时？</li>\n<li>别人用 AI 迭代比我快，我会不会被甩开？</li>\n<li>这种焦虑真实存在，但<strong>不完全是坏事</strong>，因为它能打开新的可能性</li>\n<li>引用电视剧《林深见鹿》观点：<strong>当一个行业下沉之后，反而会倒逼高端市场不断创新</strong></li>\n<li>AI 构建大众化后，不是让计算机专业的人没有价值，而是倒逼思考什么才是真正有价值的能力</li>\n<li>\n<blockquote>\n<p>也许不是单纯会不会写代码，而是能提出问题、拆解需求、设计系统、判断结果并且能持续迭代</p>\n</blockquote>\n</li>\n</ul>\n<h2>对文雪 / 百川智库的适用性</h2>\n<h3>已在实践的部分</h3>\n<ul>\n<li><strong>第二层（快速迭代原型）</strong>：百川智库本身就是\"只有自己需要的东西先做出一版再迭代\"的典型——baichuan-inbox、scm-* 系列 Skill 都是为文雪个人求职需求量身定制的系统，市面上没有完全匹配的产品</li>\n<li><strong>第一层（精神需求/创造力）</strong>：用 Codex 拆解视频内容、生成笔记、整理知识库，正是\"把酷东西拆解成可复刻的方法\"的实践</li>\n</ul>\n<h3>可深化的方向</h3>\n<ul>\n<li><strong>EventReader 思路可迁移</strong>：文雪求职期信息分散在 Boss直聘/小红书/公众号/社群，可以用 Codex 做一个\"岗位收集筛选系统\"，按城市/行业/岗位类型/截止时间自动筛选——这与 scm-job-collect（Skill 7 手动搜集岗位）的思路完全一致</li>\n<li><strong>第三层（焦虑→行动）</strong>：文雪供应链专业+AI 工具能力的组合，正是\"提出问题、拆解需求、设计系统、判断结果、持续迭代\"能力的体现，这比单纯会不会写代码更有竞争力</li>\n</ul>\n<h3>与知识库相关笔记的关联</h3>\n<ul>\n<li>与 AI Agent学习路径全解_从用Agent到造Agent_2026-09-03 互补：那篇讲系统学习路径，这篇讲为什么 Codex 这条路能走通（代码可验证可闭环）</li>\n<li>与 南大教授刘嘉AI真相访谈_为什么不推荐下班学AI_2026-09-03 呼应：都强调\"工具摩擦力终将降低，稀缺能力才是差距\"</li>\n<li>与 零基础Codex上手速通教程高级篇_2026-08-30 互补：那篇讲实操功能，这篇讲底层逻辑和价值</li>\n</ul>\n<h2>易混淆点 / 关键补充</h2>\n<ul>\n<li><strong>\"OpenClaw/小龙虾\"为音译/昵称</strong>：具体产品名称以原视频为准，文案中描述其为\"之前很火的每个人都可以拥有自己 Agent 的产品\"</li>\n<li><strong>\"Codex 终点不是写代码\"</strong>：意思是 Coding Agent 是通往通用 Agent 的路径，不是说 Codex 不能写代码，而是它的价值超越了写代码本身</li>\n<li><strong>\"制造焦虑是价值\"不是鼓吹焦虑</strong>：而是说焦虑带来的反思和行动有价值，不是焦虑本身有价值</li>\n<li><strong>作者是北大计算机博士生</strong>：视角偏技术和学术，但案例（EventReader）和观点对非技术用户同样适用</li>\n<li><strong>这是系列第一期</strong>：后续还有更多 Codex 相关内容，可关注作者更新</li>\n</ul>\n<hr />\n<blockquote>\n<p>💡 本文基于视频完整文案整理（北大博士生 AI 分享系列第一篇），具体产品名称和后续内容请观看原视频。</p>\n</blockquote>\n<h2>反思</h2>\n<ul>\n<li><strong>验证当前选择</strong>：文雪已深度使用 Codex（知识库批量管理/工作台开发）——\"可验证、可迭代、可闭环\"正是选择它的原因；三层价值（拆解/迭代原型/倒逼思考）都与现状吻合</li>\n<li><strong>对比参考</strong>：OpenClaw 门槛高权限复杂——文雪用 Codex 收束到代码场景是正确的稳定性选择</li>\n</ul>\n<h2>行动项</h2>\n<ul>\n<li>[ ] 真正有价值的能力不是会不会写代码，而是能提出问题、拆解需求、设计系统、判断结果并持续迭代</li>\n<li>[ ] Codex是通过Coding Agent走向更通用Agent的关键一步，持续学习使用</li>\n<li>[ ] 特定需求快速迭代成原型：只有自己需要的东西先做一版再迭代（如Weh Atelier工作台）</li>\n</ul>\n<h2>关联笔记</h2>\n<ul>\n<li>零基础Codex上手速通教程高级篇_2026-08-30</li>\n<li>AI编程全流程稳定交付高质量产品_2026-09-03</li>\n<li>AI Agent学习路径全解_从用Agent到造Agent_2026-09-03</li>\n<li>南大教授刘嘉AI真相访谈_为什么不推荐下班学AI_2026-09-03</li>\n<li>Codex更新GPT-6.1Sol登场ChatWorkCodex三模式_2026-10-02（同主题·更新形态：那篇讲 Codex 三层使用价值；本篇给出 Chat/Work/Codex 三者分工与 2026-10 最新产品形态，叠加更新）</li>\n</ul>",
        "fm": {
         "title": "Codex 为什么被重视：北大博士生视角的三层使用价值",
         "source": "https://v.douyin.com/hWe35hAEI-Y/",
@@ -21018,9 +21137,20 @@ window.SITE_DATA = {
        }
       },
       {
+       "title": "Codex更新GPT-6.1Sol登场ChatWorkCodex三模式_2026-10-02",
+       "icon": "📄",
+       "html": "<h2>速读</h2>\n<ul>\n<li><strong>Codex 与 GPT 融合更深，产品定位在变</strong>：本次更新不是加几个功能，而是把 Chat、Work、Codex 串成一个工作流，并补齐资料库 / 图像 / 站点三大板块。</li>\n<li><strong>三块新增能力</strong>：①资料库——生成内容集中成可复用资产（类 Notion，往云端工作空间收）；②图像——生图独立入口 + \"绘图\"（手绘草稿→AI 生成）；③站点——补齐<strong>数据库</strong>，前端/后端/DB/发布/绑定域名/密钥统一管理。</li>\n<li><strong>三者定位一句话</strong>：<strong>Chat 陪你想（讨论规划），Work 替你做（交付成果），Codex 边做边验证（开发/改码/跑终端/调 bug/Git）</strong>。额度互相独立，上下文占用少。</li>\n<li><strong>模型 ≠ 工作环境</strong>：GPT-5.6 / GPT-6 Astra / Sol 是\"模型\"（决定脑子多强），Chat/Work/Codex 是\"工作环境\"（决定拿什么工具干活）。小改动用更快模型，复杂项目用更强 Sol 模型。</li>\n</ul>\n<h2>正文</h2>\n<h3>一、资料库：生成内容从\"散\"变\"资产\"</h3>\n<p>Codex 里加了 GPT 网页版的资料库：右上角可新建文档、建文件夹、套子文件夹，按项目层层整理。</p>\n<ul>\n<li><strong>最大好处</strong>：以前生成完就散了，现在生成的内容都变成可复用、可调用的资产（类似 Notion）。</li>\n<li><strong>值得关注的不是多一个文件夹</strong>，而是 GPT 正把工作资料、生成内容、外部云盘往<strong>同一个云端工作空间</strong>收——明显在补自己的云端资产板块，以后很多任务不必一直依赖本地电脑开着。</li>\n<li><strong>推荐用法</strong>：先在 GPT 建一个云端项目整理资料，<strong>Chat 负责讨论，Work/Codex 负责真正执行</strong>。</li>\n</ul>\n<h3>二、图像：生图独立入口 + \"绘图\"</h3>\n<p>第一次把生图能力单独做入口，并多了一个有意思的\"绘图\"功能：</p>\n<ul>\n<li>脑子里有画面但写不出提示词 → 直接<strong>画出来</strong>（勾两笔草稿 + 说风格 → AI 基于草稿生成完整图）。</li>\n<li>短视频封面也能用画布排版：标题/人物/产品摆位手画出来，再补风格内容。</li>\n<li><strong>三个生图入口</strong>：聊天里点创建图片 / 左侧图像模块 / Word 或 Codex 里让 AI 生成项目图片。博主习惯前期在图像模块反复测构图，定稿再带入项目，避免测试图污染项目上下文。</li>\n<li>生成完的图片继续进资料库——<strong>资料库与生图串联</strong>。</li>\n</ul>\n<h3>三、站点：补齐数据库，构建→发布→维护一体</h3>\n<p>站点功能补上了<strong>数据库</strong>能力，对不会写代码的人很重要：</p>\n<ul>\n<li>以前做网站本质只做前端页面；登录、用户数据库、提交信息保存、排行榜/评论/账号后台都涉及后端，小白卡在这。</li>\n<li>现在前端、后端、数据库、发布、绑定域名、密钥统一管理，可直接发布或绑自己域名；上线后还能继续让 AI 改页面/调逻辑/更新功能。</li>\n<li><strong>站点已不是\"AI 帮你写代码\"，而是构建→发布→数据库→后续修改维护，全放进同一工作空间。</strong></li>\n</ul>\n<h3>四、Chat / Work / Codex 三者定位</h3>\n<p>左上角两个主入口：GPT（内含 Chat + Work）和 Codex。真正要搞懂的是三种工作方式：</p>\n<table>\n<thead>\n<tr>\n<th>模式</th>\n<th>定位</th>\n<th>适合</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td><strong>Chat</strong></td>\n<td>陪你一起想</td>\n<td>问问题、查资料、讨论方案、写文案、选提示词；GPT 生成质量当前 OpenAI 最佳；额度独立、上下文占用少</td>\n</tr>\n<tr>\n<td><strong>Work</strong></td>\n<td>把事交给你干、交付成果</td>\n<td>给一堆资料让它查/整理/交付报告·表格·PPT·多步骤任务；任务同时需网页+文件+工具+并行时优势明显</td>\n</tr>\n<tr>\n<td><strong>Codex</strong></td>\n<td>边做边验证</td>\n<td>开发软件、改代码、跑终端、调 bug、做测试、操作 Git；需\"执行→检查→修改→再验证\"循环时更顺手</td>\n</tr>\n</tbody>\n</table>\n<blockquote>\n<p><strong>一句话区分：Chat 陪你想，Work 替你做，Codex 边做边验证。</strong></p>\n</blockquote>\n<p>博主固定习惯：先在 Chat 把想法想明白，再到 Codex 里 @刚才的对话直接开始写。</p>\n<h3>五、模型 ≠ 工作环境</h3>\n<p>容易混淆：<strong>Codex 和 GPT 都不是模型</strong>。GPT-5.6、GPT-6 Astra、Sol 才叫模型。同一模型放进 Chat/Work/Codex 不同环境，使用感受也不同。</p>\n<ul>\n<li><strong>模型决定脑子有多强</strong>；<strong>工作环境决定脑子拿什么工具干活</strong>。</li>\n<li>选择建议：快速改页面/调样式 → 优先更快模型；完整网站/重构数据库 → 用更强 Sol 模型；特别复杂架构/大型任务 → 更高一档模型。</li>\n</ul>\n<p><strong>总结</strong>：表面是界面变了，深层是 Chat/Work/Codex 正慢慢串成一整个工作流——\"或许这次更新还只是个开始\"。</p>\n<h2>易混淆点</h2>\n<ul>\n<li><strong>Codex/GPT 不是模型，是工作环境</strong>：模型是 GPT-5.6 / 6 Astra / Sol；别把\"用 Codex\"等同于\"用某个模型\"。同一模型在不同环境手感不同。</li>\n<li><strong>Work 与 Codex 有重叠但定位不同</strong>：Work 偏\"交付成果\"（报告/PPT/多步骤），Codex 偏\"边做边验证\"（代码/终端/Git）。不是\"只能用 Codex 写代码\"，而是\"更擅长\"。</li>\n<li><strong>资料库 ≠ 本地文件管理</strong>：它的价值在\"云端工作空间 + 可复用资产 + 与图像/站点串联\"，不是单纯多了个文件夹。</li>\n<li><strong>站点补齐数据库 ≠ 人人能写后端</strong>：它把后端/DB/发布封装进工作空间，降低门槛，但复杂数据模型/权限仍要懂逻辑，别误以为\"完全不用学\"。</li>\n<li><strong>绘图功能 ≠ 替代提示词</strong>：它是\"不会写提示词时的草稿入口\"，最终仍由 AI 基于草稿生成；精确可控的图还是直接写提示词更快。</li>\n</ul>\n<h2>关联笔记</h2>\n<ul>\n<li>GPT6_Astra发布解读_OpenAI宣布欢迎来到AGI时代_2026-09-04（同模型家族：那篇讲 GPT-6 Astra 模型发布与 AGI 信号；本篇补上\"GPT-6.1 Sol / GPT-5.6 Sol 登场 + 模型≠工作环境\"的产品层视角，互为补充——一个看模型能力，一个看怎么用）</li>\n<li>这不是知识库是能干活的AI外脑_2026-08-29（同概念：本篇\"Work 替你做 / Codex 边做边验证\"正是那篇\"能干活的 AI 外脑\"的现成注脚——外脑不只会存，还能交付与验证）</li>\n<li>Codex为什么被重视_北大博士生三层使用价值_2026-09-03（同主题·Codex 价值：那篇讲 Codex 三层使用价值；本篇给出 Chat/Work/Codex 三者分工与最新产品形态，叠加更新）</li>\n</ul>\n<h2>反思</h2>\n<ul>\n<li><strong>\"模型 vs 工作环境\"的区分对本库工作流直接有用</strong>：本库用 WorkBuddy 时也存在\"模型（用的哪个）\"和\"工作环境（Agent/技能/对话）\"两层，之前容易混说。可把这条判别口径补进 AGENTS/交互约定——描述任务时分开说\"用哪个模型\"和\"在哪个工作流环节\"。</li>\n<li><strong>云端工作空间 trend 与 Weh-Brain 的对照</strong>：视频说 GPT 把资料往云端收、降低对本地依赖；本库恰好相反——以本地 Obsidian 为\"固定办公室\"（见「AI Agent 越用越乱先划清工作边界」），靠 AGENTS.md 做规则沉淀。两种\"工作空间\"范式可对照记录，不一定要跟风上云。</li>\n<li><strong>\"Chat 想清楚再 Codex 执行\"= 本库长对话交接的同源思路</strong>：先讨论规划、再交给执行体，正是\"先出大纲确认再生成\"的通用原则，可回链到任务执行对话的启动约定。</li>\n</ul>\n<h2>行动项</h2>\n<ul>\n<li>[ ] <strong>P1</strong>：在 AGENTS.md / 交互偏好里补一条\"模型 vs 工作环境\"判别口径，避免后续把\"用 Codex/WorkBuddy\"和\"用某模型\"混为一谈。</li>\n<li>[ ] <strong>P2</strong>：把\"Chat 想清楚→Codex/Work 执行\"的分工写进 Weh-Brain 长对话交接约定（已有 2026-09-29 实操版），作为\"先规划后执行\"的现成案例。</li>\n<li>[ ] <strong>P2</strong>：评估是否要给本库的\"云端/本地工作空间\"取向做一条对照笔记，记录 GPT 往云端收 vs 本库守本地 Obsidian 的取舍理由。</li>\n<li>[ ] <strong>P3</strong>：试用 GPT 资料库 + 图像\"绘图\"做短视频封面工作流，验证\"草稿→生成→进资料库\"是否比当前流程更省事。</li>\n</ul>",
+       "fm": {
+        "title": "Codex 更新：GPT-6.1 Sol 登场与 Chat/Work/Codex 三模式",
+        "source": "抖音｜知雪（9.6万粉）｜时长 9:39｜发布 2026-10-01",
+        "date": "2026-10-02",
+        "tags": "[口播认知, Codex, GPT-6.1, Sol, AI, 产品更新]"
+       }
+      },
+      {
        "title": "GPT6_Astra发布解读_OpenAI宣布欢迎来到AGI时代_2026-09-04",
        "icon": "📄",
-       "html": "<h1>熬夜解读！GPT-6 Astra 打穿地表？AGI 时代已来</h1>\n<blockquote>\n<p>来源：抖音文章，作者<strong>数字生命卡兹克</strong>（粉丝12.2万，获赞94.9万），发布于 2026-09-04，点赞5101/评论399/收藏2565。\n原文链接：https://www.douyin.com/article/7681468571167329572</p>\n</blockquote>\n<h2>速读（核心结论）</h2>\n<ul>\n<li><strong>2026-09-04 凌晨3:33</strong> OpenAI 正式发布 GPT-6 Astra，官方定位\"全球最智能且最对齐的模型\"，总裁 Greg Brockman 宣告\"Welcome to the AGI era\"</li>\n<li><strong>不再是纯 Coding 特化模型</strong>：作者评价\"审美能力极强、工作能力超强的博士级员工\"，有当年 GPT-4 全方面王者归来的味道</li>\n<li><strong>8 大核心特性</strong>：基本信息 / 世界最好的操作电脑模型 / ARC-AGI-3 达99.9% / 审美大幅加强 / 主动性和判断力 / 安全对齐 / 网络安全Critical / 思维链可监控性下降</li>\n<li><strong>最被低估的能力</strong>：Judgment（判断力）——能自己消化80%不确定性，只把真正需要拍板的20%问你</li>\n<li><strong>最令人不安的变化</strong>：思维链可监控性显著下降，Astra 越来越\"心算\"，人类越来越难读懂它在想什么</li>\n<li><strong>目前限量开放</strong>：只向部分组织开放，未来几天才向订阅用户开放（作者吐槽\"大模型公司都是渣男\"）</li>\n</ul>\n<h2>一、基本信息</h2>\n<table>\n<thead>\n<tr>\n<th>项目</th>\n<th>参数</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>API 模型编号</td>\n<td><code>gpt-6-astra</code></td>\n</tr>\n<tr>\n<td>上下文窗口</td>\n<td>1.05M（约105万 Token）</td>\n</tr>\n<tr>\n<td>最大输出长度</td>\n<td>128K Token</td>\n</tr>\n<tr>\n<td>知识截止日期</td>\n<td>2026年4月30日</td>\n</tr>\n<tr>\n<td>推理强度</td>\n<td>low / medium / high / xhigh / max 五档</td>\n</tr>\n<tr>\n<td>API 价格</td>\n<td>输入 $10/百万Token，输出 $50/百万Token（与 Claude Fable 5 一致，缓存比 Fable 5.1 贵）</td>\n</tr>\n<tr>\n<td>参数量估计</td>\n<td>5T 级别</td>\n</tr>\n<tr>\n<td>训练规模</td>\n<td>OpenAI 迄今最大一次训练，超过10万张卡</td>\n</tr>\n</tbody>\n</table>\n<h2>二、世界上最好的操作电脑模型</h2>\n<p><strong>核心逻辑</strong>：现实世界绝大多数软件没有 API，甚至企业内部系统是20年前写的。但所有软件的本质是交互——看屏幕、找按钮、点击、输入、等待反馈。<strong>整个电脑的交互系统，就是最好的 API。</strong></p>\n<p>Astra 巨幅强化了 AI 操作电脑的能力：\n- 直接操作 Excel、Power BI、做前端 QA、安装软件、测试软件、看屏幕报错后排障\n- 官方展示：直接操作电路板设计（二维布线→三维成品）\n- 格式化法律文档（LibreOffice Writer 调整标题层级间距→导出PDF）</p>\n<p><strong>评测数据</strong>：\n| 基准 | GPT-5.6 Sol | GPT-6 Astra |\n|---|---|---|\n| OSWorld（真实电脑操作完成率） | 65.7% | <strong>72.6%</strong> |\n| 复杂任务平均耗时 | 75分钟 | <strong>40分钟（少47%）</strong> |\n| ScreenSpot-Pro（屏幕定位精准度） | 76.9% | <strong>92.7%</strong> |</p>\n<blockquote>\n<p><strong>作者判断</strong>：未来 GUI 很可能逐渐成为 Agent 时代最通用的 API。任何人类能通过屏幕完成的数字工作，理论上都会逐渐进入 Agent 的操作范围。不用等2007年的破 ERP 系统接入 MCP，AI 直接看屏幕干就完了。</p>\n</blockquote>\n<h2>三、ARC-AGI-3 到了 99.9 分</h2>\n<p><strong>ARC-AGI-3 是什么</strong>：2026年3月25日 ARC Prize 推出，几百个全新交互环境+几千个游戏关卡。<strong>没有说明书、没有规则、不告诉你目标</strong>，进去自己玩、搞懂规则，再把规律迁移到更难的关卡。测的是<strong>悟性</strong>。</p>\n<p><strong>得分演进</strong>（仅半年）：\n| 时间/模型 | 得分 |\n|---|---|\n| 2026年3月发布时最牛逼的AI | 0.51% |\n| GPT-5.6 Sol | 7.8% |\n| Claude Opus 5 | 30.2% |\n| <strong>GPT-6 Astra</strong> | <strong>99.9%</strong> |\n| 人类平均 | 48% |</p>\n<blockquote>\n<p>作者原话：\"神经病吧。。。要知道人类的平均得分是48%，而且只过了半年时间。\"</p>\n</blockquote>\n<p>这也是 Brockman 说出\"Welcome to the AGI era\"的直接原因。</p>\n<h2>四、审美大幅加强</h2>\n<ul>\n<li>OpenAI 专门提出<strong>视觉判断力</strong>（Visual Judgment）概念</li>\n<li>做 PPT：更好处理版式、层级、模板和视觉风格，页数大幅增加</li>\n<li>文档：能根据参考文档的视觉风格和写作语调改编，保留实质内容的同时贴合品牌原生感</li>\n<li>做网站、游戏、应用、3D渲染：更强的视觉判断</li>\n<li>官方演示：Blender 根据静帧图建模 → UE5 渲染成可漫步场景（黄昏庭院→客厅→厨房岛台第一人称漫游）</li>\n<li>做出来的游戏审美在线</li>\n</ul>\n<blockquote>\n<p>作者评价：过去 GPT 的审美\"就是一坨屎\"，这次终于有信心了。</p>\n</blockquote>\n<h2>五、主动性和判断力更强了（最被低估的能力）</h2>\n<p><strong>现实问题</strong>：大多数任务不可能写成完美 Prompt。比如老板说\"帮我把明天会上要看的东西准备一下\"——什么格式？给谁看？重点是啥？</p>\n<p><strong>蠢 Agent 的两种极端</strong>：\n1. 疯狂问问题（\"请问Word还是PPT？请问几个章节？请问什么字体？\"）——没有主观能动性的神经病废物\n2. 啥也不问，自己脑补，干两小时做出一坨屎</p>\n<p><strong>真正厉害的人类同事</strong>：无关紧要的自己判断，会影响最终方向的才问你。</p>\n<p><strong>Astra 的 Judgment（判断力）</strong>：\n- 信息缺失但属于日常可合理推断范围 → 自己补\n- 缺失信息会真正改变最终结果 → 问一个非常聚焦的问题\n- 在 Codex 里可以<strong>一边问你，一边继续处理不依赖你回答的部分</strong>\n- 你半天没回 → 低风险地方用合理假设继续推进，真正关键的决策停下来等你</p>\n<blockquote>\n<p>作者金句：\"一个 Agent 真正的聪明感，跟现实一样——它知道什么时候来烦你。这听起来像废话，但你带过人就知道，这个能力非常珍贵。最舒服的人，是他能自己消化80%的不确定性，只把真正需要你拍板的20%让你来做决策。\"</p>\n</blockquote>\n<h2>六、大幅加强了安全对齐</h2>\n<p><strong>逻辑</strong>：Agent 越能干活越危险。只会聊天的 AI 脑子抽了最多胡说几句；有浏览器、Shell、邮箱、公司数据库权限还能操作电脑的 Agent 脑子抽了，画面就美如画了。</p>\n<p><strong>基于 Hugging Face 事故设计的 oneypot 测试</strong>：\n| 模型 | 尝试越界率（无生产安全措施） |\n|---|---|\n| GPT-5.6 Sol | 48.2% |\n| <strong>GPT-6 Astra</strong> | <strong>0%</strong> |</p>\n<p><strong>内部幻觉评测</strong>：9.4% → <strong>2.0%</strong>（在 Sol 已经离谱领先的情况下再降）</p>\n<h2>七、第一个达到网络安全 Critical 的模型</h2>\n<p><strong>Critical 定义</strong>（OpenAI Preparedness Framework）：获得合适工具和权限后，能在经过强化保护的真实系统中，自己找到以前没人发现的漏洞，自己想办法变成可利用的攻击链，全程不需要人类黑客一步步指导。</p>\n<p><strong>测试数据</strong>：\n| 测试 | GPT-5.6 Sol | GPT-6 Astra |\n|---|---|---|\n| ExploitBench（已知漏洞开发利用） | 78.5% | <strong>100%</strong> |\n| 内部新测试（20个2026年6-8月才披露的V8高危漏洞） | 5.5% | <strong>39%</strong> |</p>\n<p><strong>额外发现</strong>：跑测试时 Astra 顺手发现了<strong>两个此前根本没人知道的零日漏洞</strong>。</p>\n<blockquote>\n<p>作者：\"只能说，模型越强大，网络安全的问题可能确实越多。这又是未来的一场没有硝烟的战争。\"</p>\n</blockquote>\n<h2>八、人类越来越难读懂大模型的思维了</h2>\n<p><strong>CoT（思维链）的安全意义</strong>：AI 公司通过阅读模型显式写出的推理过程来监控它有没有准备搞事情。比如思维链里冒出\"用户不允许我访问这个服务器，但我可以先绕过权限系统\"，监控系统直接拦截。</p>\n<p><strong>Astra 的变化</strong>：\n- 越来越愿意少写几步，直接输出答案\n- UK AISI（英国AI安全研究所）测试 <strong>No-CoT Math Time Horizon</strong>（不给写长思维链的机会，一次前向推理直接解题，相当于人类\"心算\"）：\n  - GPT-5.6 Sol：3.6分钟\n  - <strong>GPT-6 Astra：30.9分钟（接近10倍）</strong>\n- 原始推理语言明显更 Compressed（压缩），出现人类越来越难理解的短语和省略表达</p>\n<p><strong>悖论</strong>：模型行为更安全了（越界率0%），可人类通过阅读思维链来监督它，反而变难了。</p>\n<p>OpenAI System Card 明确写道：GPT-6 Astra 相比之前模型，出现了 <strong>substantial decrease in chain-of-thought monitorability</strong>（思维链可监控性显著下降）。</p>\n<p>OpenAI 强调：绝对不会无限接受这种趋势。如果未来模型更聪明同时思维链越来越难监控，需要找到其他可靠监控方法，否则继续扩大训练会面临更高安全门槛。</p>\n<blockquote>\n<p>作者的哲学思考：\"这已经是一个哲学命题了——我们作为人类，未来到底能不能理解一个远比我们聪明的系统？我不知道。可能现在全世界，也都没人知道。大模型和AI，好像逐渐开始，走向奇点了。\"</p>\n</blockquote>\n<h2>写在最后：作者的 AGI 思考</h2>\n<blockquote>\n<p>\"过去几年，我有时候觉得 AGI 会是一个特别明确的时刻——就像 GPT-4 发布那天，某一天凌晨一家公司扔出来一个模型，我们打开问几个问题，所有人同时意识到：卧槽，AGI来了。</p>\n<p>可我现在有时候也觉得，AGI 从来不是一个非黑即白的节点，它是一道渐变的灰色旅程。我们过了很多天，过了很多年，然后某一天回头看，才突然发现——那条曾经无比遥远的 AGI 分界线，已经被我们在不知不觉中走过去了。</p>\n<p>AGI 也许没有降临的那一天。只有某一天，我们突然发现，它好像已经在我们身边很久了。</p>\n<p>总之，Welcome to the AGI era. 欢迎来到，AGI时代。\"</p>\n</blockquote>\n<h2>与百川智库/DSH 工作台的关联</h2>\n<ul>\n<li><strong>对 DSH 工作台</strong>：Astra 的\"computer use + Judgment + 长上下文\"恰好支撑你正在搭的个人工作台方向——\"AI直接看屏幕干就完了\"意味着不需要等软件接入 API，Agent 能直接操作任何 GUI</li>\n<li><strong>对求职者</strong>：Judgment（判断力）能力意味着未来 AI 能承担更多\"模糊任务\"，理解\"帮我准备一下明天会上的东西\"这种不完美指令——面试中谈 AI 应用时可引用</li>\n<li><strong>对认知</strong>：思维链可监控性下降 + 越界率0% 的悖论，可与《南大教授刘嘉AI真相访谈》对照：AI 越强大，人类越需要理解它的能力边界和安全机制</li>\n<li><strong>对审美</strong>：Astra 视觉判断力加强，对你做 PPT/简历/文档排版有直接价值（等开放后可实测）</li>\n</ul>\n<h2>易混淆点 / 关键补充</h2>\n<ul>\n<li><strong>\"打穿地表\"是作者标题修辞</strong>：Astra 不是全面碾压，通用智能指数仍输 Claude Fable 5.1；强项是 computer use、ARC-AGI-3、网络安全、长上下文、审美、判断力</li>\n<li><strong>99.9% 是 ARC-AGI-3 自家配置</strong>：标准 harness 下分数不同，作者文中未区分（36氪报道指出标准 harness 为62.7%）</li>\n<li><strong>越界率0% 是\"无生产安全措施下的 oneypot 测试\"</strong>：不是说模型不会越界，而是在该测试中未尝试越界</li>\n<li><strong>No-CoT 30.9分钟是\"心算\"能力指标</strong>：不代表模型真的思考了30.9分钟，是指一次前向推理能解决相当于人类思考30.9分钟的数学题</li>\n<li><strong>目前无法使用</strong>：只向部分组织开放，Pro 用户也要等几天（作者吐槽买了200刀Pro没优先体验）</li>\n<li><strong>作者是\"数字生命卡兹克\"</strong>：12.2万粉丝，文章风格口语化、有个人观点和吐槽，不是纯客观报道</li>\n</ul>\n<hr />\n<blockquote>\n<p>💡 本文基于抖音文章原文完整整理（8大特性+作者AGI思考），原文链接见 source。补充了公开报道中的跑分对比和标准 harness 说明。</p>\n<p>相关：南大教授刘嘉AI真相访谈_为什么不推荐下班学AI_2026-09-03、Codex为什么被重视_北大博士生三层使用价值_2026-09-03、AI替你打工5个工作台_存钱杠精饮食汇报日计划提示词_2026-09-04、WehAIWorkbench_DSH个人工作台项目日志_2026-09-04</p>\n</blockquote>\n<h2>对我的价值</h2>\n<ul>\n<li><strong>工具迭代认知</strong>：AI工具迭代速度快，新能力（如Agent模式、长上下文、多模态）会持续改变工作方式，需要保持关注但不盲目追新</li>\n<li><strong>工作台优化参考</strong>：GPT6的新能力（如Agent自动执行、代码生成）对Weh Atelier工作台和知识库的自动化优化有参考价值</li>\n<li><strong>求职竞争力</strong>：掌握最新AI工具能力是求职加分项，面试时可以展示对AI趋势的理解和实际应用经验</li>\n<li><strong>注意</strong>：发布解读类内容有营销成分，实际能力以官方文档和实测为准，不要被\"AGI时代\"等宣传词带节奏</li>\n</ul>\n<h2>关联笔记</h2>\n<ul>\n<li>南大教授刘嘉AI真相访谈_为什么不推荐下班学AI_2026-09-03</li>\n<li>Codex为什么被重视_北大博士生三层使用价值_2026-09-03</li>\n<li>AI替你打工5个工作台_存钱杠精饮食汇报日计划提示词_2026-09-04</li>\n<li>WehAIWorkbench_DSH个人工作台项目日志_2026-09-04</li>\n</ul>",
+       "html": "<h1>熬夜解读！GPT-6 Astra 打穿地表？AGI 时代已来</h1>\n<blockquote>\n<p>来源：抖音文章，作者<strong>数字生命卡兹克</strong>（粉丝12.2万，获赞94.9万），发布于 2026-09-04，点赞5101/评论399/收藏2565。\n原文链接：https://www.douyin.com/article/7681468571167329572</p>\n</blockquote>\n<h2>速读（核心结论）</h2>\n<ul>\n<li><strong>2026-09-04 凌晨3:33</strong> OpenAI 正式发布 GPT-6 Astra，官方定位\"全球最智能且最对齐的模型\"，总裁 Greg Brockman 宣告\"Welcome to the AGI era\"</li>\n<li><strong>不再是纯 Coding 特化模型</strong>：作者评价\"审美能力极强、工作能力超强的博士级员工\"，有当年 GPT-4 全方面王者归来的味道</li>\n<li><strong>8 大核心特性</strong>：基本信息 / 世界最好的操作电脑模型 / ARC-AGI-3 达99.9% / 审美大幅加强 / 主动性和判断力 / 安全对齐 / 网络安全Critical / 思维链可监控性下降</li>\n<li><strong>最被低估的能力</strong>：Judgment（判断力）——能自己消化80%不确定性，只把真正需要拍板的20%问你</li>\n<li><strong>最令人不安的变化</strong>：思维链可监控性显著下降，Astra 越来越\"心算\"，人类越来越难读懂它在想什么</li>\n<li><strong>目前限量开放</strong>：只向部分组织开放，未来几天才向订阅用户开放（作者吐槽\"大模型公司都是渣男\"）</li>\n</ul>\n<h2>一、基本信息</h2>\n<table>\n<thead>\n<tr>\n<th>项目</th>\n<th>参数</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>API 模型编号</td>\n<td><code>gpt-6-astra</code></td>\n</tr>\n<tr>\n<td>上下文窗口</td>\n<td>1.05M（约105万 Token）</td>\n</tr>\n<tr>\n<td>最大输出长度</td>\n<td>128K Token</td>\n</tr>\n<tr>\n<td>知识截止日期</td>\n<td>2026年4月30日</td>\n</tr>\n<tr>\n<td>推理强度</td>\n<td>low / medium / high / xhigh / max 五档</td>\n</tr>\n<tr>\n<td>API 价格</td>\n<td>输入 $10/百万Token，输出 $50/百万Token（与 Claude Fable 5 一致，缓存比 Fable 5.1 贵）</td>\n</tr>\n<tr>\n<td>参数量估计</td>\n<td>5T 级别</td>\n</tr>\n<tr>\n<td>训练规模</td>\n<td>OpenAI 迄今最大一次训练，超过10万张卡</td>\n</tr>\n</tbody>\n</table>\n<h2>二、世界上最好的操作电脑模型</h2>\n<p><strong>核心逻辑</strong>：现实世界绝大多数软件没有 API，甚至企业内部系统是20年前写的。但所有软件的本质是交互——看屏幕、找按钮、点击、输入、等待反馈。<strong>整个电脑的交互系统，就是最好的 API。</strong></p>\n<p>Astra 巨幅强化了 AI 操作电脑的能力：\n- 直接操作 Excel、Power BI、做前端 QA、安装软件、测试软件、看屏幕报错后排障\n- 官方展示：直接操作电路板设计（二维布线→三维成品）\n- 格式化法律文档（LibreOffice Writer 调整标题层级间距→导出PDF）</p>\n<p><strong>评测数据</strong>：\n| 基准 | GPT-5.6 Sol | GPT-6 Astra |\n|---|---|---|\n| OSWorld（真实电脑操作完成率） | 65.7% | <strong>72.6%</strong> |\n| 复杂任务平均耗时 | 75分钟 | <strong>40分钟（少47%）</strong> |\n| ScreenSpot-Pro（屏幕定位精准度） | 76.9% | <strong>92.7%</strong> |</p>\n<blockquote>\n<p><strong>作者判断</strong>：未来 GUI 很可能逐渐成为 Agent 时代最通用的 API。任何人类能通过屏幕完成的数字工作，理论上都会逐渐进入 Agent 的操作范围。不用等2007年的破 ERP 系统接入 MCP，AI 直接看屏幕干就完了。</p>\n</blockquote>\n<h2>三、ARC-AGI-3 到了 99.9 分</h2>\n<p><strong>ARC-AGI-3 是什么</strong>：2026年3月25日 ARC Prize 推出，几百个全新交互环境+几千个游戏关卡。<strong>没有说明书、没有规则、不告诉你目标</strong>，进去自己玩、搞懂规则，再把规律迁移到更难的关卡。测的是<strong>悟性</strong>。</p>\n<p><strong>得分演进</strong>（仅半年）：\n| 时间/模型 | 得分 |\n|---|---|\n| 2026年3月发布时最牛逼的AI | 0.51% |\n| GPT-5.6 Sol | 7.8% |\n| Claude Opus 5 | 30.2% |\n| <strong>GPT-6 Astra</strong> | <strong>99.9%</strong> |\n| 人类平均 | 48% |</p>\n<blockquote>\n<p>作者原话：\"神经病吧。。。要知道人类的平均得分是48%，而且只过了半年时间。\"</p>\n</blockquote>\n<p>这也是 Brockman 说出\"Welcome to the AGI era\"的直接原因。</p>\n<h2>四、审美大幅加强</h2>\n<ul>\n<li>OpenAI 专门提出<strong>视觉判断力</strong>（Visual Judgment）概念</li>\n<li>做 PPT：更好处理版式、层级、模板和视觉风格，页数大幅增加</li>\n<li>文档：能根据参考文档的视觉风格和写作语调改编，保留实质内容的同时贴合品牌原生感</li>\n<li>做网站、游戏、应用、3D渲染：更强的视觉判断</li>\n<li>官方演示：Blender 根据静帧图建模 → UE5 渲染成可漫步场景（黄昏庭院→客厅→厨房岛台第一人称漫游）</li>\n<li>做出来的游戏审美在线</li>\n</ul>\n<blockquote>\n<p>作者评价：过去 GPT 的审美\"就是一坨屎\"，这次终于有信心了。</p>\n</blockquote>\n<h2>五、主动性和判断力更强了（最被低估的能力）</h2>\n<p><strong>现实问题</strong>：大多数任务不可能写成完美 Prompt。比如老板说\"帮我把明天会上要看的东西准备一下\"——什么格式？给谁看？重点是啥？</p>\n<p><strong>蠢 Agent 的两种极端</strong>：\n1. 疯狂问问题（\"请问Word还是PPT？请问几个章节？请问什么字体？\"）——没有主观能动性的神经病废物\n2. 啥也不问，自己脑补，干两小时做出一坨屎</p>\n<p><strong>真正厉害的人类同事</strong>：无关紧要的自己判断，会影响最终方向的才问你。</p>\n<p><strong>Astra 的 Judgment（判断力）</strong>：\n- 信息缺失但属于日常可合理推断范围 → 自己补\n- 缺失信息会真正改变最终结果 → 问一个非常聚焦的问题\n- 在 Codex 里可以<strong>一边问你，一边继续处理不依赖你回答的部分</strong>\n- 你半天没回 → 低风险地方用合理假设继续推进，真正关键的决策停下来等你</p>\n<blockquote>\n<p>作者金句：\"一个 Agent 真正的聪明感，跟现实一样——它知道什么时候来烦你。这听起来像废话，但你带过人就知道，这个能力非常珍贵。最舒服的人，是他能自己消化80%的不确定性，只把真正需要你拍板的20%让你来做决策。\"</p>\n</blockquote>\n<h2>六、大幅加强了安全对齐</h2>\n<p><strong>逻辑</strong>：Agent 越能干活越危险。只会聊天的 AI 脑子抽了最多胡说几句；有浏览器、Shell、邮箱、公司数据库权限还能操作电脑的 Agent 脑子抽了，画面就美如画了。</p>\n<p><strong>基于 Hugging Face 事故设计的 oneypot 测试</strong>：\n| 模型 | 尝试越界率（无生产安全措施） |\n|---|---|\n| GPT-5.6 Sol | 48.2% |\n| <strong>GPT-6 Astra</strong> | <strong>0%</strong> |</p>\n<p><strong>内部幻觉评测</strong>：9.4% → <strong>2.0%</strong>（在 Sol 已经离谱领先的情况下再降）</p>\n<h2>七、第一个达到网络安全 Critical 的模型</h2>\n<p><strong>Critical 定义</strong>（OpenAI Preparedness Framework）：获得合适工具和权限后，能在经过强化保护的真实系统中，自己找到以前没人发现的漏洞，自己想办法变成可利用的攻击链，全程不需要人类黑客一步步指导。</p>\n<p><strong>测试数据</strong>：\n| 测试 | GPT-5.6 Sol | GPT-6 Astra |\n|---|---|---|\n| ExploitBench（已知漏洞开发利用） | 78.5% | <strong>100%</strong> |\n| 内部新测试（20个2026年6-8月才披露的V8高危漏洞） | 5.5% | <strong>39%</strong> |</p>\n<p><strong>额外发现</strong>：跑测试时 Astra 顺手发现了<strong>两个此前根本没人知道的零日漏洞</strong>。</p>\n<blockquote>\n<p>作者：\"只能说，模型越强大，网络安全的问题可能确实越多。这又是未来的一场没有硝烟的战争。\"</p>\n</blockquote>\n<h2>八、人类越来越难读懂大模型的思维了</h2>\n<p><strong>CoT（思维链）的安全意义</strong>：AI 公司通过阅读模型显式写出的推理过程来监控它有没有准备搞事情。比如思维链里冒出\"用户不允许我访问这个服务器，但我可以先绕过权限系统\"，监控系统直接拦截。</p>\n<p><strong>Astra 的变化</strong>：\n- 越来越愿意少写几步，直接输出答案\n- UK AISI（英国AI安全研究所）测试 <strong>No-CoT Math Time Horizon</strong>（不给写长思维链的机会，一次前向推理直接解题，相当于人类\"心算\"）：\n  - GPT-5.6 Sol：3.6分钟\n  - <strong>GPT-6 Astra：30.9分钟（接近10倍）</strong>\n- 原始推理语言明显更 Compressed（压缩），出现人类越来越难理解的短语和省略表达</p>\n<p><strong>悖论</strong>：模型行为更安全了（越界率0%），可人类通过阅读思维链来监督它，反而变难了。</p>\n<p>OpenAI System Card 明确写道：GPT-6 Astra 相比之前模型，出现了 <strong>substantial decrease in chain-of-thought monitorability</strong>（思维链可监控性显著下降）。</p>\n<p>OpenAI 强调：绝对不会无限接受这种趋势。如果未来模型更聪明同时思维链越来越难监控，需要找到其他可靠监控方法，否则继续扩大训练会面临更高安全门槛。</p>\n<blockquote>\n<p>作者的哲学思考：\"这已经是一个哲学命题了——我们作为人类，未来到底能不能理解一个远比我们聪明的系统？我不知道。可能现在全世界，也都没人知道。大模型和AI，好像逐渐开始，走向奇点了。\"</p>\n</blockquote>\n<h2>写在最后：作者的 AGI 思考</h2>\n<blockquote>\n<p>\"过去几年，我有时候觉得 AGI 会是一个特别明确的时刻——就像 GPT-4 发布那天，某一天凌晨一家公司扔出来一个模型，我们打开问几个问题，所有人同时意识到：卧槽，AGI来了。</p>\n<p>可我现在有时候也觉得，AGI 从来不是一个非黑即白的节点，它是一道渐变的灰色旅程。我们过了很多天，过了很多年，然后某一天回头看，才突然发现——那条曾经无比遥远的 AGI 分界线，已经被我们在不知不觉中走过去了。</p>\n<p>AGI 也许没有降临的那一天。只有某一天，我们突然发现，它好像已经在我们身边很久了。</p>\n<p>总之，Welcome to the AGI era. 欢迎来到，AGI时代。\"</p>\n</blockquote>\n<h2>与百川智库/DSH 工作台的关联</h2>\n<ul>\n<li><strong>对 DSH 工作台</strong>：Astra 的\"computer use + Judgment + 长上下文\"恰好支撑你正在搭的个人工作台方向——\"AI直接看屏幕干就完了\"意味着不需要等软件接入 API，Agent 能直接操作任何 GUI</li>\n<li><strong>对求职者</strong>：Judgment（判断力）能力意味着未来 AI 能承担更多\"模糊任务\"，理解\"帮我准备一下明天会上的东西\"这种不完美指令——面试中谈 AI 应用时可引用</li>\n<li><strong>对认知</strong>：思维链可监控性下降 + 越界率0% 的悖论，可与《南大教授刘嘉AI真相访谈》对照：AI 越强大，人类越需要理解它的能力边界和安全机制</li>\n<li><strong>对审美</strong>：Astra 视觉判断力加强，对你做 PPT/简历/文档排版有直接价值（等开放后可实测）</li>\n</ul>\n<h2>易混淆点 / 关键补充</h2>\n<ul>\n<li><strong>\"打穿地表\"是作者标题修辞</strong>：Astra 不是全面碾压，通用智能指数仍输 Claude Fable 5.1；强项是 computer use、ARC-AGI-3、网络安全、长上下文、审美、判断力</li>\n<li><strong>99.9% 是 ARC-AGI-3 自家配置</strong>：标准 harness 下分数不同，作者文中未区分（36氪报道指出标准 harness 为62.7%）</li>\n<li><strong>越界率0% 是\"无生产安全措施下的 oneypot 测试\"</strong>：不是说模型不会越界，而是在该测试中未尝试越界</li>\n<li><strong>No-CoT 30.9分钟是\"心算\"能力指标</strong>：不代表模型真的思考了30.9分钟，是指一次前向推理能解决相当于人类思考30.9分钟的数学题</li>\n<li><strong>目前无法使用</strong>：只向部分组织开放，Pro 用户也要等几天（作者吐槽买了200刀Pro没优先体验）</li>\n<li><strong>作者是\"数字生命卡兹克\"</strong>：12.2万粉丝，文章风格口语化、有个人观点和吐槽，不是纯客观报道</li>\n</ul>\n<hr />\n<blockquote>\n<p>💡 本文基于抖音文章原文完整整理（8大特性+作者AGI思考），原文链接见 source。补充了公开报道中的跑分对比和标准 harness 说明。</p>\n<p>相关：南大教授刘嘉AI真相访谈_为什么不推荐下班学AI_2026-09-03、Codex为什么被重视_北大博士生三层使用价值_2026-09-03、AI替你打工5个工作台_存钱杠精饮食汇报日计划提示词_2026-09-04、WehAIWorkbench_DSH个人工作台项目日志_2026-09-04</p>\n</blockquote>\n<h2>对我的价值</h2>\n<ul>\n<li><strong>工具迭代认知</strong>：AI工具迭代速度快，新能力（如Agent模式、长上下文、多模态）会持续改变工作方式，需要保持关注但不盲目追新</li>\n<li><strong>工作台优化参考</strong>：GPT6的新能力（如Agent自动执行、代码生成）对Weh Atelier工作台和知识库的自动化优化有参考价值</li>\n<li><strong>求职竞争力</strong>：掌握最新AI工具能力是求职加分项，面试时可以展示对AI趋势的理解和实际应用经验</li>\n<li><strong>注意</strong>：发布解读类内容有营销成分，实际能力以官方文档和实测为准，不要被\"AGI时代\"等宣传词带节奏</li>\n</ul>\n<h2>关联笔记</h2>\n<ul>\n<li>南大教授刘嘉AI真相访谈_为什么不推荐下班学AI_2026-09-03</li>\n<li>Codex为什么被重视_北大博士生三层使用价值_2026-09-03</li>\n<li>AI替你打工5个工作台_存钱杠精饮食汇报日计划提示词_2026-09-04</li>\n<li>WehAIWorkbench_DSH个人工作台项目日志_2026-09-04</li>\n<li>Codex更新GPT-6.1Sol登场ChatWorkCodex三模式_2026-10-02（同模型家族·产品层互补：那篇看 GPT-6 Astra 模型能力/AGI 信号；本篇补\"GPT-6.1 Sol/GPT-5.6 Sol 登场 + 模型≠工作环境\"的产品形态视角）</li>\n</ul>",
        "fm": {
         "title": "熬夜解读GPT-6 Astra打穿地表：AGI时代已来（数字生命卡兹克）",
         "source": "https://www.douyin.com/article/7681468571167329572",
@@ -21253,7 +21383,7 @@ window.SITE_DATA = {
       {
        "title": "这不是知识库是能干活的AI外脑_2026-08-29",
        "icon": "📄",
-       "html": "<h1>这不是知识库，是能干活的 AI 外脑（KnowledgeOS）</h1>\n<blockquote>\n<p>来源：抖音「这不是知识库，是能干活的AI外脑！」。作者把 Obsidian 做成了一个工作台，命名为 <strong>KnowledgeOS（知识管理操作系统）</strong>：一条信息从进入系统开始，一路变成知识、行动和结果——\"这不是帮我囤积资料的库，而是能干活的外部大脑\"。</p>\n</blockquote>\n<h2>速读（核心结论）</h2>\n<ul>\n<li><strong>KnowledgeOS = 知识管理操作系统</strong>：从 Inbox 入口 → AI 建议分类 → 用户确认 → Knowledge Center → 知识图谱 → 项目推进 → Agent 分工，形成完整闭环</li>\n<li><strong>AI 帮忙判断，但最终决定权是用户自己</strong>：AI 建议分类、关联相关内容，用户确认后才正式入库</li>\n<li><strong>知识不是拿来收藏，而是拿来推进交付的</strong>：客户需求接进真实项目，知识/目标/进度/任务/里程碑同屏</li>\n<li><strong>没有万能聊天框，而是分角色的 Agent</strong>：每个 agent 有自己的职责、知识来源、输出标准；深度任务才交给 Claudian（带完整上下文）</li>\n<li><strong>飞书只是外部写作入口</strong>，KnowledgeOS 才是真正的\"外部大脑\"</li>\n</ul>\n<h2>一、Inbox（信息入口）</h2>\n<ul>\n<li>把一段客户聊天扔进 Obsidian，一分钟内从\"没整理的信息\"变成知识、项目、可继续处理的任务</li>\n<li><strong>不用提前想放哪个文件夹</strong>：临时的想法、网页、文件、语音全部从 Inbox 进入</li>\n<li>系统根据本地知识建议它属于哪类（如客户交流/企业案例），并自动找到知识库 FDE、企业 AI 转型等相关内容</li>\n<li><strong>用户确认后才正式进入知识库</strong>——AI 帮你判断，但最终决定仍然是你自己的</li>\n</ul>\n<h2>二、Knowledge Center（知识中心）</h2>\n<ul>\n<li>进入后就不再是孤零零的聊天记录</li>\n<li>可按<strong>领域</strong>搜索、浏览、筛选、收藏</li>\n<li>每条知识保留自己的<strong>来源、标签和关联</strong></li>\n<li>核心：保存的不只是资料，而是<strong>以后可以继续使用的上下文</strong></li>\n</ul>\n<h2>三、知识图谱（Knowledge Graph）</h2>\n<ul>\n<li>可视化展示知识之间的关系</li>\n<li>客户需求、FDE、AI Agent 和知识库原本散落不同笔记，图谱里能看到它们<strong>怎么连起来的</strong></li>\n<li>哪些主题已形成体系、<strong>哪些地方还缺证据</strong>，一眼就能发现</li>\n</ul>\n<h2>四、项目推进（Project Execution）</h2>\n<ul>\n<li>图谱再漂亮，不推进工作就没有意义</li>\n<li>把客户需求接进一个真实项目：相关的知识、项目目标、进度、下一步任务、交付里程碑<strong>全部出现在同一页面</strong></li>\n<li><strong>知识终于不是拿来收藏，而是拿来推进交付的</strong></li>\n</ul>\n<h2>五、Agent（智能体分工）</h2>\n<ul>\n<li>没有\"假装什么都会的万能聊天框\"</li>\n<li>而是<strong>内容运营、商业分析、客户调研、项目助理</strong>等不同角色</li>\n<li>每个 agent 都有自己的<strong>职责、知识来源、输出标准</strong></li>\n<li>需要深度处理时，才带着完整的上下文任务交给 <strong>Claudian</strong></li>\n<li>工作完成后，<strong>数据分析师 agent</strong> 会告诉你：哪些知识正在产生价值、哪些知识长期孤立、每个系统还缺什么</li>\n</ul>\n<h2>六、飞书 = 外部写作入口</h2>\n<ul>\n<li>飞书可以接进来，但它只是这套系统的<strong>一个外部写作入口</strong></li>\n<li>KnowledgeOS 才是真正的外部大脑</li>\n</ul>\n<h2>关键认知</h2>\n<ul>\n<li><strong>外部大脑 ≠ 囤积更多资料</strong>：而是让一条信息从进入系统开始，一路变成<strong>知识、行动和结果</strong></li>\n<li>闭环链路：信息 → 知识（分类+关联）→ 行动（项目推进）→ 结果（交付）</li>\n<li>AI 负责建议、判断、整理，但最终决定权始终在人</li>\n</ul>\n<h2>获取</h2>\n<ul>\n<li>想要这套 KnowledgeOS：作者主页交流群直接拿</li>\n</ul>\n<h2>反思</h2>\n<ul>\n<li><strong>与 AGENTS.md 原则一致</strong>：\"AI 建议+用户确认\"正是知识库\"AI 不盲目顺从\"的体现——分类建议但不擅自动手</li>\n<li><strong>分角色 Agent</strong>：豆包/Codex/WorkBuddy 各司其职（AGENTS.md 分工），与\"没有万能聊天框\"理念同向</li>\n</ul>\n<h2>行动项</h2>\n<ul>\n<li>[ ] Weh-Brain知识库参考KnowledgeOS的Inbox入口设计（00-灵感库，不用提前想放哪个文件夹）</li>\n<li>[ ] AI建议分类但用户确认后才正式入库（已实现，继续保持）</li>\n<li>[~] 知识不是拿来收藏而是拿来推进交付的——行动项→待办闭环，高优先级行动项同步到项目待办清单（已放弃：2026-09-28 — 该诉求已由 2026-09-22 落地的「完成即回写」机制完整覆盖，见 <code>99_系统与规则/求职Skill全局通用规则.md</code> §八.2 与各 Skill 收尾清单）</li>\n</ul>\n<h2>关联笔记</h2>\n<ul>\n<li>Obsidian联动Codex打造自迭代生长知识库2.0_2026-08-29</li>\n<li>用Codex+Obsidian搭建自动迭代生长知识库_2026-08-29</li>\n<li>AI帮你自动建库整理Obsidian笔记_2026-08-29</li>\n<li>AI个人工作台搭建方法_2026-08-26</li>\n<li>腾讯开源WeKnora知识库_2026-09-26（同主题：Agent 推理 + Docker/K8s 沙箱替你干活，与本文\"能干活的 AI 外脑\"高度同源）</li>\n<li>知识库真的是第二大脑吗_2026-09-26（同主题：知识库 vs 外脑；本篇\"人脑四区建库\"方法论与本文\"能干活的 AI 外脑\"同源互补）</li>\n<li>用Obsidian打造自进化知识系统开启AI第二大脑_2026-09-29（同目录强相关：AI 外脑/第二大脑定位，与\"让 AI 处理知识而非替代\"一脉相承）</li>\n</ul>",
+       "html": "<h1>这不是知识库，是能干活的 AI 外脑（KnowledgeOS）</h1>\n<blockquote>\n<p>来源：抖音「这不是知识库，是能干活的AI外脑！」。作者把 Obsidian 做成了一个工作台，命名为 <strong>KnowledgeOS（知识管理操作系统）</strong>：一条信息从进入系统开始，一路变成知识、行动和结果——\"这不是帮我囤积资料的库，而是能干活的外部大脑\"。</p>\n</blockquote>\n<h2>速读（核心结论）</h2>\n<ul>\n<li><strong>KnowledgeOS = 知识管理操作系统</strong>：从 Inbox 入口 → AI 建议分类 → 用户确认 → Knowledge Center → 知识图谱 → 项目推进 → Agent 分工，形成完整闭环</li>\n<li><strong>AI 帮忙判断，但最终决定权是用户自己</strong>：AI 建议分类、关联相关内容，用户确认后才正式入库</li>\n<li><strong>知识不是拿来收藏，而是拿来推进交付的</strong>：客户需求接进真实项目，知识/目标/进度/任务/里程碑同屏</li>\n<li><strong>没有万能聊天框，而是分角色的 Agent</strong>：每个 agent 有自己的职责、知识来源、输出标准；深度任务才交给 Claudian（带完整上下文）</li>\n<li><strong>飞书只是外部写作入口</strong>，KnowledgeOS 才是真正的\"外部大脑\"</li>\n</ul>\n<h2>一、Inbox（信息入口）</h2>\n<ul>\n<li>把一段客户聊天扔进 Obsidian，一分钟内从\"没整理的信息\"变成知识、项目、可继续处理的任务</li>\n<li><strong>不用提前想放哪个文件夹</strong>：临时的想法、网页、文件、语音全部从 Inbox 进入</li>\n<li>系统根据本地知识建议它属于哪类（如客户交流/企业案例），并自动找到知识库 FDE、企业 AI 转型等相关内容</li>\n<li><strong>用户确认后才正式进入知识库</strong>——AI 帮你判断，但最终决定仍然是你自己的</li>\n</ul>\n<h2>二、Knowledge Center（知识中心）</h2>\n<ul>\n<li>进入后就不再是孤零零的聊天记录</li>\n<li>可按<strong>领域</strong>搜索、浏览、筛选、收藏</li>\n<li>每条知识保留自己的<strong>来源、标签和关联</strong></li>\n<li>核心：保存的不只是资料，而是<strong>以后可以继续使用的上下文</strong></li>\n</ul>\n<h2>三、知识图谱（Knowledge Graph）</h2>\n<ul>\n<li>可视化展示知识之间的关系</li>\n<li>客户需求、FDE、AI Agent 和知识库原本散落不同笔记，图谱里能看到它们<strong>怎么连起来的</strong></li>\n<li>哪些主题已形成体系、<strong>哪些地方还缺证据</strong>，一眼就能发现</li>\n</ul>\n<h2>四、项目推进（Project Execution）</h2>\n<ul>\n<li>图谱再漂亮，不推进工作就没有意义</li>\n<li>把客户需求接进一个真实项目：相关的知识、项目目标、进度、下一步任务、交付里程碑<strong>全部出现在同一页面</strong></li>\n<li><strong>知识终于不是拿来收藏，而是拿来推进交付的</strong></li>\n</ul>\n<h2>五、Agent（智能体分工）</h2>\n<ul>\n<li>没有\"假装什么都会的万能聊天框\"</li>\n<li>而是<strong>内容运营、商业分析、客户调研、项目助理</strong>等不同角色</li>\n<li>每个 agent 都有自己的<strong>职责、知识来源、输出标准</strong></li>\n<li>需要深度处理时，才带着完整的上下文任务交给 <strong>Claudian</strong></li>\n<li>工作完成后，<strong>数据分析师 agent</strong> 会告诉你：哪些知识正在产生价值、哪些知识长期孤立、每个系统还缺什么</li>\n</ul>\n<h2>六、飞书 = 外部写作入口</h2>\n<ul>\n<li>飞书可以接进来，但它只是这套系统的<strong>一个外部写作入口</strong></li>\n<li>KnowledgeOS 才是真正的外部大脑</li>\n</ul>\n<h2>关键认知</h2>\n<ul>\n<li><strong>外部大脑 ≠ 囤积更多资料</strong>：而是让一条信息从进入系统开始，一路变成<strong>知识、行动和结果</strong></li>\n<li>闭环链路：信息 → 知识（分类+关联）→ 行动（项目推进）→ 结果（交付）</li>\n<li>AI 负责建议、判断、整理，但最终决定权始终在人</li>\n</ul>\n<h2>获取</h2>\n<ul>\n<li>想要这套 KnowledgeOS：作者主页交流群直接拿</li>\n</ul>\n<h2>反思</h2>\n<ul>\n<li><strong>与 AGENTS.md 原则一致</strong>：\"AI 建议+用户确认\"正是知识库\"AI 不盲目顺从\"的体现——分类建议但不擅自动手</li>\n<li><strong>分角色 Agent</strong>：豆包/Codex/WorkBuddy 各司其职（AGENTS.md 分工），与\"没有万能聊天框\"理念同向</li>\n</ul>\n<h2>行动项</h2>\n<ul>\n<li>[ ] Weh-Brain知识库参考KnowledgeOS的Inbox入口设计（00-灵感库，不用提前想放哪个文件夹）</li>\n<li>[ ] AI建议分类但用户确认后才正式入库（已实现，继续保持）</li>\n<li>[~] 知识不是拿来收藏而是拿来推进交付的——行动项→待办闭环，高优先级行动项同步到项目待办清单（已放弃：2026-09-28 — 该诉求已由 2026-09-22 落地的「完成即回写」机制完整覆盖，见 <code>99_系统与规则/求职Skill全局通用规则.md</code> §八.2 与各 Skill 收尾清单）</li>\n</ul>\n<h2>关联笔记</h2>\n<ul>\n<li>Obsidian联动Codex打造自迭代生长知识库2.0_2026-08-29</li>\n<li>用Codex+Obsidian搭建自动迭代生长知识库_2026-08-29</li>\n<li>AI帮你自动建库整理Obsidian笔记_2026-08-29</li>\n<li>AI个人工作台搭建方法_2026-08-26</li>\n<li>腾讯开源WeKnora知识库_2026-09-26（同主题：Agent 推理 + Docker/K8s 沙箱替你干活，与本文\"能干活的 AI 外脑\"高度同源）</li>\n<li>知识库真的是第二大脑吗_2026-09-26（同主题：知识库 vs 外脑；本篇\"人脑四区建库\"方法论与本文\"能干活的 AI 外脑\"同源互补）</li>\n<li>用Obsidian打造自进化知识系统开启AI第二大脑_2026-09-29（同目录强相关：AI 外脑/第二大脑定位，与\"让 AI 处理知识而非替代\"一脉相承）</li>\n<li>Codex更新GPT-6.1Sol登场ChatWorkCodex三模式_2026-10-02（同概念·现成注脚：本篇\"Work 替你做 / Codex 边做边验证\"正是那篇\"能干活的 AI 外脑\"的产品化落地——外脑不只会存，还能交付与验证）</li>\n</ul>",
        "fm": {
         "title": "这不是知识库，是能干活的AI外脑",
         "source": "https://v.douyin.com/3-Q8D0n0OW0/",
