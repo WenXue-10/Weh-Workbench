@@ -6135,7 +6135,7 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
 
                   <div class="setting-control">
 
-                    <input type="password" id="syncToken" placeholder="ghp_...（只勾 gist 权限）" class="sync-input">
+                    <input type="password" id="syncToken" placeholder="ghp_...（只勾 gist 权限）" class="sync-input" onchange="saveSyncConfig()">
 
                   </div>
 
@@ -6147,7 +6147,7 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
 
                   <div class="setting-control">
 
-                    <input type="text" id="syncGistId" placeholder="留空则自动创建" class="sync-input">
+                    <input type="text" id="syncGistId" placeholder="留空则自动创建" class="sync-input" onchange="saveSyncConfig()">
 
                   </div>
 
@@ -6644,7 +6644,7 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
 
 <script>
 window.SITE_DATA = {
- "updated": "2026-10-02 20:31",
+ "updated": "2026-10-02 21:35",
  "stats": {
   "jobs": 58,
   "rec": 0,
@@ -26399,7 +26399,7 @@ function renderSyncStatus(){
   var el = document.getElementById("syncStatus");
   if(!el) return;
   if(!c.token){ el.textContent = "未配置"; el.style.color = "var(--muted)"; return; }
-  if(!c.gistId){ el.textContent = "已填 Token，尚未连接（点“保存并连接”）"; el.style.color = "var(--muted)"; return; }
+  if(!c.gistId){ el.textContent = "已填 Token，点『上传』即保存并连接 Gist"; el.style.color = "var(--muted)"; return; }
   var parts = ["已连接 Gist " + c.gistId.slice(0,8) + "…"];
   if(c.lastSync){ parts.push("上次同步 " + fmtSyncTime(c.lastSync)); }
   el.textContent = parts.join(" · ");
