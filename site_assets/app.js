@@ -5413,6 +5413,14 @@ document.addEventListener("keydown", function(e){ if(e.key==="Escape") closeModa
   spawn();spawn();
   setInterval(spawn,1500);
 
+var MAN_KEY = "weh_manifest_data_v1";
+var MAN_DEFAULTS = {goals:[], script:[], sealed:false, sealedAt:"", cheque:null, gratitude:[], rehearsal:[], evidence:[], translator:[], freq:{}, freqDone:{}, freqCustom:[], diary:[], migEv:false};
+var currentGoalId = null;
+var FREQ_DEFAULTS = [
+  {key:"cheque", em:"🏦", name:"开未来支票", sub:"30秒 · 重复到账"},
+  {key:"gratitude", em:"📖", name:"读感恩日记", sub:"读出声音，让耳朵听见"},
+  {key:"rehearsal", em:"🌙", name:"每日排练", sub:"5分钟 · 睡前过剧本"}
+];
 /* ---------- 初始化 ---------- */
 (function(){
   var upd = document.getElementById("syncText");
@@ -5452,12 +5460,6 @@ document.addEventListener("keydown", function(e){ if(e.key==="Escape") closeModa
     }
     if(document.getElementById("bookList")){
       renderBooks();
-    }
-    if(document.getElementById("goalList")){
-      renderManifest();
-    }
-    if(document.getElementById("goalList")){
-      renderManifest();
     }
     if(document.getElementById("goalList")){
       renderManifest();
@@ -7665,14 +7667,6 @@ document.addEventListener("change", function(e){
 });
 
 /* ========== 显化·成长台模块 ========== */
-var MAN_KEY = "weh_manifest_data_v1";
-var MAN_DEFAULTS = {goals:[], script:[], sealed:false, sealedAt:"", cheque:null, gratitude:[], rehearsal:[], evidence:[], translator:[], freq:{}, freqDone:{}, freqCustom:[], diary:[], migEv:false};
-var currentGoalId = null;
-var FREQ_DEFAULTS = [
-  {key:"cheque", em:"🏦", name:"开未来支票", sub:"30秒 · 重复到账"},
-  {key:"gratitude", em:"📖", name:"读感恩日记", sub:"读出声音，让耳朵听见"},
-  {key:"rehearsal", em:"🌙", name:"每日排练", sub:"5分钟 · 睡前过剧本"}
-];
 
 function _manBlank(){
   var d = {};
