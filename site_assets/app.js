@@ -8412,7 +8412,7 @@ function renderGratitude(data){
       + ps.map(function(p){ return '<p class="grat-p">' + mHl(p) + '</p>'; }).join("")
       + '<div class="grat-sign">—— 写给未来的我，也写给正在读出声的你 🔔</div>'
       + '</div>';
-    if(wrap) wrap.innerHTML = '<div class="grat-done">🌙 今天的日记已生成 · 明天再来</div>';
+    if(wrap) wrap.innerHTML = '<div class="grat-done">🌙 今天的日记已生成 · 明天再来</div><button class="mod-btn-ghost" onclick="clearGratitudeToday()">清除今日</button>';
     return;
   }
   if(!data.sealed){
@@ -8508,7 +8508,7 @@ function renderRehearsal(data, dayN){
     box.innerHTML = '<div class="reh-title">今晚的剧本场景：' + esc(r.title || "推开那扇门") + '</div>'
       + String(r.text).split(/\n+/).filter(function(x){ return x.trim(); })
           .map(function(p){ return '<p class="reh-p">' + mHl(p) + '</p>'; }).join("");
-    if(wrap) wrap.innerHTML = '<button class="mod-btn-dim" onclick="aiRehearsal()">🔁 换一个今晚的场景</button>';
+    if(wrap) wrap.innerHTML = '<button class="mod-btn-dim" onclick="aiRehearsal()">🔁 换一个今晚的场景</button><button class="mod-btn-ghost" onclick="clearRehearsalToday()">清除今日</button>';
   } else {
     box.innerHTML = '<div class="reh-wait">' + (data.sealed
       ? '闭眼前，让 AI 按你的剧本给你造今晚的场景：有温度、有声音、有一句你会对自己说的话。'
@@ -8558,8 +8558,9 @@ function renderTranslator(data){
   if(!wall) return;
   var arr = (data.translator || []).slice().reverse().slice(0, 8);
   if(!arr.length){ wall.innerHTML = '<div class="id-empty">把一句自我怀疑，翻译成笃定的身份陈述</div>'; return; }
-  wall.innerHTML = arr.map(function(r){
-    return '<div class="id-item"><div class="id-from">' + esc(r.from || "") + '</div>'
+  var clearBtn = arr.length ? '<div class="man-clear-row"><button class="inspire-action-btn" onclick="clearTranslator()">🗑️ 清空全部翻译</button></div>' : '';
+  wall.innerHTML = clearBtn + arr.map(function(r){
+    return '<div class="id-item"><button class="id-x" onclick="delTranslator(' + r.id + ')">✕</button><div class="id-from">' + esc(r.from || "") + '</div>'
       + '<div class="id-arrow">↓</div>'
       + '<div class="id-to">' + esc(r.to || "") + '</div></div>';
   }).join("");
@@ -8588,6 +8589,52 @@ function aiTranslate(){
     if(wall) wall.innerHTML = '<div class="id-empty" style="color:#e74c3c">失败：' + esc(err.message || "") + '</div>';
   });
 }
+
+
+function delTranslator(id){
+  showConfirm("删除这条翻译？").then(function(ok){
+    if(!ok) return;
+    var data = loadManifest();
+    data.translator = (data.translator || []).filter(function(x){ return x.id !== id; });
+    saveManifest(data);
+    renderManifest();
+    toast("已删除");
+  });
+}
+function clearTranslator(){
+  showConfirm("清空全部翻译记录？").then(function(ok){
+    if(!ok) return;
+    var data = loadManifest();
+    data.translator = [];
+    saveManifest(data);
+    renderManifest();
+    toast("已清空");
+  });
+}
+function clearRehearsalToday(){
+  showConfirm("清除今晚的排练场景？清除后今晚可重新生成。").then(function(ok){
+    if(!ok) return;
+    var data = loadManifest();
+    var t = todayStr();
+    data.rehearsal = (data.rehearsal || []).filter(function(x){ return x.date !== t; });
+    saveManifest(data);
+    renderManifest();
+    toast("已清除今日排练");
+  });
+}
+function clearGratitudeToday(){
+  showConfirm("清除今天的感恩日记？清除后今天可重新生成。").then(function(ok){
+    if(!ok) return;
+    var data = loadManifest();
+    var t = todayStr();
+    data.gratitude = (data.gratitude || []).filter(function(x){ return x.date !== t; });
+    saveManifest(data);
+    renderManifest();
+    toast("已清除今日日记");
+  });
+}
+
+
 
 /* ---------- 频率打卡（网格 + 最近 10 周热力图） ---------- */
 function renderFreq(data){
