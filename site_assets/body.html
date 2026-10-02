@@ -2149,13 +2149,13 @@
                 <div class="setting-row">
                   <div class="setting-label">GitHub Token</div>
                   <div class="setting-control">
-                    <input type="password" id="syncToken" placeholder="ghp_...（只勾 gist 权限）" class="sync-input">
+                    <input type="password" id="syncToken" placeholder="ghp_...（只勾 gist 权限）" class="sync-input" onchange="saveSyncConfig()">
                   </div>
                 </div>
                 <div class="setting-row">
                   <div class="setting-label">Gist ID</div>
                   <div class="setting-control">
-                    <input type="text" id="syncGistId" placeholder="留空则自动创建" class="sync-input">
+                    <input type="text" id="syncGistId" placeholder="留空则自动创建" class="sync-input" onchange="saveSyncConfig()">
                   </div>
                 </div>
                 <div class="setting-row">

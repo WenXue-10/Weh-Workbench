@@ -4490,7 +4490,7 @@ function renderSyncStatus(){
   var el = document.getElementById("syncStatus");
   if(!el) return;
   if(!c.token){ el.textContent = "未配置"; el.style.color = "var(--muted)"; return; }
-  if(!c.gistId){ el.textContent = "已填 Token，尚未连接（点“保存并连接”）"; el.style.color = "var(--muted)"; return; }
+  if(!c.gistId){ el.textContent = "已填 Token，点『上传』即保存并连接 Gist"; el.style.color = "var(--muted)"; return; }
   var parts = ["已连接 Gist " + c.gistId.slice(0,8) + "…"];
   if(c.lastSync){ parts.push("上次同步 " + fmtSyncTime(c.lastSync)); }
   el.textContent = parts.join(" · ");
