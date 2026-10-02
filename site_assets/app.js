@@ -6479,8 +6479,9 @@ function updateCet6ErrorStats(){
   if(masteredEl) masteredEl.textContent = mastered;
   var todayEl = document.getElementById('cet6ErrorToday');
   if(todayEl) todayEl.textContent = todayCount;
-  // 更新概览的错题统计
-  var errorTotalEl = document.getElementById('cet6ErrorTotal');
+  // 更新概览 + 错题子页的错题统计（两处 id 不同，都要写）
+  var errorTotalSubEl = document.getElementById('cet6ErrorTotalSub');
+  if(errorTotalSubEl) errorTotalSubEl.textContent = total;
   var errorPendingEl = document.getElementById('cet6ErrorPending');
   if(errorPendingEl) errorPendingEl.textContent = review;
 }
@@ -7405,8 +7406,9 @@ function aiReadOption(type){
   var sys = "你是读书复盘助手，中文输出。要求：先给一句不超过 40 字的高亮结论；再给 3-5 条要点，每条含一个最贴切的 emoji 图标、一个不超过 12 字的小标题、一句不超过 50 字的说明。禁止糊成一大段。";
   var user = "书名：《"+(b.title||"未命名")+"》\n作者："+(b.author||"未知")+"\n类型："+(b.type||"书")+"\n我的备注："+(b.note||"无")+"\n\n任务："+label+"\n只输出一个JSON：{\"summary\":\"一句结论\",\"items\":[{\"icon\":\"emoji\",\"title\":\"小标题\",\"desc\":\"一句说明\"}]}";
   aiChat(c, [{role:"system",content:sys},{role:"user",content:user}], 45).then(function(res){
-    var o = parseExtJSON(res.content);
+    var o = parseAIJSON(res.content);
     if(!o){ throw new Error("AI 返回无法解析成 JSON"); }
+    if(!Array.isArray(o.items)) o.items = o.items ? [o.items] : [];
     if(type==="chars") b.aiChars=o; else if(type==="plot") b.aiPlot=o; else b.aiPoints=o;
     saveBooks(d); bumpLibStreak(); renderBookDigest(); renderBookRead();
     toast("✨ 精读完成");
@@ -7482,8 +7484,13 @@ function aiQuotes(){
   if(wall) wall.innerHTML = '<div style="color:var(--muted);padding:10px">AI 挑金句中…</div>';
   var sys = "你是金句猎人。从《"+(b.title||"未命名")+"》中挑出 3-5 句值得摘抄的话，附作者/出处。只输出JSON：{\"quotes\":[{\"text\":\"原句\",\"source\":\"出处\"}]}";
   aiChat(c, [{role:"system",content:sys},{role:"user",content:"挑金句"}], 40).then(function(res){
-    var o = parseExtJSON(res.content);
+    var o = parseAIJSON(res.content);
     if(!o || !o.quotes){ throw new Error("无法解析"); }
+    if(!Array.isArray(o.quotes)) o.quotes = [o.quotes];
+    o.quotes = o.quotes.filter(function(q){ return q && (q.text || q.quote); })
+                       .map(function(q){ return { text:String(q.text || q.quote || "").trim(),
+                                                  source:String(q.source || q.from || "").trim() }; });
+    if(!o.quotes.length){ throw new Error("无法解析"); }
     b.quotes = (b.quotes||[]).concat(o.quotes);
     saveBooks(d); bumpLibStreak(); renderLibStats(); renderQuotes();
     toast("✨ 已收入金句墙");
@@ -7529,9 +7536,12 @@ function searchAuthor(){
   var sys = "你是文学八卦小报主编。给一位作家做『吃瓜式』档案，幽默但有依据。输出JSON：{\"name\":\"\",\"enName\":\"英文名\",\"years\":\"生卒年 例 1821-1881\",\"avatar\":\"一个最贴切的 emoji\",\"zodiac\":\"星座\",\"mbti\":\"MBTI猜测\",\"mbtiReason\":\"一句话理由\",\"hiddenSkill\":\"隐藏技能\",\"timeline\":[{\"year\":\"年份/时期\",\"text\":\"奇闻/翻车/成就\"}],\"relations\":[{\"name\":\"相关作家\",\"type\":\"like|hate|reconcile|mentor\",\"note\":\"两人恩怨一句话\"}],\"booklist\":[{\"title\":\"代表作\",\"stars\":4,\"reason\":\"推荐理由一句\"}]}";
   var user = "作家："+name+"\n给出完整吃瓜档案，时间线至少4条，关系至少3个，书单至少3本。";
   aiChat(c, [{role:"system",content:sys},{role:"user",content:user}], 50).then(function(res){
-    var o = parseExtJSON(res.content);
+    var o = parseAIJSON(res.content);
     if(!o){ throw new Error("无法解析"); }
     o.name = name;
+    if(!Array.isArray(o.timeline)) o.timeline = [];
+    if(!Array.isArray(o.relations)) o.relations = [];
+    if(!Array.isArray(o.booklist)) o.booklist = [];
     cache[name] = o; saveAuthorCache(cache);
     renderAuthor(o);
   }).catch(function(err){
