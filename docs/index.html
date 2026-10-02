@@ -2067,11 +2067,13 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
 .bk-topic-input:focus{border-color:var(--pink-deep)}
 .bk-topic-results{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-top:12px}
 .topic-card{background:rgba(255,255,255,.72);border:1px solid rgba(255,190,214,.5);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:6px}
-.topic-card img{width:100%;height:120px;object-fit:cover;border-radius:8px;background:#f3e9ff}
-.topic-card .tc-noimg{width:100%;height:120px;display:flex;align-items:center;justify-content:center;font-size:34px;border-radius:8px;background:#f3e9ff}
+.topic-card img{width:100%;height:88px;object-fit:cover;border-radius:8px;background:#f3e9ff}
+.topic-card .tc-noimg{width:100%;height:50px;display:flex;align-items:center;justify-content:center;font-size:22px;border-radius:8px;background:#f3e9ff}
 .topic-card .tc-title{font-weight:600;font-size:13px;line-height:1.35;color:#3a2a4a}
 .topic-card .tc-sub{font-size:11.5px;color:#8a7a99;line-height:1.4}
 .topic-card .tc-add{margin-top:auto;align-self:flex-start;padding:5px 10px;font-size:12px;border:none;border-radius:8px;color:#fff;background:linear-gradient(135deg,var(--grad-from),var(--grad-to));cursor:pointer}
+.bk-read-tools{display:flex;gap:8px;justify-content:flex-end;margin:0 0 8px}
+.bk-read-tools .inspire-action-btn{font-size:12px;padding:3px 10px}
 
 </style>
 </head>
@@ -3014,6 +3016,7 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
               <div class="bk-topic-row">
                 <input id="bookTopicInput" class="bk-topic-input" placeholder="例如：希腊神话 / 想看关于心理学的入门书" />
                 <button class="inspire-action-btn bk-smart-primary" data-act="topic-search">🔍 搜一下</button>
+                <button class="inspire-action-btn" data-act="topic-clear" title="清除搜索结果">✕ 清除</button>
               </div>
               <div class="bk-smart-hint" id="bookTopicHint"></div>
               <div class="bk-topic-results" id="bookTopicResults"></div>
@@ -6689,7 +6692,7 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
 
 <script>
 window.SITE_DATA = {
- "updated": "2026-10-03 03:24",
+ "updated": "2026-10-03 03:45",
  "stats": {
   "jobs": 58,
   "rec": 0,
@@ -29138,6 +29141,8 @@ function renderSopCategory(){
 var LIB_KEY = "weh_library_data_v1";
 var LIB_DEFAULTS = {books:[], streak:{date:"", count:0}};
 var currentBookId = null;
+var currentReadTab = "chars";
+var READ_TABS = {chars:["👥 人物关系","aiChars"], plot:["📌 全书重点","aiPlot"], points:["📖 讲了什么","aiPoints"]};
 var currentAuthorName = "";
 var libCatFilter = "全部";
 var libSearchFilter = "";
@@ -29304,6 +29309,16 @@ function saveBook(){
 }
 
 /* ---------- 按主题搜书：模糊意图 → 真实API优先 + AI 兜底 ---------- */
+function topicClear(){
+  var inp = document.getElementById("bookTopicInput");
+  var box = document.getElementById("bookTopicResults");
+  var hint = document.getElementById("bookTopicHint");
+  if(inp) inp.value = "";
+  if(box) box.innerHTML = "";
+  if(hint) hint.textContent = "";
+  toast("已清除搜索结果");
+}
+
 function topicSearch(){
   var q = (document.getElementById("bookTopicInput").value||"").trim();
   if(!q){ toast("请输入想看的主题或意图"); return; }
@@ -29588,24 +29603,57 @@ function aiReadOption(type){
   var d = loadBooks();
   var b = d.books.find(function(x){return x.id===currentBookId;});
   if(!b){ toast("请先选一本书"); return; }
+  if(!READ_TABS[type]) type = "chars";
+  currentReadTab = type;
+  syncReadTabUI();
+  if(b[READ_TABS[type][1]]){ renderBookRead(); return; }
+  genReadOption(type);
+}
+function syncReadTabUI(){
+  document.querySelectorAll("#module-library .bk-opt").forEach(function(x){
+    x.classList.toggle("on", x.getAttribute("data-opt")===currentReadTab);
+  });
+}
+function genReadOption(type){
+  if(!READ_TABS[type]) type = "chars";
+  var d = loadBooks();
+  var b = d.books.find(function(x){return x.id===currentBookId;});
+  if(!b){ toast("请先选一本书"); return; }
   var c = loadAIConfig();
   if(!(c.key && c.base && c.model)){ toast("请先在设置里配置 AI"); return; }
+  currentReadTab = type;
+  syncReadTabUI();
   var box = document.getElementById("bookReadOut");
   if(box) box.innerHTML = '<div style="color:var(--muted);padding:10px">AI 精读中…</div>';
   var label = type==="chars"?"一口气理清全书人物关系":type==="plot"?"一口气提炼全书重点":"一口气讲清这本书讲了什么";
-  document.querySelectorAll("#module-library .bk-opt").forEach(function(x){ x.classList.toggle("on", x.getAttribute("data-opt")===type); });
   var sys = "你是读书复盘助手，中文输出。要求：先给一句不超过 40 字的高亮结论；再给 3-5 条要点，每条含一个最贴切的 emoji 图标、一个不超过 12 字的小标题、一句不超过 50 字的说明。禁止糊成一大段。";
   var user = "书名：《"+(b.title||"未命名")+"》\n作者："+(b.author||"未知")+"\n类型："+(b.type||"书")+"\n我的备注："+(b.note||"无")+"\n\n任务："+label+"\n只输出一个JSON：{\"summary\":\"一句结论\",\"items\":[{\"icon\":\"emoji\",\"title\":\"小标题\",\"desc\":\"一句说明\"}]}";
   aiChat(c, [{role:"system",content:sys},{role:"user",content:user}], 45).then(function(res){
     var o = parseAIJSON(res.content);
     if(!o){ throw new Error("AI 返回无法解析成 JSON"); }
     if(!Array.isArray(o.items)) o.items = o.items ? [o.items] : [];
-    if(type==="chars") b.aiChars=o; else if(type==="plot") b.aiPlot=o; else b.aiPoints=o;
+    b[READ_TABS[type][1]] = o;
     saveBooks(d); bumpLibStreak(); renderBookDigest(); renderBookRead();
     toast("✨ 精读完成");
   }).catch(function(err){
     if(box) box.innerHTML = '<div style="color:#e74c3c;font-size:13px;padding:10px">精读失败：'+esc(err.message||"")+'（未配置AI或网络不通时可手动记笔记）</div>';
   });
+}
+function regenReadOption(){
+  var d = loadBooks();
+  var b = d.books.find(function(x){return x.id===currentBookId;});
+  if(!b){ toast("请先选一本书"); return; }
+  genReadOption(READ_TABS[currentReadTab] ? currentReadTab : "chars");
+}
+function clearReadOption(){
+  var d = loadBooks();
+  var b = d.books.find(function(x){return x.id===currentBookId;});
+  if(!b){ toast("请先选一本书"); return; }
+  var f = (READ_TABS[currentReadTab]||READ_TABS.chars)[1];
+  if(!b[f]){ toast("这一页还没有内容"); return; }
+  b[f] = null;
+  saveBooks(d); renderBookDigest(); renderBookRead();
+  toast("已清除本页");
 }
 function renderBookRead(){
   var box = document.getElementById("bookReadOut");
@@ -29613,22 +29661,29 @@ function renderBookRead(){
   var d = loadBooks();
   var b = d.books.find(function(x){return x.id===currentBookId;});
   if(!b){ box.innerHTML=""; return; }
-  var parts = [];
-  [["👥 人物关系",b.aiChars],["📌 全书重点",b.aiPlot],["📖 讲了什么",b.aiPoints]].forEach(function(p){
-    var o = p[1];
-    if(!o) return;
-    parts.push('<div class="bk-sec">'+p[0]+'</div>');
-    if(o.summary) parts.push('<div class="bk-quote"><span class="bq-tag">💡 一句话版</span>'+esc(o.summary)+'</div>');
-    if(o.items && o.items.length){
-      parts.push(o.items.map(function(it,i){
-        if(typeof it === "string") return '<div class="bk-item"><div class="bi-ico">'+(i+1)+'</div><div><div class="bi-d">'+esc(it)+'</div></div></div>';
-        return '<div class="bk-item"><div class="bi-ico">'+esc(it.icon||String(i+1))+'</div><div><div class="bi-t">'+esc(it.title||"")+'</div><div class="bi-d">'+esc(it.desc||"")+'</div></div></div>';
-      }).join(""));
-    }
-  });
-  box.innerHTML = parts.length ? parts.join("") : '<div style="color:var(--muted);font-size:13px;padding:8px 0">先在上一行选一本书，再点上面三个选项 👆</div>';
+  if(!READ_TABS[currentReadTab]) currentReadTab = "chars";
+  syncReadTabUI();
+  var meta = READ_TABS[currentReadTab];
+  var o = b[meta[1]];
+  var shortName = meta[0].replace(/^\S+\s*/, "");
+  var tools = '<div class="bk-read-tools">'
+    + '<button class="inspire-action-btn" data-act="read-regen">🔄 换一批</button>'
+    + '<button class="inspire-action-btn" data-act="read-clear">🗑️ 清除本页</button>'
+    + '</div>';
+  if(!o){
+    box.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:8px 0">这一页还没内容：点上面「'+shortName+'」那个按钮，AI 马上生成 👆</div>';
+    return;
+  }
+  var parts = [tools, '<div class="bk-sec">'+meta[0]+'</div>'];
+  if(o.summary) parts.push('<div class="bk-quote"><span class="bq-tag">💡 一句话版</span>'+esc(o.summary)+'</div>');
+  if(o.items && o.items.length){
+    parts.push(o.items.map(function(it,i){
+      if(typeof it === "string") return '<div class="bk-item"><div class="bi-ico">'+(i+1)+'</div><div><div class="bi-d">'+esc(it)+'</div></div></div>';
+      return '<div class="bk-item"><div class="bi-ico">'+esc(it.icon||String(i+1))+'</div><div><div class="bi-t">'+esc(it.title||"")+'</div><div class="bi-d">'+esc(it.desc||"")+'</div></div></div>';
+    }).join(""));
+  }
+  box.innerHTML = parts.join("");
 }
-
 function sendDeepThink(){
   var d = loadBooks();
   var b = d.books.find(function(x){return x.id===currentBookId;});
@@ -29848,11 +29903,14 @@ document.addEventListener("click", function(e){
   else if(act==="smart-fill") smartFillBook();
   else if(act==="smart-batch") smartBatchImport();
   else if(act==="topic-search") topicSearch();
+  else if(act==="topic-clear") topicClear();
   else if(act==="topic-add") topicAddBook(el);
   else if(act==="hideBookEditor") hideBookEditor();
   else if(act==="openBook") openBook(+el.getAttribute("data-id"));
   else if(act==="lib-cat"){ libCatFilter = el.getAttribute("data-cat"); renderBooks(); }
   else if(act==="read-opt") aiReadOption(el.getAttribute("data-opt"));
+  else if(act==="read-regen") regenReadOption();
+  else if(act==="read-clear") clearReadOption();
   else if(act==="send-deep") sendDeepThink();
   else if(act==="copy-quote") copyQuote(+el.getAttribute("data-i"));
   else if(act==="bk-reading") bookAction("reading");
