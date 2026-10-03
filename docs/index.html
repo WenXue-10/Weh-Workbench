@@ -2104,6 +2104,14 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
 }
 .about-changelog-date{font-size:11px;color:var(--muted);margin-bottom:0}
 
+/* ===== 首页快捷模块视觉升级（2026-10-03） ===== */
+#module-home .card-head{position:relative;padding-left:13px}
+#module-home .card-head::before{content:"";position:absolute;left:0;top:4px;bottom:4px;width:4px;border-radius:4px;background:linear-gradient(180deg,var(--pink-deep),var(--purple))}
+.quick-grid a .q-em{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:13px;font-size:21px;background:linear-gradient(135deg,var(--pink-soft),#fff);box-shadow:0 3px 9px rgba(224,85,138,.18);margin-bottom:2px}
+.quick-grid a{transition:transform .15s,box-shadow .15s,border-color .15s,background .15s}
+.quick-grid a:hover{transform:translateY(-3px);box-shadow:0 8px 20px rgba(224,85,138,.20);border-color:#ffb3d1;background:#fff}
+.stat-card .lab{color:var(--text)}
+
 </style>
 </head>
 <body>
@@ -2216,13 +2224,13 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
 
             <div class="quick-grid">
 
-              <a data-module="baichuan">📚 灵犀智库</a>
+              <a data-module="baichuan"><span class="q-em">📚</span>灵犀智库</a>
 
-              <a data-module="career">💼 SCM Career</a>
+              <a data-module="career"><span class="q-em">💼</span>SCM Career</a>
 
-              <a data-module="cet6">📖 CET-6备战</a>
+              <a data-module="cet6"><span class="q-em">📖</span>CET-6备战</a>
 
-              <a data-module="sop">🛠️ 工作SOP</a>
+              <a data-module="sop"><span class="q-em">🛠️</span>工作SOP</a>
 
             </div>
 
@@ -2230,17 +2238,17 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
 
           <div class="card">
 
-            <div class="card-head">🛠️ 工具模块</div>
+            <div class="card-head">🌟 成长规划</div>
 
             <div class="quick-grid">
 
-              <a data-module="money">💰 存钱记账</a>
+              <a data-module="report"><span class="q-em">📝</span>工作汇报台</a>
 
-              <a data-module="health">🍱 吃饭健康</a>
+              <a data-module="library"><span class="q-em">📖</span>读书学习台</a>
 
-              <a data-module="todo">✅ Weh Tasks</a>
+              <a data-module="manifest"><span class="q-em">🌟</span>显化成长台</a>
 
-              <a data-module="settings">⚙️ 设置</a>
+              <a data-module="daily"><span class="q-em">📅</span>日计划台</a>
 
             </div>
 
@@ -2250,15 +2258,15 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
 
         <div class="card">
 
-          <div class="card-head">🧠 思考辅助模块</div>
+          <div class="card-head">🛠️ 工具模块</div>
 
-          <div class="quick-grid">
+            <div class="quick-grid">
 
-            <a data-module="inspiration">💡 灵感捕捉</a>
+              <a data-module="todo"><span class="q-em">✅</span>Weh Tasks</a>
 
-            <a data-module="decision">🎯 决策顾问</a>
+              <a data-module="settings"><span class="q-em">⚙️</span>设置</a>
 
-          </div>
+            </div>
 
         </div>
 
@@ -6805,7 +6813,7 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
 
 <script>
 window.SITE_DATA = {
- "updated": "2026-10-03 20:25",
+ "updated": "2026-10-03 23:07",
  "stats": {
   "jobs": 58,
   "rec": 0,
