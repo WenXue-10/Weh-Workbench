@@ -6699,7 +6699,7 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
 
 <script>
 window.SITE_DATA = {
- "updated": "2026-10-03 19:14",
+ "updated": "2026-10-03 19:39",
  "stats": {
   "jobs": 58,
   "rec": 0,
@@ -26731,6 +26731,7 @@ function _refreshAfterSync(){
   try{ if(typeof renderDaily === "function") renderDaily(); }catch(e){}
   try{ if(typeof renderJobs === "function") renderJobs(); }catch(e){}
   try{ if(typeof renderCompanies === "function") renderCompanies(); }catch(e){}
+  try{ if(typeof renderBooks === "function") renderBooks(); }catch(e){}
 }
 
 function syncNow(action, silent){
@@ -27361,6 +27362,7 @@ function go(view){
   document.body.classList.toggle("sop-active", view==="sop");
   updateBackBtn();
   window.scrollTo({top:0});
+  if(view === "library"){ try{ renderBooks(); }catch(e){} }
 }
 function updateBackBtn(){
   var backBtn = document.getElementById("backBtn");
@@ -27494,6 +27496,8 @@ var FREQ_DEFAULTS = [
       }
   }catch(e){ console.log("求职模块渲染跳过:", e.message); }
 })();
+// 初始化期间若前面模块渲染抛错会跳过读书台，这里兜底补一次渲染
+if(document.getElementById("bookList")){ try{ renderBooks(); }catch(e){} }
 
 
 /* ===== SCM Career 底栏子模块导航 ===== */
