@@ -6699,7 +6699,7 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
 
 <script>
 window.SITE_DATA = {
- "updated": "2026-10-03 14:45",
+ "updated": "2026-10-03 15:18",
  "stats": {
   "jobs": 58,
   "rec": 0,
@@ -29352,9 +29352,10 @@ function topicSearch(){
   var box = document.getElementById("bookTopicResults");
   if(box) box.innerHTML = "";
   if(hint) hint.textContent = "🔍 搜索中…";
-  fetchOpenLibrary(q).then(function(list){
-    if(hint) hint.textContent = "来自 Open Library 的真实书单（共 "+list.length+" 本）";
-    renderTopicResults(list);
+  fetchOpenLibrary(q).then(function(res){
+    var tag = res.viaProxy ? "（经代理）" : "";
+    if(hint) hint.textContent = "来自 Open Library 的真实书单"+tag+"（共 "+res.list.length+" 本）";
+    renderTopicResults(res.list);
   }).catch(function(){
     if(hint) hint.textContent = "联网搜索不可用，改用 AI 推荐…";
     return aiTopicSearch(q).then(function(list){
@@ -29366,25 +29367,38 @@ function topicSearch(){
   });
 }
 function fetchOpenLibrary(q){
-  var url = "https://openlibrary.org/search.json?q=" + encodeURIComponent(q) + "&limit=12&fields=title,author_name,first_publish_year,cover_i,key";
-  var ctrl = (typeof AbortController!=="undefined") ? new AbortController() : null;
-  var to = ctrl ? setTimeout(function(){ ctrl.abort(); }, 8000) : null;
-  return fetch(url, {signal: ctrl?ctrl.signal:undefined}).then(function(r){
-    if(to) clearTimeout(to);
-    if(!r.ok) throw new Error("HTTP "+r.status);
-    return r.json();
-  }).then(function(d){
-    var docs = (d && d.docs) || [];
-    return docs.map(function(x){
-      return {
-        title: x.title || "",
-        author: (x.author_name && x.author_name[0]) || "",
-        year: x.first_publish_year || "",
-        cover: x.cover_i ? ("https://covers.openlibrary.org/b/id/"+x.cover_i+"-M.jpg") : "",
-        source: "ol"
-      };
-    }).filter(function(x){ return x.title; }).slice(0, 12);
-  });
+  var base = "https://openlibrary.org/search.json?q=" + encodeURIComponent(q) + "&limit=12&fields=title,author_name,first_publish_year,cover_i,key";
+  var eps = [
+    {url: base, via: false},
+    {url: "https://api.allorigins.win/raw?url=" + encodeURIComponent(base), via: true},
+    {url: "https://corsproxy.io/?url=" + encodeURIComponent(base), via: true},
+    {url: "https://api.codetabs.com/v1/proxy/?quest=" + encodeURIComponent(base), via: true}
+  ];
+  function tryOne(i){
+    if(i >= eps.length) return Promise.reject(new Error("Open Library 全部来源不可用"));
+    var ep = eps[i];
+    var ctrl = (typeof AbortController!=="undefined") ? new AbortController() : null;
+    var to = ctrl ? setTimeout(function(){ ctrl.abort(); }, 8000) : null;
+    return fetch(ep.url, {signal: ctrl?ctrl.signal:undefined}).then(function(r){
+      if(to) clearTimeout(to);
+      if(!r.ok) throw new Error("HTTP " + r.status);
+      return r.json();
+    }).then(function(d){
+      var docs = (d && d.docs) || [];
+      var list = docs.map(function(x){
+        return {
+          title: x.title || "",
+          author: (x.author_name && x.author_name[0]) || "",
+          year: x.first_publish_year || "",
+          cover: x.cover_i ? ("https://covers.openlibrary.org/b/id/"+x.cover_i+"-M.jpg") : "",
+          source: "ol"
+        };
+      }).filter(function(x){ return x.title; }).slice(0, 12);
+      if(!list.length) throw new Error("空结果");
+      return {list: list, viaProxy: ep.via};
+    }).catch(function(){ return tryOne(i+1); });
+  }
+  return tryOne(0);
 }
 function aiTopicSearch(q){
   var cfg = loadAIConfig();
