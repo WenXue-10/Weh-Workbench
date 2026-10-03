@@ -21,7 +21,7 @@
     <div class="nav-item" data-module="cet6">📖 CET-6备战</div>
     <div class="nav-item" data-module="sop">🛠️ 工作SOP</div>
     <div class="nav-item" data-module="settings">⚙️ 设置</div>
-    <div class="foot">🐾 数据本地存储 · 知识库自动同步<br>慢慢搭建中，敬请期待 ✨</div>
+    <div class="foot">🐾 数据本地存储 · 跨设备云同步<br>持续打磨中 ✨</div>
   </aside>
 
   <div class="main">
@@ -41,7 +41,7 @@
       <section id="module-home" class="view active">
         <div class="card">
           <div style="font-size:16px;font-weight:800">✨ 欢迎来到 Weh Atelier</div>
-          <div style="font-size:13px;color:var(--muted);margin-top:6px">这是你的专属AI工作室，慢慢搭建中。左侧切换不同模块，每个模块都有对应的AI助手帮你干活～</div>
+          <div style="font-size:13px;color:var(--muted);margin-top:6px">你的专属个人 AI 工作室 —— 记账 / 饮食 / 灵感 / 决策 / 汇报 / 读书 / 成长，一站打理。左侧切换模块，每个模块都有 AI 助手帮你干活～</div>
         </div>
         <div class="stat-grid">
           <div class="stat-card p1" onclick="go('money')" style="cursor:pointer"><div class="em">💰</div><div class="lab">存钱记账</div><div class="num" id="homeMoneyCount">0</div><div class="lab" style="font-size:11px;margin-top:2px">笔消费记录</div></div>
@@ -2351,7 +2351,7 @@
                   <div class="about-logo">✨</div>
                   <div class="about-name">Weh Atelier</div>
                   <div class="about-sub">🐾 个人AI工作室</div>
-                  <div class="about-version">版本 v1.0.0</div>
+                  <div class="about-version">版本 v1.3.0</div>
                 </div>
                 <div class="setting-row">
                   <div class="setting-label">项目地址</div>
@@ -2365,17 +2365,58 @@
                     <a href="https://WenXue-10.github.io/Weh-Workbench/" target="_blank" class="setting-link">在线访问</a>
                   </div>
                 </div>
-                <div class="about-changelog">
+                                <div class="about-changelog">
                   <div class="about-changelog-title">📝 更新日志</div>
+
                   <div class="about-changelog-item">
-                    <div class="about-changelog-version">v1.0.0</div>
-                    <div class="about-changelog-date">2026-09-05</div>
+                    <div class="cl-head">
+                      <span class="about-changelog-version">v1.3.0</span>
+                      <span class="about-changelog-date">2026-10-03</span>
+                    </div>
                     <ul>
-                      <li>完成视频里5个工作台：存钱台、饮食台、杠精台、汇报台、日计划台</li>
-                      <li>完成灵感捕捉、Weh Tasks、4个知识库模块</li>
-                      <li>三模块联动：灵感→Weh Tasks→日计划台</li>
-                      <li>背景图/头像/图标自定义，主题跟随背景</li>
-                      <li>全局搜索功能</li>
+                      <li>新增「读书学习台」「显化成长台」两大模块</li>
+                      <li>AI 全线接入：灵感延伸 / 决策顾问（毒舌·资深双风格）/ 工作汇报，均可一键生成</li>
+                      <li>读书台按主题搜书、AI 一句话录入、批量导入</li>
+                      <li>云同步升级：按记录 id 合并 + 删除同步 + 灵感→知识库落盘通道</li>
+                    </ul>
+                  </div>
+
+                  <div class="about-changelog-item">
+                    <div class="cl-head">
+                      <span class="about-changelog-version">v1.2.0</span>
+                      <span class="about-changelog-date">2026-09-19</span>
+                    </div>
+                    <ul>
+                      <li>接入 DeepSeek 真模型（模型可选 + 深度思考）</li>
+                      <li>云同步重构：跨设备按 id 合并、删除也同步</li>
+                      <li>新增「操作日志」，记录各模块 AI 调用</li>
+                      <li>全模块拍照 + 语音输入</li>
+                    </ul>
+                  </div>
+
+                  <div class="about-changelog-item">
+                    <div class="cl-head">
+                      <span class="about-changelog-version">v1.1.0</span>
+                      <span class="about-changelog-date">2026-09-07</span>
+                    </div>
+                    <ul>
+                      <li>跨设备云同步（Gist 中转）</li>
+                      <li>首页卡片配色自定义（5 套预设），主题跟随背景</li>
+                      <li>移动端全面适配（底栏导航 / 返回键 / 布局）</li>
+                      <li>灵犀智库合并 4 大分类；吃饭模块周切换</li>
+                    </ul>
+                  </div>
+
+                  <div class="about-changelog-item">
+                    <div class="cl-head">
+                      <span class="about-changelog-version">v1.0.0</span>
+                      <span class="about-changelog-date">2026-09-05</span>
+                    </div>
+                    <ul>
+                      <li>初版：存钱记账 / 吃饭健康 / 决策顾问 / 工作汇报 / 日计划台</li>
+                      <li>灵感捕捉、Weh Tasks、4 个知识库模块</li>
+                      <li>三模块联动：灵感 → Weh Tasks → 日计划台</li>
+                      <li>背景图 / 头像 / 图标自定义；全局搜索</li>
                     </ul>
                   </div>
                 </div>

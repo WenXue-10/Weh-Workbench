@@ -2069,3 +2069,27 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
 .topic-card .tc-add{margin-top:auto;align-self:flex-start;padding:5px 10px;font-size:12px;border:none;border-radius:8px;color:#fff;background:linear-gradient(135deg,var(--grad-from),var(--grad-to));cursor:pointer}
 .bk-read-tools{display:flex;gap:8px;justify-content:flex-end;margin:0 0 8px}
 .bk-read-tools .inspire-action-btn{font-size:12px;padding:3px 10px}
+
+/* ===== 关于页视觉增强（2026-10-03） ===== */
+.about-logo{
+  width:72px;height:72px;line-height:72px;text-align:center;margin:0 auto 10px;
+  border-radius:50%;
+  background:radial-gradient(circle at 50% 38%, rgba(255,255,255,.9), rgba(255,225,240,.55));
+  box-shadow:0 6px 22px rgba(180,142,217,.35);
+  font-size:34px;
+}
+.about-version{
+  display:inline-block;padding:3px 14px;border-radius:999px;
+  background:linear-gradient(135deg,var(--pink-deep),#b48ed9);color:#fff;
+  font-size:12px;font-weight:700;margin-top:10px;
+}
+.about-changelog-item{
+  border-left:3px solid rgba(180,142,217,.55);
+}
+.about-changelog-item .cl-head{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.about-changelog-version{
+  display:inline-block;padding:2px 10px;border-radius:999px;
+  background:rgba(255,255,255,.78);border:1px solid rgba(180,142,217,.45);
+  color:var(--pink-deep);font-size:12px;font-weight:800;
+}
+.about-changelog-date{font-size:11px;color:var(--muted);margin-bottom:0}
