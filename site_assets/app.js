@@ -5431,6 +5431,7 @@ document.addEventListener("keydown", function(e){ if(e.key==="Escape") closeModa
   }
   spawn();spawn();
   setInterval(spawn,1500);
+})();
 
 var MAN_KEY = "weh_manifest_data_v1";
 var MAN_DEFAULTS = {goals:[], script:[], sealed:false, sealedAt:"", cheque:null, gratitude:[], rehearsal:[], evidence:[], translator:[], freq:{}, freqDone:{}, freqCustom:[], diary:[], migEv:false};
@@ -5528,6 +5529,7 @@ var FREQ_DEFAULTS = [
         renderHome(); renderJobs(); renderCompanies(); renderTimeline(); renderResumes();
       }
   }catch(e){ console.log("求职模块渲染跳过:", e.message); }
+})();
 
 
 /* ===== SCM Career 底栏子模块导航 ===== */
@@ -8765,8 +8767,3 @@ function delFreqCustom(name){
   renderManifest();
   toast("已删除这一项");
 }
-
-})();
-
-})();
-
