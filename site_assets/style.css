@@ -2093,3 +2093,11 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
   color:var(--pink-deep);font-size:12px;font-weight:800;
 }
 .about-changelog-date{font-size:11px;color:var(--muted);margin-bottom:0}
+
+/* ===== 首页快捷模块视觉升级（2026-10-03） ===== */
+#module-home .card-head{position:relative;padding-left:13px}
+#module-home .card-head::before{content:"";position:absolute;left:0;top:4px;bottom:4px;width:4px;border-radius:4px;background:linear-gradient(180deg,var(--pink-deep),var(--purple))}
+.quick-grid a .q-em{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:13px;font-size:21px;background:linear-gradient(135deg,var(--pink-soft),#fff);box-shadow:0 3px 9px rgba(224,85,138,.18);margin-bottom:2px}
+.quick-grid a{transition:transform .15s,box-shadow .15s,border-color .15s,background .15s}
+.quick-grid a:hover{transform:translateY(-3px);box-shadow:0 8px 20px rgba(224,85,138,.20);border-color:#ffb3d1;background:#fff}
+.stat-card .lab{color:var(--text)}
