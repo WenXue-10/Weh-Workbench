@@ -1,5 +1,5 @@
 /* Weh Atelier · Service Worker */
-const CACHE = "atelier-v2";
+const CACHE = "atelier-v3";
 self.addEventListener("install", (e) => { self.skipWaiting(); });
 self.addEventListener("activate", (e) => {
   e.waitUntil(
@@ -12,10 +12,10 @@ self.addEventListener("fetch", (e) => {
   if (req.method !== "GET") return;
   const url = new URL(req.url);
   if (url.origin !== location.origin) return; // 跨域不缓存
-  // 页面(导航)：网络优先，保证实时更新；断网时回退缓存
+  // 页面(导航)：网络优先，强制绕过 HTTP 缓存保证实时更新；断网时回退缓存
   if (req.mode === "navigate" || url.pathname.endsWith("index.html")) {
     e.respondWith(
-      fetch(req).then((res) => { put(req, res.clone()); return res; })
+      fetch(req, { cache: "no-cache" }).then((res) => { put(req, res.clone()); return res; })
         .catch(() => caches.match(req))
     );
     return;
