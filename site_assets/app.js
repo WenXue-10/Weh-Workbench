@@ -3634,6 +3634,8 @@ function renderReportResult(result){
   if(!box) return;
   if(title) title.textContent = result.typeText + " · 汇报对象：" + result.audienceText + " · " + result.createdAt;
   if(exportBtn) exportBtn.style.display = "inline-block";
+  var reportNewBtn = document.getElementById("reportNewBtn");
+  if(reportNewBtn) reportNewBtn.style.display = "inline-block";
 
   var highlightsHtml = (result.highlights || []).map(function(h){ return "<li>" + esc(h) + "</li>"; }).join("");
   var questionsHtml = (result.questions || []).map(function(q){
@@ -3666,6 +3668,23 @@ function renderReportResult(result){
                 ? '<div class="ai-src">内置模板生成（未接入 AI，去 设置 → 🤖 AI 延伸 里填 Key）</div>'
                 : ''));
   box.innerHTML = html;
+}
+
+/* 仅清当前结果视图，不动历史（历史保留，符合生成类保留历史原则） */
+function clearReportResult(){
+  currentReportId = null;
+  var box = document.getElementById("reportResult");
+  var title = document.getElementById("reportResultTitle");
+  var exportBtn = document.getElementById("reportExportBtn");
+  var newBtn = document.getElementById("reportNewBtn");
+  if(title) title.textContent = "在左边填写后点生成";
+  if(exportBtn) exportBtn.style.display = "none";
+  if(newBtn) newBtn.style.display = "none";
+  if(box) box.innerHTML = '<div style="text-align:center;color:var(--muted);padding:60px 20px;font-size:13px;line-height:1.8">'
+    + '选择汇报类型和对象<br>'
+    + '在左边输入碎碎念（做了什么、遇到什么问题、下一步计划）<br>'
+    + '点"✨ 生成精简汇报"<br>'
+    + '<span style="color:var(--pink-deep);font-weight:700">AI会参考工作SOP的模板，把"做了一大堆"翻译成"做出了什么"</span></div>';
 }
 
 function renderReportHistory(){
