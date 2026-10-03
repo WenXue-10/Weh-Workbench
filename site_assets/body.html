@@ -543,6 +543,7 @@
             <button class="inspire-action-btn" data-act="bk-reread">🔁 重读</button>
             <button class="inspire-action-btn" data-act="bk-export">📥 导出MD</button>
             <button class="inspire-action-btn" data-act="bk-delete">🗑️ 删除</button>
+            <button class="inspire-action-btn" data-act="open-local-book" style="border:none;background:linear-gradient(135deg,#6a8ed9,#9d7be0);color:#fff">📂 打开本地电子书</button>
           </div>
         </div>
 
@@ -560,6 +561,23 @@
           <div class="qwall-bar"><span class="qb-hint">AI 从书里挑的 · 点这里换一批</span><button class="inspire-action-btn" style="font-size:12px;padding:3px 10px" data-act="bk-quotes">✨ 换一批</button></div>
           <div id="quoteWall" class="quote-grid"></div>
         </div>
+      <!-- 本地电子书阅读器（不持久化，选文件即读） -->
+      <div id="bookReader" class="reader-modal" style="display:none">
+        <div class="reader-bar">
+          <span id="readerTitle" class="reader-title"></span>
+          <div class="reader-ctrls">
+            <button id="readerPrev" class="reader-btn">‹ 上一页</button>
+            <span id="readerPct" class="reader-pct">0%</span>
+            <button id="readerNext" class="reader-btn">下一页 ›</button>
+            <button id="readerClose" class="reader-btn close">✕ 关闭</button>
+          </div>
+        </div>
+        <div class="reader-body">
+          <div id="readerMount" class="reader-mount"></div>
+          <iframe id="readerPdf" class="reader-pdf" style="display:none"></iframe>
+        </div>
+        <input type="file" id="readerFile" accept=".epub,.pdf" style="display:none">
+      </div>
       </section>
 
       <section id="module-manifest" class="view">

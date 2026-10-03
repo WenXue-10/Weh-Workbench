@@ -1087,6 +1087,13 @@ def build():
     css = read(os.path.join(ASSETS, "style.css"))
     body = read(os.path.join(ASSETS, "body.html"))
     js = read(os.path.join(ASSETS, "app.js"))
+    vendor_js = ""
+    vendor_dir = os.path.join(ASSETS, "vendor")
+    if os.path.isdir(vendor_dir):
+        for fn in sorted(os.listdir(vendor_dir)):
+            if fn.endswith(".js"):
+                vendor_js += read(os.path.join(vendor_dir, fn))
+
     data_json = json.dumps(data, ensure_ascii=False, indent=1)
 
     # 读取同步状态并注入页脚
@@ -1121,6 +1128,9 @@ def build():
 """ + body + """
 <script>
 window.SITE_DATA = """ + data_json + """;
+</script>
+<script>
+""" + vendor_js + """
 </script>
 <script>
 """ + js + """

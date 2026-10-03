@@ -2101,3 +2101,16 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
 .quick-grid a{transition:transform .15s,box-shadow .15s,border-color .15s,background .15s}
 .quick-grid a:hover{transform:translateY(-3px);box-shadow:0 8px 20px rgba(224,85,138,.20);border-color:#ffb3d1;background:#fff}
 .stat-card .lab{color:var(--text)}
+
+/* ========== 本地电子书阅读器 ========== */
+.reader-modal{ position:fixed; inset:0; z-index:9999; display:none; flex-direction:column; background:#faf7fb; }
+.reader-bar{ display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 16px; background:linear-gradient(135deg,#ffffff,#fdeef6); border-bottom:1px solid rgba(0,0,0,.06); box-shadow:0 2px 10px rgba(0,0,0,.05); }
+.reader-title{ font-weight:800; font-size:15px; color:#5b3a4d; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.reader-ctrls{ display:flex; align-items:center; gap:8px; flex-shrink:0; }
+.reader-btn{ border:1px solid rgba(0,0,0,.08); background:#fff; color:#6b4a5e; border-radius:20px; padding:6px 14px; font-size:13px; cursor:pointer; }
+.reader-btn:hover{ background:#ffe3ee; }
+.reader-btn.close{ background:linear-gradient(135deg,#e0558a,#9d7be0); color:#fff; border:none; }
+.reader-pct{ font-size:12px; color:var(--muted); min-width:38px; text-align:center; }
+.reader-body{ flex:1; overflow:hidden; position:relative; background:#fff; }
+.reader-mount{ width:100%; height:100%; overflow:auto; }
+.reader-pdf{ width:100%; height:100%; border:none; }

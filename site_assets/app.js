@@ -7993,7 +7993,7 @@ document.addEventListener("click", function(e){
   else if(act==="topic-clear") topicClear();
   else if(act==="topic-add") topicAddBook(el);
   else if(act==="hideBookEditor") hideBookEditor();
-  else if(act==="openBook") openBook(+el.getAttribute("data-id"));
+  else if(act==="openBook") openBook(+el.getAttribute("data-id")); else if(act==="open-local-book"){ openLocalBookPicker(); }
   else if(act==="lib-cat"){ libCatFilter = el.getAttribute("data-cat"); renderBooks(); }
   else if(act==="read-opt") aiReadOption(el.getAttribute("data-opt"));
   else if(act==="read-regen") regenReadOption();
@@ -8771,3 +8771,52 @@ function delFreqCustom(name){
   renderManifest();
   toast("已删除这一项");
 }
+
+/* ========== 本地电子书阅读器（不持久化，选文件即读）========== */
+var __readerBook=null, __readerRend=null, __readerUrl=null;
+function openLocalBookPicker(){ var f=document.getElementById("readerFile"); if(f) f.click(); }
+function setReaderPct(p){ var e=document.getElementById("readerPct"); if(e) e.textContent=p+"%"; }
+function epubPrev(){ if(__readerRend) __readerRend.prev(); }
+function epubNext(){ if(__readerRend) __readerRend.next(); }
+function closeReader(){
+  var modal=document.getElementById("bookReader"), mount=document.getElementById("readerMount"), pdf=document.getElementById("readerPdf");
+  if(modal) modal.style.display="none";
+  if(mount) mount.innerHTML="";
+  if(pdf){ pdf.src=""; pdf.style.display="none"; }
+  if(__readerUrl){ try{URL.revokeObjectURL(__readerUrl);}catch(e){} __readerUrl=null; }
+  if(__readerRend){ try{__readerRend.destroy();}catch(e){} __readerRend=null; }
+  __readerBook=null;
+}
+function handleLocalBookFile(file){
+  if(!file) return;
+  var name=file.name||"本地电子书", ext=(name.split(".").pop()||"").toLowerCase();
+  var modal=document.getElementById("bookReader"), title=document.getElementById("readerTitle");
+  var mount=document.getElementById("readerMount"), pdf=document.getElementById("readerPdf");
+  if(title) title.textContent="📖 "+name;
+  if(modal) modal.style.display="flex";
+  mount.innerHTML=""; mount.style.display="none"; pdf.style.display="none"; pdf.src="";
+  if(__readerUrl){ try{URL.revokeObjectURL(__readerUrl);}catch(e){} __readerUrl=null; }
+  __readerBook=null; __readerRend=null;
+  if(ext==="pdf"){
+    __readerUrl=URL.createObjectURL(file); pdf.src=__readerUrl; pdf.style.display="block"; setReaderPct(0);
+  } else if(ext==="epub"){
+    mount.style.display="block";
+    try{
+      if(typeof ePub!=="function"){ mount.innerHTML='<div style="padding:20px;color:#b00">阅读引擎未加载（epub.js 缺失）</div>'; return; }
+      __readerBook=ePub(file);
+      __readerRend=__readerBook.renderTo(mount,{width:"100%",height:"100%",spread:"none",flow:"paginated"});
+      __readerRend.display();
+      __readerRend.on("relocated",function(loc){ try{ setReaderPct(Math.round((loc.start.percentage||0)*100)); }catch(e){} });
+    }catch(e){ mount.innerHTML='<div style="padding:20px;color:#b00">EPUB 打开失败：'+((e&&e.message)||e)+'</div>'; }
+  } else {
+    mount.style.display="block";
+    mount.innerHTML='<div style="padding:20px;color:#b00">只支持 .epub / .pdf 文件</div>';
+  }
+}
+(function(){
+  var f=document.getElementById("readerFile");
+  if(f) f.addEventListener("change",function(){ handleLocalBookFile(this.files&&this.files[0]); this.value=""; });
+  var c=document.getElementById("readerClose"); if(c) c.addEventListener("click",closeReader);
+  var pv=document.getElementById("readerPrev"); if(pv) pv.addEventListener("click",epubPrev);
+  var nx=document.getElementById("readerNext"); if(nx) nx.addEventListener("click",epubNext);
+})();
