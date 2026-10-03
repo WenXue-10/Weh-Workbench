@@ -1985,6 +1985,11 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
 #module-manifest .id-note .dim{color:var(--muted);font-size:11.5px;margin-top:5px}
 #module-manifest .id-list{display:flex;flex-direction:column;gap:10px}
 #module-manifest .id-item{padding:11px 13px;border-radius:13px;background:rgba(255,255,255,.72);border:1px solid rgba(255,203,224,.45)}
+#module-manifest .id-item{position:relative;padding-right:30px}
+#module-manifest .id-x{position:absolute;top:8px;right:9px;border:none;background:transparent;color:#c9a8ba;cursor:pointer;font-size:11px;padding:2px 4px;line-height:1}
+#module-manifest .id-x:hover{color:#e84393}
+#module-manifest .man-clear-row{display:flex;justify-content:flex-end;margin-bottom:8px}
+#module-manifest .man-clear-row .inspire-action-btn{font-size:12px;padding:3px 11px}
 #module-manifest .id-from{font-size:12.5px;color:var(--muted);line-height:1.6}
 #module-manifest .id-arrow{font-size:12px;color:#c9a8ba;margin:2px 0;line-height:1}
 #module-manifest .id-to{font-size:13.5px;font-weight:700;color:var(--pink-deep);line-height:1.6}
@@ -2946,6 +2951,8 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
               <div class="card-head">📝 汇报结果 <small id="reportResultTitle">在左边填写后点生成</small>
 
                 <button id="reportExportBtn" style="display:none;float:right;font-size:12px;padding:4px 12px;background:linear-gradient(135deg,var(--pink-deep),#b48ed9);color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:700" onclick="exportReport()">📥 导出MD</button>
+
+                <button id="reportNewBtn" style="display:none;float:right;margin-right:8px;font-size:12px;padding:4px 12px;background:#3a2f4d;color:#cfc2e6;border:1px solid #5a4a73;border-radius:8px;cursor:pointer;font-weight:700" onclick="clearReportResult()">🆕 新建</button>
 
               </div>
 
@@ -6692,7 +6699,7 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
 
 <script>
 window.SITE_DATA = {
- "updated": "2026-10-03 03:45",
+ "updated": "2026-10-03 14:45",
  "stats": {
   "jobs": 58,
   "rec": 0,
@@ -25591,6 +25598,8 @@ function renderReportResult(result){
   if(!box) return;
   if(title) title.textContent = result.typeText + " · 汇报对象：" + result.audienceText + " · " + result.createdAt;
   if(exportBtn) exportBtn.style.display = "inline-block";
+  var reportNewBtn = document.getElementById("reportNewBtn");
+  if(reportNewBtn) reportNewBtn.style.display = "inline-block";
 
   var highlightsHtml = (result.highlights || []).map(function(h){ return "<li>" + esc(h) + "</li>"; }).join("");
   var questionsHtml = (result.questions || []).map(function(q){
@@ -25623,6 +25632,23 @@ function renderReportResult(result){
                 ? '<div class="ai-src">内置模板生成（未接入 AI，去 设置 → 🤖 AI 延伸 里填 Key）</div>'
                 : ''));
   box.innerHTML = html;
+}
+
+/* 仅清当前结果视图，不动历史（历史保留，符合生成类保留历史原则） */
+function clearReportResult(){
+  currentReportId = null;
+  var box = document.getElementById("reportResult");
+  var title = document.getElementById("reportResultTitle");
+  var exportBtn = document.getElementById("reportExportBtn");
+  var newBtn = document.getElementById("reportNewBtn");
+  if(title) title.textContent = "在左边填写后点生成";
+  if(exportBtn) exportBtn.style.display = "none";
+  if(newBtn) newBtn.style.display = "none";
+  if(box) box.innerHTML = '<div style="text-align:center;color:var(--muted);padding:60px 20px;font-size:13px;line-height:1.8">'
+    + '选择汇报类型和对象<br>'
+    + '在左边输入碎碎念（做了什么、遇到什么问题、下一步计划）<br>'
+    + '点"✨ 生成精简汇报"<br>'
+    + '<span style="color:var(--pink-deep);font-weight:700">AI会参考工作SOP的模板，把"做了一大堆"翻译成"做出了什么"</span></div>';
 }
 
 function renderReportHistory(){
@@ -30369,7 +30395,7 @@ function renderGratitude(data){
       + ps.map(function(p){ return '<p class="grat-p">' + mHl(p) + '</p>'; }).join("")
       + '<div class="grat-sign">—— 写给未来的我，也写给正在读出声的你 🔔</div>'
       + '</div>';
-    if(wrap) wrap.innerHTML = '<div class="grat-done">🌙 今天的日记已生成 · 明天再来</div>';
+    if(wrap) wrap.innerHTML = '<div class="grat-done">🌙 今天的日记已生成 · 明天再来</div><button class="mod-btn-ghost" onclick="clearGratitudeToday()">清除今日</button>';
     return;
   }
   if(!data.sealed){
@@ -30465,7 +30491,7 @@ function renderRehearsal(data, dayN){
     box.innerHTML = '<div class="reh-title">今晚的剧本场景：' + esc(r.title || "推开那扇门") + '</div>'
       + String(r.text).split(/\n+/).filter(function(x){ return x.trim(); })
           .map(function(p){ return '<p class="reh-p">' + mHl(p) + '</p>'; }).join("");
-    if(wrap) wrap.innerHTML = '<button class="mod-btn-dim" onclick="aiRehearsal()">🔁 换一个今晚的场景</button>';
+    if(wrap) wrap.innerHTML = '<button class="mod-btn-dim" onclick="aiRehearsal()">🔁 换一个今晚的场景</button><button class="mod-btn-ghost" onclick="clearRehearsalToday()">清除今日</button>';
   } else {
     box.innerHTML = '<div class="reh-wait">' + (data.sealed
       ? '闭眼前，让 AI 按你的剧本给你造今晚的场景：有温度、有声音、有一句你会对自己说的话。'
@@ -30515,8 +30541,9 @@ function renderTranslator(data){
   if(!wall) return;
   var arr = (data.translator || []).slice().reverse().slice(0, 8);
   if(!arr.length){ wall.innerHTML = '<div class="id-empty">把一句自我怀疑，翻译成笃定的身份陈述</div>'; return; }
-  wall.innerHTML = arr.map(function(r){
-    return '<div class="id-item"><div class="id-from">' + esc(r.from || "") + '</div>'
+  var clearBtn = arr.length ? '<div class="man-clear-row"><button class="inspire-action-btn" onclick="clearTranslator()">🗑️ 清空全部翻译</button></div>' : '';
+  wall.innerHTML = clearBtn + arr.map(function(r){
+    return '<div class="id-item"><button class="id-x" onclick="delTranslator(' + r.id + ')">✕</button><div class="id-from">' + esc(r.from || "") + '</div>'
       + '<div class="id-arrow">↓</div>'
       + '<div class="id-to">' + esc(r.to || "") + '</div></div>';
   }).join("");
@@ -30545,6 +30572,52 @@ function aiTranslate(){
     if(wall) wall.innerHTML = '<div class="id-empty" style="color:#e74c3c">失败：' + esc(err.message || "") + '</div>';
   });
 }
+
+
+function delTranslator(id){
+  showConfirm("删除这条翻译？").then(function(ok){
+    if(!ok) return;
+    var data = loadManifest();
+    data.translator = (data.translator || []).filter(function(x){ return x.id !== id; });
+    saveManifest(data);
+    renderManifest();
+    toast("已删除");
+  });
+}
+function clearTranslator(){
+  showConfirm("清空全部翻译记录？").then(function(ok){
+    if(!ok) return;
+    var data = loadManifest();
+    data.translator = [];
+    saveManifest(data);
+    renderManifest();
+    toast("已清空");
+  });
+}
+function clearRehearsalToday(){
+  showConfirm("清除今晚的排练场景？清除后今晚可重新生成。").then(function(ok){
+    if(!ok) return;
+    var data = loadManifest();
+    var t = todayStr();
+    data.rehearsal = (data.rehearsal || []).filter(function(x){ return x.date !== t; });
+    saveManifest(data);
+    renderManifest();
+    toast("已清除今日排练");
+  });
+}
+function clearGratitudeToday(){
+  showConfirm("清除今天的感恩日记？清除后今天可重新生成。").then(function(ok){
+    if(!ok) return;
+    var data = loadManifest();
+    var t = todayStr();
+    data.gratitude = (data.gratitude || []).filter(function(x){ return x.date !== t; });
+    saveManifest(data);
+    renderManifest();
+    toast("已清除今日日记");
+  });
+}
+
+
 
 /* ---------- 频率打卡（网格 + 最近 10 周热力图） ---------- */
 function renderFreq(data){
