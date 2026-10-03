@@ -7213,6 +7213,11 @@ function loadBooks(){
   if(typeof LIB_DEFAULTS === "undefined"){ LIB_DEFAULTS = {books:[], streak:{date:"", count:0}}; }
   try{
     var d = JSON.parse(localStorage.getItem(LIB_KEY));
+    if(Array.isArray(d)){ d = {books:d, streak:{date:"",count:0}}; try{ localStorage.setItem(LIB_KEY, JSON.stringify(d)); }catch(_e0){} }
+    else if(d && !Array.isArray(d.books)){
+      var _found=null; for(var _kk in d){ if(Array.isArray(d[_kk]) && d[_kk].length && d[_kk][0] && typeof d[_kk][0]==="object"){ _found=d[_kk]; break; } }
+      if(_found){ d.books=_found; try{ localStorage.setItem(LIB_KEY, JSON.stringify(d)); }catch(_e1){} }
+    }
     if(!d) return JSON.parse(JSON.stringify(LIB_DEFAULTS));
     for(var k in LIB_DEFAULTS){ if(d[k]===undefined) d[k]=LIB_DEFAULTS[k]; }
     return d;
