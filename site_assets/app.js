@@ -1078,6 +1078,7 @@ function generateMoneyReply(msg, data){
 
 /* ========== 吃饭健康模块 ========== */
 var HEALTH_KEY = "weh_health_data_v1";
+var SELFLOG_KEY = "weh_selflog_data_v1";
 var HEALTH_DEFAULTS = {drinkBudget:100, drinkGoal:7, records:[], chatHistory:[]};
 var DRINKS = [
   {name:"咖啡", icon:"☕", amount:18},
@@ -4979,6 +4980,7 @@ function resetAllData(){
       localStorage.removeItem(SETTINGS_KEY);
       localStorage.removeItem(JOB_OVERRIDE_KEY);
       localStorage.removeItem(DECISION_LIVE_KEY);
+      localStorage.removeItem(SELFLOG_KEY);
       clearSyncBase(); // 重置全部属「整段清掉」，不作为删除判定依据，避免同步时误删另一台设备的数据
       markLocalChange();
   toast("已重置全部数据，页面即将刷新");
@@ -5373,7 +5375,8 @@ var TITLES = {
   baichuan:"📚 灵犀智库", career:"💼 SCM Career", cet6:"📖 CET-6备战", sop:"🛠️ 工作SOP",
   daily:"📅 日计划台", todo:"✅ 待办清单", settings:"⚙️ 设置", library:"📖 读书学习台", manifest:"🌟 显化成长台",
   jobs:"🐾 岗位看板", companies:"🐈 目标公司池", timeline:"😺 每日日报",
-  resume:"📄 简历库", knowledge:"📚 知识库"
+  resume:"📄 简历库", knowledge:"📚 知识库",
+  selflog:"💗 身心小记"
 };
 var _currentView="home";
 function go(view){
@@ -5399,6 +5402,7 @@ function go(view){
   updateBackBtn();
   window.scrollTo({top:0});
   if(view === "library"){ try{ renderBooks(); }catch(e){} }
+  if(view === "selflog"){ try{ renderSelfLog(); }catch(e){} }
 }
 function updateBackBtn(){
   var backBtn = document.getElementById("backBtn");
@@ -5473,6 +5477,9 @@ var FREQ_DEFAULTS = [
     }
     if(document.getElementById("healthSpent")){
       renderHealth();
+    }
+    if(document.getElementById("selflogForm")){
+      renderSelfLog();
     }
     if(document.getElementById("decChatMessages")){
       initDecision();
@@ -8820,3 +8827,134 @@ function handleLocalBookFile(file){
   var pv=document.getElementById("readerPrev"); if(pv) pv.addEventListener("click",epubPrev);
   var nx=document.getElementById("readerNext"); if(nx) nx.addEventListener("click",epubNext);
 })();
+
+
+/* ========== 💗 身心小记（仅本机，不进云同步）========== */
+var _slDraft = {sleep:0, energy:0, mood:0, period:"none"};
+function loadSelfLog(){
+  try{
+    var d = JSON.parse(localStorage.getItem(SELFLOG_KEY));
+    if(!d) return {entries:[]};
+    if(!d.entries) d.entries = [];
+    return d;
+  }catch(e){ return {entries:[]}; }
+}
+function saveSelfLog(data){ localStorage.setItem(SELFLOG_KEY, JSON.stringify(data)); }
+function slToday(){ var t=new Date(); return t.getFullYear()+"-"+String(t.getMonth()+1).padStart(2,"0")+"-"+String(t.getDate()).padStart(2,"0"); }
+function renderSelfLog(){
+  var form = document.getElementById("selflogForm"); if(!form) return;
+  var data = loadSelfLog();
+  var t = slToday();
+  var e = (data.entries||[]).find(function(x){ return x.date===t; });
+  if(e){ _slDraft = {sleep:e.sleep||0, energy:e.energy||0, mood:e.mood||0, period:e.period||"none"}; }
+  else { _slDraft = {sleep:0, energy:0, mood:0, period:"none"}; }
+  buildScore("slSleep","sleep");
+  buildScore("slEnergy","energy");
+  buildScore("slMood","mood");
+  buildPeriod("slPeriod");
+  document.getElementById("slExercise").value = e ? (e.exercise||"") : "";
+  document.getElementById("slNote").value = e ? (e.note||"") : "";
+  var list = document.getElementById("selflogList");
+  var c = document.getElementById("selflogCount");
+  var arr = (data.entries||[]).slice().sort(function(a,b){ return String(b.date).localeCompare(String(a.date)); });
+  if(c) c.textContent = arr.length ? arr.length+"条" : "";
+  if(!arr.length){ list.innerHTML = '<div class="ev-empty">还没有记录，写下今天第一条吧～</div>'; return; }
+  list.innerHTML = arr.slice(0,30).map(function(x){
+    var sc = "睡"+(x.sleep||"-")+" 精"+(x.energy||"-")+" 绪"+(x.mood||"-");
+    var pc = x.period && x.period!=="none" ? (" · "+({"none":"","premen":"经前","men":"经期","postmen":"经后"}[x.period]||"")) : "";
+    var ex = x.exercise ? (" · 动:"+esc(x.exercise)) : "";
+    var note = x.note ? esc(x.note) : '<span style="color:var(--muted)">（无文字）</span>';
+    var saved = x.savedInspire ? ' · <span style="color:#1D9E75">已存灵感</span>' : '';
+    return '<div class="ev-item"><span class="ev-date">'+esc(x.date)+'</span>'
+      + '<div class="ev-body"><div class="ev-t">'+sc+pc+ex+saved+'</div><div class="ev-s">'+note+'</div></div>'
+      + '<button class="ev-x" title="存原话到灵感库" onclick="saveSelfLogToInspire('+x.id+')">📚</button></div>';
+  }).join("");
+}
+function buildScore(elId, field){
+  var box = document.getElementById(elId); if(!box) return;
+  var cur = _slDraft[field]||0;
+  box.innerHTML = [1,2,3,4,5].map(function(n){
+    return '<button type="button" class="sl-btn'+(n===cur?' on':'')+'" onclick="setSelfLogScore('+field+','+n+')">'+n+'</button>';
+  }).join("");
+}
+function setSelfLogScore(field, n){
+  _slDraft[field] = n;
+  buildScore({sleep:"slSleep",energy:"slEnergy",mood:"slMood"}[field], field);
+}
+function buildPeriod(elId){
+  var box = document.getElementById(elId); if(!box) return;
+  var val = _slDraft.period||"none";
+  var opts = [["none","无"],["premen","经前"],["men","经期"],["postmen","经后"]];
+  box.innerHTML = opts.map(function(o){
+    return '<button type="button" class="sl-btn'+(o[0]===val?' on':'')+'" onclick="setSelfLogPeriod('+o[0]+')">'+o[1]+'</button>';
+  }).join("");
+}
+function setSelfLogPeriod(v){ _slDraft.period = v; buildPeriod("slPeriod"); }
+function saveSelfLogEntry(){
+  var data = loadSelfLog();
+  var t = slToday();
+  var entry = { id:"sl_"+t, date:t,
+    sleep:_slDraft.sleep||0, energy:_slDraft.energy||0, mood:_slDraft.mood||0,
+    period:_slDraft.period||"none",
+    exercise:document.getElementById("slExercise").value.trim(),
+    note:document.getElementById("slNote").value.trim() };
+  var arr = data.entries||[];
+  var idx = -1;
+  for(var i=0;i<arr.length;i++){ if(arr[i].date===t){ idx=i; break; } }
+  if(idx>=0) arr[idx]=entry; else arr.push(entry);
+  data.entries = arr;
+  saveSelfLog(data);
+  renderSelfLog();
+  toast("已保存今日身心小记 💗");
+}
+function saveSelfLogToInspire(id){
+  var data = loadSelfLog();
+  var entry = (data.entries||[]).find(function(x){ return x.id===id; });
+  if(!entry) return;
+  var text = (entry.note||"").trim();
+  if(!text){ toast("这条没有写文字，没法存原话"); return; }
+  if(entry.savedInspire){ toast("这条已经存过灵感啦"); return; }
+  var insp = loadInspire();
+  if(insp.records.some(function(r){ return r.id==="sl_"+id; })){ toast("这条已经存过灵感啦"); return; }
+  var rec = { id:"sl_"+id, content:text, date:entry.date, time:"", status:"recorded",
+    tags:["身心小记"], fromSelfLog:true,
+    aiExtension:{source:"none", questions:[], directions:[], judgment:"", related:""} };
+  insp.records.push(rec);
+  saveInspire(insp);
+  rec.kb = { at:Date.now(), variant:"none", md: inspireToMarkdown(rec, {withExt:false}) };
+  saveInspire(insp);
+  entry.savedInspire = true;
+  saveSelfLog(data);
+  renderSelfLog();
+  toast("已存为灵感并标记入库，同步到云端后可在电脑端「拉取灵感」归档到 00-灵感库");
+  kbPushToCloud();
+}
+function sendSelfLogChat(){
+  var c = loadAIConfig();
+  if(!(c && c.key && c.base && c.model)){ toast("请先在设置里配置 AI"); return; }
+  var input = document.getElementById("selflogChatInput");
+  var q = (input.value||"").trim(); if(!q) return;
+  input.value = "";
+  var box = document.getElementById("selflogChat");
+  box.innerHTML += '<div class="m-msg user">'+esc(q)+'</div>';
+  var data = loadSelfLog();
+  var recent = (data.entries||[]).slice().sort(function(a,b){ return String(b.date).localeCompare(String(a.date)); }).slice(0,7).reverse();
+  var pmap = {none:"",premen:"经前",men:"经期",postmen:"经后"};
+  var ctx = recent.map(function(x){
+    return x.date+": 睡"+(x.sleep||"-")+" 精"+(x.energy||"-")+" 绪"+(x.mood||"-")
+      + (x.period&&x.period!=="none"?(" "+pmap[x.period]):"")
+      + (x.exercise?(" 动:"+x.exercise):"") + (x.note?(" 记:"+x.note):"");
+  }).join("\n");
+  var sys = "你是温柔的生活观察员，帮助用户通过每天的身心记录更好地认识自己。用户会给你最近几天的记录（睡眠/精力/情绪评分、生理期、运动、自由笔记），请用一句中文给出今天或近期的温和提醒或观察。注意：你不是医生，任何涉及健康的内容都要明确标注『仅作参考，非医疗建议』，不替代专业意见。不要说教，像朋友一样。";
+  var user = "我最近几天的记录：\n" + (ctx||"（暂无记录）") + "\n\n我的提问：" + q;
+  box.innerHTML += '<div class="m-msg ai" id="slThinking">思考中…</div>';
+  aiChat(c, [{role:"system",content:sys},{role:"user",content:user}], 30).then(function(res){
+    var el = document.getElementById("slThinking"); if(el) el.remove();
+    var text = (res.content||"").replace(/^```[a-zA-Z]*/,"").replace(/```$/,"").replace(/^\s+|\s+$/g,"");
+    box.innerHTML += '<div class="m-msg ai">'+esc(text)+'</div>';
+    box.scrollTop = box.scrollHeight;
+  }).catch(function(err){
+    var el = document.getElementById("slThinking"); if(el) el.remove();
+    box.innerHTML += '<div class="m-msg ai" style="color:#e74c3c">出错了：'+esc(err.message||"")+'</div>';
+  });
+}

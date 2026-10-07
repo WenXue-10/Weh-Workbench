@@ -2114,3 +2114,18 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
 .reader-body{ flex:1; overflow:hidden; position:relative; background:#fff; }
 .reader-mount{ width:100%; height:100%; overflow:auto; }
 .reader-pdf{ width:100%; height:100%; border:none; }
+
+
+/* ===== 💗 身心小记 ===== */
+.sl-notice{font-size:12px;color:var(--muted,#8a7f8c);background:#f7f3f8;border:1px solid #e9e2ee;border-radius:12px;padding:8px 14px;margin-bottom:14px}
+.sl-row{display:flex;align-items:center;gap:12px;margin:10px 0}
+.sl-row label{width:54px;font-size:13px;color:var(--text,#443d49);flex:none}
+.sl-row-col{flex-direction:column;align-items:flex-start}
+.sl-row-col label{margin-bottom:4px}
+.sl-score,.sl-period{display:flex;gap:6px;flex-wrap:wrap}
+.sl-btn{width:34px;height:34px;border-radius:8px;border:1px solid #e3dce8;background:#fff;color:#5b5460;font-size:14px;cursor:pointer;transition:.15s}
+.sl-btn:hover{border-color:#c9a9d6}
+.sl-btn.on{background:linear-gradient(135deg,#f4a6c0,#b48ed9);color:#fff;border-color:transparent}
+.sl-period .sl-btn{width:auto;padding:0 14px}
+.sl-input,.sl-textarea{width:100%;border:1px solid #e3dce8;border-radius:8px;padding:8px 10px;font-size:13px;font-family:inherit;color:#443d49}
+.sl-textarea{resize:vertical}
