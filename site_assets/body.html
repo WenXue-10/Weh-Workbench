@@ -3844,6 +3844,7 @@
       <!-- 💗 身心小记 -->
       <section id="module-selflog" class="view">
         <div class="sl-notice">💗 身心小记 · 已开启云同步（含睡眠/情绪等，多设备共享）</div>
+        <div class="sl-alert" id="slAlert" style="display:none"></div>
         <div class="money-layout">
           <div class="money-left">
             <div class="card">
@@ -3915,6 +3916,17 @@
               <div class="m-chat-input">
                 <input type="text" id="selflogChatInput" placeholder="问AI，比如：我最近状态怎么样？" onkeydown="if(event.key==='Enter')sendSelfLogChat()">
                 <button onclick="sendSelfLogChat()">发送</button>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-head">📊 周期复盘 <small>AI 帮你回看近况，零填写</small></div>
+              <div class="r-ai-row">
+                <button class="ai-truth-btn" onclick="generateSelfLogReview('week')">📅 周报</button>
+                <button class="ai-truth-btn ghost" onclick="generateSelfLogReview('month')">🗓️ 月报</button>
+              </div>
+              <div class="r-ai-box" id="selfReviewBox"><span class="ev-empty">点「周报/月报」基于你已有的记录生成一段回顾。</span></div>
+              <div class="r-ai-row" id="selfReviewSaveRow" style="display:none">
+                <button class="ai-truth-btn ghost" onclick="saveSelfReviewToInspire()">📚 存为灵感</button>
               </div>
             </div>
           </div>
@@ -4486,6 +4498,19 @@
 
                 </div>
 
+                <div class="setting-subtitle">💧 喝水提醒</div>
+                <div class="setting-row">
+                  <div class="setting-label">开启定时提醒<small>到点弹一次，不记录杯数</small></div>
+                  <div class="setting-control">
+                    <input type="checkbox" id="prefWaterReminder" onchange="savePreference()" style="width:16px;height:16px;accent-color:var(--pink-deep)">
+                  </div>
+                </div>
+                <div class="setting-row">
+                  <div class="setting-label">提醒间隔（分钟）</div>
+                  <div class="setting-control">
+                    <input type="number" id="prefWaterInterval" value="120" min="15" step="15" onchange="savePreference()">
+                  </div>
+                </div>
                 <div class="setting-subtitle">📅 日计划台</div>
 
                 <div class="setting-row">

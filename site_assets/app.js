@@ -5040,6 +5040,8 @@ function savePreference(){
   s.preferences.healthBudget = parseInt(document.getElementById("prefHealthBudget").value) || 100;
   s.preferences.healthGoal = parseInt(document.getElementById("prefHealthGoal").value) || 7;
   s.preferences.dailyStart = parseInt(document.getElementById("prefDailyStart").value) || 9;
+  s.preferences.waterReminder = !!(document.getElementById("prefWaterReminder") && document.getElementById("prefWaterReminder").checked);
+  s.preferences.waterInterval = parseInt(document.getElementById("prefWaterInterval").value) || 120;
   saveSettings(s);
   applyPrefsToModules();
   toast("偏好已保存并同步到模块");
@@ -5074,8 +5076,11 @@ function loadPreference(){
   if(s.glassOpacity) document.documentElement.style.setProperty("--glass-opacity", s.glassOpacity/100);
   if(s.fontSize && s.fontSize !== "medium"){
     var sizes = {small:"13px", medium:"14px", large:"15px"};
-    document.documentElement.style.fontSize = sizes[s.fontSize] || "14px";
+    document.documentElement.fontSize = sizes[s.fontSize] || "14px";
   }
+  if(document.getElementById("prefWaterReminder")) document.getElementById("prefWaterReminder").checked = !!(p && p.waterReminder);
+  if(document.getElementById("prefWaterInterval")) document.getElementById("prefWaterInterval").value = (p && p.waterInterval) || 120;
+  setupWaterReminder();
 }
 
 function initSettings(){
@@ -8889,6 +8894,7 @@ function renderSelfLog(){
   renderSelfCharts();
   renderTodayInsight();
   renderSelfStreak();
+  checkSelfLogAlerts();
 }
 
 function renderRecipes(){
@@ -9169,4 +9175,97 @@ function recommendRecipe(again){
   }).catch(function(err){
     box.innerHTML='<div class="ev-empty" style="color:#e74c3c">出错了：'+esc(err.message||"")+'</div>';
   });
+}
+/* ========== 身心小记 · 周期复盘 / 智能预警 / 喝水提醒 ========== */
+var _lastSelfReview = "";
+var _waterTimer = null;
+
+/* 定时喝水提醒（时间触发，不记录杯数） */
+function setupWaterReminder(){
+  if(_waterTimer){ clearInterval(_waterTimer); _waterTimer = null; }
+  try{
+    var s = loadSettings();
+    var p = s.preferences || {};
+    if(!p.waterReminder) return;
+    var mins = (p.waterInterval && p.waterInterval >= 15) ? p.waterInterval : 120;
+    _waterTimer = setInterval(function(){
+      toast("💧 该喝水啦～记得补点水");
+    }, mins * 60 * 1000);
+  }catch(e){}
+}
+
+/* 智能预警（数据触发）：扫描最近 7 天，连续偏低给温和提醒 */
+function checkSelfLogAlerts(){
+  var box = document.getElementById("slAlert"); if(!box) return;
+  var data = loadSelfLog();
+  var arr = (data.entries||[]).slice().sort(function(a,b){ return String(a.date).localeCompare(String(b.date)); });
+  var seq = _slDateSeq(7);
+  var recent = [];
+  seq.forEach(function(ds){ for(var k=0;k<arr.length;k++){ if(arr[k].date===ds){ recent.push(arr[k]); break; } } });
+  if(recent.length < 3){ box.style.display="none"; return; }
+  var maxShort=0, curShort=0, maxLow=0, curLow=0;
+  recent.forEach(function(e){
+    var shortSleep = (e.sleepHours != null && e.sleepHours < 7);
+    var lowMood = (e.mood != null && e.mood > 0 && e.mood <= 2);
+    curShort = shortSleep ? curShort+1 : 0; if(curShort>maxShort) maxShort=curShort;
+    curLow = lowMood ? curLow+1 : 0; if(curLow>maxLow) maxLow=curLow;
+  });
+  var msgs = [];
+  if(maxShort >= 3) msgs.push("最近 "+maxShort+" 天睡眠偏短，今晚早点休息好不好？🌙");
+  if(maxLow >= 3) msgs.push("最近 "+maxLow+" 天情绪有点低，记得对自己温柔一点 💗");
+  if(msgs.length){ box.innerHTML = "⚠️ " + msgs.join("　｜　"); box.style.display = "block"; }
+  else { box.style.display = "none"; }
+}
+
+/* 周期复盘：基于已有记录，AI 生成周/月回顾（零新增填写） */
+function generateSelfLogReview(span){
+  var c = loadAIConfig();
+  if(!(c && c.key && c.base && c.model)){ toast("请先在设置里配置 AI"); return; }
+  var box = document.getElementById("selfReviewBox"); if(!box) return;
+  var saveRow = document.getElementById("selfReviewSaveRow");
+  var days = span === "month" ? 30 : 7;
+  box.innerHTML = '<div class="ev-empty">🤖 正在生成'+(span==="month"?"月报":"周报")+'…</div>';
+  _lastSelfReview = "";
+  if(saveRow) saveRow.style.display = "none";
+  var data = loadSelfLog();
+  var arr = (data.entries||[]).slice().sort(function(a,b){ return String(a.date).localeCompare(String(b.date)); });
+  var seq = _slDateSeq(days);
+  var recent = [];
+  seq.forEach(function(ds){ for(var k=0;k<arr.length;k++){ if(arr[k].date===ds){ recent.push(arr[k]); break; } } });
+  if(!recent.length){ box.innerHTML = '<div class="ev-empty">最近还没记录，先去记几天吧～</div>'; return; }
+  var pmap = {none:"",premen:"经前",men:"经期",postmen:"经后"};
+  var ctx = recent.map(function(x){
+    return x.date+": 睡"+(x.sleep||"-")+((x.sleepHours!=null&&x.sleepHours!=="")?(" "+x.sleepHours+"h"):"")+" 精"+(x.energy||"-")+" 绪"+(x.mood||"-")
+      + (x.sleepQuality?(" 睡质"+x.sleepQuality):"")
+      + (x.period&&x.period!=="none"?(" "+pmap[x.period]):"")
+      + ((x.exerciseType||x.exercise)?(" 动:"+(x.exerciseType||x.exercise)+((x.exerciseMinutes!=null&&x.exerciseMinutes!=="")?(" "+x.exerciseMinutes+"分"):"")):"")
+      + (x.note?(" 记:"+x.note):"");
+  }).join("\n");
+  var sys = "你是温柔的生活观察员。根据用户在"+(span==="month"?"过去一个月":"过去一周")+"的记录（睡眠/精力/情绪评分、生理期、运动、自由笔记），用 2-4 句中文做一段温和的回顾总结，点出 1-2 个趋势或亮点，并给一句可执行的小建议。非医疗建议，像朋友一样，不要说教。";
+  var user = "我的记录：\n" + ctx;
+  aiChat(c, [{role:"system",content:sys},{role:"user",content:user}], 40).then(function(res){
+    var txt = (res.content||"").replace(/^```[a-zA-Z]*/,"").replace(/```$/,"").replace(/^\s+|\s+$/g,"");
+    if(!txt){ box.innerHTML = '<div class="ev-empty">生成为空，稍后再试。</div>'; return; }
+    _lastSelfReview = txt;
+    box.innerHTML = '<div class="r-rec">'+esc(txt).replace(/\n/g,"<br>")+'</div>';
+    if(saveRow) saveRow.style.display = "flex";
+  }).catch(function(err){
+    box.innerHTML = '<div class="ev-empty" style="color:#e74c3c">出错了：'+esc(err.message||"")+'</div>';
+  });
+}
+
+/* 把生成的复盘存为灵感（复用灵感库通道） */
+function saveSelfReviewToInspire(){
+  if(!_lastSelfReview){ toast("还没有可保存的复盘"); return; }
+  var insp = loadInspire();
+  var id = "sl_review_"+Date.now();
+  var rec = { id:id, content:_lastSelfReview, date:slToday(), time:"", status:"recorded",
+    tags:["身心小记","周期复盘"], fromSelfLog:true,
+    aiExtension:{source:"none", questions:[], directions:[], judgment:"", related:""} };
+  insp.records.push(rec);
+  saveInspire(insp);
+  rec.kb = { at:Date.now(), variant:"none", md: inspireToMarkdown(rec, {withExt:false}) };
+  saveInspire(insp);
+  kbPushToCloud();
+  toast("已存为灵感并标记入库，同步后可在电脑端「拉取灵感」归档到 00-灵感库");
 }
