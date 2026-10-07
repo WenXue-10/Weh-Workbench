@@ -3847,7 +3847,7 @@
         <div class="money-layout">
           <div class="money-left">
             <div class="card">
-              <div class="card-head">📝 今日记录 <small>每天一条，想写啥写啥</small></div>
+              <div class="card-head">📝 今日记录 <small>每天一条，想写啥写啥</small><span class="sl-streak" id="selfStreak"></span></div>
               <form id="selflogForm" onsubmit="return false">
                 <div class="sl-row"><label>睡眠</label><div class="sl-score" id="slSleep"></div></div>
                 <div class="sl-row"><label>精力</label><div class="sl-score" id="slEnergy"></div></div>
@@ -3862,25 +3862,53 @@
               </form>
             </div>
             <div class="card">
+              <div class="card-head">📊 本周可视化 <small>睡眠 / 精力 / 情绪趋势</small></div>
+              <div class="sl-overview" id="slOverview"></div>
+              <div class="sl-charts">
+                <div class="sl-chart"><div class="sl-chart-t">😊 情绪趋势</div><canvas id="chartMood" height="96"></canvas></div>
+                <div class="sl-chart"><div class="sl-chart-t">😴 睡眠时长</div><canvas id="chartSleep" height="96"></canvas></div>
+                <div class="sl-chart"><div class="sl-chart-t">🏃 运动时长</div><canvas id="chartExercise" height="96"></canvas></div>
+                <div class="sl-chart"><div class="sl-chart-t">🌸 生理周期</div><canvas id="chartPeriod" height="34"></canvas></div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-head">💡 今日 AI 洞察 <small>保存后自动生成</small></div>
+              <div class="sl-insight" id="todayInsight">配置 AI Key 后，保存今日记录会自动生成一句话洞察。</div>
+            </div>
+            <div class="card">
               <div class="card-head">📜 近况 <span class="m-count" id="selflogCount"></span></div>
               <div class="expense-list" id="selflogList"></div>
             </div>
-            <div class="card">
-              <div class="card-head">🍱 参考食谱 <small>自己维护，可空</small></div>
-              <div class="r-form">
-                <input type="text" id="rName" class="sl-input" placeholder="菜名，如：番茄炒蛋">
-                <select id="rMeal" class="sl-input">
-                  <option value="早">早</option><option value="午">午</option><option value="晚">晚</option><option value="加餐">加餐</option>
-                </select>
-                <input type="text" id="rIngredients" class="sl-input" placeholder="食材，可空">
-                <textarea id="rSteps" class="sl-textarea" rows="2" placeholder="做法，可空"></textarea>
-                <input type="text" id="rNote" class="sl-input" placeholder="备注，可空">
-                <button class="ai-truth-btn" onclick="addRecipe()">➕ 添加食谱</button>
-              </div>
-              <div class="expense-list" id="recipeList"></div>
-            </div>
           </div>
           <div class="money-right">
+            <div class="card">
+              <div class="card-head">🍱 食谱推荐 <small>按场景与目标，AI 给参考</small></div>
+              <div class="r-ai">
+                <div class="r-ai-row">
+                  <select id="recipeScene" class="sl-input"><option value="外卖">🛵 点外卖</option><option value="自己做">🍳 自己做</option></select>
+                  <select id="recipeGoal" class="sl-input"><option value="减脂">减脂</option><option value="维持">维持</option><option value="增肌">增肌</option><option value="生活化">生活化</option></select>
+                </div>
+                <div class="r-ai-row">
+                  <button class="ai-truth-btn ghost" id="recipeLocBtn" onclick="toggleRecipeLoc()">📍 用我的位置</button>
+                  <button class="ai-truth-btn" onclick="recommendRecipe()">🤖 给我推荐</button>
+                  <button class="ai-truth-btn ghost" onclick="recommendRecipe(true)">🔄 换一批</button>
+                </div>
+                <div class="r-ai-loc" id="recipeLocState"></div>
+                <div class="r-ai-box" id="recipeRecBox"><span class="ev-empty">选好场景和目标，点「给我推荐」。</span></div>
+              </div>
+              <details class="r-manual">
+                <summary>➕ 我的常食谱（手动添加，可空）</summary>
+                <div class="r-form">
+                  <input type="text" id="rName" class="sl-input" placeholder="菜名，如：番茄炒蛋">
+                  <select id="rMeal" class="sl-input"><option value="早">早</option><option value="午">午</option><option value="晚">晚</option><option value="加餐">加餐</option></select>
+                  <input type="text" id="rIngredients" class="sl-input" placeholder="食材，可空">
+                  <textarea id="rSteps" class="sl-textarea" rows="2" placeholder="做法，可空"></textarea>
+                  <input type="text" id="rNote" class="sl-input" placeholder="备注，可空">
+                  <button class="ai-truth-btn" onclick="addRecipe()">添加</button>
+                </div>
+                <div class="expense-list" id="recipeList"></div>
+              </details>
+            </div>
             <div class="card">
               <div class="card-head">💬 AI生活顾问 <small>仅作参考，非医疗建议</small></div>
               <div class="m-chat-messages" id="selflogChat"></div>
@@ -3892,7 +3920,6 @@
           </div>
         </div>
       </section>
-
       <!-- ⚙️ 设置 -->
 
       <section id="module-settings" class="view">

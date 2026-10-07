@@ -4354,12 +4354,13 @@ function _trimSlash(s){
 
 /* 统一的对话调用：兼容 OpenAI 格式的 /chat/completions
    返回 { content, reasoning }；开启深度思考时自动放宽超时与输出额度 */
-function aiChat(cfg, messages, timeoutSec){
+function aiChat(cfg, messages, timeoutSec, options){
   var url = _trimSlash(cfg.base) + "/chat/completions";
   var pv = AI_PROVIDERS[cfg.provider] || {};
   var supportThink = !!pv.thinking;                  // 该服务商是否支持「参数切思考」
   var thinkOn = !!(supportThink && cfg.thinking);
   var payload = { model: cfg.model, messages: messages, temperature: 0.85, max_tokens: thinkOn ? 4096 : 800 };
+  if(options && options.search){ payload.enable_search = true; }
   if(supportThink){
     /* 必须显式声明：DeepSeek 的思考模式默认开启，不写 disabled 就等于一直在思考 */
     payload.thinking = { type: thinkOn ? "enabled" : "disabled" };
@@ -8885,6 +8886,9 @@ function renderSelfLog(){
       + '<button class="ev-x" title="存原话到灵感库" onclick="saveSelfLogToInspire('+x.id+')">📚</button></div>';
   }).join("");
   renderRecipes();
+  renderSelfCharts();
+  renderTodayInsight();
+  renderSelfStreak();
 }
 
 function renderRecipes(){
@@ -8963,6 +8967,7 @@ function saveSelfLogEntry(){
   data.entries = arr;
   saveSelfLog(data);
   renderSelfLog();
+  autoGenInsight(t, entry);
   toast("已保存今日身心小记 💗");
 }
 function saveSelfLogToInspire(id){
@@ -9016,5 +9021,152 @@ function sendSelfLogChat(){
   }).catch(function(err){
     var el = document.getElementById("slThinking"); if(el) el.remove();
     box.innerHTML += '<div class="m-msg ai" style="color:#e74c3c">出错了：'+esc(err.message||"")+'</div>';
+  });
+}
+
+/* ========== 身心小记 · 可视化 / 洞察 / 食谱 AI 推荐 ========== */
+function computeStreak(){
+  var data = loadSelfLog();
+  var arr = (data.entries||[]).map(function(e){ return e.date; });
+  var set = {}; arr.forEach(function(x){ set[x]=1; });
+  var n = 0; var dt = new Date();
+  for(;;){
+    var ds = dt.getFullYear()+"-"+String(dt.getMonth()+1).padStart(2,"0")+"-"+String(dt.getDate()).padStart(2,"0");
+    if(set[ds]){ n++; dt.setDate(dt.getDate()-1); } else break;
+  }
+  return n;
+}
+function renderSelfStreak(){
+  var el = document.getElementById("selfStreak"); if(!el) return;
+  var n = computeStreak();
+  el.textContent = n>0 ? ("🔥 连续 "+n+" 天") : "";
+}
+function _slDateSeq(days){
+  var seq=[]; var today=new Date();
+  for(var i=days-1;i>=0;i--){ var d2=new Date(today); d2.setDate(d2.getDate()-i);
+    seq.push(d2.getFullYear()+"-"+String(d2.getMonth()+1).padStart(2,"0")+"-"+String(d2.getDate()).padStart(2,"0")); }
+  return seq;
+}
+function drawSLLine(cvId, vals, color, maxV){
+  var cv=document.getElementById(cvId); if(!cv) return;
+  var dpr=window.devicePixelRatio||1;
+  var w=cv.clientWidth||300, h=cv.height||96; cv.width=w*dpr; cv.height=h*dpr;
+  var ctx=cv.getContext("2d"); ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,w,h);
+  var pad=8;
+  if(!vals.length||vals.every(function(v){return v==null;})){ ctx.fillStyle="#b9aeb6"; ctx.font="12px sans-serif"; ctx.fillText("暂无数据",pad,h/2); return; }
+  var n=vals.length, stepX=(w-pad*2)/Math.max(n-1,1);
+  var hi=maxV||5, lo=0;
+  function y(v){ return h-pad-((v-lo)/(hi-lo))*(h-pad*2); }
+  ctx.strokeStyle="#ece6ef"; ctx.lineWidth=1;
+  for(var g=0;g<=2;g++){ var gy=pad+(h-pad*2)*g/2; ctx.beginPath(); ctx.moveTo(pad,gy); ctx.lineTo(w-pad,gy); ctx.stroke(); }
+  ctx.strokeStyle=color; ctx.lineWidth=2; ctx.beginPath(); var started=false;
+  for(var i=0;i<n;i++){ var v=vals[i]; if(v==null){ started=false; continue; } var x=pad+stepX*i, yy=y(v); if(!started){ ctx.moveTo(x,yy); started=true; } else ctx.lineTo(x,yy); }
+  ctx.stroke();
+  ctx.fillStyle=color;
+  for(var i=0;i<n;i++){ var v=vals[i]; if(v==null) continue; var x=pad+stepX*i; ctx.beginPath(); ctx.arc(x,y(v),2.6,0,Math.PI*2); ctx.fill(); }
+}
+function drawSLBars(cvId, vals, color){
+  var cv=document.getElementById(cvId); if(!cv) return;
+  var dpr=window.devicePixelRatio||1;
+  var w=cv.clientWidth||300, h=cv.height||96; cv.width=w*dpr; cv.height=h*dpr;
+  var ctx=cv.getContext("2d"); ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,w,h);
+  var pad=8;
+  var nums=vals.filter(function(x){return x!=null;});
+  if(!nums.length){ ctx.fillStyle="#b9aeb6"; ctx.font="12px sans-serif"; ctx.fillText("暂无数据",pad,h/2); return; }
+  var maxV=Math.max.apply(null, nums.concat([10]));
+  var n=vals.length, stepX=(w-pad*2)/n, bw=Math.min(14, stepX*0.6);
+  ctx.fillStyle=color;
+  for(var i=0;i<n;i++){ var v=vals[i]; if(v==null) continue; var bh=(v/maxV)*(h-pad*2); var x=pad+stepX*i+(stepX-bw)/2; ctx.fillRect(x, h-pad-bh, bw, bh); }
+}
+function drawSLPeriod(cvId, codes){
+  var cv=document.getElementById(cvId); if(!cv) return;
+  var dpr=window.devicePixelRatio||1;
+  var w=cv.clientWidth||300, h=cv.height||34; cv.width=w*dpr; cv.height=h*dpr;
+  var ctx=cv.getContext("2d"); ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,w,h);
+  var pad=2, n=codes.length; if(!n) return;
+  var stepX=(w-pad*2)/n;
+  var map={men:"#e8748a",premen:"#f0b27a",postmen:"#f3c6d4",none:"#e8e2ec"};
+  for(var i=0;i<n;i++){ var c=map[codes[i]]||map.none; ctx.fillStyle=c; ctx.fillRect(pad+stepX*i+0.5, pad, stepX-1, h-pad*2); }
+}
+function renderSelfOverview(lastN){
+  var box=document.getElementById("slOverview"); if(!box) return;
+  if(!lastN.length){ box.innerHTML='<span class="ev-empty">最近 7 天还没有记录</span>'; return; }
+  function avg(f){ var v=lastN.map(f).filter(function(x){return x!=null&&x>0;}); if(!v.length) return "-"; return (v.reduce(function(a,b){return a+b;},0)/v.length).toFixed(1); }
+  box.innerHTML='<div class="sl-ov"><span>😴 睡眠 '+avg(function(e){return e.sleep;})+'</span><span>⚡ 精力 '+avg(function(e){return e.energy;})+'</span><span>😊 情绪 '+avg(function(e){return e.mood;})+'</span></div>';
+}
+function renderSelfCharts(){
+  var data=loadSelfLog();
+  var arr=(data.entries||[]).slice().sort(function(a,b){ return String(a.date).localeCompare(String(b.date)); });
+  var seq=_slDateSeq(14);
+  function find(ds){ for(var k=0;k<arr.length;k++){ if(arr[k].date===ds) return arr[k]; } return null; }
+  var mood=[],sleep=[],exer=[],per=[];
+  seq.forEach(function(ds){ var e=find(ds); mood.push(e?(e.mood||null):null); sleep.push(e&&e.sleepHours!=null?e.sleepHours:null); exer.push(e&&e.exerciseMinutes!=null?e.exerciseMinutes:null); per.push(e?(e.period||"none"):"none"); });
+  drawSLLine("chartMood", mood, "#b48ed9", 5);
+  var sNums=sleep.filter(function(x){return x!=null;}); var sMax=sNums.length?Math.max.apply(null,sNums):8; drawSLLine("chartSleep", sleep, "#6db3c9", Math.max(10, Math.ceil(sMax)));
+  drawSLBars("chartExercise", exer, "#6cc08b");
+  drawSLPeriod("chartPeriod", per);
+  renderSelfOverview(arr.slice(-7));
+}
+function renderTodayInsight(){
+  var el=document.getElementById("todayInsight"); if(!el) return;
+  var data=loadSelfLog(); var t=slToday();
+  var e=(data.entries||[]).find(function(x){ return x.date===t; });
+  if(e && e.todayInsight){ el.textContent="✨ "+e.todayInsight; }
+  else { el.textContent="配置 AI Key 后，保存今日记录会自动生成一句话洞察。"; }
+}
+function autoGenInsight(date, entry){
+  var c=loadAIConfig();
+  if(!(c && c.key && c.base && c.model)) return;
+  var pmap={none:"",premen:"经前",men:"经期",postmen:"经后"};
+  var u=date+": 睡"+(entry.sleep||"-")+((entry.sleepHours!=null)?(" "+entry.sleepHours+"h"):"")+" 精"+(entry.energy||"-")+" 绪"+(entry.mood||"-")
+    +(entry.sleepQuality?(" 睡质"+entry.sleepQuality):"")
+    +(entry.period&&entry.period!=="none"?(" "+pmap[entry.period]):"")
+    +((entry.exerciseType)?(" 动:"+entry.exerciseType+(entry.exerciseMinutes!=null?(" "+entry.exerciseMinutes+"分"):"")):"")
+    +(entry.note?(" 记:"+entry.note):"");
+  var sys="你是温柔的生活观察员。根据用户今天的身心记录，用一句中文（不超过 40 字）给出温和的观察或提醒。非医疗建议，像朋友一样。";
+  aiChat(c, [{role:"system",content:sys},{role:"user",content:u}], 25).then(function(res){
+    var txt=(res.content||"").replace(/^```[a-zA-Z]*/,"").replace(/```$/,"").replace(/^\s+|\s+$/g,"");
+    if(!txt) return;
+    var data=loadSelfLog(); var arr=data.entries||[];
+    for(var i=0;i<arr.length;i++){ if(arr[i].date===date){ arr[i].todayInsight=txt; break; } }
+    data.entries=arr; saveSelfLog(data);
+    var el=document.getElementById("todayInsight"); if(el) el.textContent="✨ "+txt;
+  }).catch(function(){});
+}
+var _recipeLoc=null;
+function toggleRecipeLoc(){
+  if(_recipeLoc){ _recipeLoc=null; var s=document.getElementById("recipeLocState"); if(s) s.textContent=""; var b=document.getElementById("recipeLocBtn"); if(b) b.classList.remove("on"); return; }
+  getMyLocation();
+}
+function getMyLocation(){
+  var b=document.getElementById("recipeLocBtn"), s=document.getElementById("recipeLocState");
+  if(!navigator.geolocation){ if(s) s.textContent="当前浏览器不支持定位"; return; }
+  if(s) s.textContent="📍 定位中…";
+  navigator.geolocation.getCurrentPosition(function(pos){
+    var lat=pos.coords.latitude, lon=pos.coords.longitude;
+    fetch("https://nominatim.openstreetmap.org/reverse?format=json&zoom=10&lat="+lat+"&lon="+lon, {headers:{"Accept":"application/json"}})
+      .then(function(r){ return r.json(); }).then(function(j){
+        var city=(j&&j.address&&(j.address.city||j.address.town||j.address.county||j.address.state))||"";
+        _recipeLoc={city:city, lat:lat, lon:lon};
+        if(s) s.textContent="📍 已定位："+(city||(lat.toFixed(2)+","+lon.toFixed(2)));
+        if(b) b.classList.add("on");
+      }).catch(function(){ _recipeLoc={city:""}; if(s) s.textContent="📍 定位成功，但解析城市失败（仍可用）"; if(b) b.classList.add("on"); });
+  }, function(){ if(s) s.textContent="定位失败，将使用通用推荐"; }, {timeout:8000});
+}
+function recommendRecipe(again){
+  var c=loadAIConfig();
+  if(!(c && c.key && c.base && c.model)){ toast("请先在设置里配置 AI"); return; }
+  var scene=document.getElementById("recipeScene").value;
+  var goal=document.getElementById("recipeGoal").value;
+  var box=document.getElementById("recipeRecBox");
+  box.innerHTML='<div class="ev-empty">🤖 正在生成推荐…</div>';
+  var locTxt=(_recipeLoc&&_recipeLoc.city)?("所在城市："+_recipeLoc.city+"\n"):"";
+  var sys="你是贴心的饮食助手。根据用户选择的【场景】和【目标】"+(scene==="外卖"?"（点外卖）":"（自己做）")+"以及"+(locTxt?"所在城市":"一般情况")+"，给出 3 条具体可执行的饮食参考。每条不超过 70 字。点外卖时给可点的品类+具体菜品示例+注意点；自己做时给食材清单+简易做法。减脂强调低油低糖高蛋白；增肌强调足量蛋白质；维持/生活化就均衡好操作。最后用一句提醒：仅供参考，非专业营养建议。";
+  var user="场景："+scene+"\n目标："+goal+"\n"+(locTxt?locTxt:"")+(again?"\n请换一批不一样的推荐。":"");
+  aiChat(c, [{role:"system",content:sys},{role:"user",content:user}], 40, {search: (scene==="外卖" && !!(_recipeLoc&&_recipeLoc.city))}).then(function(res){
+    var txt=(res.content||"").replace(/^```[a-zA-Z]*/,"").replace(/```$/,"");
+    box.innerHTML='<div class="r-rec">'+esc(txt).replace(/\n/g,"<br>")+'</div>';
+  }).catch(function(err){
+    box.innerHTML='<div class="ev-empty" style="color:#e74c3c">出错了：'+esc(err.message||"")+'</div>';
   });
 }
