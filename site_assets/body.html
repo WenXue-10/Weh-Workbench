@@ -3843,7 +3843,7 @@
 
       <!-- 💗 身心小记 -->
       <section id="module-selflog" class="view">
-        <div class="sl-notice">💗 身心小记 · 数据仅存本机，不进云同步</div>
+        <div class="sl-notice">💗 身心小记 · 已开启云同步（含睡眠/情绪等，多设备共享）</div>
         <div class="money-layout">
           <div class="money-left">
             <div class="card">
@@ -3853,7 +3853,10 @@
                 <div class="sl-row"><label>精力</label><div class="sl-score" id="slEnergy"></div></div>
                 <div class="sl-row"><label>情绪</label><div class="sl-score" id="slMood"></div></div>
                 <div class="sl-row"><label>生理期</label><div class="sl-period" id="slPeriod"></div></div>
-                <div class="sl-row"><label>运动</label><input type="text" id="slExercise" class="sl-input" placeholder="如：跑步30分 / 瑜伽 / 无（可空）"></div>
+                <div class="sl-row"><label>睡眠时长</label><input type="number" id="slSleepHours" class="sl-input" placeholder="小时，如 7.5（可空）" min="0" step="0.5"></div>
+                <div class="sl-row"><label>睡眠质量</label><div class="sl-score" id="slSleepQuality"></div></div>
+                <div class="sl-row"><label>运动类型</label><input type="text" id="slExerciseType" class="sl-input" placeholder="如：跑步 / 瑜伽 / 无（可空）"></div>
+                <div class="sl-row"><label>运动时长</label><input type="number" id="slExerciseMinutes" class="sl-input" placeholder="分钟，如 30（可空）" min="0"></div>
                 <div class="sl-row sl-row-col"><label>今天想说的</label><textarea id="slNote" class="sl-textarea" rows="4" placeholder="今天发生了什么、什么感受，可长可短，不想写就留空"></textarea></div>
                 <button class="ai-truth-btn" onclick="saveSelfLogEntry()">💾 保存今日</button>
               </form>
@@ -3861,6 +3864,20 @@
             <div class="card">
               <div class="card-head">📜 近况 <span class="m-count" id="selflogCount"></span></div>
               <div class="expense-list" id="selflogList"></div>
+            </div>
+            <div class="card">
+              <div class="card-head">🍱 参考食谱 <small>自己维护，可空</small></div>
+              <div class="r-form">
+                <input type="text" id="rName" class="sl-input" placeholder="菜名，如：番茄炒蛋">
+                <select id="rMeal" class="sl-input">
+                  <option value="早">早</option><option value="午">午</option><option value="晚">晚</option><option value="加餐">加餐</option>
+                </select>
+                <input type="text" id="rIngredients" class="sl-input" placeholder="食材，可空">
+                <textarea id="rSteps" class="sl-textarea" rows="2" placeholder="做法，可空"></textarea>
+                <input type="text" id="rNote" class="sl-input" placeholder="备注，可空">
+                <button class="ai-truth-btn" onclick="addRecipe()">➕ 添加食谱</button>
+              </div>
+              <div class="expense-list" id="recipeList"></div>
             </div>
           </div>
           <div class="money-right">

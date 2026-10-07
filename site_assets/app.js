@@ -4056,7 +4056,8 @@ var DATA_KEYS = {
   job: "weh_job_data_v1",
   company: "weh_company_data_v1",
   library: "weh_library_data_v1",
-  manifest: "weh_manifest_data_v1"
+  manifest: "weh_manifest_data_v1",
+  selflog: SELFLOG_KEY
 };
 
 function loadSettings(){
@@ -4567,7 +4568,8 @@ var SYNC_LIST_FIELDS = {
   library: ["books"],
   /* 显化台：只列真·数组字段（按 id 求并集）。对象字段（cheque / freq / freqDone）不能走列表合并，
      否则 _mergeListById 会对 object 调 forEach 抛 TypeError，导致整次同步失败。 */
-  manifest: ["goals", "script", "diary", "gratitude", "translator", "rehearsal", "evidence", "freqCustom"]
+  manifest: ["goals", "script", "diary", "gratitude", "translator", "rehearsal", "evidence", "freqCustom"],
+  selflog: ["entries", "recipes"]
 };
 /* 对象/映射型字段：按键级并集合并 */
 var SYNC_MAP_FIELDS = { manifest: ["freq", "freqDone"] };
@@ -4763,6 +4765,7 @@ function _refreshAfterSync(){
   renderCareerOverview(); }catch(e){}
   try{ if(typeof renderMoney === "function") renderMoney(); }catch(e){}
   try{ if(typeof renderHealth === "function") renderHealth(); }catch(e){}
+  try{ if(typeof renderSelfLog === "function") renderSelfLog(); }catch(e){}
   try{ if(typeof renderInspire === "function") renderInspire(); }catch(e){}
   try{ if(typeof renderTodo === "function") renderTodo(); }catch(e){}
   try{ if(typeof renderDaily === "function") renderDaily(); }catch(e){}
@@ -8830,46 +8833,96 @@ function handleLocalBookFile(file){
 
 
 /* ========== 💗 身心小记（仅本机，不进云同步）========== */
-var _slDraft = {sleep:0, energy:0, mood:0, period:"none"};
+var _slDraft = {sleep:0, energy:0, mood:0, period:"none", sleepHours:"", sleepQuality:0, exerciseType:"", exerciseMinutes:""};
 function loadSelfLog(){
   try{
     var d = JSON.parse(localStorage.getItem(SELFLOG_KEY));
-    if(!d) return {entries:[]};
+    if(!d) return {entries:[], recipes:[]};
     if(!d.entries) d.entries = [];
+    if(!d.recipes) d.recipes = [];
+    d.entries.forEach(function(x){ if(!x.id) x.id = "sl_"+x.date; });
+    d.recipes.forEach(function(x,i){ if(!x.id) x.id = "r_"+Date.now()+"_"+i; });
     return d;
-  }catch(e){ return {entries:[]}; }
+  }catch(e){ return {entries:[], recipes:[]}; }
 }
-function saveSelfLog(data){ localStorage.setItem(SELFLOG_KEY, JSON.stringify(data)); }
+function saveSelfLog(data){ localStorage.setItem(SELFLOG_KEY, JSON.stringify(data)); markLocalChange(); }
 function slToday(){ var t=new Date(); return t.getFullYear()+"-"+String(t.getMonth()+1).padStart(2,"0")+"-"+String(t.getDate()).padStart(2,"0"); }
 function renderSelfLog(){
   var form = document.getElementById("selflogForm"); if(!form) return;
   var data = loadSelfLog();
   var t = slToday();
   var e = (data.entries||[]).find(function(x){ return x.date===t; });
-  if(e){ _slDraft = {sleep:e.sleep||0, energy:e.energy||0, mood:e.mood||0, period:e.period||"none"}; }
-  else { _slDraft = {sleep:0, energy:0, mood:0, period:"none"}; }
+  if(e){
+    _slDraft = {sleep:e.sleep||0, energy:e.energy||0, mood:e.mood||0, period:e.period||"none",
+      sleepHours: (e.sleepHours!=null?e.sleepHours:""), sleepQuality:e.sleepQuality||0,
+      exerciseType: e.exerciseType||e.exercise||"", exerciseMinutes: (e.exerciseMinutes!=null?e.exerciseMinutes:"")};
+  } else {
+    _slDraft = {sleep:0, energy:0, mood:0, period:"none", sleepHours:"", sleepQuality:0, exerciseType:"", exerciseMinutes:""};
+  }
   buildScore("slSleep","sleep");
   buildScore("slEnergy","energy");
   buildScore("slMood","mood");
+  buildScore("slSleepQuality","sleepQuality");
   buildPeriod("slPeriod");
-  document.getElementById("slExercise").value = e ? (e.exercise||"") : "";
+  document.getElementById("slSleepHours").value = _slDraft.sleepHours;
+  document.getElementById("slExerciseType").value = _slDraft.exerciseType;
+  document.getElementById("slExerciseMinutes").value = _slDraft.exerciseMinutes;
   document.getElementById("slNote").value = e ? (e.note||"") : "";
   var list = document.getElementById("selflogList");
   var c = document.getElementById("selflogCount");
   var arr = (data.entries||[]).slice().sort(function(a,b){ return String(b.date).localeCompare(String(a.date)); });
   if(c) c.textContent = arr.length ? arr.length+"条" : "";
-  if(!arr.length){ list.innerHTML = '<div class="ev-empty">还没有记录，写下今天第一条吧～</div>'; return; }
+  if(!arr.length){ list.innerHTML = '<div class="ev-empty">还没有记录，写下今天第一条吧～</div>'; renderRecipes(); return; }
   list.innerHTML = arr.slice(0,30).map(function(x){
-    var sc = "睡"+(x.sleep||"-")+" 精"+(x.energy||"-")+" 绪"+(x.mood||"-");
+    var sc = "睡"+(x.sleep||"-")+((x.sleepHours!=null&&x.sleepHours!=="")?("("+x.sleepHours+"h)"):"")+" 精"+(x.energy||"-")+" 绪"+(x.mood||"-")+((x.sleepQuality)?(" 睡质"+x.sleepQuality):"");
     var pc = x.period && x.period!=="none" ? (" · "+({"none":"","premen":"经前","men":"经期","postmen":"经后"}[x.period]||"")) : "";
-    var ex = x.exercise ? (" · 动:"+esc(x.exercise)) : "";
+    var exT = x.exerciseType||x.exercise||"";
+    var ex = exT ? (" · 动:"+esc(exT)+((x.exerciseMinutes!=null&&x.exerciseMinutes!=="")?(" "+x.exerciseMinutes+"分"):"")) : "";
     var note = x.note ? esc(x.note) : '<span style="color:var(--muted)">（无文字）</span>';
     var saved = x.savedInspire ? ' · <span style="color:#1D9E75">已存灵感</span>' : '';
     return '<div class="ev-item"><span class="ev-date">'+esc(x.date)+'</span>'
       + '<div class="ev-body"><div class="ev-t">'+sc+pc+ex+saved+'</div><div class="ev-s">'+note+'</div></div>'
       + '<button class="ev-x" title="存原话到灵感库" onclick="saveSelfLogToInspire('+x.id+')">📚</button></div>';
   }).join("");
+  renderRecipes();
 }
+
+function renderRecipes(){
+  var box = document.getElementById("recipeList"); if(!box) return;
+  var data = loadSelfLog();
+  var arr = data.recipes||[];
+  if(!arr.length){ box.innerHTML = '<div class="ev-empty">还没有食谱，加上常吃的几道吧～</div>'; return; }
+  var mealMap = {"早":"🌅","午":"☀️","晚":"🌙","加餐":"🍎"};
+  box.innerHTML = arr.map(function(r){
+    return '<div class="ev-item"><span class="ev-date">'+(mealMap[r.meal]||"")+(r.meal||"")+'</span>'
+      + '<div class="ev-body"><div class="ev-t">'+esc(r.name||"未命名")+(r.ingredients?(" · "+esc(r.ingredients)):"")+'</div>'
+      + (r.steps?('<div class="ev-s">'+esc(r.steps)+'</div>'):'')
+      + (r.note?('<div class="ev-s" style="color:var(--muted)">备注：'+esc(r.note)+'</div>'):'')
+      + '</div><button class="ev-x" title="删除" onclick="deleteRecipe('+JSON.stringify(r.id)+')">✕</button></div>';
+  }).join("");
+}
+
+function addRecipe(){
+  var data = loadSelfLog();
+  var name = (document.getElementById("rName").value||"").trim();
+  if(!name){ toast("填个菜名再添加吧"); return; }
+  var r = { id:"r_"+Date.now(), name:name, meal:(document.getElementById("rMeal").value||"午"),
+    ingredients:(document.getElementById("rIngredients").value||"").trim(),
+    steps:(document.getElementById("rSteps").value||"").trim(),
+    note:(document.getElementById("rNote").value||"").trim() };
+  data.recipes = data.recipes||[]; data.recipes.push(r);
+  saveSelfLog(data); renderRecipes();
+  document.getElementById("rName").value=""; document.getElementById("rIngredients").value="";
+  document.getElementById("rSteps").value=""; document.getElementById("rNote").value="";
+  toast("已添加参考食谱 🍱");
+}
+
+function deleteRecipe(id){
+  var data = loadSelfLog();
+  data.recipes = (data.recipes||[]).filter(function(x){ return x.id!==id; });
+  saveSelfLog(data); renderRecipes();
+}
+
 function buildScore(elId, field){
   var box = document.getElementById(elId); if(!box) return;
   var cur = _slDraft[field]||0;
@@ -8879,7 +8932,7 @@ function buildScore(elId, field){
 }
 function setSelfLogScore(field, n){
   _slDraft[field] = n;
-  buildScore({sleep:"slSleep",energy:"slEnergy",mood:"slMood"}[field], field);
+  buildScore({sleep:"slSleep",energy:"slEnergy",mood:"slMood",sleepQuality:"slSleepQuality"}[field], field);
 }
 function buildPeriod(elId){
   var box = document.getElementById(elId); if(!box) return;
@@ -8893,11 +8946,16 @@ function setSelfLogPeriod(v){ _slDraft.period = v; buildPeriod("slPeriod"); }
 function saveSelfLogEntry(){
   var data = loadSelfLog();
   var t = slToday();
+  var sh = (document.getElementById("slSleepHours").value||"").trim();
+  var em = (document.getElementById("slExerciseMinutes").value||"").trim();
   var entry = { id:"sl_"+t, date:t,
     sleep:_slDraft.sleep||0, energy:_slDraft.energy||0, mood:_slDraft.mood||0,
     period:_slDraft.period||"none",
-    exercise:document.getElementById("slExercise").value.trim(),
-    note:document.getElementById("slNote").value.trim() };
+    sleepHours: sh===""?null:parseFloat(sh),
+    sleepQuality:_slDraft.sleepQuality||0,
+    exerciseType:(document.getElementById("slExerciseType").value||"").trim(),
+    exerciseMinutes: em===""?null:parseInt(em,10),
+    note:(document.getElementById("slNote").value||"").trim() };
   var arr = data.entries||[];
   var idx = -1;
   for(var i=0;i<arr.length;i++){ if(arr[i].date===t){ idx=i; break; } }
@@ -8941,9 +8999,11 @@ function sendSelfLogChat(){
   var recent = (data.entries||[]).slice().sort(function(a,b){ return String(b.date).localeCompare(String(a.date)); }).slice(0,7).reverse();
   var pmap = {none:"",premen:"经前",men:"经期",postmen:"经后"};
   var ctx = recent.map(function(x){
-    return x.date+": 睡"+(x.sleep||"-")+" 精"+(x.energy||"-")+" 绪"+(x.mood||"-")
+    return x.date+": 睡"+(x.sleep||"-")+((x.sleepHours!=null&&x.sleepHours!=="")?(" "+x.sleepHours+"h"):"")+" 精"+(x.energy||"-")+" 绪"+(x.mood||"-")
+      + (x.sleepQuality?(" 睡质"+x.sleepQuality):"")
       + (x.period&&x.period!=="none"?(" "+pmap[x.period]):"")
-      + (x.exercise?(" 动:"+x.exercise):"") + (x.note?(" 记:"+x.note):"");
+      + ((x.exerciseType||x.exercise)?(" 动:"+(x.exerciseType||x.exercise)+((x.exerciseMinutes!=null&&x.exerciseMinutes!=="")?(" "+x.exerciseMinutes+"分"):"")):"")
+      + (x.note?(" 记:"+x.note):"");
   }).join("\n");
   var sys = "你是温柔的生活观察员，帮助用户通过每天的身心记录更好地认识自己。用户会给你最近几天的记录（睡眠/精力/情绪评分、生理期、运动、自由笔记），请用一句中文给出今天或近期的温和提醒或观察。注意：你不是医生，任何涉及健康的内容都要明确标注『仅作参考，非医疗建议』，不替代专业意见。不要说教，像朋友一样。";
   var user = "我最近几天的记录：\n" + (ctx||"（暂无记录）") + "\n\n我的提问：" + q;
