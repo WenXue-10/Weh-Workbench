@@ -8937,7 +8937,7 @@ function buildScore(elId, field){
   var box = document.getElementById(elId); if(!box) return;
   var cur = _slDraft[field]||0;
   box.innerHTML = [1,2,3,4,5].map(function(n){
-    return '<button type="button" class="sl-btn'+(n===cur?' on':'')+'" onclick="setSelfLogScore('+field+','+n+')">'+n+'</button>';
+    return '<button type="button" class="sl-btn'+(n===cur?' on':'')+'" onclick="setSelfLogScore(\''+field+'\','+n+')">'+n+'</button>';
   }).join("");
 }
 function setSelfLogScore(field, n){
@@ -8949,7 +8949,7 @@ function buildPeriod(elId){
   var val = _slDraft.period||"none";
   var opts = [["none","无"],["premen","经前"],["men","经期"],["postmen","经后"]];
   box.innerHTML = opts.map(function(o){
-    return '<button type="button" class="sl-btn'+(o[0]===val?' on':'')+'" onclick="setSelfLogPeriod('+o[0]+')">'+o[1]+'</button>';
+    return '<button type="button" class="sl-btn'+(o[0]===val?' on':'')+'" onclick="setSelfLogPeriod(\''+o[0]+'\')">'+o[1]+'</button>';
   }).join("");
 }
 function setSelfLogPeriod(v){ _slDraft.period = v; buildPeriod("slPeriod"); }
