@@ -1632,6 +1632,17 @@
 
         <div class="cet6-sub-content">
 
+          <!-- 二级子导航：六级学习内部小节 -->
+          <div class="cet6-inner-bar" id="cet6InnerBar">
+            <div class="cet6-inner-tab active" data-inner="overview">📊 概览</div>
+            <div class="cet6-inner-tab" data-inner="words">📝 词汇</div>
+            <div class="cet6-inner-tab" data-inner="listening">🎧 听力</div>
+            <div class="cet6-inner-tab" data-inner="reading">📖 阅读</div>
+            <div class="cet6-inner-tab" data-inner="writing">✍️ 写译</div>
+            <div class="cet6-inner-tab" data-inner="errors">❌ 错题</div>
+            <div class="cet6-inner-tab" data-inner="materials">📚 资料</div>
+          </div>
+
           <!-- 概览 -->
 
           <div class="cet6-sub" id="cet6-sub-overview">
@@ -3487,11 +3498,11 @@
 
             <div class="eng-block">
               <div class="card-head">🌱 长期积累</div>
-              <div class="sub-tab-bar" id="engLongTabs">
-                <div class="eng-long-tab active" data-sub="vocab">📘 跨场景生词</div>
-                <div class="eng-long-tab" data-sub="quotes">💬 喜欢的英文句</div>
-                <div class="eng-long-tab" data-sub="notes">🎬 阅读·观影</div>
-                <div class="eng-long-tab" data-sub="journals">✍️ 英文随笔</div>
+              <div class="cet6-inner-bar" id="engLongTabs">
+                <div class="cet6-inner-tab active" data-sub="vocab">📘 跨场景生词</div>
+                <div class="cet6-inner-tab" data-sub="quotes">💬 喜欢的英文句</div>
+                <div class="cet6-inner-tab" data-sub="notes">🎬 阅读·观影</div>
+                <div class="cet6-inner-tab" data-sub="journals">✍️ 英文随笔</div>
               </div>
               <div id="engLongBody"></div>
             </div>
@@ -3502,22 +3513,12 @@
 
         <!-- 底栏子模块导航 -->
 
-        <div class="sub-tab-bar">
+        <div class="sub-tab-bar" id="cet6BottomBar">
 
-          <div class="sub-tab active" data-sub="overview">📊 概览</div>
+          <div class="sub-tab active" data-sub="cet6">📖 六级学习</div>
 
-          <div class="sub-tab" data-sub="words">📝 词汇</div>
-
-          <div class="sub-tab" data-sub="listening">🎧 听力</div>
-
-          <div class="sub-tab" data-sub="reading">📖 阅读</div>
-
-          <div class="sub-tab" data-sub="writing">✍️ 写译</div>
-
-          <div class="sub-tab" data-sub="errors">❌ 错题</div>
-
-          <div class="sub-tab" data-sub="materials">📚 资料</div>
           <div class="sub-tab" data-sub="scene">💼 场景实战</div>
+
           <div class="sub-tab" data-sub="long">🌱 长期积累</div>
 
         </div>

@@ -5717,36 +5717,52 @@ function renderCareerKbCategory(){
 
 
 /* ===== CET-6 六级底栏子模块导航 ===== */
+var CET6_INNER_CUR = 'overview';
+
 function initCet6SubTabs(){
-  var tabs = document.querySelectorAll('#module-cet6 .sub-tab');
+  var tabs = document.querySelectorAll('#cet6BottomBar .sub-tab');
   if(!tabs.length) return;
   tabs.forEach(function(tab){
     tab.addEventListener('click', function(){
-      var sub = this.getAttribute('data-sub');
-      switchCet6Sub(sub);
+      switchCet6Sub(this.getAttribute('data-sub'));
     });
+  });
+  // 二级导航：六级学习内部小节
+  document.querySelectorAll('#cet6InnerBar .cet6-inner-tab').forEach(function(t){
+    t.addEventListener('click', function(){ switchCet6Inner(this.getAttribute('data-inner')); });
   });
   // 渲染各子模块内容
   renderCet6Category();
   // 初始化概览子模块（倒计时 + 打卡 + 进度）
   initCet6Overview();
-  var lt = document.querySelectorAll('#engLongTabs .eng-long-tab');
-  lt.forEach(function(t){
-    t.addEventListener('click', function(){ engLongSwitch(t.getAttribute('data-sub')); });
+  document.querySelectorAll('#engLongTabs .cet6-inner-tab').forEach(function(t){
+    t.addEventListener('click', function(){ engLongSwitch(this.getAttribute('data-sub')); });
   });
 }
 
+// 一级导航：六级学习 / 场景实战 / 长期积累
 function switchCet6Sub(sub){
-  // 切换tab激活状态
-  document.querySelectorAll('#module-cet6 .sub-tab').forEach(function(t){
+  document.querySelectorAll('#cet6BottomBar .sub-tab').forEach(function(t){
     t.classList.toggle('active', t.getAttribute('data-sub') === sub);
   });
-  // 切换内容显示
+  var inner = document.getElementById('cet6InnerBar');
+  var inCet6 = (sub === 'cet6');
+  if(inner) inner.style.display = inCet6 ? '' : 'none';
+  var target = inCet6 ? ('cet6-sub-' + CET6_INNER_CUR) : ('cet6-sub-' + sub);
   document.querySelectorAll('#module-cet6 .cet6-sub').forEach(function(el){
-    el.style.display = (el.id === 'cet6-sub-' + sub) ? '' : 'none';
+    el.style.display = (el.id === target) ? '' : 'none';
   });
   if(sub === 'scene'){ renderEngScene(); }
   if(sub === 'long'){ renderEngLong(); }
+}
+
+// 二级导航：六级学习内部小节切换
+function switchCet6Inner(x){
+  CET6_INNER_CUR = x;
+  document.querySelectorAll('#cet6InnerBar .cet6-inner-tab').forEach(function(t){
+    t.classList.toggle('active', t.getAttribute('data-inner') === x);
+  });
+  switchCet6Sub('cet6');
 }
 
 function renderCet6Category(){
@@ -9466,7 +9482,7 @@ function renderEngLong(){
 }
 function engLongSwitch(sub){
   engLongSub = sub;
-  var tabs = document.querySelectorAll('#engLongTabs .eng-long-tab');
+  var tabs = document.querySelectorAll('#engLongTabs .cet6-inner-tab');
   tabs.forEach(function(t){ t.classList.toggle('active', t.getAttribute('data-sub') === sub); });
   renderEngLong();
 }
