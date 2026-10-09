@@ -2155,3 +2155,32 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
 .r-manual summary{cursor:pointer;font-size:12px;color:var(--muted,#8a7f8c)}
 .r-manual .r-form{display:flex;flex-direction:column;gap:8px;margin-top:8px}
 @media (max-width:680px){ .sl-charts{grid-template-columns:1fr} }
+
+/* ===== 英语成长台 · 场景实战 + 长期积累 ===== */
+.eng-block{ margin-bottom:18px; }
+.eng-card{ background:#fff; border:1px solid #ece6ef; border-radius:12px; padding:16px; margin:10px 0; }
+.eng-card-term{ font-size:18px; font-weight:600; margin-bottom:6px; }
+.eng-card-term .tag{ font-size:12px; background:#f0e6f5; color:#7a4fa3; border-radius:8px; padding:1px 8px; margin-left:6px; }
+.eng-card-sentence{ font-size:15px; color:#333; line-height:1.5; }
+.eng-card-note{ font-size:13px; color:#8a8a8a; margin-top:6px; }
+.eng-actions{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px; }
+.eng-add{ display:flex; gap:8px; flex-wrap:wrap; margin:8px 0; }
+.eng-add input, .eng-add select{ flex:1; min-width:120px; padding:8px 10px; border:1px solid #ddd; border-radius:8px; font-size:14px; }
+.eng-list{ margin-top:8px; }
+.eng-card-row{ display:flex; justify-content:space-between; align-items:center; padding:6px 0; border-bottom:1px dashed #eee; }
+.eng-card-row.done{ opacity:.5; text-decoration:line-through; }
+.eng-scene-tabs{ display:flex; gap:8px; flex-wrap:wrap; margin:8px 0; }
+.chip{ border:1px solid #ddd; background:#fff; border-radius:16px; padding:5px 12px; cursor:pointer; font-size:13px; }
+.chip.active{ background:#7a4fa3; color:#fff; border-color:#7a4fa3; }
+.m-box{ max-height:320px; overflow:auto; background:#faf8fc; border:1px solid #ece6ef; border-radius:10px; padding:10px; margin:8px 0; }
+.m-msg{ padding:8px 11px; border-radius:10px; margin:6px 0; max-width:85%; line-height:1.5; font-size:14px; word-break:break-word; }
+.m-msg.user{ background:#7a4fa3; color:#fff; margin-left:auto; }
+.m-msg.ai{ background:#fff; border:1px solid #ece6ef; }
+.eng-chat-input{ display:flex; gap:8px; }
+.eng-chat-input input{ flex:1; padding:8px 10px; border:1px solid #ddd; border-radius:8px; font-size:14px; }
+.eng-long-tab{ padding:6px 12px; border-radius:8px 8px 0 0; cursor:pointer; font-size:13px; border:1px solid transparent; }
+.eng-long-tab.active{ background:#7a4fa3; color:#fff; }
+.eng-long-list{ margin-top:10px; }
+.eng-long-item{ display:flex; justify-content:space-between; align-items:flex-start; gap:10px; padding:10px; border:1px solid #ece6ef; border-radius:10px; margin-bottom:8px; }
+.eng-long-main{ font-size:14px; line-height:1.5; }
+.btn.sm, .btn.ghost.sm{ padding:2px 8px; font-size:12px; }

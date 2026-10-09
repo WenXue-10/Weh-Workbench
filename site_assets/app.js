@@ -4045,6 +4045,14 @@ function initReport(){
 /* ========== 设置页 ========== */
 var SETTINGS_KEY = "weh_settings_v1";
 var SETTINGS_DEFAULTS = {theme:"pink", glassOpacity:75, veilOpacity:50, blurRadius:18, fontSize:"medium", preferences:{}};
+var ENG_SCENE_KEY = 'weh_eng_scene_v1';
+var ENG_SCENE_CHATS_KEY = 'weh_eng_scene_chats_v1';
+var ENG_LONG_KEY = 'weh_eng_long_v1';
+var ENG_SCENE_SYS = {
+  negotiation: '你是海外供应商的资深销售，正在和中国采购（用户）谈一批货的交期、报价和付款条款。用英语回复，语气专业但可让步。每次只说一两句，推动谈判。不要替用户说话。',
+  email: '用户会给你一段中文或英文的邮件草稿或场景，请你：1) 用专业商务英语重写或补全这封邮件；2) 用中文简短说明你改了什么、为什么。',
+  interview: '你是一家外企的供应链面试官，用英语向用户提问，围绕他的供应链实习与项目经历。每次问一个问题，等用户回答后再继续。不要替用户回答。'
+};
 var DATA_KEYS = {
   money: "weh_money_data_v1",
   health: "weh_health_data_v1",
@@ -4057,7 +4065,9 @@ var DATA_KEYS = {
   company: "weh_company_data_v1",
   library: "weh_library_data_v1",
   manifest: "weh_manifest_data_v1",
-  selflog: SELFLOG_KEY
+  selflog: SELFLOG_KEY,
+  engScene: ENG_SCENE_KEY,
+  engLong: ENG_LONG_KEY
 };
 
 function loadSettings(){
@@ -4570,7 +4580,9 @@ var SYNC_LIST_FIELDS = {
   /* 显化台：只列真·数组字段（按 id 求并集）。对象字段（cheque / freq / freqDone）不能走列表合并，
      否则 _mergeListById 会对 object 调 forEach 抛 TypeError，导致整次同步失败。 */
   manifest: ["goals", "script", "diary", "gratitude", "translator", "rehearsal", "evidence", "freqCustom"],
-  selflog: ["entries", "recipes"]
+  selflog: ["entries", "recipes"],
+  engScene: ["cards"],
+  engLong: ["vocab", "quotes", "notes", "journals"]
 };
 /* 对象/映射型字段：按键级并集合并 */
 var SYNC_MAP_FIELDS = { manifest: ["freq", "freqDone"] };
@@ -5718,6 +5730,10 @@ function initCet6SubTabs(){
   renderCet6Category();
   // 初始化概览子模块（倒计时 + 打卡 + 进度）
   initCet6Overview();
+  var lt = document.querySelectorAll('#engLongTabs .eng-long-tab');
+  lt.forEach(function(t){
+    t.addEventListener('click', function(){ engLongSwitch(t.getAttribute('data-sub')); });
+  });
 }
 
 function switchCet6Sub(sub){
@@ -5729,6 +5745,8 @@ function switchCet6Sub(sub){
   document.querySelectorAll('#module-cet6 .cet6-sub').forEach(function(el){
     el.style.display = (el.id === 'cet6-sub-' + sub) ? '' : 'none';
   });
+  if(sub === 'scene'){ renderEngScene(); }
+  if(sub === 'long'){ renderEngLong(); }
 }
 
 function renderCet6Category(){
@@ -9268,4 +9286,204 @@ function saveSelfReviewToInspire(){
   saveInspire(insp);
   kbPushToCloud();
   toast("已存为灵感并标记入库，同步后可在电脑端「拉取灵感」归档到 00-灵感库");
+}
+
+/* ===== 英语成长台 · 场景实战 + 长期积累 ===== */
+var engSceneSub = 'negotiation';
+var engLongSub = 'vocab';
+
+function loadEngScene(){
+  var d = null;
+  try{ d = JSON.parse(localStorage.getItem(ENG_SCENE_KEY)); }catch(e){}
+  if(!d || !Array.isArray(d.cards)){ d = { cards: engSceneSeed(), lastCardId: '' }; saveEngScene(d); }
+  return d;
+}
+function saveEngScene(d){ try{ localStorage.setItem(ENG_SCENE_KEY, JSON.stringify(d)); markLocalChange(); }catch(e){} }
+function loadEngSceneChats(){
+  var d = null;
+  try{ d = JSON.parse(localStorage.getItem(ENG_SCENE_CHATS_KEY)); }catch(e){}
+  if(!d || typeof d !== 'object'){ d = { negotiation: [], email: [], interview: [] }; }
+  ['negotiation','email','interview'].forEach(function(k){ if(!Array.isArray(d[k])) d[k] = []; });
+  return d;
+}
+function saveEngSceneChats(d){ try{ localStorage.setItem(ENG_SCENE_CHATS_KEY, JSON.stringify(d)); }catch(e){} }
+function engSceneSeed(){
+  return [
+    {id:'sc1', term:'lead time', sentence:'Please confirm the lead time for this order.', cat:'谈判', note:'从下单到交货的周期', mastered:false},
+    {id:'sc2', term:'FOB', sentence:'The price is FOB Shanghai.', cat:'谈判', note:'离岸价 Free On Board', mastered:false},
+    {id:'sc3', term:'follow up', sentence:'I will follow up with the supplier tomorrow.', cat:'邮件', note:'跟进', mastered:false},
+    {id:'sc4', term:'bulk discount', sentence:'Can we get a bulk discount for 1000 units?', cat:'谈判', note:'批量折扣', mastered:false},
+    {id:'sc5', term:'walk me through', sentence:'Could you walk me through your supply chain project?', cat:'面试', note:'带我过一遍（面试常用）', mastered:false}
+  ];
+}
+function renderEngScene(){
+  var box = document.getElementById('engSceneCard'); if(!box) return;
+  var d = loadEngScene();
+  var pool = d.cards.filter(function(c){ return !c.mastered; });
+  var card = pool.length ? pool[0] : (d.cards[0] || null);
+  if(!card){
+    box.innerHTML = '<div class="muted">还没有卡片，点「添加卡片」建第一张。</div>';
+    box.removeAttribute('data-cur');
+  } else {
+    box.setAttribute('data-cur', card.id);
+    box.innerHTML = '<div class="eng-card-term">'+esc(card.term)+' <span class="tag">'+esc(card.cat)+'</span></div>'
+      + '<div class="eng-card-sentence">'+esc(card.sentence)+'</div>'
+      + (card.note ? '<div class="eng-card-note">📝 '+esc(card.note)+'</div>' : '');
+  }
+  var list = document.getElementById('engSceneCardList');
+  if(list){
+    list.innerHTML = d.cards.map(function(c){
+      return '<div class="eng-card-row'+(c.mastered?' done':'')+'"><span>'+esc(c.term)+' <span class="muted">'+esc(c.cat)+'</span></span>'
+        + '<span>'+ (c.mastered?'✅':'⬜') +' <button class="btn ghost sm" onclick="engSceneDel(\''+c.id+'\')">🗑️</button></span></div>';
+    }).join('');
+  }
+  renderEngSceneChat();
+}
+function engSceneNextCard(){
+  var d = loadEngScene();
+  var pool = d.cards.filter(function(c){ return !c.mastered; });
+  if(pool.length < 2){ return renderEngScene(); }
+  var cur = null;
+  var cb = document.getElementById('engSceneCard');
+  if(cb){ cur = cb.getAttribute('data-cur'); }
+  var picks = pool.filter(function(c){ return c.id !== cur; });
+  if(!picks.length) picks = pool;
+  var pick = picks[Math.floor(Math.random()*picks.length)];
+  d.lastCardId = pick.id; saveEngScene(d); renderEngScene();
+}
+function engSceneMarkMastered(){
+  var cb = document.getElementById('engSceneCard'); if(!cb) return;
+  var cur = cb.getAttribute('data-cur'); if(!cur) return;
+  var d = loadEngScene();
+  var c = null;
+  for(var i=0;i<d.cards.length;i++){ if(d.cards[i].id === cur){ c = d.cards[i]; break; } }
+  if(!c) return;
+  c.mastered = true; saveEngScene(d); renderEngScene(); toast('✅ 已记住');
+}
+function engSceneShowAdd(){ var b = document.getElementById('engSceneAddBox'); if(b){ b.style.display = (b.style.display === 'none') ? '' : 'none'; } }
+function engSceneAdd(){
+  var term = (document.getElementById('engSceneTerm').value||'').trim();
+  var sentence = (document.getElementById('engSceneSentence').value||'').trim();
+  var cat = document.getElementById('engSceneCat').value;
+  var note = (document.getElementById('engSceneNote').value||'').trim();
+  if(!term || !sentence){ toast('术语和句子都要填'); return; }
+  var d = loadEngScene();
+  d.cards.push({id:'sc'+Date.now(), term:term, sentence:sentence, cat:cat, note:note, mastered:false});
+  saveEngScene(d);
+  document.getElementById('engSceneTerm').value = '';
+  document.getElementById('engSceneSentence').value = '';
+  document.getElementById('engSceneNote').value = '';
+  document.getElementById('engSceneAddBox').style.display = 'none';
+  renderEngScene(); toast('已添加');
+}
+function engSceneDel(id){
+  var d = loadEngScene();
+  d.cards = d.cards.filter(function(c){ return c.id !== id; });
+  saveEngScene(d); renderEngScene();
+}
+function engSceneSwitch(scn){
+  engSceneSub = scn;
+  var chips = document.querySelectorAll('#cet6-sub-scene .eng-scene-tabs .chip');
+  chips.forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-scn') === scn); });
+  renderEngSceneChat();
+}
+function renderEngSceneChat(){
+  var box = document.getElementById('engSceneChat'); if(!box) return;
+  var chats = loadEngSceneChats();
+  var msgs = chats[engSceneSub] || [];
+  if(!msgs.length){
+    var greet = engSceneSub === 'negotiation' ? '你好，我们开始谈吧。你想先聊交期还是价格？'
+      : engSceneSub === 'email' ? '把你想写的邮件发给我，我来帮你润色成专业商务英语。'
+      : '先做个英文自我介绍？';
+    box.innerHTML = '<div class="m-msg ai">'+esc(greet)+'</div>';
+    return;
+  }
+  box.innerHTML = msgs.map(function(m){ return '<div class="m-msg '+(m.role==='user'?'user':'ai')+'">'+esc(m.content)+'</div>'; }).join('');
+  box.scrollTop = box.scrollHeight;
+}
+function engSceneSend(){
+  var c = loadAIConfig();
+  if(!(c && c.key && c.base && c.model)){ toast('请先在设置里配置 AI'); return; }
+  var input = document.getElementById('engSceneInput');
+  var q = (input.value||'').trim(); if(!q) return;
+  input.value = '';
+  var chats = loadEngSceneChats();
+  chats[engSceneSub] = chats[engSceneSub] || [];
+  chats[engSceneSub].push({role:'user', content:q});
+  saveEngSceneChats(chats);
+  var box = document.getElementById('engSceneChat');
+  box.innerHTML += '<div class="m-msg user">'+esc(q)+'</div>';
+  box.innerHTML += '<div class="m-msg ai" id="engSceneThinking">思考中…</div>';
+  box.scrollTop = box.scrollHeight;
+  var history = chats[engSceneSub].map(function(m){ return {role:m.role, content:m.content}; });
+  aiChat(c, [{role:'system', content:ENG_SCENE_SYS[engSceneSub]}].concat(history), 60).then(function(res){
+    var el = document.getElementById('engSceneThinking'); if(el) el.remove();
+    var text = (res.content||'').replace(/^```[a-zA-Z]*/,'').replace(/```$/,'').trim();
+    chats[engSceneSub].push({role:'assistant', content:text});
+    saveEngSceneChats(chats);
+    box.innerHTML += '<div class="m-msg ai">'+esc(text)+'</div>';
+    box.scrollTop = box.scrollHeight;
+  }).catch(function(err){
+    var el = document.getElementById('engSceneThinking'); if(el) el.remove();
+    box.innerHTML += '<div class="m-msg ai" style="color:#e74c3c">出错了：'+esc(err.message||'')+'</div>';
+  });
+}
+function engSceneClear(){
+  var chats = loadEngSceneChats();
+  chats[engSceneSub] = []; saveEngSceneChats(chats); renderEngSceneChat();
+}
+/* 长期积累 */
+var ENG_LONG_META = {
+  vocab: { title:'📘 跨场景生词', fields:[{k:'word',ph:'单词'},{k:'phonetic',ph:'音标(可选)'},{k:'meaning',ph:'释义'},{k:'source',ph:'来源:书/剧/生活(可选)'},{k:'note',ph:'备注(可选)'}] },
+  quotes: { title:'💬 喜欢的英文句', fields:[{k:'sentence',ph:'英文句子'},{k:'source',ph:'出处(可选)'},{k:'note',ph:'为什么喜欢(可选)'}] },
+  notes: { title:'🎬 阅读·观影笔记', fields:[{k:'title',ph:'书名/片名'},{k:'type',ph:'类型:书/剧/播客'},{k:'excerpt',ph:'摘抄/片段(可选)'},{k:'reflection',ph:'感想'}] },
+  journals: { title:'✍️ 英文随笔', fields:[{k:'content',ph:'用英文写点什么…'}] }
+};
+function loadEngLong(){
+  var d = null;
+  try{ d = JSON.parse(localStorage.getItem(ENG_LONG_KEY)); }catch(e){}
+  if(!d || typeof d !== 'object'){ d = {vocab:[], quotes:[], notes:[], journals:[]}; }
+  ['vocab','quotes','notes','journals'].forEach(function(k){ if(!Array.isArray(d[k])) d[k] = []; });
+  return d;
+}
+function saveEngLong(d){ try{ localStorage.setItem(ENG_LONG_KEY, JSON.stringify(d)); markLocalChange(); }catch(e){} }
+function renderEngLong(){
+  var meta = ENG_LONG_META[engLongSub];
+  var body = document.getElementById('engLongBody'); if(!body) return;
+  var fields = meta.fields;
+  var form = '<div class="eng-add">' + fields.map(function(f){ return '<input id="engLong_'+f.k+'" placeholder="'+f.ph+'">'; }).join('') + '<button class="btn" onclick="engLongAdd()">保存</button></div>';
+  var d = loadEngLong();
+  var arr = (d[engLongSub] || []).slice().reverse();
+  var mainFields = fields.filter(function(f){ return f.k !== 'note' && f.k !== 'reflection' && f.k !== 'source' && f.k !== 'excerpt'; });
+  var subField = (engLongSub === 'vocab') ? 'note' : (engLongSub === 'quotes') ? 'source' : (engLongSub === 'notes') ? 'reflection' : null;
+  var list = arr.length ? arr.map(function(it){
+    return '<div class="eng-long-item"><div class="eng-long-main">' + mainFields.map(function(f){ return '<div>'+esc(it[f.k]||'')+'</div>'; }).join('')
+      + (subField && it[subField] ? '<div class="muted">'+esc(it[subField])+'</div>' : '')
+      + (engLongSub === 'notes' && it.excerpt ? '<div class="muted">“'+esc(it.excerpt)+'”</div>' : '')
+      + '</div><button class="btn ghost sm" onclick="engLongDel(\''+engLongSub+'\',\''+it.id+'\')">🗑️</button></div>';
+  }).join('') : '<div class="muted">还没有记录，写下第一条吧。</div>';
+  body.innerHTML = '<div class="muted" style="margin-bottom:8px">'+meta.title+'</div>' + form + '<div class="eng-long-list">'+list+'</div>';
+}
+function engLongSwitch(sub){
+  engLongSub = sub;
+  var tabs = document.querySelectorAll('#engLongTabs .eng-long-tab');
+  tabs.forEach(function(t){ t.classList.toggle('active', t.getAttribute('data-sub') === sub); });
+  renderEngLong();
+}
+function engLongAdd(){
+  var meta = ENG_LONG_META[engLongSub];
+  var obj = {id:'el'+Date.now()};
+  var empty = true;
+  meta.fields.forEach(function(f){ var v = (document.getElementById('engLong_'+f.k).value||'').trim(); obj[f.k] = v; if(v) empty = false; });
+  if(empty){ toast('至少填一项'); return; }
+  var d = loadEngLong();
+  d[engLongSub] = d[engLongSub] || [];
+  d[engLongSub].push(obj); saveEngLong(d);
+  meta.fields.forEach(function(f){ var el = document.getElementById('engLong_'+f.k); if(el) el.value = ''; });
+  renderEngLong(); toast('已保存');
+}
+function engLongDel(sub, id){
+  var d = loadEngLong();
+  d[sub] = d[sub].filter(function(x){ return x.id !== id; });
+  saveEngLong(d); renderEngLong();
 }

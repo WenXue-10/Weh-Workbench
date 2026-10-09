@@ -39,7 +39,7 @@
 
     <div class="nav-item" data-module="career">💼 SCM Career</div>
 
-    <div class="nav-item" data-module="cet6">📖 CET-6备战</div>
+    <div class="nav-item" data-module="cet6">🌍 英语成长台</div>
 
     <div class="nav-item" data-module="sop">🛠️ 工作SOP</div>
 
@@ -113,7 +113,7 @@
 
               <a data-module="career"><span class="q-em">💼</span>SCM Career</a>
 
-              <a data-module="cet6"><span class="q-em">📖</span>CET-6备战</a>
+              <a data-module="cet6"><span class="q-em">🌍</span>英语成长台</a>
 
               <a data-module="sop"><span class="q-em">🛠️</span>工作SOP</a>
 
@@ -1622,9 +1622,9 @@
 
         <div class="page-head">
 
-          <div class="page-title">📖 六级学习</div>
+          <div class="page-title">🌍 英语成长台</div>
 
-          <div class="page-sub">备考总览 · 词汇/听力/阅读/写作/翻译 · 错题本</div>
+          <div class="page-sub">终身学习 · CET-6 应试 · 场景实战 · 长期积累</div>
 
         </div>
 
@@ -3438,6 +3438,66 @@
 
           </div>
 
+          <!-- 场景实战 -->
+          <div class="cet6-sub" id="cet6-sub-scene" style="display:none">
+
+            <div class="eng-block">
+              <div class="card-head">🃏 碎片卡 <span class="muted">每天 5 分钟 · 供应链场景</span></div>
+              <div class="eng-card" id="engSceneCard"></div>
+              <div class="eng-actions">
+                <button class="btn" onclick="engSceneNextCard()">🔄 换一张</button>
+                <button class="btn" onclick="engSceneMarkMastered()">✅ 我记住了</button>
+                <button class="btn ghost" onclick="engSceneShowAdd()">➕ 添加卡片</button>
+              </div>
+              <div id="engSceneAddBox" style="display:none" class="eng-add">
+                <input id="engSceneTerm" placeholder="术语，如：lead time">
+                <input id="engSceneSentence" placeholder="一句商务/场景句">
+                <select id="engSceneCat">
+                  <option value="谈判">谈判</option>
+                  <option value="邮件">邮件</option>
+                  <option value="面试">面试</option>
+                  <option value="日常">日常</option>
+                </select>
+                <input id="engSceneNote" placeholder="你的自述（可选）">
+                <button class="btn" onclick="engSceneAdd()">保存</button>
+              </div>
+              <div class="eng-list" id="engSceneCardList"></div>
+            </div>
+
+            <div class="eng-block">
+              <div class="card-head">🤖 AI 角色扮演对练</div>
+              <div class="eng-scene-tabs">
+                <button class="chip active" data-scn="negotiation" onclick="engSceneSwitch('negotiation')">供应商谈判</button>
+                <button class="chip" data-scn="email" onclick="engSceneSwitch('email')">英文邮件批改</button>
+                <button class="chip" data-scn="interview" onclick="engSceneSwitch('interview')">外企面试</button>
+              </div>
+              <div class="m-box" id="engSceneChat"></div>
+              <div class="eng-chat-input">
+                <input id="engSceneInput" placeholder="用英语或中英混着说…" onkeydown="if(event.key==='Enter') engSceneSend()">
+                <button class="btn" onclick="engSceneSend()">发送</button>
+                <button class="btn ghost" onclick="engSceneClear()">清空</button>
+              </div>
+              <div class="muted">需先在设置页配置 DeepSeek Key；AI 演对方，你练表达。</div>
+            </div>
+
+          </div>
+
+          <!-- 长期积累 -->
+          <div class="cet6-sub" id="cet6-sub-long" style="display:none">
+
+            <div class="eng-block">
+              <div class="card-head">🌱 长期积累</div>
+              <div class="sub-tab-bar" id="engLongTabs">
+                <div class="eng-long-tab active" data-sub="vocab">📘 跨场景生词</div>
+                <div class="eng-long-tab" data-sub="quotes">💬 喜欢的英文句</div>
+                <div class="eng-long-tab" data-sub="notes">🎬 阅读·观影</div>
+                <div class="eng-long-tab" data-sub="journals">✍️ 英文随笔</div>
+              </div>
+              <div id="engLongBody"></div>
+            </div>
+
+          </div>
+
         </div>
 
         <!-- 底栏子模块导航 -->
@@ -3457,6 +3517,8 @@
           <div class="sub-tab" data-sub="errors">❌ 错题</div>
 
           <div class="sub-tab" data-sub="materials">📚 资料</div>
+          <div class="sub-tab" data-sub="scene">💼 场景实战</div>
+          <div class="sub-tab" data-sub="long">🌱 长期积累</div>
 
         </div>
 
