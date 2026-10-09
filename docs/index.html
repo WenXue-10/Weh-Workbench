@@ -2195,6 +2195,12 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
 .eng-long-main{ font-size:14px; line-height:1.5; }
 .btn.sm, .btn.ghost.sm{ padding:2px 8px; font-size:12px; }
 
+/* ===== 英语成长台 · 二级内嵌子导航 ===== */
+.cet6-inner-bar{ display:flex; flex-wrap:wrap; gap:4px; padding:5px; margin:0 0 16px; background:rgba(255,255,255,0.72); backdrop-filter:blur(14px) saturate(1.3); -webkit-backdrop-filter:blur(14px) saturate(1.3); border:1px solid rgba(255,255,255,0.6); border-radius:14px; position:sticky; top:8px; z-index:30; }
+.cet6-inner-tab{ padding:6px 13px; border-radius:10px; font-size:12.5px; font-weight:600; color:var(--muted); cursor:pointer; white-space:nowrap; transition:background .18s,color .18s; }
+.cet6-inner-tab:hover{ color:#7a4fa3; }
+.cet6-inner-tab.active{ background:#7a4fa3; color:#fff; box-shadow:0 2px 8px rgba(122,79,163,.28); }
+
 </style>
 </head>
 <body>
@@ -3830,6 +3836,17 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
         <!-- 子模块内容区 -->
 
         <div class="cet6-sub-content">
+
+          <!-- 二级子导航：六级学习内部小节 -->
+          <div class="cet6-inner-bar" id="cet6InnerBar">
+            <div class="cet6-inner-tab active" data-inner="overview">📊 概览</div>
+            <div class="cet6-inner-tab" data-inner="words">📝 词汇</div>
+            <div class="cet6-inner-tab" data-inner="listening">🎧 听力</div>
+            <div class="cet6-inner-tab" data-inner="reading">📖 阅读</div>
+            <div class="cet6-inner-tab" data-inner="writing">✍️ 写译</div>
+            <div class="cet6-inner-tab" data-inner="errors">❌ 错题</div>
+            <div class="cet6-inner-tab" data-inner="materials">📚 资料</div>
+          </div>
 
           <!-- 概览 -->
 
@@ -5686,11 +5703,11 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
 
             <div class="eng-block">
               <div class="card-head">🌱 长期积累</div>
-              <div class="sub-tab-bar" id="engLongTabs">
-                <div class="eng-long-tab active" data-sub="vocab">📘 跨场景生词</div>
-                <div class="eng-long-tab" data-sub="quotes">💬 喜欢的英文句</div>
-                <div class="eng-long-tab" data-sub="notes">🎬 阅读·观影</div>
-                <div class="eng-long-tab" data-sub="journals">✍️ 英文随笔</div>
+              <div class="cet6-inner-bar" id="engLongTabs">
+                <div class="cet6-inner-tab active" data-sub="vocab">📘 跨场景生词</div>
+                <div class="cet6-inner-tab" data-sub="quotes">💬 喜欢的英文句</div>
+                <div class="cet6-inner-tab" data-sub="notes">🎬 阅读·观影</div>
+                <div class="cet6-inner-tab" data-sub="journals">✍️ 英文随笔</div>
               </div>
               <div id="engLongBody"></div>
             </div>
@@ -5701,22 +5718,12 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
 
         <!-- 底栏子模块导航 -->
 
-        <div class="sub-tab-bar">
+        <div class="sub-tab-bar" id="cet6BottomBar">
 
-          <div class="sub-tab active" data-sub="overview">📊 概览</div>
+          <div class="sub-tab active" data-sub="cet6">📖 六级学习</div>
 
-          <div class="sub-tab" data-sub="words">📝 词汇</div>
-
-          <div class="sub-tab" data-sub="listening">🎧 听力</div>
-
-          <div class="sub-tab" data-sub="reading">📖 阅读</div>
-
-          <div class="sub-tab" data-sub="writing">✍️ 写译</div>
-
-          <div class="sub-tab" data-sub="errors">❌ 错题</div>
-
-          <div class="sub-tab" data-sub="materials">📚 资料</div>
           <div class="sub-tab" data-sub="scene">💼 场景实战</div>
+
           <div class="sub-tab" data-sub="long">🌱 长期积累</div>
 
         </div>
@@ -7079,7 +7086,7 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
 
 <script>
 window.SITE_DATA = {
- "updated": "2026-10-09 17:21",
+ "updated": "2026-10-09 17:27",
  "stats": {
   "jobs": 58,
   "rec": 0,
@@ -27923,36 +27930,52 @@ function renderCareerKbCategory(){
 
 
 /* ===== CET-6 六级底栏子模块导航 ===== */
+var CET6_INNER_CUR = 'overview';
+
 function initCet6SubTabs(){
-  var tabs = document.querySelectorAll('#module-cet6 .sub-tab');
+  var tabs = document.querySelectorAll('#cet6BottomBar .sub-tab');
   if(!tabs.length) return;
   tabs.forEach(function(tab){
     tab.addEventListener('click', function(){
-      var sub = this.getAttribute('data-sub');
-      switchCet6Sub(sub);
+      switchCet6Sub(this.getAttribute('data-sub'));
     });
+  });
+  // 二级导航：六级学习内部小节
+  document.querySelectorAll('#cet6InnerBar .cet6-inner-tab').forEach(function(t){
+    t.addEventListener('click', function(){ switchCet6Inner(this.getAttribute('data-inner')); });
   });
   // 渲染各子模块内容
   renderCet6Category();
   // 初始化概览子模块（倒计时 + 打卡 + 进度）
   initCet6Overview();
-  var lt = document.querySelectorAll('#engLongTabs .eng-long-tab');
-  lt.forEach(function(t){
-    t.addEventListener('click', function(){ engLongSwitch(t.getAttribute('data-sub')); });
+  document.querySelectorAll('#engLongTabs .cet6-inner-tab').forEach(function(t){
+    t.addEventListener('click', function(){ engLongSwitch(this.getAttribute('data-sub')); });
   });
 }
 
+// 一级导航：六级学习 / 场景实战 / 长期积累
 function switchCet6Sub(sub){
-  // 切换tab激活状态
-  document.querySelectorAll('#module-cet6 .sub-tab').forEach(function(t){
+  document.querySelectorAll('#cet6BottomBar .sub-tab').forEach(function(t){
     t.classList.toggle('active', t.getAttribute('data-sub') === sub);
   });
-  // 切换内容显示
+  var inner = document.getElementById('cet6InnerBar');
+  var inCet6 = (sub === 'cet6');
+  if(inner) inner.style.display = inCet6 ? '' : 'none';
+  var target = inCet6 ? ('cet6-sub-' + CET6_INNER_CUR) : ('cet6-sub-' + sub);
   document.querySelectorAll('#module-cet6 .cet6-sub').forEach(function(el){
-    el.style.display = (el.id === 'cet6-sub-' + sub) ? '' : 'none';
+    el.style.display = (el.id === target) ? '' : 'none';
   });
   if(sub === 'scene'){ renderEngScene(); }
   if(sub === 'long'){ renderEngLong(); }
+}
+
+// 二级导航：六级学习内部小节切换
+function switchCet6Inner(x){
+  CET6_INNER_CUR = x;
+  document.querySelectorAll('#cet6InnerBar .cet6-inner-tab').forEach(function(t){
+    t.classList.toggle('active', t.getAttribute('data-inner') === x);
+  });
+  switchCet6Sub('cet6');
 }
 
 function renderCet6Category(){
@@ -31672,7 +31695,7 @@ function renderEngLong(){
 }
 function engLongSwitch(sub){
   engLongSub = sub;
-  var tabs = document.querySelectorAll('#engLongTabs .eng-long-tab');
+  var tabs = document.querySelectorAll('#engLongTabs .cet6-inner-tab');
   tabs.forEach(function(t){ t.classList.toggle('active', t.getAttribute('data-sub') === sub); });
   renderEngLong();
 }
