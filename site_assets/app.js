@@ -8199,6 +8199,7 @@ function renderManifest(){
   renderRehearsal(data, streak || 1);
   renderTranslator(data);
   renderFreq(data);
+  renderMicroReview(data);
 }
 
 /* ---------- 我的目标（保留：进度 / 达成 / 放弃） ---------- */
@@ -8887,6 +8888,49 @@ function loadSelfLog(){
 }
 function saveSelfLog(data){ localStorage.setItem(SELFLOG_KEY, JSON.stringify(data)); markLocalChange(); }
 function slToday(){ var t=new Date(); return t.getFullYear()+"-"+String(t.getMonth()+1).padStart(2,"0")+"-"+String(t.getDate()).padStart(2,"0"); }
+
+/* ---------- 每日微复盘（轻量决策日志，每天一条） ---------- */
+function renderMicroReview(data){
+  var box = document.getElementById("microReviewList");
+  if(!box) return;
+  var list = (data.microReviews || []).slice().sort(function(a,b){ return (b.date||"").localeCompare(a.date||""); }).slice(0,7);
+  if(list.length === 0){
+    box.innerHTML = '<div style="text-align:center;color:var(--muted);padding:14px;font-size:13px">还没有复盘<br>今天做了什么、感受如何？写两句</div>';
+    return;
+  }
+  box.innerHTML = list.map(function(r){
+    return '<div class="inspire-item">'
+      + '<div class="inspire-item-text"><b>' + esc(r.date||"") + '</b>' + (r.did ? '<div>▶ ' + esc(r.did) + '</div>' : "") + (r.feel ? '<div>💭 ' + esc(r.feel) + '</div>' : "") + '</div>'
+      + '<div class="inspire-item-meta"><button class="inspire-action-btn" style="font-size:12px;padding:2px 8px" onclick="delMicroReview(\'' + esc(r.id) + '\')">删</button></div>'
+      + '</div>';
+  }).join("");
+}
+function saveMicroReview(){
+  var didEl = document.getElementById("microDid");
+  var feelEl = document.getElementById("microFeel");
+  var did = (didEl.value || "").trim();
+  var feel = (feelEl.value || "").trim();
+  if(!did && !feel){ toast("先写点什么～"); return; }
+  var data = loadManifest();
+  data.microReviews = data.microReviews || [];
+  var t = todayStr();
+  var id = "mr_" + t;
+  var idx = -1;
+  for(var i=0;i<data.microReviews.length;i++){ if(data.microReviews[i].id === id){ idx = i; break; } }
+  var rec = {id:id, date:t, did:did, feel:feel};
+  if(idx >= 0) data.microReviews[idx] = rec; else data.microReviews.unshift(rec);
+  if(data.microReviews.length > 60) data.microReviews = data.microReviews.slice(0,60);
+  saveManifest(data);
+  didEl.value = ""; feelEl.value = "";
+  renderManifest();
+  toast(idx >= 0 ? "已更新今日复盘 ✏️" : "已保存今日复盘 📝");
+}
+function delMicroReview(id){
+  var data = loadManifest();
+  data.microReviews = (data.microReviews || []).filter(function(x){ return x.id !== id; });
+  saveManifest(data);
+  renderManifest();
+}
 function renderSelfLog(){
   var form = document.getElementById("selflogForm"); if(!form) return;
   var data = loadSelfLog();

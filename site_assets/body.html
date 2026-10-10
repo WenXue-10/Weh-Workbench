@@ -1124,6 +1124,21 @@
           <div id="freqHeat"></div>
         </div>
 
+        <div class="mod-sec-head"><span class="ms-en">DAILY MICRO-REVIEW</span><span class="ms-cn">📝 每日微复盘</span></div>
+        <div class="card card-soft">
+          <p class="mod-desc">每天 2 句：今天做了什么、今天感受。录音说一遍也行。轻量决策日志，补足显化台的「行动层」。</p>
+          <div class="mod-search-row">
+            <textarea id="microDid" class="gf-full" rows="2" placeholder="今天做了什么…（如：投了 3 个岗位、啃完一章供应链）"></textarea>
+          </div>
+          <div class="mod-search-row">
+            <textarea id="microFeel" class="gf-full" rows="2" placeholder="今天感受…（如：有点焦虑但推进了，OK）"></textarea>
+          </div>
+          <div class="mod-search-row">
+            <button type="button" class="voice-btn" data-target="microDid" onclick="toggleVoice('microDid')">🎤 说</button>
+            <button class="mod-btn-primary" onclick="saveMicroReview()">💾 保存今日复盘</button>
+          </div>
+          <div id="microReviewList" class="inspire-list"></div>
+        </div>
         <div class="mod-sec-head"><span class="ms-en">EXTRA</span><span class="ms-cn">🎯 我的目标</span></div>
         <div class="card card-soft">
           <div class="card-head" data-en="MY GOALS"><span class="ch-title">🎯 我的目标</span><span class="m-count" id="goalCount"></span></div>
