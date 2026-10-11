@@ -2200,6 +2200,10 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
 .eng-card-row .btn.ghost.sm:hover, .eng-long-item .btn.ghost.sm:hover{ color:var(--pink-deep); border-color:var(--pink); background:rgba(255,255,255,.9); }
 /* 输入行与下方提示之间留白（原先紧贴显拥挤） */
 .eng-chat-input + .muted{ margin-top:10px; line-height:1.6; }
+/* 表单字段分组：输入框与语音按钮同组，排列更整齐 */
+.eng-add-field{ flex:1; min-width:200px; display:flex; gap:6px; align-items:center; }
+.eng-add-field input{ flex:1; min-width:0; }
+.eng-add-field .voice-btn{ width:38px; height:38px; border-radius:11px; font-size:16px; }
 
 /* 聊天区：.m-box 仅英语场景使用；共用 .m-msg 全面主题化（粉紫渐变 + 主题描边） */
 .m-box{ max-height:340px; overflow:auto; background:rgba(255,255,255,.5); border:1px solid var(--line); border-radius:16px; padding:12px; margin:10px 0; }

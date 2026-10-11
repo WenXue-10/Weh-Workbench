@@ -9523,7 +9523,9 @@ function renderEngLong(){
   var meta = ENG_LONG_META[engLongSub];
   var body = document.getElementById('engLongBody'); if(!body) return;
   var fields = meta.fields;
-  var form = '<div class="eng-add">' + fields.map(function(f){ return '<input id="engLong_'+f.k+'" placeholder="'+f.ph+'">'; }).join('') + '<button class="btn" onclick="engLongAdd()">保存</button></div>';
+  var form = '<div class="eng-add">' + fields.map(function(f){ return '<div class="eng-add-field"><input id="engLong_'+f.k+'" placeholder="'+f.ph+'">'
+    + '<button type="button" class="voice-btn" data-target="engLong_'+f.k+'" onclick="toggleVoice(\'engLong_'+f.k+'\')">🎤</button></div>'; }).join('')
+    + '<button class="btn" onclick="engLongAdd()">保存</button></div>';
   var d = loadEngLong();
   var arr = (d[engLongSub] || []).slice().reverse();
   var mainFields = fields.filter(function(f){ return f.k !== 'note' && f.k !== 'reflection' && f.k !== 'source' && f.k !== 'excerpt'; });
@@ -9534,7 +9536,12 @@ function renderEngLong(){
       + (engLongSub === 'notes' && it.excerpt ? '<div class="muted">“'+esc(it.excerpt)+'”</div>' : '')
       + '</div><button class="btn ghost sm" onclick="engLongDel(\''+engLongSub+'\',\''+it.id+'\')">🗑️</button></div>';
   }).join('') : '<div class="muted">还没有记录，写下第一条吧。</div>';
-  body.innerHTML = '<div class="muted" style="margin-bottom:8px">'+meta.title+'</div>' + form + '<div class="eng-long-list">'+list+'</div>';
+  var aiBtn = (engLongSub === 'journals') ? '' : '<button class="btn ghost sm" onclick="engLongAIFill()">🤖 AI 帮我找</button>';
+  body.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px">'
+    + '<div class="muted">' + meta.title + '</div>' + aiBtn + '</div>'
+    + '<div id="engLongAITip" class="muted" style="margin-bottom:6px"></div>'
+    + form + '<div class="eng-long-list">' + list + '</div>';
+  initVoiceInput();
 }
 function engLongSwitch(sub){
   engLongSub = sub;
@@ -9558,4 +9565,79 @@ function engLongDel(sub, id){
   var d = loadEngLong();
   d[sub] = d[sub].filter(function(x){ return x.id !== id; });
   saveEngLong(d); renderEngLong();
+}
+/* ===== 长期积累 · AI 辅助（找词句 / 识图） ===== */
+var AI_VISION_HINTS = ['glm-4v','glm-4.1v','qwen-vl','qwen2-vl','qwen2.5-vl','gpt-4o','gpt-4.1','gemini','claude-3','claude-4','internvl','deepseek-vl'];
+function aiSupportsVision(cfg){
+  var m = String((cfg && cfg.model) || '').toLowerCase();
+  for(var i=0;i<AI_VISION_HINTS.length;i++){ if(m.indexOf(AI_VISION_HINTS[i]) >= 0) return true; }
+  return false;
+}
+function engLongAISpec(){
+  if(engLongSub === 'vocab') return {
+    task: '从材料中挑出 5~8 个最值得学的供应链/商务英语单词或短语',
+    item: '{"word":"单词或短语","phonetic":"音标(可空)","meaning":"中文释义","source":"来源(书名/剧名/文章名)","note":"一个例句或记忆点"}',
+    name: '生词' };
+  if(engLongSub === 'quotes') return {
+    task: '挑出 5~8 句地道、好用、值得背下来的英文句子',
+    item: '{"sentence":"英文句子","source":"出处","note":"中文意思或喜欢的原因"}',
+    name: '金句' };
+  if(engLongSub === 'notes') return {
+    task: '提炼这本书/影视/播客的核心要点，给出 3~6 条笔记',
+    item: '{"title":"书名或片名","type":"书/剧/播客","excerpt":"摘抄或片段(可空)","reflection":"要点或感想"}',
+    name: '笔记' };
+  return null;
+}
+function engLongAIFill(){
+  var spec = engLongAISpec();
+  if(!spec){ toast('随笔请自己写哦～'); return; }
+  var c = loadAIConfig();
+  if(!(c && c.key && c.base && c.model)){ toast('请先在设置页配置 AI'); return; }
+  showPrompt({
+    title: '🤖 AI 帮我找' + spec.name,
+    fields: [{label:'给我书名 / 剧名 / 主题，或粘贴一段英文（可留空，只用照片）', placeholder:'例：《原则》/ The Office / 供应商谈判常用表达…'}],
+    withPhoto: true
+  }).then(function(vals){
+    if(!vals) return;
+    var q = (vals[0] || '').trim();
+    var photoId = vals[vals.length - 1];
+    function tip(t){ var el = document.getElementById('engLongAITip'); if(el) el.textContent = t || ''; }
+    var prompt = '你是英语学习助手。请针对下面的材料/主题，' + spec.task
+      + '。只输出 JSON，格式为 {"items":[' + spec.item + ', ...]}，每条字段齐全，不要多余解释，不要出现「字数」「JSON」「字段」等字样。'
+      + (q ? '\n\n材料/主题：' + q : '');
+    function doChat(userContent){
+      tip('AI 正在生成…');
+      var msgs = [{role:'system', content:'你是严谨的英语学习素材整理助手，输出必须是合法 JSON。'},
+                  {role:'user', content:userContent}];
+      aiChat(c, msgs, 60).then(function(res){
+        var o = parseAIJSON(res.content);
+        var items = (o && Object.prototype.toString.call(o.items) === '[object Array]') ? o.items : null;
+        if(!items || !items.length){ tip('没找到合适的条目，换个说法再试'); return; }
+        var d = loadEngLong();
+        d[engLongSub] = d[engLongSub] || [];
+        var fields = ENG_LONG_META[engLongSub].fields;
+        var added = 0;
+        items.forEach(function(it){
+          if(!it || typeof it !== 'object') return;
+          var obj = {id:'el' + Date.now() + '_' + added};
+          var ok = false;
+          fields.forEach(function(f){ var v = _aiStr(it[f.k]); obj[f.k] = v; if(v) ok = true; });
+          if(ok){ d[engLongSub].push(obj); added++; }
+        });
+        saveEngLong(d); renderEngLong();
+        tip('');
+        toast(added ? ('✅ AI 已加入 ' + added + ' 条' + spec.name) : 'AI 没给出有效条目，再试一次');
+      }).catch(function(err){ tip(''); toast('AI 出错：' + ((err && err.message) || '')); });
+    }
+    if(photoId){
+      if(!aiSupportsVision(c)){ toast('当前模型不支持看图，请在设置页换成视觉模型（如 智谱 glm-4v）'); return; }
+      getPhoto(photoId).then(function(data){
+        if(!data){ toast('没读到照片'); return; }
+        doChat([{type:'text', text:prompt}, {type:'image_url', image_url:{url:data}}]);
+      });
+    } else {
+      if(!q){ toast('至少给个主题或一张照片'); return; }
+      doChat(prompt);
+    }
+  });
 }

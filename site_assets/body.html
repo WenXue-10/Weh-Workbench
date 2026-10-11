@@ -3470,17 +3470,17 @@
                 <button class="btn ghost" onclick="engSceneShowAdd()">➕ 添加卡片</button>
               </div>
               <div id="engSceneAddBox" style="display:none" class="eng-add">
-                <input id="engSceneTerm" placeholder="术语，如：lead time">
-                <button type="button" class="voice-btn" data-target="engSceneTerm" onclick="toggleVoice('engSceneTerm')">🎤</button>
-                <input id="engSceneSentence" placeholder="一句商务/场景句">
-                <button type="button" class="voice-btn" data-target="engSceneSentence" onclick="toggleVoice('engSceneSentence')">🎤</button>
+                <div class="eng-add-field"><input id="engSceneTerm" placeholder="术语，如：lead time">
+                <button type="button" class="voice-btn" data-target="engSceneTerm" onclick="toggleVoice('engSceneTerm')">🎤</button></div>
+                <div class="eng-add-field"><input id="engSceneSentence" placeholder="一句商务/场景句">
+                <button type="button" class="voice-btn" data-target="engSceneSentence" onclick="toggleVoice('engSceneSentence')">🎤</button></div>
                 <select id="engSceneCat">
                   <option value="谈判">谈判</option>
                   <option value="邮件">邮件</option>
                   <option value="面试">面试</option>
                   <option value="日常">日常</option>
                 </select>
-                <input id="engSceneNote" placeholder="你的自述（可选）">
+                <div class="eng-add-field"><input id="engSceneNote" placeholder="你的自述（可选）"></div>
                 <button class="btn" onclick="engSceneAdd()">保存</button>
               </div>
               <div class="eng-list" id="engSceneCardList"></div>
