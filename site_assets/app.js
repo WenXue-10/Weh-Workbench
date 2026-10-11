@@ -9380,7 +9380,9 @@ function renderEngScene(){
   var box = document.getElementById('engSceneCard'); if(!box) return;
   var d = loadEngScene();
   var pool = d.cards.filter(function(c){ return !c.mastered; });
-  var card = pool.length ? pool[0] : (d.cards[0] || null);
+  var card = null;
+  if(d.lastCardId){ for(var _i=0;_i<pool.length;_i++){ if(pool[_i].id === d.lastCardId){ card = pool[_i]; break; } } }
+  if(!card) card = pool.length ? pool[0] : (d.cards[0] || null);
   if(!card){
     box.innerHTML = '<div class="muted">还没有卡片，点「添加卡片」建第一张。</div>';
     box.removeAttribute('data-cur');
@@ -9394,7 +9396,7 @@ function renderEngScene(){
   if(list){
     list.innerHTML = d.cards.map(function(c){
       return '<div class="eng-card-row'+(c.mastered?' done':'')+'"><span>'+esc(c.term)+' <span class="muted">'+esc(c.cat)+'</span></span>'
-        + '<span>'+ (c.mastered?'✅':'⬜') +' <button class="btn ghost sm" onclick="engSceneDel(\''+c.id+'\')">🗑️</button></span></div>';
+        + '<span><button class="btn ghost sm eng-st" title="点击切换掌握状态" onclick="engSceneToggleMastered(\''+c.id+'\')">'+(c.mastered?'✅ 再学':'⬜ 记住')+'</button> <button class="btn ghost sm" onclick="engSceneDel(\''+c.id+'\')">🗑️</button></span></div>';
     }).join('');
   }
   renderEngSceneChat();
@@ -9418,7 +9420,17 @@ function engSceneMarkMastered(){
   var c = null;
   for(var i=0;i<d.cards.length;i++){ if(d.cards[i].id === cur){ c = d.cards[i]; break; } }
   if(!c) return;
-  c.mastered = true; saveEngScene(d); renderEngScene(); toast('✅ 已记住');
+  c.mastered = true; saveEngScene(d); renderEngScene(); toast('✅ 已记住，可在列表点击「再学」找回');
+}
+function engSceneToggleMastered(id){
+  var d = loadEngScene();
+  var c = null;
+  for(var i=0;i<d.cards.length;i++){ if(d.cards[i].id === id){ c = d.cards[i]; break; } }
+  if(!c) return;
+  c.mastered = !c.mastered;
+  if(!c.mastered){ d.lastCardId = id; }
+  saveEngScene(d); renderEngScene();
+  toast(c.mastered ? '✅ 已掌握，可在列表点击「再学」找回' : '↩️ 已放回复习队列');
 }
 function engSceneShowAdd(){ var b = document.getElementById('engSceneAddBox'); if(b){ b.style.display = (b.style.display === 'none') ? '' : 'none'; } }
 function engSceneAdd(){

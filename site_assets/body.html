@@ -3471,7 +3471,9 @@
               </div>
               <div id="engSceneAddBox" style="display:none" class="eng-add">
                 <input id="engSceneTerm" placeholder="术语，如：lead time">
+                <button type="button" class="voice-btn" data-target="engSceneTerm" onclick="toggleVoice('engSceneTerm')">🎤</button>
                 <input id="engSceneSentence" placeholder="一句商务/场景句">
+                <button type="button" class="voice-btn" data-target="engSceneSentence" onclick="toggleVoice('engSceneSentence')">🎤</button>
                 <select id="engSceneCat">
                   <option value="谈判">谈判</option>
                   <option value="邮件">邮件</option>
@@ -3494,6 +3496,7 @@
               <div class="m-box" id="engSceneChat"></div>
               <div class="eng-chat-input">
                 <input id="engSceneInput" placeholder="用英语或中英混着说…" onkeydown="if(event.key==='Enter') engSceneSend()">
+                <button type="button" class="voice-btn" data-target="engSceneInput" onclick="toggleVoice('engSceneInput')">🎤</button>
                 <button class="btn" onclick="engSceneSend()">发送</button>
                 <button class="btn ghost" onclick="engSceneClear()">清空</button>
               </div>
