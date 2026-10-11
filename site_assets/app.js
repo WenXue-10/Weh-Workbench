@@ -5754,6 +5754,7 @@ function switchCet6Sub(sub){
   });
   if(sub === 'scene'){ renderEngScene(); }
   if(sub === 'long'){ renderEngLong(); }
+  if(sub === 'game'){ renderEngGame(); }
 }
 
 // 二级导航：六级学习内部小节切换
@@ -9641,3 +9642,220 @@ function engLongAIFill(){
     }
   });
 }
+/* ===== 英语成长台 · 复习闯关 ===== */
+var GAME_KEY = 'weh_eng_game_v1';
+var ENG_INTERVALS = [0, 1, 3, 7, 15, 30];   /* 天：level 对应的下次复习间隔 */
+var ENG_BADGES = [
+  {id:'s3',  icon:'🔥', name:'三日不辍', desc:'连续复习打卡 3 天'},
+  {id:'s7',  icon:'🏅', name:'一周坚持', desc:'连续复习打卡 7 天'},
+  {id:'r50', icon:'⭐', name:'复习达人', desc:'累计复习 50 次'},
+  {id:'r150',icon:'💎', name:'百炼成钢', desc:'累计复习 150 次'},
+  {id:'c10', icon:'🧠', name:'掌握十卡', desc:'场景卡掌握满 10 张'},
+  {id:'a20', icon:'📚', name:'积累有方', desc:'长期积累满 20 条'}
+];
+var _engGame = null;
+function engTodayKey(){
+  var d = new Date();
+  return d.getFullYear() + '-' + ('0'+(d.getMonth()+1)).slice(-2) + '-' + ('0'+d.getDate()).slice(-2);
+}
+function loadEngGame(){
+  var d = null;
+  try{ d = JSON.parse(localStorage.getItem(GAME_KEY)); }catch(e){}
+  if(!d || typeof d !== 'object'){ d = {streak:0, lastDay:'', stars:0, reviews:0, badges:[]}; }
+  if(!Array.isArray(d.badges)) d.badges = [];
+  if(typeof d.streak !== 'number') d.streak = 0;
+  if(typeof d.stars !== 'number') d.stars = 0;
+  if(typeof d.reviews !== 'number') d.reviews = 0;
+  if(typeof d.lastDay !== 'string') d.lastDay = '';
+  return d;
+}
+function saveEngGame(d){ try{ localStorage.setItem(GAME_KEY, JSON.stringify(d)); markLocalChange(); }catch(e){} }
+function engEnsureCardFields(){
+  var d = loadEngScene();
+  var changed = false;
+  d.cards.forEach(function(c){
+    if(typeof c.level !== 'number'){ c.level = 0; changed = true; }
+    if(typeof c.due !== 'number'){ c.due = 0; changed = true; }
+  });
+  if(changed) saveEngScene(d);
+  return d;
+}
+function engDueCards(){
+  var d = engEnsureCardFields();
+  var now = Date.now();
+  return d.cards.filter(function(c){ return !c.due || c.due <= now; });
+}
+function engShuffle(a){ for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+function engPickGameItems(){
+  var d = engEnsureCardFields();
+  var now = Date.now();
+  var pool = d.cards.slice().sort(function(a,b){ return (a.due||0) - (b.due||0); });
+  var items = [];
+  for(var i=0;i<pool.length && items.length<6;i++){
+    var c = pool[i];
+    if(!c.due || c.due <= now) items.push({kind:'card', id:c.id});
+  }
+  var L = loadEngLong();
+  var extra = engShuffle((L.vocab||[]).slice()).slice(0,2);
+  extra.forEach(function(v){ items.push({kind:'vocab', id:v.id}); });
+  if(items.length > 8) items = items.slice(0,8);
+  return engShuffle(items);
+}
+function engBadgeCheck(g){
+  var d = loadEngScene();
+  var masteredN = d.cards.filter(function(c){ return c.mastered; }).length;
+  var L = loadEngLong();
+  var accN = (L.vocab||[]).length + (L.quotes||[]).length + (L.notes||[]).length + (L.journals||[]).length;
+  var newly = [];
+  ENG_BADGES.forEach(function(b){
+    if(g.badges.indexOf(b.id) >= 0) return;
+    var hit = false;
+    if(b.id === 's3') hit = g.streak >= 3;
+    else if(b.id === 's7') hit = g.streak >= 7;
+    else if(b.id === 'r50') hit = g.reviews >= 50;
+    else if(b.id === 'r150') hit = g.reviews >= 150;
+    else if(b.id === 'c10') hit = masteredN >= 10;
+    else if(b.id === 'a20') hit = accN >= 20;
+    if(hit){ g.badges.push(b.id); newly.push(b); }
+  });
+  return newly;
+}
+function renderEngBadges(g){
+  return '<div class="eng-block" style="margin-top:12px"><div class="card-head">🏅 成就</div>'
+    + '<div class="eng-badges">' + ENG_BADGES.map(function(b){
+        var got = g.badges.indexOf(b.id) >= 0;
+        return '<div class="eng-badge' + (got ? ' got' : '') + '" title="' + b.desc + '">'
+          + '<div class="eng-badge-icon">' + b.icon + '</div>'
+          + '<div class="eng-badge-name">' + b.name + '</div></div>';
+      }).join('') + '</div></div>';
+}
+function engGameQuestionHTML(){
+  var it = _engGame.items[_engGame.idx];
+  var front = '', back = '';
+  if(it.kind === 'card'){
+    var d = loadEngScene(); var c = null;
+    d.cards.forEach(function(x){ if(x.id === it.id) c = x; });
+    if(!c) return '';
+    front = esc(c.term);
+    back = esc(c.sentence) + (c.note ? '　—　' + esc(c.note) : '');
+  } else {
+    var L = loadEngLong(); var v = null;
+    (L.vocab||[]).forEach(function(x){ if(x.id === it.id) v = x; });
+    if(!v) return '';
+    front = esc(v.word);
+    back = esc(v.meaning) + (v.note ? '　—　' + esc(v.note) : '');
+  }
+  return '<div class="eng-block" style="margin-top:12px">'
+    + '<div class="muted">第 ' + (_engGame.idx+1) + ' / ' + _engGame.items.length + ' 题</div>'
+    + '<div class="eng-game-front">' + front + '</div>'
+    + '<div class="eng-game-back" id="engGameBack" style="display:none">' + back + '</div>'
+    + '<div class="eng-actions" style="margin-top:12px">'
+    + '<button class="btn ghost" id="engGameRevealBtn" onclick="engGameReveal()">👀 看答案</button>'
+    + '<button class="btn" onclick="engGameAnswer(1)">✅ 记住了</button>'
+    + '<button class="btn ghost" onclick="engGameAnswer(0)">🤔 没记住</button>'
+    + '</div></div>';
+}
+function renderEngGame(){
+  var body = document.getElementById('engGameBody'); if(!body) return;
+  var g = loadEngGame();
+  var today = engTodayKey();
+  var doneToday = (g.lastDay === today);
+  var dueN = engDueCards().length;
+  function sb(icon, n, label){ return '<div class="eng-game-stat"><div class="n">' + n + '</div><div class="l">' + icon + ' ' + label + '</div></div>'; }
+  var html = '<div class="eng-game-stats">'
+    + sb('🔥', g.streak, '连续') + sb('⭐', g.stars, '星星') + sb('🔁', g.reviews, '复习') + sb('📅', dueN, '待复习')
+    + '</div>';
+  if(_engGame && _engGame.idx < _engGame.items.length){
+    html += engGameQuestionHTML();
+  } else {
+    html += '<div class="eng-block" style="margin-top:12px">'
+      + '<button class="btn" onclick="engStartGame()">🎮 开始今日闯关' + (doneToday ? '（加练）' : '') + '</button> '
+      + '<button class="btn ghost" onclick="engExportMD()">📤 导出 Markdown</button>'
+      + '<div class="muted" style="margin-top:10px;line-height:1.6">每天 5 分钟：复习到期的卡片 + 随机回顾你积累的生词。答对攒 ⭐，连续打卡有徽章；导出的 Markdown 放进知识库即可长期保存。</div>'
+      + '</div>';
+  }
+  html += renderEngBadges(g);
+  body.innerHTML = html;
+}
+function engStartGame(){
+  var items = engPickGameItems();
+  if(!items.length){ toast('暂时没有可复习的卡片，先去场景实战加几张吧'); return; }
+  _engGame = {items:items, idx:0, ok:0};
+  renderEngGame();
+}
+function engGameReveal(){
+  var b = document.getElementById('engGameBack'); if(b) b.style.display = 'block';
+  var btn = document.getElementById('engGameRevealBtn'); if(btn) btn.style.display = 'none';
+}
+function engGameAnswer(ok){
+  if(!_engGame) return;
+  var it = _engGame.items[_engGame.idx];
+  if(it && it.kind === 'card'){
+    var d = engEnsureCardFields(); var c = null;
+    d.cards.forEach(function(x){ if(x.id === it.id) c = x; });
+    if(c){
+      if(ok){
+        c.level = Math.min((c.level||0)+1, ENG_INTERVALS.length-1);
+        c.mastered = true;
+        c.due = Date.now() + ENG_INTERVALS[c.level] * 86400000;
+      } else {
+        c.level = 0; c.mastered = false; c.due = 0;
+      }
+      saveEngScene(d);
+    }
+  }
+  if(ok) _engGame.ok++;
+  var g = loadEngGame(); g.reviews = (g.reviews||0) + 1; saveEngGame(g);
+  _engGame.idx++;
+  if(_engGame.idx >= _engGame.items.length){ engFinishGame(); }
+  else { renderEngGame(); }
+}
+function engFinishGame(){
+  var g = loadEngGame();
+  var today = engTodayKey();
+  var n = _engGame.items.length, okN = _engGame.ok;
+  g.stars = (g.stars||0) + okN;
+  if(g.lastDay !== today){
+    var y = new Date(Date.now() - 86400000);
+    var yk = y.getFullYear() + '-' + ('0'+(y.getMonth()+1)).slice(-2) + '-' + ('0'+y.getDate()).slice(-2);
+    g.streak = (g.lastDay === yk) ? (g.streak||0)+1 : 1;
+    g.lastDay = today;
+  }
+  var newly = engBadgeCheck(g);
+  saveEngGame(g);
+  _engGame = null;
+  renderEngGame();
+  var msg = '🎉 本轮完成！答对 ' + okN + ' / ' + n + '，+' + okN + ' ⭐';
+  if(newly.length) msg += '　解锁：' + newly.map(function(b){ return b.icon + b.name; }).join('、');
+  toast(msg);
+}
+function engExportMD(){
+  var d = loadEngScene();
+  var L = loadEngLong();
+  var today = engTodayKey();
+  var md = '# 英语积累 · ' + today + '\n\n';
+  md += '## 🃏 场景碎片卡（' + d.cards.length + '）\n\n';
+  d.cards.forEach(function(c){
+    md += '- **' + c.term + '**' + (c.cat ? '（' + c.cat + '）' : '') + (c.mastered ? ' ✅' : '') + '\n';
+    if(c.sentence) md += '  - ' + c.sentence + '\n';
+    if(c.note) md += '  - 备注：' + c.note + '\n';
+  });
+  function sec(title, arr, mk){
+    md += '\n## ' + title + '（' + (arr || []).length + '）\n\n';
+    (arr || []).forEach(function(it){ md += mk(it) + '\n'; });
+  }
+  sec('📘 跨场景生词', L.vocab, function(v){ return '- **' + (v.word||'') + '**' + (v.phonetic ? ' /' + v.phonetic + '/' : '') + ' — ' + (v.meaning||'') + (v.source ? '　〔' + v.source + '〕' : '') + (v.note ? '　' + v.note : ''); });
+  sec('💬 喜欢的英文句', L.quotes, function(q){ return '- ' + (q.sentence||'') + (q.source ? '　—— ' + q.source : '') + (q.note ? '　（' + q.note + '）' : ''); });
+  sec('🎬 阅读·观影笔记', L.notes, function(n){ return '- **' + (n.title||'') + '**' + (n.type ? '（' + n.type + '）' : '') + '\n  - ' + (n.excerpt ? ('摘抄：' + n.excerpt + '\n  - ') : '') + (n.reflection||''); });
+  sec('✍️ 英文随笔', L.journals, function(j){ return '- ' + (j.content||''); });
+  try{
+    var blob = new Blob([md], {type:'text/markdown;charset=utf-8'});
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'english-accumulation-' + today + '.md';
+    document.body.appendChild(a); a.click();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+    toast('已导出 Markdown，放进知识库即可');
+  }catch(e){ toast('导出失败：' + e.message); }
+}
+
