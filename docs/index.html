@@ -2182,12 +2182,35 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
 .eng-card-row.done{ opacity:.55; }
 .eng-card-row.done > span:first-child{ text-decoration:line-through; }
 .eng-scene-tabs{ display:flex; gap:8px; flex-wrap:wrap; margin:10px 0; }
-.eng-chat-input{ display:flex; gap:8px; }
+.eng-chat-input{ display:flex; gap:8px; flex-wrap:wrap; }
 .eng-chat-input input{ flex:1; padding:9px 12px; border:1px solid var(--line); border-radius:12px; font-size:14px; background:rgba(255,255,255,.72); color:var(--text); }
 .eng-long-list{ margin-top:10px; display:flex; flex-direction:column; gap:8px; }
 .eng-long-item{ display:flex; justify-content:space-between; align-items:flex-start; gap:12px; padding:12px 14px; border:1px solid var(--line); border-radius:14px; background:rgba(255,255,255,.5); }
 .eng-long-main{ font-size:14px; line-height:1.6; color:var(--text); }
 .btn.sm, .btn.ghost.sm{ padding:3px 10px; font-size:12px; }
+
+
+/* 英语成长台按钮主题化（2026-10-11）：.btn 此前无基础样式 → 渲染成浏览器默认灰底按钮，与全站粉紫主题格格不入 */
+.eng-actions .btn, .eng-add .btn, .eng-chat-input .btn{
+  border:1px solid var(--line); border-radius:12px; padding:9px 16px; font-size:13px; font-weight:700;
+  line-height:1.4; cursor:pointer; white-space:nowrap; flex-shrink:0; transition:.15s;
+  background:var(--pink-soft); color:var(--pink-deep);
+}
+.eng-actions .btn:hover, .eng-add .btn:hover, .eng-chat-input .btn:hover{ transform:translateY(-1px); box-shadow:var(--shadow-sm); }
+/* 主操作（发送 / 保存）粉紫渐变，与全站主按钮一致 */
+.eng-chat-input .btn:not(.ghost), .eng-add .btn:not(.ghost){ background:linear-gradient(135deg,var(--pink-deep),#b48ed9); color:#fff; border-color:transparent; }
+/* 次要 ghost（清空 / 添加卡片） */
+.eng-actions .btn.ghost, .eng-chat-input .btn.ghost{ background:rgba(255,255,255,.6); color:var(--muted); border-color:var(--line); }
+.eng-actions .btn.ghost:hover, .eng-chat-input .btn.ghost:hover{ background:rgba(255,255,255,.9); color:var(--pink-deep); border-color:var(--pink); }
+/* 小号图标按钮（🗑️ 删除） */
+.eng-card-row .btn.ghost.sm, .eng-long-item .btn.ghost.sm{
+  background:rgba(255,255,255,.6); border:1px solid var(--line); color:var(--muted);
+  padding:4px 9px; font-size:12px; border-radius:9px; cursor:pointer; transition:.15s; flex-shrink:0; line-height:1.4;
+}
+.eng-card-row .btn.ghost.sm:hover, .eng-long-item .btn.ghost.sm:hover{ color:var(--pink-deep); border-color:var(--pink); background:rgba(255,255,255,.9); }
+/* 输入行与下方提示之间留白（原先紧贴显拥挤） */
+.eng-chat-input + .muted{ margin-top:10px; line-height:1.6; }
+
 /* 聊天区：.m-box 仅英语场景使用；共用 .m-msg 全面主题化（粉紫渐变 + 主题描边） */
 .m-box{ max-height:340px; overflow:auto; background:rgba(255,255,255,.5); border:1px solid var(--line); border-radius:16px; padding:12px; margin:10px 0; }
 .m-msg{ padding:9px 13px; border-radius:14px; margin:8px 0; max-width:85%; line-height:1.55; font-size:14px; word-break:break-word; }
@@ -7100,7 +7123,7 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
 
 <script>
 window.SITE_DATA = {
- "updated": "2026-10-11 19:59",
+ "updated": "2026-10-11 22:28",
  "stats": {
   "jobs": 57,
   "rec": 0,
