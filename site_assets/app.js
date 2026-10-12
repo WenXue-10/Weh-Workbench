@@ -9537,7 +9537,7 @@ function renderEngLong(){
       + (engLongSub === 'notes' && it.excerpt ? '<div class="muted">“'+esc(it.excerpt)+'”</div>' : '')
       + '</div><button class="btn ghost sm" onclick="engLongDel(\''+engLongSub+'\',\''+it.id+'\')">🗑️</button></div>';
   }).join('') : '<div class="muted">还没有记录，写下第一条吧。</div>';
-  var aiBtn = (engLongSub === 'journals') ? '' : '<button class="btn ghost sm" onclick="engLongAIFill()">🤖 AI 帮我找</button>';
+  var aiBtn = (engLongSub === 'journals') ? '' : '<div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn ghost sm" onclick="engLongPhotoFill()">📷 拍图识别</button><button class="btn ghost sm" onclick="engLongAIFill()">🤖 AI 帮我找</button></div>';
   body.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px">'
     + '<div class="muted">' + meta.title + '</div>' + aiBtn + '</div>'
     + '<div id="engLongAITip" class="muted" style="margin-bottom:6px"></div>'
@@ -9642,6 +9642,49 @@ function engLongAIFill(){
     }
   });
 }
+/* 长期积累 · 直连拍图识别（表单行一键按钮） */
+function engLongIngest(items, specName){
+  if(!items || !items.length) return 0;
+  var d = loadEngLong();
+  d[engLongSub] = d[engLongSub] || [];
+  var fields = ENG_LONG_META[engLongSub].fields;
+  var added = 0;
+  items.forEach(function(it){
+    if(!it || typeof it !== 'object') return;
+    var obj = {id:'el' + Date.now() + '_' + added};
+    var ok = false;
+    fields.forEach(function(f){ var v = _aiStr(it[f.k]); obj[f.k] = v; if(v) ok = true; });
+    if(ok){ d[engLongSub].push(obj); added++; }
+  });
+  if(added) saveEngLong(d);
+  renderEngLong();
+  return added;
+}
+function engLongPhotoFill(){
+  var spec = engLongAISpec();
+  if(!spec){ toast('随笔请自己写哦～'); return; }
+  var c = loadAIConfig();
+  if(!(c && c.key && c.base && c.model)){ toast('请先在设置页配置 AI'); return; }
+  if(!aiSupportsVision(c)){ toast('当前模型不支持看图，请在设置页换成视觉模型（如 智谱 glm-4v / 通义 qwen-vl）'); return; }
+  var tip = function(t){ var el = document.getElementById('engLongAITip'); if(el) el.textContent = t || ''; };
+  tip('请选择或拍摄一张图片…');
+  pickPhoto().then(function(photo){
+    if(!photo || !photo.data){ tip(''); return; }
+    var prompt = '你是英语学习助手。请识别这张图片（书页 / 单词表 / 台词截图 / 笔记等）中的内容，' + spec.task
+      + '。只输出 JSON，格式为 {"items":[' + spec.item + ', ...]}，每条字段齐全，不要多余解释，不要出现「字数」「JSON」「字段」等字样。';
+    tip('AI 正在识别图片…');
+    var msgs = [{role:'system', content:'你是严谨的英语学习素材整理助手，能识别图片内容，输出必须是合法 JSON。'},
+                {role:'user', content:[{type:'text', text:prompt}, {type:'image_url', image_url:{url:photo.data}}]}];
+    aiChat(c, msgs, 60).then(function(res){
+      var o = parseAIJSON(res.content);
+      var items = (o && Object.prototype.toString.call(o.items) === '[object Array]') ? o.items : null;
+      var added = engLongIngest(items, spec.name);
+      tip('');
+      toast(added ? ('✅ 已从图片识别并加入 ' + added + ' 条' + spec.name) : 'AI 没识别出有效条目，换张更清晰的图再试');
+    }).catch(function(err){ tip(''); toast('AI 出错：' + ((err && err.message) || '')); });
+  });
+}
+
 /* ===== 英语成长台 · 复习闯关 ===== */
 var GAME_KEY = 'weh_eng_game_v1';
 var ENG_INTERVALS = [0, 1, 3, 7, 15, 30];   /* 天：level 对应的下次复习间隔 */
@@ -9661,8 +9704,9 @@ function engTodayKey(){
 function loadEngGame(){
   var d = null;
   try{ d = JSON.parse(localStorage.getItem(GAME_KEY)); }catch(e){}
-  if(!d || typeof d !== 'object'){ d = {streak:0, lastDay:'', stars:0, reviews:0, badges:[]}; }
+  if(!d || typeof d !== 'object'){ d = {streak:0, lastDay:'', stars:0, reviews:0, badges:[], history:[]}; }
   if(!Array.isArray(d.badges)) d.badges = [];
+  if(!Array.isArray(d.history)) d.history = [];
   if(typeof d.streak !== 'number') d.streak = 0;
   if(typeof d.stars !== 'number') d.stars = 0;
   if(typeof d.reviews !== 'number') d.reviews = 0;
@@ -9729,6 +9773,13 @@ function renderEngBadges(g){
           + '<div class="eng-badge-name">' + b.name + '</div></div>';
       }).join('') + '</div></div>';
 }
+function renderEngHistory(g){
+  var h = (g && g.history) || [];
+  var rows = h.length ? h.slice(0, 8).map(function(x){
+    return '<div class="eng-hist-row"><span>' + esc(x.day) + '</span><span>答对 ' + (x.ok||0) + ' / ' + (x.n||0) + '　+' + (x.ok||0) + ' ⭐</span></div>';
+  }).join('') : '<div class="muted">还没有复习记录，完成一轮闯关就会记在这里。</div>';
+  return '<div class="eng-block" style="margin-top:12px"><div class="card-head">📜 复习记录（最近 8 次）</div><div class="eng-hist-list">' + rows + '</div></div>';
+}
 function engGameQuestionHTML(){
   var it = _engGame.items[_engGame.idx];
   var front = '', back = '';
@@ -9769,11 +9820,12 @@ function renderEngGame(){
     html += engGameQuestionHTML();
   } else {
     html += '<div class="eng-block" style="margin-top:12px">'
-      + '<button class="btn" onclick="engStartGame()">🎮 开始今日闯关' + (doneToday ? '（加练）' : '') + '</button> '
+      + '<button class="btn primary" onclick="engStartGame()">🎮 开始今日闯关' + (doneToday ? '（加练）' : '') + '</button> '
       + '<button class="btn ghost" onclick="engExportMD()">📤 导出 Markdown</button>'
       + '<div class="muted" style="margin-top:10px;line-height:1.6">每天 5 分钟：复习到期的卡片 + 随机回顾你积累的生词。答对攒 ⭐，连续打卡有徽章；导出的 Markdown 放进知识库即可长期保存。</div>'
       + '</div>';
   }
+  html += renderEngHistory(g);
   html += renderEngBadges(g);
   body.innerHTML = html;
 }
@@ -9822,6 +9874,9 @@ function engFinishGame(){
     g.lastDay = today;
   }
   var newly = engBadgeCheck(g);
+  g.history = g.history || [];
+  g.history.unshift({day:today, n:n, ok:okN, stars:okN});
+  if(g.history.length > 30) g.history = g.history.slice(0,30);
   saveEngGame(g);
   _engGame = null;
   renderEngGame();

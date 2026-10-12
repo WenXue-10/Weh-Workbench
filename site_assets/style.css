@@ -2177,27 +2177,20 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
 .eng-long-list{ margin-top:10px; display:flex; flex-direction:column; gap:8px; }
 .eng-long-item{ display:flex; justify-content:space-between; align-items:flex-start; gap:12px; padding:12px 14px; border:1px solid var(--line); border-radius:14px; background:rgba(255,255,255,.5); }
 .eng-long-main{ font-size:14px; line-height:1.6; color:var(--text); }
-.btn.sm, .btn.ghost.sm{ padding:3px 10px; font-size:12px; }
-
-
-/* 英语成长台按钮主题化（2026-10-11）：.btn 此前无基础样式 → 渲染成浏览器默认灰底按钮，与全站粉紫主题格格不入 */
-.eng-actions .btn, .eng-add .btn, .eng-chat-input .btn{
-  border:1px solid var(--line); border-radius:12px; padding:9px 16px; font-size:13px; font-weight:700;
-  line-height:1.4; cursor:pointer; white-space:nowrap; flex-shrink:0; transition:.15s;
-  background:var(--pink-soft); color:var(--pink-deep);
-}
-.eng-actions .btn:hover, .eng-add .btn:hover, .eng-chat-input .btn:hover{ transform:translateY(-1px); box-shadow:var(--shadow-sm); }
-/* 主操作（发送 / 保存）粉紫渐变，与全站主按钮一致 */
-.eng-chat-input .btn:not(.ghost), .eng-add .btn:not(.ghost){ background:linear-gradient(135deg,var(--pink-deep),#b48ed9); color:#fff; border-color:transparent; }
-/* 次要 ghost（清空 / 添加卡片） */
-.eng-actions .btn.ghost, .eng-chat-input .btn.ghost{ background:rgba(255,255,255,.6); color:var(--muted); border-color:var(--line); }
-.eng-actions .btn.ghost:hover, .eng-chat-input .btn.ghost:hover{ background:rgba(255,255,255,.9); color:var(--pink-deep); border-color:var(--pink); }
-/* 小号图标按钮（🗑️ 删除） */
-.eng-card-row .btn.ghost.sm, .eng-long-item .btn.ghost.sm{
-  background:rgba(255,255,255,.6); border:1px solid var(--line); color:var(--muted);
-  padding:4px 9px; font-size:12px; border-radius:9px; cursor:pointer; transition:.15s; flex-shrink:0; line-height:1.4;
-}
-.eng-card-row .btn.ghost.sm:hover, .eng-long-item .btn.ghost.sm:hover{ color:var(--pink-deep); border-color:var(--pink); background:rgba(255,255,255,.9); }
+/* 英语成长台按钮基础样式（2026-10-12）：.btn 此前仅在部分容器内上色，裸放在 .eng-block 里的 .btn 会回落成浏览器默认灰底按钮；改为给 .btn 补全站级基础样式，任意位置的英语按钮都自动主题化 */
+.btn{ display:inline-flex; align-items:center; justify-content:center; gap:5px; border:1px solid var(--line); border-radius:12px; padding:9px 16px; font-size:13px; font-weight:700; line-height:1.4; cursor:pointer; white-space:nowrap; flex-shrink:0; transition:.15s; background:var(--pink-soft); color:var(--pink-deep); font-family:inherit; }
+.btn:hover{ transform:translateY(-1px); box-shadow:var(--shadow-sm); }
+/* 主操作粉紫渐变（发送 / 保存 / 开始闯关） */
+.btn.primary, .eng-chat-input .btn:not(.ghost), .eng-add .btn:not(.ghost){ background:linear-gradient(135deg,var(--pink-deep),#b48ed9); color:#fff; border-color:transparent; }
+/* 次要 ghost（清空 / 添加卡片 / 看答案 / 导出） */
+.btn.ghost{ background:rgba(255,255,255,.6); color:var(--muted); border-color:var(--line); }
+.btn.ghost:hover{ background:rgba(255,255,255,.9); color:var(--pink-deep); border-color:var(--pink); }
+/* 小号（删除 🗑️ / 掌握切换） */
+.btn.sm, .btn.ghost.sm{ padding:4px 10px; font-size:12px; border-radius:9px; }
+/* 复习记录 */
+.eng-hist-list{ display:flex; flex-direction:column; gap:6px; margin-top:6px; }
+.eng-hist-row{ display:flex; justify-content:space-between; gap:10px; font-size:13px; color:var(--text); padding:7px 12px; border:1px solid var(--line); border-radius:10px; background:rgba(255,255,255,.5); }
+.eng-hist-row span:first-child{ color:var(--muted); }
 /* 输入行与下方提示之间留白（原先紧贴显拥挤） */
 .eng-chat-input + .muted{ margin-top:10px; line-height:1.6; }
 /* 表单字段分组：输入框与语音按钮同组，排列更整齐 */
