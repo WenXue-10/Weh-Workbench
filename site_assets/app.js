@@ -9460,6 +9460,79 @@ function engSceneDel(id){
   d.cards = d.cards.filter(function(c){ return c.id !== id; });
   saveEngScene(d); renderEngScene();
 }
+/* ===== 场景实战 · AI 批量生成卡片（2026-10-12） ===== */
+var ENG_SCENE_CATS = ['谈判','邮件','面试','日常'];
+function _engSceneNormCat(s){
+  s = String(s||'').trim();
+  for(var i=0;i<ENG_SCENE_CATS.length;i++){ if(s.indexOf(ENG_SCENE_CATS[i])>=0) return ENG_SCENE_CATS[i]; }
+  var m = {negotiation:'谈判',negotiate:'谈判',bargain:'谈判',pricing:'谈判',quote:'谈判',quotation:'谈判',email:'邮件',mail:'邮件',interview:'面试',resume:'面试',daily:'日常',casual:'日常',greeting:'日常',smalltalk:'日常'};
+  var low = s.toLowerCase();
+  for(var k in m){ if(low.indexOf(k)>=0) return m[k]; }
+  return '日常';
+}
+function engSceneIngest(items){
+  var d = loadEngScene();
+  var have = {};
+  d.cards.forEach(function(c){ have[String(c.term||'').trim().toLowerCase()] = true; });
+  var added = 0, skipped = 0;
+  (items||[]).forEach(function(it){
+    if(!it || typeof it !== 'object') return;
+    var term = _aiStr(it.term || it.word || it.phrase);
+    var sentence = _aiStr(it.sentence || it.example || it.usage);
+    if(!term || !sentence) return;
+    var key = term.toLowerCase();
+    if(have[key]){ skipped++; return; }
+    have[key] = true;
+    d.cards.push({id:'sc'+Date.now()+'_'+added, term:term, sentence:sentence,
+      cat:_engSceneNormCat(it.cat || it.category || it.type),
+      note:_aiStr(it.note || it.meaning || it.cn || it.tip), mastered:false});
+    added++;
+  });
+  if(added){ saveEngScene(d); renderEngScene(); }
+  return {added:added, skipped:skipped};
+}
+function engSceneAISpec(fromWork){
+  if(fromWork) return {title:'🎬 从影视/书籍找表达', label:'给我一部影视 / 一本书的名字', ph:'例：The Office / Suits / 《原则》/ Friends',
+    where:'这部作品', task:'挑出 6~10 个最地道、最实用、最值得学的英语表达（以台词/对白为主，附中文意思与使用情境）'};
+  return {title:'🤖 AI 生成卡片', label:'给我主题 / 行业 / 场景，或粘贴一段英文（可留空，只用照片）', ph:'例：供应链 · 报价谈判 / 外贸 · 催款邮件 / job interview 常用表达…',
+    where:'这个主题/材料', task:'挑出 6~10 个最实用、最值得学的商务/场景英语表达（词或短语 + 例句）'};
+}
+function engSceneAIFill(fromWork){
+  var c = loadAIConfig();
+  if(!(c && c.key && c.base && c.model)){ toast('请先在设置页配置 AI'); return; }
+  var spec = engSceneAISpec(fromWork);
+  showPrompt({ title:spec.title, fields:[{label:spec.label, placeholder:spec.ph}], withPhoto:true }).then(function(vals){
+    if(!vals) return;
+    var q = (vals[0] || '').trim();
+    var photoId = vals[vals.length - 1];
+    var tip = function(t){ var el = document.getElementById('engSceneAITip'); if(el) el.textContent = t || ''; };
+    var prompt = '你是英语学习助手。请针对' + spec.where + '，' + spec.task
+      + '。分类只能从「谈判/邮件/面试/日常」中选一个。只输出 JSON，格式为 {"items":[{"term":"词或短语","sentence":"一个地道例句","cat":"谈判/邮件/面试/日常","note":"中文意思或使用情境"}, ...]}，每条字段齐全，不要多余解释，不要出现「字数」「JSON」「字段」等字样。'
+      + (q ? '\n\n材料/主题：' + q : '');
+    function report(r){
+      tip('');
+      if(r.added) toast('✅ 已加入 ' + r.added + ' 张卡片' + (r.skipped ? ('，跳过 ' + r.skipped + ' 张重复') : ''));
+      else toast(r.skipped ? ('这些表达你都已经有了（跳过 ' + r.skipped + ' 张）') : 'AI 没给出有效卡片，换个说法再试');
+    }
+    function doChat(userContent){
+      tip('AI 正在生成…');
+      var msgs = [{role:'system', content:'你是严谨的英语学习素材整理助手，输出必须是合法 JSON。'}, {role:'user', content:userContent}];
+      aiChat(c, msgs, 60).then(function(res){
+        var o = parseAIJSON(res.content);
+        var items = (o && Object.prototype.toString.call(o.items) === '[object Array]') ? o.items : null;
+        if(!items || !items.length){ tip('没找到合适的表达，换个说法再试'); return; }
+        report(engSceneIngest(items));
+      }).catch(function(err){ tip(''); toast('AI 出错：' + ((err && err.message) || '')); });
+    }
+    if(photoId){
+      if(!aiSupportsVision(c)){ toast('当前模型不支持看图，请在设置页换成视觉模型（如 智谱 glm-4v）'); return; }
+      getPhoto(photoId).then(function(data){ if(!data){ toast('没读到照片'); return; } doChat([{type:'text', text:prompt}, {type:'image_url', image_url:{url:data}}]); });
+    } else {
+      if(!q){ toast('至少给个主题或一张照片'); return; }
+      doChat(prompt);
+    }
+  });
+}
 function engSceneSwitch(scn){
   engSceneSub = scn;
   var chips = document.querySelectorAll('#cet6-sub-scene .eng-scene-tabs .chip');
