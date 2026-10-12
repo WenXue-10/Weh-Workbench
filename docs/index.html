@@ -2180,7 +2180,17 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
 .eng-card-row{ display:flex; justify-content:space-between; align-items:center; gap:10px; padding:9px 12px; border:1px solid var(--line); border-radius:12px; background:rgba(255,255,255,.5); transition:background .15s,border-color .15s; }
 .eng-card-row:hover{ background:rgba(255,255,255,.78); border-color:var(--pink); }
 .eng-card-row.done{ opacity:.55; }
-.eng-card-row.done > span:first-child{ text-decoration:line-through; }
+.eng-card-row.done .eng-card-info{ text-decoration:line-through; }
+.eng-list-bar{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; justify-content:space-between; margin:6px 0 8px; }
+.eng-filter-bar{ display:flex; gap:6px; flex-wrap:wrap; }
+.eng-list-search{ flex:1; min-width:150px; }
+.eng-cat-tag{ display:inline-block; font-size:11px; font-weight:600; padding:1px 8px; border-radius:10px; background:var(--pink-soft); color:var(--pink-deep); vertical-align:middle; }
+.eng-card-info{ flex:1; min-width:0; }
+.eng-card-term-line{ font-weight:600; color:var(--text); }
+.eng-card-cn{ font-size:12.5px; color:var(--muted); margin-top:2px; }
+.eng-fresh{ font-size:11px; color:var(--pink-deep); font-weight:700; }
+.eng-card-ops{ flex-shrink:0; display:flex; gap:6px; align-items:center; }
+.eng-more{ margin-top:4px; align-self:flex-start; }
 .eng-scene-tabs{ display:flex; gap:8px; flex-wrap:wrap; margin:10px 0; }
 .eng-chat-input{ display:flex; gap:8px; flex-wrap:wrap; }
 .eng-chat-input input{ flex:1; padding:9px 12px; border:1px solid var(--line); border-radius:12px; font-size:14px; background:rgba(255,255,255,.72); color:var(--text); }
@@ -5732,6 +5742,7 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
                 <div class="eng-add-field"><input id="engSceneNote" placeholder="你的自述（可选）"></div>
                 <button class="btn" onclick="engSceneAdd()">保存</button>
               </div>
+              <div id="engSceneListBar"></div>
               <div class="eng-list" id="engSceneCardList"></div>
             </div>
 
@@ -7154,7 +7165,7 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
 
 <script>
 window.SITE_DATA = {
- "updated": "2026-10-12 16:30",
+ "updated": "2026-10-12 18:01",
  "stats": {
   "jobs": 57,
   "rec": 0,
@@ -31681,13 +31692,8 @@ function renderEngScene(){
       + '<div class="eng-card-sentence">'+esc(card.sentence)+'</div>'
       + (card.note ? '<div class="eng-card-note">📝 '+esc(card.note)+'</div>' : '');
   }
-  var list = document.getElementById('engSceneCardList');
-  if(list){
-    list.innerHTML = d.cards.map(function(c){
-      return '<div class="eng-card-row'+(c.mastered?' done':'')+'"><span>'+esc(c.term)+' <span class="muted">'+esc(c.cat)+'</span></span>'
-        + '<span><button class="btn ghost sm eng-st" title="点击切换掌握状态" onclick="engSceneToggleMastered(\''+c.id+'\')">'+(c.mastered?'✅ 再学':'⬜ 记住')+'</button> <button class="btn ghost sm" onclick="engSceneDel(\''+c.id+'\')">🗑️</button></span></div>';
-    }).join('');
-  }
+  renderEngSceneListBar(d);
+  renderEngSceneList(d);
   var _sum = document.getElementById('engSceneSummary');
   if(_sum){
     var _total = d.cards.length, _mst = d.cards.filter(function(c){ return c.mastered; }).length;
@@ -31762,7 +31768,7 @@ function engSceneIngest(items){
   var d = loadEngScene();
   var have = {};
   d.cards.forEach(function(c){ have[String(c.term||'').trim().toLowerCase()] = true; });
-  var added = 0, skipped = 0;
+  var added = 0, skipped = 0, newIds = [];
   (items||[]).forEach(function(it){
     if(!it || typeof it !== 'object') return;
     var term = _aiStr(it.term || it.word || it.phrase);
@@ -31771,12 +31777,13 @@ function engSceneIngest(items){
     var key = term.toLowerCase();
     if(have[key]){ skipped++; return; }
     have[key] = true;
-    d.cards.push({id:'sc'+Date.now()+'_'+added, term:term, sentence:sentence,
+    var _id = 'sc'+Date.now()+'_'+added;
+    d.cards.push({id:_id, term:term, sentence:sentence,
       cat:_engSceneNormCat(it.cat || it.category || it.type),
       note:_aiStr(it.note || it.meaning || it.cn || it.tip), mastered:false});
-    added++;
+    newIds.push(_id); added++;
   });
-  if(added){ saveEngScene(d); renderEngScene(); }
+  if(added){ d.lastBatchIds = newIds; saveEngScene(d); renderEngScene(); }
   return {added:added, skipped:skipped};
 }
 function engSceneAISpec(fromWork){
@@ -31821,6 +31828,57 @@ function engSceneAIFill(fromWork){
     }
   });
 }
+/* ===== 场景实战 · 列表：分类筛选 / 搜索 / 折叠 / 最近新增标记 ===== */
+var engSceneFilter = 'all';
+var engSceneQuery = '';
+var engSceneExpanded = false;
+var ENG_SCENE_SHOW_N = 10;
+function _engSceneLastIds(d){ var m={}; ((d && d.lastBatchIds) || []).forEach(function(id){ m[id]=1; }); return m; }
+function renderEngSceneListBar(d){
+  var bar = document.getElementById('engSceneListBar'); if(!bar) return;
+  d = d || loadEngScene();
+  var chips = '<button class="chip'+(engSceneFilter==='all'?' active':'')+'" onclick="engSceneSetCat(\'all\')">全部</button>';
+  chips += ENG_SCENE_CATS.map(function(c){
+    var n = d.cards.filter(function(x){ return x.cat===c; }).length;
+    return '<button class="chip'+(engSceneFilter===c?' active':'')+'" onclick="engSceneSetCat(\''+c+'\')">'+c+(n?(' '+n):'')+'</button>';
+  }).join('');
+  var newN = (d.lastBatchIds||[]).length;
+  if(newN) chips += '<button class="chip'+(engSceneFilter==='__new'?' active':'')+'" onclick="engSceneSetCat(\'__new\')">🆕 最近新增 '+newN+'</button>';
+  bar.innerHTML = '<div class="eng-list-bar"><div class="eng-filter-bar">'+chips+'</div>'
+    + '<input id="engSceneSearch" class="eng-list-search" placeholder="🔍 搜术语/中文…" value="'+esc(engSceneQuery)+'" oninput="engSceneSetQuery(this.value)"></div>';
+}
+function renderEngSceneList(d){
+  var list = document.getElementById('engSceneCardList'); if(!list) return;
+  d = d || loadEngScene();
+  var lastIds = _engSceneLastIds(d);
+  var q = engSceneQuery.trim().toLowerCase();
+  var arr = d.cards.filter(function(c){
+    if(engSceneFilter==='__new'){ if(!lastIds[c.id]) return false; }
+    else if(engSceneFilter!=='all'){ if(c.cat!==engSceneFilter) return false; }
+    if(q){ var hay = ((c.term||'')+' '+(c.note||'')+' '+(c.sentence||'')).toLowerCase(); if(hay.indexOf(q)<0) return false; }
+    return true;
+  });
+  if(!arr.length){ list.innerHTML = '<div class="muted">没有匹配的卡片。</div>'; return; }
+  var ordered = arr.slice().reverse();
+  var shown = engSceneExpanded ? ordered : ordered.slice(0, ENG_SCENE_SHOW_N);
+  var html = shown.map(function(c){
+    return '<div class="eng-card-row'+(c.mastered?' done':'')+'">'
+      + '<div class="eng-card-info"><div class="eng-card-term-line">'+esc(c.term)
+      + (lastIds[c.id]?' <span class="eng-fresh">🆕 新增</span>':'')
+      + ' <span class="eng-cat-tag">'+esc(c.cat)+'</span></div>'
+      + (c.note?'<div class="eng-card-cn">'+esc(c.note)+'</div>':'')
+      + '</div>'
+      + '<span class="eng-card-ops"><button class="btn ghost sm eng-st" title="点击切换掌握状态" onclick="engSceneToggleMastered(\''+c.id+'\')">'+(c.mastered?'✅ 再学':'⬜ 记住')+'</button> <button class="btn ghost sm" onclick="engSceneDel(\''+c.id+'\')">🗑️</button></span></div>';
+  }).join('');
+  if(ordered.length > ENG_SCENE_SHOW_N){
+    html += engSceneExpanded ? '<button class="btn ghost sm eng-more" onclick="engSceneExpand(0)">收起</button>'
+      : '<button class="btn ghost sm eng-more" onclick="engSceneExpand(1)">展开全部 '+ordered.length+' 张</button>';
+  }
+  list.innerHTML = html;
+}
+function engSceneSetCat(c){ engSceneFilter = c; engSceneExpanded = false; var d = loadEngScene(); renderEngSceneListBar(d); renderEngSceneList(d); }
+function engSceneSetQuery(v){ engSceneQuery = v || ''; renderEngSceneList(); }
+function engSceneExpand(on){ engSceneExpanded = !!on; renderEngSceneList(); }
 function engSceneSwitch(scn){
   engSceneSub = scn;
   var chips = document.querySelectorAll('#cet6-sub-scene .eng-scene-tabs .chip');
@@ -31895,15 +31953,6 @@ function renderEngLong(){
     + '<button type="button" class="voice-btn" data-target="engLong_'+f.k+'" onclick="toggleVoice(\'engLong_'+f.k+'\')">🎤</button></div>'; }).join('')
     + '<button class="btn" onclick="engLongAdd()">保存</button></div>';
   var d = loadEngLong();
-  var arr = (d[engLongSub] || []).slice().reverse();
-  var mainFields = fields.filter(function(f){ return f.k !== 'note' && f.k !== 'reflection' && f.k !== 'source' && f.k !== 'excerpt'; });
-  var subField = (engLongSub === 'vocab') ? 'note' : (engLongSub === 'quotes') ? 'source' : (engLongSub === 'notes') ? 'reflection' : null;
-  var list = arr.length ? arr.map(function(it){
-    return '<div class="eng-long-item"><div class="eng-long-main">' + mainFields.map(function(f){ return '<div>'+esc(it[f.k]||'')+'</div>'; }).join('')
-      + (subField && it[subField] ? '<div class="muted">'+esc(it[subField])+'</div>' : '')
-      + (engLongSub === 'notes' && it.excerpt ? '<div class="muted">“'+esc(it.excerpt)+'”</div>' : '')
-      + '</div><button class="btn ghost sm" onclick="engLongDel(\''+engLongSub+'\',\''+it.id+'\')">🗑️</button></div>';
-  }).join('') : '<div class="muted">还没有记录，写下第一条吧。</div>';
   var aiBtn = (engLongSub === 'journals') ? '' : '<div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn ghost sm" onclick="engLongPhotoFill()">📷 拍图识别</button><button class="btn ghost sm" onclick="engLongAIFill()">🤖 AI 帮我找</button></div>';
   var _counts = '📘 生词 ' + (d.vocab||[]).length + ' · 💬 金句 ' + (d.quotes||[]).length + ' · 🎬 笔记 ' + (d.notes||[]).length + ' · ✍️ 随笔 ' + (d.journals||[]).length;
   body.innerHTML = '<div class="eng-summary"><div class="eng-sum-text">' + _counts + '</div>'
@@ -31911,11 +31960,14 @@ function renderEngLong(){
     + '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px">'
     + '<div class="muted">' + meta.title + '</div>' + aiBtn + '</div>'
     + '<div id="engLongAITip" class="muted" style="margin-bottom:6px"></div>'
-    + form + '<div class="eng-long-list">' + list + '</div>';
+    + form + '<div id="engLongListBar"></div><div class="eng-long-list" id="engLongList"></div>';
   initVoiceInput();
+  renderEngLongListBar(d);
+  renderEngLongList(d);
 }
 function engLongSwitch(sub){
   engLongSub = sub;
+  engLongQuery = ''; engLongExpanded = false; engLongFilter = 'all';
   var tabs = document.querySelectorAll('#engLongTabs .cet6-inner-tab');
   tabs.forEach(function(t){ t.classList.toggle('active', t.getAttribute('data-sub') === sub); });
   renderEngLong();
@@ -31937,6 +31989,78 @@ function engLongDel(sub, id){
   d[sub] = d[sub].filter(function(x){ return x.id !== id; });
   saveEngLong(d); renderEngLong();
 }
+/* ===== 长期积累 · 列表：类型筛选 / 搜索 / 折叠 ===== */
+var engLongQuery = '';
+var engLongExpanded = false;
+var engLongFilter = 'all';
+var ENG_LONG_SHOW_N = 10;
+var ENG_LONG_NOTE_TYPES = ['书','剧','播客'];
+var ENG_LONG_SEARCH_KEYS = ['word','phonetic','meaning','source','note','sentence','title','type','excerpt','reflection','content'];
+function _engLongNoteType(it){
+  var t = String((it && it.type) || '').trim();
+  if(!t) return '其他';
+  for(var i=0;i<ENG_LONG_NOTE_TYPES.length;i++){ if(t.indexOf(ENG_LONG_NOTE_TYPES[i]) >= 0) return ENG_LONG_NOTE_TYPES[i]; }
+  return '其他';
+}
+function _engLongHay(it){
+  var parts = [];
+  ENG_LONG_SEARCH_KEYS.forEach(function(k){ if(it[k]) parts.push(String(it[k])); });
+  return parts.join(' ').toLowerCase();
+}
+function engLongListItems(d){
+  d = d || loadEngLong();
+  var arr = (d[engLongSub] || []).slice();
+  if(engLongSub === 'notes' && engLongFilter !== 'all'){
+    arr = arr.filter(function(it){ return _engLongNoteType(it) === engLongFilter; });
+  }
+  var q = engLongQuery.trim().toLowerCase();
+  if(q){ arr = arr.filter(function(it){ return _engLongHay(it).indexOf(q) >= 0; }); }
+  return arr;
+}
+function renderEngLongListBar(d){
+  var bar = document.getElementById('engLongListBar'); if(!bar) return;
+  d = d || loadEngLong();
+  var chips = '';
+  if(engLongSub === 'notes'){
+    var pool = d.notes || [];
+    chips += '<button class="chip'+(engLongFilter==='all'?' active':'')+'" onclick="engLongSetCat(\'all\')">全部</button>';
+    ENG_LONG_NOTE_TYPES.concat(['其他']).forEach(function(t){
+      var n = pool.filter(function(x){ return _engLongNoteType(x)===t; }).length;
+      if(!n) return;
+      chips += '<button class="chip'+(engLongFilter===t?' active':'')+'" onclick="engLongSetCat(\''+t+'\')">'+t+(n?(' '+n):'')+'</button>';
+    });
+  }
+  var search = '<input id="engLongSearch" class="eng-list-search" placeholder="🔍 搜索…" value="'+esc(engLongQuery)+'" oninput="engLongSetQuery(this.value)">';
+  bar.innerHTML = '<div class="eng-list-bar"><div class="eng-filter-bar">'+chips+'</div>'+search+'</div>';
+}
+function renderEngLongList(d){
+  var list = document.getElementById('engLongList'); if(!list) return;
+  d = d || loadEngLong();
+  var metas = ENG_LONG_META[engLongSub];
+  var fields = metas.fields;
+  var mainFields = fields.filter(function(f){ return f.k !== 'note' && f.k !== 'reflection' && f.k !== 'source' && f.k !== 'excerpt' && f.k !== 'type'; });
+  var subField = (engLongSub === 'vocab') ? 'note' : (engLongSub === 'quotes') ? 'source' : (engLongSub === 'notes') ? 'reflection' : null;
+  var arr = engLongListItems(d);
+  var filtering = (engLongQuery.trim() !== '' || (engLongSub === 'notes' && engLongFilter !== 'all'));
+  if(!arr.length){ list.innerHTML = '<div class="muted">' + (filtering ? '没有匹配的记录。' : '还没有记录，写下第一条吧。') + '</div>'; return; }
+  var ordered = arr.slice().reverse();
+  var shown = engLongExpanded ? ordered : ordered.slice(0, ENG_LONG_SHOW_N);
+  var html = shown.map(function(it){
+    return '<div class="eng-long-item"><div class="eng-long-main">' + mainFields.map(function(f){ return '<div>'+esc(it[f.k]||'')+'</div>'; }).join('')
+      + (engLongSub === 'notes' && it.type ? '<div><span class="eng-cat-tag">'+esc(_engLongNoteType(it))+'</span></div>' : '')
+      + (subField && it[subField] ? '<div class="muted">'+esc(it[subField])+'</div>' : '')
+      + (engLongSub === 'notes' && it.excerpt ? '<div class="muted">“'+esc(it.excerpt)+'”</div>' : '')
+      + '</div><button class="btn ghost sm" onclick="engLongDel(\''+engLongSub+'\',\''+it.id+'\')">🗑️</button></div>';
+  }).join('');
+  if(ordered.length > ENG_LONG_SHOW_N){
+    html += engLongExpanded ? '<button class="btn ghost sm eng-more" onclick="engLongExpand(0)">收起</button>'
+      : '<button class="btn ghost sm eng-more" onclick="engLongExpand(1)">展开全部 '+ordered.length+' 条</button>';
+  }
+  list.innerHTML = html;
+}
+function engLongSetQuery(v){ engLongQuery = v || ''; renderEngLongList(); }
+function engLongExpand(on){ engLongExpanded = !!on; renderEngLongList(); }
+function engLongSetCat(c){ engLongFilter = c; engLongExpanded = false; renderEngLongListBar(); renderEngLongList(); }
 /* ===== 长期积累 · AI 辅助（找词句 / 识图） ===== */
 var AI_VISION_HINTS = ['glm-4v','glm-4.1v','qwen-vl','qwen2-vl','qwen2.5-vl','gpt-4o','gpt-4.1','gemini','claude-3','claude-4','internvl','deepseek-vl'];
 function aiSupportsVision(cfg){
@@ -32268,13 +32392,21 @@ function _engDownloadMD(filename, md){
 function engExportSceneMD(){
   var d = loadEngScene();
   var today = engTodayKey();
-  var md = '# 英语场景碎片卡 · ' + today + '\n\n';
-  md += '## 🃏 场景碎片卡（' + d.cards.length + '）\n\n';
-  d.cards.forEach(function(c){
-    md += '- **' + c.term + '**' + (c.cat ? '（' + c.cat + '）' : '') + (c.mastered ? ' ✅' : '') + '\n';
-    if(c.sentence) md += '  - ' + c.sentence + '\n';
-    if(c.note) md += '  - 备注：' + c.note + '\n';
+  var md = '# 英语场景碎片卡 · ' + today + '\n';
+  function _row(c){
+    var s = '- **' + c.term + '**' + (c.mastered ? ' ✅' : '') + '\n';
+    if(c.sentence) s += '  - ' + c.sentence + '\n';
+    if(c.note) s += '  - ' + c.note + '\n';
+    return s;
+  }
+  var total = 0;
+  ENG_SCENE_CATS.concat(['其他']).forEach(function(cat){
+    var arr = d.cards.filter(function(c){ return (ENG_SCENE_CATS.indexOf(c.cat) >= 0 ? c.cat : '其他') === cat; });
+    if(!arr.length) return;
+    total += arr.length;
+    md += '\n## ' + (cat === '其他' ? '🗂️ 其他' : cat) + '（' + arr.length + '）\n\n' + arr.map(_row).join('');
   });
+  md += '\n---\n共 ' + total + ' 张\n';
   _engDownloadMD('english-scene-cards-' + today + '.md', md);
 }
 /* 长期积累 → 仅导出 生词/金句/笔记/随笔 */
