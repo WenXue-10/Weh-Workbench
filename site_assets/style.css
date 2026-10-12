@@ -2170,7 +2170,17 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
 .eng-card-row{ display:flex; justify-content:space-between; align-items:center; gap:10px; padding:9px 12px; border:1px solid var(--line); border-radius:12px; background:rgba(255,255,255,.5); transition:background .15s,border-color .15s; }
 .eng-card-row:hover{ background:rgba(255,255,255,.78); border-color:var(--pink); }
 .eng-card-row.done{ opacity:.55; }
-.eng-card-row.done > span:first-child{ text-decoration:line-through; }
+.eng-card-row.done .eng-card-info{ text-decoration:line-through; }
+.eng-list-bar{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; justify-content:space-between; margin:6px 0 8px; }
+.eng-filter-bar{ display:flex; gap:6px; flex-wrap:wrap; }
+.eng-list-search{ flex:1; min-width:150px; }
+.eng-cat-tag{ display:inline-block; font-size:11px; font-weight:600; padding:1px 8px; border-radius:10px; background:var(--pink-soft); color:var(--pink-deep); vertical-align:middle; }
+.eng-card-info{ flex:1; min-width:0; }
+.eng-card-term-line{ font-weight:600; color:var(--text); }
+.eng-card-cn{ font-size:12.5px; color:var(--muted); margin-top:2px; }
+.eng-fresh{ font-size:11px; color:var(--pink-deep); font-weight:700; }
+.eng-card-ops{ flex-shrink:0; display:flex; gap:6px; align-items:center; }
+.eng-more{ margin-top:4px; align-self:flex-start; }
 .eng-scene-tabs{ display:flex; gap:8px; flex-wrap:wrap; margin:10px 0; }
 .eng-chat-input{ display:flex; gap:8px; flex-wrap:wrap; }
 .eng-chat-input input{ flex:1; padding:9px 12px; border:1px solid var(--line); border-radius:12px; font-size:14px; background:rgba(255,255,255,.72); color:var(--text); }

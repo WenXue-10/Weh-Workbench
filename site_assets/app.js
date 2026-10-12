@@ -9393,13 +9393,8 @@ function renderEngScene(){
       + '<div class="eng-card-sentence">'+esc(card.sentence)+'</div>'
       + (card.note ? '<div class="eng-card-note">📝 '+esc(card.note)+'</div>' : '');
   }
-  var list = document.getElementById('engSceneCardList');
-  if(list){
-    list.innerHTML = d.cards.map(function(c){
-      return '<div class="eng-card-row'+(c.mastered?' done':'')+'"><span>'+esc(c.term)+' <span class="muted">'+esc(c.cat)+'</span></span>'
-        + '<span><button class="btn ghost sm eng-st" title="点击切换掌握状态" onclick="engSceneToggleMastered(\''+c.id+'\')">'+(c.mastered?'✅ 再学':'⬜ 记住')+'</button> <button class="btn ghost sm" onclick="engSceneDel(\''+c.id+'\')">🗑️</button></span></div>';
-    }).join('');
-  }
+  renderEngSceneListBar(d);
+  renderEngSceneList(d);
   var _sum = document.getElementById('engSceneSummary');
   if(_sum){
     var _total = d.cards.length, _mst = d.cards.filter(function(c){ return c.mastered; }).length;
@@ -9474,7 +9469,7 @@ function engSceneIngest(items){
   var d = loadEngScene();
   var have = {};
   d.cards.forEach(function(c){ have[String(c.term||'').trim().toLowerCase()] = true; });
-  var added = 0, skipped = 0;
+  var added = 0, skipped = 0, newIds = [];
   (items||[]).forEach(function(it){
     if(!it || typeof it !== 'object') return;
     var term = _aiStr(it.term || it.word || it.phrase);
@@ -9483,12 +9478,13 @@ function engSceneIngest(items){
     var key = term.toLowerCase();
     if(have[key]){ skipped++; return; }
     have[key] = true;
-    d.cards.push({id:'sc'+Date.now()+'_'+added, term:term, sentence:sentence,
+    var _id = 'sc'+Date.now()+'_'+added;
+    d.cards.push({id:_id, term:term, sentence:sentence,
       cat:_engSceneNormCat(it.cat || it.category || it.type),
       note:_aiStr(it.note || it.meaning || it.cn || it.tip), mastered:false});
-    added++;
+    newIds.push(_id); added++;
   });
-  if(added){ saveEngScene(d); renderEngScene(); }
+  if(added){ d.lastBatchIds = newIds; saveEngScene(d); renderEngScene(); }
   return {added:added, skipped:skipped};
 }
 function engSceneAISpec(fromWork){
@@ -9533,6 +9529,57 @@ function engSceneAIFill(fromWork){
     }
   });
 }
+/* ===== 场景实战 · 列表：分类筛选 / 搜索 / 折叠 / 最近新增标记 ===== */
+var engSceneFilter = 'all';
+var engSceneQuery = '';
+var engSceneExpanded = false;
+var ENG_SCENE_SHOW_N = 10;
+function _engSceneLastIds(d){ var m={}; ((d && d.lastBatchIds) || []).forEach(function(id){ m[id]=1; }); return m; }
+function renderEngSceneListBar(d){
+  var bar = document.getElementById('engSceneListBar'); if(!bar) return;
+  d = d || loadEngScene();
+  var chips = '<button class="chip'+(engSceneFilter==='all'?' active':'')+'" onclick="engSceneSetCat(\'all\')">全部</button>';
+  chips += ENG_SCENE_CATS.map(function(c){
+    var n = d.cards.filter(function(x){ return x.cat===c; }).length;
+    return '<button class="chip'+(engSceneFilter===c?' active':'')+'" onclick="engSceneSetCat(\''+c+'\')">'+c+(n?(' '+n):'')+'</button>';
+  }).join('');
+  var newN = (d.lastBatchIds||[]).length;
+  if(newN) chips += '<button class="chip'+(engSceneFilter==='__new'?' active':'')+'" onclick="engSceneSetCat(\'__new\')">🆕 最近新增 '+newN+'</button>';
+  bar.innerHTML = '<div class="eng-list-bar"><div class="eng-filter-bar">'+chips+'</div>'
+    + '<input id="engSceneSearch" class="eng-list-search" placeholder="🔍 搜术语/中文…" value="'+esc(engSceneQuery)+'" oninput="engSceneSetQuery(this.value)"></div>';
+}
+function renderEngSceneList(d){
+  var list = document.getElementById('engSceneCardList'); if(!list) return;
+  d = d || loadEngScene();
+  var lastIds = _engSceneLastIds(d);
+  var q = engSceneQuery.trim().toLowerCase();
+  var arr = d.cards.filter(function(c){
+    if(engSceneFilter==='__new'){ if(!lastIds[c.id]) return false; }
+    else if(engSceneFilter!=='all'){ if(c.cat!==engSceneFilter) return false; }
+    if(q){ var hay = ((c.term||'')+' '+(c.note||'')+' '+(c.sentence||'')).toLowerCase(); if(hay.indexOf(q)<0) return false; }
+    return true;
+  });
+  if(!arr.length){ list.innerHTML = '<div class="muted">没有匹配的卡片。</div>'; return; }
+  var ordered = arr.slice().reverse();
+  var shown = engSceneExpanded ? ordered : ordered.slice(0, ENG_SCENE_SHOW_N);
+  var html = shown.map(function(c){
+    return '<div class="eng-card-row'+(c.mastered?' done':'')+'">'
+      + '<div class="eng-card-info"><div class="eng-card-term-line">'+esc(c.term)
+      + (lastIds[c.id]?' <span class="eng-fresh">🆕 新增</span>':'')
+      + ' <span class="eng-cat-tag">'+esc(c.cat)+'</span></div>'
+      + (c.note?'<div class="eng-card-cn">'+esc(c.note)+'</div>':'')
+      + '</div>'
+      + '<span class="eng-card-ops"><button class="btn ghost sm eng-st" title="点击切换掌握状态" onclick="engSceneToggleMastered(\''+c.id+'\')">'+(c.mastered?'✅ 再学':'⬜ 记住')+'</button> <button class="btn ghost sm" onclick="engSceneDel(\''+c.id+'\')">🗑️</button></span></div>';
+  }).join('');
+  if(ordered.length > ENG_SCENE_SHOW_N){
+    html += engSceneExpanded ? '<button class="btn ghost sm eng-more" onclick="engSceneExpand(0)">收起</button>'
+      : '<button class="btn ghost sm eng-more" onclick="engSceneExpand(1)">展开全部 '+ordered.length+' 张</button>';
+  }
+  list.innerHTML = html;
+}
+function engSceneSetCat(c){ engSceneFilter = c; engSceneExpanded = false; var d = loadEngScene(); renderEngSceneListBar(d); renderEngSceneList(d); }
+function engSceneSetQuery(v){ engSceneQuery = v || ''; renderEngSceneList(); }
+function engSceneExpand(on){ engSceneExpanded = !!on; renderEngSceneList(); }
 function engSceneSwitch(scn){
   engSceneSub = scn;
   var chips = document.querySelectorAll('#cet6-sub-scene .eng-scene-tabs .chip');
@@ -9980,13 +10027,21 @@ function _engDownloadMD(filename, md){
 function engExportSceneMD(){
   var d = loadEngScene();
   var today = engTodayKey();
-  var md = '# 英语场景碎片卡 · ' + today + '\n\n';
-  md += '## 🃏 场景碎片卡（' + d.cards.length + '）\n\n';
-  d.cards.forEach(function(c){
-    md += '- **' + c.term + '**' + (c.cat ? '（' + c.cat + '）' : '') + (c.mastered ? ' ✅' : '') + '\n';
-    if(c.sentence) md += '  - ' + c.sentence + '\n';
-    if(c.note) md += '  - 备注：' + c.note + '\n';
+  var md = '# 英语场景碎片卡 · ' + today + '\n';
+  function _row(c){
+    var s = '- **' + c.term + '**' + (c.mastered ? ' ✅' : '') + '\n';
+    if(c.sentence) s += '  - ' + c.sentence + '\n';
+    if(c.note) s += '  - ' + c.note + '\n';
+    return s;
+  }
+  var total = 0;
+  ENG_SCENE_CATS.concat(['其他']).forEach(function(cat){
+    var arr = d.cards.filter(function(c){ return (ENG_SCENE_CATS.indexOf(c.cat) >= 0 ? c.cat : '其他') === cat; });
+    if(!arr.length) return;
+    total += arr.length;
+    md += '\n## ' + (cat === '其他' ? '🗂️ 其他' : cat) + '（' + arr.length + '）\n\n' + arr.map(_row).join('');
   });
+  md += '\n---\n共 ' + total + ' 张\n';
   _engDownloadMD('english-scene-cards-' + today + '.md', md);
 }
 /* 长期积累 → 仅导出 生词/金句/笔记/随笔 */
