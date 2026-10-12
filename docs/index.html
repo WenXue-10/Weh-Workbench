@@ -2210,6 +2210,22 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
 .eng-card-row .btn.ghost.sm:hover, .eng-long-item .btn.ghost.sm:hover{ color:var(--pink-deep); border-color:var(--pink); background:rgba(255,255,255,.9); }
 /* 输入行与下方提示之间留白（原先紧贴显拥挤） */
 .eng-chat-input + .muted{ margin-top:10px; line-height:1.6; }
+/* 表单字段分组：输入框与语音按钮同组，排列更整齐 */
+.eng-add-field{ flex:1; min-width:200px; display:flex; gap:6px; align-items:center; }
+.eng-add-field input{ flex:1; min-width:0; }
+.eng-add-field .voice-btn{ width:38px; height:38px; border-radius:11px; font-size:16px; }
+/* ===== 复习闯关 ===== */
+.eng-game-stats{ display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
+.eng-game-stat{ background:rgba(255,255,255,.6); border:1px solid var(--line); border-radius:14px; padding:12px 8px; text-align:center; }
+.eng-game-stat .n{ font-size:22px; font-weight:900; background:linear-gradient(135deg,var(--pink-deep),#b48ed9); -webkit-background-clip:text; -webkit-text-fill-color:transparent; line-height:1.1; }
+.eng-game-stat .l{ font-size:11px; color:var(--muted); margin-top:3px; }
+.eng-game-front{ font-size:26px; font-weight:800; text-align:center; padding:26px 12px; color:var(--text); }
+.eng-game-back{ font-size:15px; text-align:center; padding:10px 12px 18px; color:var(--muted); line-height:1.6; }
+.eng-badges{ display:flex; flex-wrap:wrap; gap:10px; margin-top:6px; }
+.eng-badge{ width:78px; text-align:center; padding:10px 4px; border-radius:14px; border:1px dashed var(--line); opacity:.45; }
+.eng-badge.got{ opacity:1; border-style:solid; background:rgba(255,255,255,.65); }
+.eng-badge-icon{ font-size:22px; }
+.eng-badge-name{ font-size:11px; color:var(--muted); margin-top:4px; }
 
 /* 聊天区：.m-box 仅英语场景使用；共用 .m-msg 全面主题化（粉紫渐变 + 主题描边） */
 .m-box{ max-height:340px; overflow:auto; background:rgba(255,255,255,.5); border:1px solid var(--line); border-radius:16px; padding:12px; margin:10px 0; }
@@ -5703,15 +5719,17 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
                 <button class="btn ghost" onclick="engSceneShowAdd()">➕ 添加卡片</button>
               </div>
               <div id="engSceneAddBox" style="display:none" class="eng-add">
-                <input id="engSceneTerm" placeholder="术语，如：lead time">
-                <input id="engSceneSentence" placeholder="一句商务/场景句">
+                <div class="eng-add-field"><input id="engSceneTerm" placeholder="术语，如：lead time">
+                <button type="button" class="voice-btn" data-target="engSceneTerm" onclick="toggleVoice('engSceneTerm')">🎤</button></div>
+                <div class="eng-add-field"><input id="engSceneSentence" placeholder="一句商务/场景句">
+                <button type="button" class="voice-btn" data-target="engSceneSentence" onclick="toggleVoice('engSceneSentence')">🎤</button></div>
                 <select id="engSceneCat">
                   <option value="谈判">谈判</option>
                   <option value="邮件">邮件</option>
                   <option value="面试">面试</option>
                   <option value="日常">日常</option>
                 </select>
-                <input id="engSceneNote" placeholder="你的自述（可选）">
+                <div class="eng-add-field"><input id="engSceneNote" placeholder="你的自述（可选）"></div>
                 <button class="btn" onclick="engSceneAdd()">保存</button>
               </div>
               <div class="eng-list" id="engSceneCardList"></div>
@@ -5727,6 +5745,7 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
               <div class="m-box" id="engSceneChat"></div>
               <div class="eng-chat-input">
                 <input id="engSceneInput" placeholder="用英语或中英混着说…" onkeydown="if(event.key==='Enter') engSceneSend()">
+                <button type="button" class="voice-btn" data-target="engSceneInput" onclick="toggleVoice('engSceneInput')">🎤</button>
                 <button class="btn" onclick="engSceneSend()">发送</button>
                 <button class="btn ghost" onclick="engSceneClear()">清空</button>
               </div>
@@ -5751,6 +5770,16 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
 
           </div>
 
+          <!-- 复习闯关 -->
+          <div class="cet6-sub" id="cet6-sub-game" style="display:none">
+
+            <div class="eng-block">
+              <div class="card-head">🎮 每日复习闯关 <span class="muted">每天 5 分钟 · 温故知新</span></div>
+              <div id="engGameBody"></div>
+            </div>
+
+          </div>
+
         </div>
 
         <!-- 底栏子模块导航 -->
@@ -5762,6 +5791,8 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
           <div class="sub-tab" data-sub="scene">💼 场景实战</div>
 
           <div class="sub-tab" data-sub="long">🌱 长期积累</div>
+
+          <div class="sub-tab" data-sub="game">🎮 复习</div>
 
         </div>
 
@@ -7123,7 +7154,7 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
 
 <script>
 window.SITE_DATA = {
- "updated": "2026-10-12 01:24",
+ "updated": "2026-10-12 13:20",
  "stats": {
   "jobs": 57,
   "rec": 0,
@@ -28011,6 +28042,7 @@ function switchCet6Sub(sub){
   });
   if(sub === 'scene'){ renderEngScene(); }
   if(sub === 'long'){ renderEngLong(); }
+  if(sub === 'game'){ renderEngGame(); }
 }
 
 // 二级导航：六级学习内部小节切换
@@ -31637,7 +31669,9 @@ function renderEngScene(){
   var box = document.getElementById('engSceneCard'); if(!box) return;
   var d = loadEngScene();
   var pool = d.cards.filter(function(c){ return !c.mastered; });
-  var card = pool.length ? pool[0] : (d.cards[0] || null);
+  var card = null;
+  if(d.lastCardId){ for(var _i=0;_i<pool.length;_i++){ if(pool[_i].id === d.lastCardId){ card = pool[_i]; break; } } }
+  if(!card) card = pool.length ? pool[0] : (d.cards[0] || null);
   if(!card){
     box.innerHTML = '<div class="muted">还没有卡片，点「添加卡片」建第一张。</div>';
     box.removeAttribute('data-cur');
@@ -31651,7 +31685,7 @@ function renderEngScene(){
   if(list){
     list.innerHTML = d.cards.map(function(c){
       return '<div class="eng-card-row'+(c.mastered?' done':'')+'"><span>'+esc(c.term)+' <span class="muted">'+esc(c.cat)+'</span></span>'
-        + '<span>'+ (c.mastered?'✅':'⬜') +' <button class="btn ghost sm" onclick="engSceneDel(\''+c.id+'\')">🗑️</button></span></div>';
+        + '<span><button class="btn ghost sm eng-st" title="点击切换掌握状态" onclick="engSceneToggleMastered(\''+c.id+'\')">'+(c.mastered?'✅ 再学':'⬜ 记住')+'</button> <button class="btn ghost sm" onclick="engSceneDel(\''+c.id+'\')">🗑️</button></span></div>';
     }).join('');
   }
   renderEngSceneChat();
@@ -31675,7 +31709,17 @@ function engSceneMarkMastered(){
   var c = null;
   for(var i=0;i<d.cards.length;i++){ if(d.cards[i].id === cur){ c = d.cards[i]; break; } }
   if(!c) return;
-  c.mastered = true; saveEngScene(d); renderEngScene(); toast('✅ 已记住');
+  c.mastered = true; saveEngScene(d); renderEngScene(); toast('✅ 已记住，可在列表点击「再学」找回');
+}
+function engSceneToggleMastered(id){
+  var d = loadEngScene();
+  var c = null;
+  for(var i=0;i<d.cards.length;i++){ if(d.cards[i].id === id){ c = d.cards[i]; break; } }
+  if(!c) return;
+  c.mastered = !c.mastered;
+  if(!c.mastered){ d.lastCardId = id; }
+  saveEngScene(d); renderEngScene();
+  toast(c.mastered ? '✅ 已掌握，可在列表点击「再学」找回' : '↩️ 已放回复习队列');
 }
 function engSceneShowAdd(){ var b = document.getElementById('engSceneAddBox'); if(b){ b.style.display = (b.style.display === 'none') ? '' : 'none'; } }
 function engSceneAdd(){
@@ -31768,7 +31812,9 @@ function renderEngLong(){
   var meta = ENG_LONG_META[engLongSub];
   var body = document.getElementById('engLongBody'); if(!body) return;
   var fields = meta.fields;
-  var form = '<div class="eng-add">' + fields.map(function(f){ return '<input id="engLong_'+f.k+'" placeholder="'+f.ph+'">'; }).join('') + '<button class="btn" onclick="engLongAdd()">保存</button></div>';
+  var form = '<div class="eng-add">' + fields.map(function(f){ return '<div class="eng-add-field"><input id="engLong_'+f.k+'" placeholder="'+f.ph+'">'
+    + '<button type="button" class="voice-btn" data-target="engLong_'+f.k+'" onclick="toggleVoice(\'engLong_'+f.k+'\')">🎤</button></div>'; }).join('')
+    + '<button class="btn" onclick="engLongAdd()">保存</button></div>';
   var d = loadEngLong();
   var arr = (d[engLongSub] || []).slice().reverse();
   var mainFields = fields.filter(function(f){ return f.k !== 'note' && f.k !== 'reflection' && f.k !== 'source' && f.k !== 'excerpt'; });
@@ -31779,7 +31825,12 @@ function renderEngLong(){
       + (engLongSub === 'notes' && it.excerpt ? '<div class="muted">“'+esc(it.excerpt)+'”</div>' : '')
       + '</div><button class="btn ghost sm" onclick="engLongDel(\''+engLongSub+'\',\''+it.id+'\')">🗑️</button></div>';
   }).join('') : '<div class="muted">还没有记录，写下第一条吧。</div>';
-  body.innerHTML = '<div class="muted" style="margin-bottom:8px">'+meta.title+'</div>' + form + '<div class="eng-long-list">'+list+'</div>';
+  var aiBtn = (engLongSub === 'journals') ? '' : '<button class="btn ghost sm" onclick="engLongAIFill()">🤖 AI 帮我找</button>';
+  body.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px">'
+    + '<div class="muted">' + meta.title + '</div>' + aiBtn + '</div>'
+    + '<div id="engLongAITip" class="muted" style="margin-bottom:6px"></div>'
+    + form + '<div class="eng-long-list">' + list + '</div>';
+  initVoiceInput();
 }
 function engLongSwitch(sub){
   engLongSub = sub;
@@ -31804,6 +31855,298 @@ function engLongDel(sub, id){
   d[sub] = d[sub].filter(function(x){ return x.id !== id; });
   saveEngLong(d); renderEngLong();
 }
+/* ===== 长期积累 · AI 辅助（找词句 / 识图） ===== */
+var AI_VISION_HINTS = ['glm-4v','glm-4.1v','qwen-vl','qwen2-vl','qwen2.5-vl','gpt-4o','gpt-4.1','gemini','claude-3','claude-4','internvl','deepseek-vl'];
+function aiSupportsVision(cfg){
+  var m = String((cfg && cfg.model) || '').toLowerCase();
+  for(var i=0;i<AI_VISION_HINTS.length;i++){ if(m.indexOf(AI_VISION_HINTS[i]) >= 0) return true; }
+  return false;
+}
+function engLongAISpec(){
+  if(engLongSub === 'vocab') return {
+    task: '从材料中挑出 5~8 个最值得学的供应链/商务英语单词或短语',
+    item: '{"word":"单词或短语","phonetic":"音标(可空)","meaning":"中文释义","source":"来源(书名/剧名/文章名)","note":"一个例句或记忆点"}',
+    name: '生词' };
+  if(engLongSub === 'quotes') return {
+    task: '挑出 5~8 句地道、好用、值得背下来的英文句子',
+    item: '{"sentence":"英文句子","source":"出处","note":"中文意思或喜欢的原因"}',
+    name: '金句' };
+  if(engLongSub === 'notes') return {
+    task: '提炼这本书/影视/播客的核心要点，给出 3~6 条笔记',
+    item: '{"title":"书名或片名","type":"书/剧/播客","excerpt":"摘抄或片段(可空)","reflection":"要点或感想"}',
+    name: '笔记' };
+  return null;
+}
+function engLongAIFill(){
+  var spec = engLongAISpec();
+  if(!spec){ toast('随笔请自己写哦～'); return; }
+  var c = loadAIConfig();
+  if(!(c && c.key && c.base && c.model)){ toast('请先在设置页配置 AI'); return; }
+  showPrompt({
+    title: '🤖 AI 帮我找' + spec.name,
+    fields: [{label:'给我书名 / 剧名 / 主题，或粘贴一段英文（可留空，只用照片）', placeholder:'例：《原则》/ The Office / 供应商谈判常用表达…'}],
+    withPhoto: true
+  }).then(function(vals){
+    if(!vals) return;
+    var q = (vals[0] || '').trim();
+    var photoId = vals[vals.length - 1];
+    function tip(t){ var el = document.getElementById('engLongAITip'); if(el) el.textContent = t || ''; }
+    var prompt = '你是英语学习助手。请针对下面的材料/主题，' + spec.task
+      + '。只输出 JSON，格式为 {"items":[' + spec.item + ', ...]}，每条字段齐全，不要多余解释，不要出现「字数」「JSON」「字段」等字样。'
+      + (q ? '\n\n材料/主题：' + q : '');
+    function doChat(userContent){
+      tip('AI 正在生成…');
+      var msgs = [{role:'system', content:'你是严谨的英语学习素材整理助手，输出必须是合法 JSON。'},
+                  {role:'user', content:userContent}];
+      aiChat(c, msgs, 60).then(function(res){
+        var o = parseAIJSON(res.content);
+        var items = (o && Object.prototype.toString.call(o.items) === '[object Array]') ? o.items : null;
+        if(!items || !items.length){ tip('没找到合适的条目，换个说法再试'); return; }
+        var d = loadEngLong();
+        d[engLongSub] = d[engLongSub] || [];
+        var fields = ENG_LONG_META[engLongSub].fields;
+        var added = 0;
+        items.forEach(function(it){
+          if(!it || typeof it !== 'object') return;
+          var obj = {id:'el' + Date.now() + '_' + added};
+          var ok = false;
+          fields.forEach(function(f){ var v = _aiStr(it[f.k]); obj[f.k] = v; if(v) ok = true; });
+          if(ok){ d[engLongSub].push(obj); added++; }
+        });
+        saveEngLong(d); renderEngLong();
+        tip('');
+        toast(added ? ('✅ AI 已加入 ' + added + ' 条' + spec.name) : 'AI 没给出有效条目，再试一次');
+      }).catch(function(err){ tip(''); toast('AI 出错：' + ((err && err.message) || '')); });
+    }
+    if(photoId){
+      if(!aiSupportsVision(c)){ toast('当前模型不支持看图，请在设置页换成视觉模型（如 智谱 glm-4v）'); return; }
+      getPhoto(photoId).then(function(data){
+        if(!data){ toast('没读到照片'); return; }
+        doChat([{type:'text', text:prompt}, {type:'image_url', image_url:{url:data}}]);
+      });
+    } else {
+      if(!q){ toast('至少给个主题或一张照片'); return; }
+      doChat(prompt);
+    }
+  });
+}
+/* ===== 英语成长台 · 复习闯关 ===== */
+var GAME_KEY = 'weh_eng_game_v1';
+var ENG_INTERVALS = [0, 1, 3, 7, 15, 30];   /* 天：level 对应的下次复习间隔 */
+var ENG_BADGES = [
+  {id:'s3',  icon:'🔥', name:'三日不辍', desc:'连续复习打卡 3 天'},
+  {id:'s7',  icon:'🏅', name:'一周坚持', desc:'连续复习打卡 7 天'},
+  {id:'r50', icon:'⭐', name:'复习达人', desc:'累计复习 50 次'},
+  {id:'r150',icon:'💎', name:'百炼成钢', desc:'累计复习 150 次'},
+  {id:'c10', icon:'🧠', name:'掌握十卡', desc:'场景卡掌握满 10 张'},
+  {id:'a20', icon:'📚', name:'积累有方', desc:'长期积累满 20 条'}
+];
+var _engGame = null;
+function engTodayKey(){
+  var d = new Date();
+  return d.getFullYear() + '-' + ('0'+(d.getMonth()+1)).slice(-2) + '-' + ('0'+d.getDate()).slice(-2);
+}
+function loadEngGame(){
+  var d = null;
+  try{ d = JSON.parse(localStorage.getItem(GAME_KEY)); }catch(e){}
+  if(!d || typeof d !== 'object'){ d = {streak:0, lastDay:'', stars:0, reviews:0, badges:[]}; }
+  if(!Array.isArray(d.badges)) d.badges = [];
+  if(typeof d.streak !== 'number') d.streak = 0;
+  if(typeof d.stars !== 'number') d.stars = 0;
+  if(typeof d.reviews !== 'number') d.reviews = 0;
+  if(typeof d.lastDay !== 'string') d.lastDay = '';
+  return d;
+}
+function saveEngGame(d){ try{ localStorage.setItem(GAME_KEY, JSON.stringify(d)); markLocalChange(); }catch(e){} }
+function engEnsureCardFields(){
+  var d = loadEngScene();
+  var changed = false;
+  d.cards.forEach(function(c){
+    if(typeof c.level !== 'number'){ c.level = 0; changed = true; }
+    if(typeof c.due !== 'number'){ c.due = 0; changed = true; }
+  });
+  if(changed) saveEngScene(d);
+  return d;
+}
+function engDueCards(){
+  var d = engEnsureCardFields();
+  var now = Date.now();
+  return d.cards.filter(function(c){ return !c.due || c.due <= now; });
+}
+function engShuffle(a){ for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+function engPickGameItems(){
+  var d = engEnsureCardFields();
+  var now = Date.now();
+  var pool = d.cards.slice().sort(function(a,b){ return (a.due||0) - (b.due||0); });
+  var items = [];
+  for(var i=0;i<pool.length && items.length<6;i++){
+    var c = pool[i];
+    if(!c.due || c.due <= now) items.push({kind:'card', id:c.id});
+  }
+  var L = loadEngLong();
+  var extra = engShuffle((L.vocab||[]).slice()).slice(0,2);
+  extra.forEach(function(v){ items.push({kind:'vocab', id:v.id}); });
+  if(items.length > 8) items = items.slice(0,8);
+  return engShuffle(items);
+}
+function engBadgeCheck(g){
+  var d = loadEngScene();
+  var masteredN = d.cards.filter(function(c){ return c.mastered; }).length;
+  var L = loadEngLong();
+  var accN = (L.vocab||[]).length + (L.quotes||[]).length + (L.notes||[]).length + (L.journals||[]).length;
+  var newly = [];
+  ENG_BADGES.forEach(function(b){
+    if(g.badges.indexOf(b.id) >= 0) return;
+    var hit = false;
+    if(b.id === 's3') hit = g.streak >= 3;
+    else if(b.id === 's7') hit = g.streak >= 7;
+    else if(b.id === 'r50') hit = g.reviews >= 50;
+    else if(b.id === 'r150') hit = g.reviews >= 150;
+    else if(b.id === 'c10') hit = masteredN >= 10;
+    else if(b.id === 'a20') hit = accN >= 20;
+    if(hit){ g.badges.push(b.id); newly.push(b); }
+  });
+  return newly;
+}
+function renderEngBadges(g){
+  return '<div class="eng-block" style="margin-top:12px"><div class="card-head">🏅 成就</div>'
+    + '<div class="eng-badges">' + ENG_BADGES.map(function(b){
+        var got = g.badges.indexOf(b.id) >= 0;
+        return '<div class="eng-badge' + (got ? ' got' : '') + '" title="' + b.desc + '">'
+          + '<div class="eng-badge-icon">' + b.icon + '</div>'
+          + '<div class="eng-badge-name">' + b.name + '</div></div>';
+      }).join('') + '</div></div>';
+}
+function engGameQuestionHTML(){
+  var it = _engGame.items[_engGame.idx];
+  var front = '', back = '';
+  if(it.kind === 'card'){
+    var d = loadEngScene(); var c = null;
+    d.cards.forEach(function(x){ if(x.id === it.id) c = x; });
+    if(!c) return '';
+    front = esc(c.term);
+    back = esc(c.sentence) + (c.note ? '　—　' + esc(c.note) : '');
+  } else {
+    var L = loadEngLong(); var v = null;
+    (L.vocab||[]).forEach(function(x){ if(x.id === it.id) v = x; });
+    if(!v) return '';
+    front = esc(v.word);
+    back = esc(v.meaning) + (v.note ? '　—　' + esc(v.note) : '');
+  }
+  return '<div class="eng-block" style="margin-top:12px">'
+    + '<div class="muted">第 ' + (_engGame.idx+1) + ' / ' + _engGame.items.length + ' 题</div>'
+    + '<div class="eng-game-front">' + front + '</div>'
+    + '<div class="eng-game-back" id="engGameBack" style="display:none">' + back + '</div>'
+    + '<div class="eng-actions" style="margin-top:12px">'
+    + '<button class="btn ghost" id="engGameRevealBtn" onclick="engGameReveal()">👀 看答案</button>'
+    + '<button class="btn" onclick="engGameAnswer(1)">✅ 记住了</button>'
+    + '<button class="btn ghost" onclick="engGameAnswer(0)">🤔 没记住</button>'
+    + '</div></div>';
+}
+function renderEngGame(){
+  var body = document.getElementById('engGameBody'); if(!body) return;
+  var g = loadEngGame();
+  var today = engTodayKey();
+  var doneToday = (g.lastDay === today);
+  var dueN = engDueCards().length;
+  function sb(icon, n, label){ return '<div class="eng-game-stat"><div class="n">' + n + '</div><div class="l">' + icon + ' ' + label + '</div></div>'; }
+  var html = '<div class="eng-game-stats">'
+    + sb('🔥', g.streak, '连续') + sb('⭐', g.stars, '星星') + sb('🔁', g.reviews, '复习') + sb('📅', dueN, '待复习')
+    + '</div>';
+  if(_engGame && _engGame.idx < _engGame.items.length){
+    html += engGameQuestionHTML();
+  } else {
+    html += '<div class="eng-block" style="margin-top:12px">'
+      + '<button class="btn" onclick="engStartGame()">🎮 开始今日闯关' + (doneToday ? '（加练）' : '') + '</button> '
+      + '<button class="btn ghost" onclick="engExportMD()">📤 导出 Markdown</button>'
+      + '<div class="muted" style="margin-top:10px;line-height:1.6">每天 5 分钟：复习到期的卡片 + 随机回顾你积累的生词。答对攒 ⭐，连续打卡有徽章；导出的 Markdown 放进知识库即可长期保存。</div>'
+      + '</div>';
+  }
+  html += renderEngBadges(g);
+  body.innerHTML = html;
+}
+function engStartGame(){
+  var items = engPickGameItems();
+  if(!items.length){ toast('暂时没有可复习的卡片，先去场景实战加几张吧'); return; }
+  _engGame = {items:items, idx:0, ok:0};
+  renderEngGame();
+}
+function engGameReveal(){
+  var b = document.getElementById('engGameBack'); if(b) b.style.display = 'block';
+  var btn = document.getElementById('engGameRevealBtn'); if(btn) btn.style.display = 'none';
+}
+function engGameAnswer(ok){
+  if(!_engGame) return;
+  var it = _engGame.items[_engGame.idx];
+  if(it && it.kind === 'card'){
+    var d = engEnsureCardFields(); var c = null;
+    d.cards.forEach(function(x){ if(x.id === it.id) c = x; });
+    if(c){
+      if(ok){
+        c.level = Math.min((c.level||0)+1, ENG_INTERVALS.length-1);
+        c.mastered = true;
+        c.due = Date.now() + ENG_INTERVALS[c.level] * 86400000;
+      } else {
+        c.level = 0; c.mastered = false; c.due = 0;
+      }
+      saveEngScene(d);
+    }
+  }
+  if(ok) _engGame.ok++;
+  var g = loadEngGame(); g.reviews = (g.reviews||0) + 1; saveEngGame(g);
+  _engGame.idx++;
+  if(_engGame.idx >= _engGame.items.length){ engFinishGame(); }
+  else { renderEngGame(); }
+}
+function engFinishGame(){
+  var g = loadEngGame();
+  var today = engTodayKey();
+  var n = _engGame.items.length, okN = _engGame.ok;
+  g.stars = (g.stars||0) + okN;
+  if(g.lastDay !== today){
+    var y = new Date(Date.now() - 86400000);
+    var yk = y.getFullYear() + '-' + ('0'+(y.getMonth()+1)).slice(-2) + '-' + ('0'+y.getDate()).slice(-2);
+    g.streak = (g.lastDay === yk) ? (g.streak||0)+1 : 1;
+    g.lastDay = today;
+  }
+  var newly = engBadgeCheck(g);
+  saveEngGame(g);
+  _engGame = null;
+  renderEngGame();
+  var msg = '🎉 本轮完成！答对 ' + okN + ' / ' + n + '，+' + okN + ' ⭐';
+  if(newly.length) msg += '　解锁：' + newly.map(function(b){ return b.icon + b.name; }).join('、');
+  toast(msg);
+}
+function engExportMD(){
+  var d = loadEngScene();
+  var L = loadEngLong();
+  var today = engTodayKey();
+  var md = '# 英语积累 · ' + today + '\n\n';
+  md += '## 🃏 场景碎片卡（' + d.cards.length + '）\n\n';
+  d.cards.forEach(function(c){
+    md += '- **' + c.term + '**' + (c.cat ? '（' + c.cat + '）' : '') + (c.mastered ? ' ✅' : '') + '\n';
+    if(c.sentence) md += '  - ' + c.sentence + '\n';
+    if(c.note) md += '  - 备注：' + c.note + '\n';
+  });
+  function sec(title, arr, mk){
+    md += '\n## ' + title + '（' + (arr || []).length + '）\n\n';
+    (arr || []).forEach(function(it){ md += mk(it) + '\n'; });
+  }
+  sec('📘 跨场景生词', L.vocab, function(v){ return '- **' + (v.word||'') + '**' + (v.phonetic ? ' /' + v.phonetic + '/' : '') + ' — ' + (v.meaning||'') + (v.source ? '　〔' + v.source + '〕' : '') + (v.note ? '　' + v.note : ''); });
+  sec('💬 喜欢的英文句', L.quotes, function(q){ return '- ' + (q.sentence||'') + (q.source ? '　—— ' + q.source : '') + (q.note ? '　（' + q.note + '）' : ''); });
+  sec('🎬 阅读·观影笔记', L.notes, function(n){ return '- **' + (n.title||'') + '**' + (n.type ? '（' + n.type + '）' : '') + '\n  - ' + (n.excerpt ? ('摘抄：' + n.excerpt + '\n  - ') : '') + (n.reflection||''); });
+  sec('✍️ 英文随笔', L.journals, function(j){ return '- ' + (j.content||''); });
+  try{
+    var blob = new Blob([md], {type:'text/markdown;charset=utf-8'});
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'english-accumulation-' + today + '.md';
+    document.body.appendChild(a); a.click();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+    toast('已导出 Markdown，放进知识库即可');
+  }catch(e){ toast('导出失败：' + e.message); }
+}
+
 
 </script>
 <script>
