@@ -9400,6 +9400,12 @@ function renderEngScene(){
         + '<span><button class="btn ghost sm eng-st" title="点击切换掌握状态" onclick="engSceneToggleMastered(\''+c.id+'\')">'+(c.mastered?'✅ 再学':'⬜ 记住')+'</button> <button class="btn ghost sm" onclick="engSceneDel(\''+c.id+'\')">🗑️</button></span></div>';
     }).join('');
   }
+  var _sum = document.getElementById('engSceneSummary');
+  if(_sum){
+    var _total = d.cards.length, _mst = d.cards.filter(function(c){ return c.mastered; }).length;
+    _sum.innerHTML = '<div class="eng-sum-text">🃏 共 ' + _total + ' 张 · ✅ 已掌握 ' + _mst + ' 张 · 📝 待学 ' + (_total - _mst) + ' 张</div>'
+      + '<button class="btn ghost sm" onclick="engExportSceneMD()">📤 导出到知识库</button>';
+  }
   renderEngSceneChat();
 }
 function engSceneNextCard(){
@@ -9538,7 +9544,10 @@ function renderEngLong(){
       + '</div><button class="btn ghost sm" onclick="engLongDel(\''+engLongSub+'\',\''+it.id+'\')">🗑️</button></div>';
   }).join('') : '<div class="muted">还没有记录，写下第一条吧。</div>';
   var aiBtn = (engLongSub === 'journals') ? '' : '<div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn ghost sm" onclick="engLongPhotoFill()">📷 拍图识别</button><button class="btn ghost sm" onclick="engLongAIFill()">🤖 AI 帮我找</button></div>';
-  body.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px">'
+  var _counts = '📘 生词 ' + (d.vocab||[]).length + ' · 💬 金句 ' + (d.quotes||[]).length + ' · 🎬 笔记 ' + (d.notes||[]).length + ' · ✍️ 随笔 ' + (d.journals||[]).length;
+  body.innerHTML = '<div class="eng-summary"><div class="eng-sum-text">' + _counts + '</div>'
+    + '<button class="btn ghost sm" onclick="engExportLongMD()">📤 导出到知识库</button></div>'
+    + '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px">'
     + '<div class="muted">' + meta.title + '</div>' + aiBtn + '</div>'
     + '<div id="engLongAITip" class="muted" style="margin-bottom:6px"></div>'
     + form + '<div class="eng-long-list">' + list + '</div>';
@@ -9820,9 +9829,8 @@ function renderEngGame(){
     html += engGameQuestionHTML();
   } else {
     html += '<div class="eng-block" style="margin-top:12px">'
-      + '<button class="btn primary" onclick="engStartGame()">🎮 开始今日闯关' + (doneToday ? '（加练）' : '') + '</button> '
-      + '<button class="btn ghost" onclick="engExportMD()">📤 导出 Markdown</button>'
-      + '<div class="muted" style="margin-top:10px;line-height:1.6">每天 5 分钟：复习到期的卡片 + 随机回顾你积累的生词。答对攒 ⭐，连续打卡有徽章；导出的 Markdown 放进知识库即可长期保存。</div>'
+      + '<button class="btn primary" onclick="engStartGame()">🎮 开始今日闯关' + (doneToday ? '（加练）' : '') + '</button>'
+      + '<div class="muted" style="margin-top:10px;line-height:1.6">每天 5 分钟：复习到期的卡片 + 随机回顾你积累的生词。答对攒 ⭐，连续打卡有徽章。想导出到知识库，用「场景实战 / 长期积累」里的「📤 导出到知识库」。</div>'
       + '</div>';
   }
   html += renderEngHistory(g);
@@ -9884,17 +9892,35 @@ function engFinishGame(){
   if(newly.length) msg += '　解锁：' + newly.map(function(b){ return b.icon + b.name; }).join('、');
   toast(msg);
 }
-function engExportMD(){
+function _engDownloadMD(filename, md){
+  try{
+    var blob = new Blob([md], {type:'text/markdown;charset=utf-8'});
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    document.body.appendChild(a); a.click();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+    toast('已导出 Markdown，放进知识库即可');
+  }catch(e){ toast('导出失败：' + e.message); }
+}
+/* 场景实战 → 仅导出碎片卡 */
+function engExportSceneMD(){
   var d = loadEngScene();
-  var L = loadEngLong();
   var today = engTodayKey();
-  var md = '# 英语积累 · ' + today + '\n\n';
+  var md = '# 英语场景碎片卡 · ' + today + '\n\n';
   md += '## 🃏 场景碎片卡（' + d.cards.length + '）\n\n';
   d.cards.forEach(function(c){
     md += '- **' + c.term + '**' + (c.cat ? '（' + c.cat + '）' : '') + (c.mastered ? ' ✅' : '') + '\n';
     if(c.sentence) md += '  - ' + c.sentence + '\n';
     if(c.note) md += '  - 备注：' + c.note + '\n';
   });
+  _engDownloadMD('english-scene-cards-' + today + '.md', md);
+}
+/* 长期积累 → 仅导出 生词/金句/笔记/随笔 */
+function engExportLongMD(){
+  var L = loadEngLong();
+  var today = engTodayKey();
+  var md = '# 英语长期积累 · ' + today + '\n';
   function sec(title, arr, mk){
     md += '\n## ' + title + '（' + (arr || []).length + '）\n\n';
     (arr || []).forEach(function(it){ md += mk(it) + '\n'; });
@@ -9903,14 +9929,6 @@ function engExportMD(){
   sec('💬 喜欢的英文句', L.quotes, function(q){ return '- ' + (q.sentence||'') + (q.source ? '　—— ' + q.source : '') + (q.note ? '　（' + q.note + '）' : ''); });
   sec('🎬 阅读·观影笔记', L.notes, function(n){ return '- **' + (n.title||'') + '**' + (n.type ? '（' + n.type + '）' : '') + '\n  - ' + (n.excerpt ? ('摘抄：' + n.excerpt + '\n  - ') : '') + (n.reflection||''); });
   sec('✍️ 英文随笔', L.journals, function(j){ return '- ' + (j.content||''); });
-  try{
-    var blob = new Blob([md], {type:'text/markdown;charset=utf-8'});
-    var a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'english-accumulation-' + today + '.md';
-    document.body.appendChild(a); a.click();
-    setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 1000);
-    toast('已导出 Markdown，放进知识库即可');
-  }catch(e){ toast('导出失败：' + e.message); }
+  _engDownloadMD('english-accumulation-' + today + '.md', md);
 }
 

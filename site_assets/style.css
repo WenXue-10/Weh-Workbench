@@ -2187,6 +2187,9 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
 .btn.ghost:hover{ background:rgba(255,255,255,.9); color:var(--pink-deep); border-color:var(--pink); }
 /* 小号（删除 🗑️ / 掌握切换） */
 .btn.sm, .btn.ghost.sm{ padding:4px 10px; font-size:12px; border-radius:9px; }
+/* 汇总条（场景实战 / 长期积累） */
+.eng-summary{ display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; margin:8px 0 6px; padding:8px 12px; border:1px solid var(--line); border-radius:12px; background:rgba(255,255,255,.55); }
+.eng-sum-text{ font-size:13px; color:var(--text); line-height:1.6; }
 /* 复习记录 */
 .eng-hist-list{ display:flex; flex-direction:column; gap:6px; margin-top:6px; }
 .eng-hist-row{ display:flex; justify-content:space-between; gap:10px; font-size:13px; color:var(--text); padding:7px 12px; border:1px solid var(--line); border-radius:10px; background:rgba(255,255,255,.5); }
