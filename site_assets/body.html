@@ -25,6 +25,7 @@
     <div class="nav-group">成长 · 学习</div>
     <div class="nav-item" data-module="library">📖 读书学习台</div>
     <div class="nav-item" data-module="cet6">🌍 英语成长台</div>
+    <div class="nav-item" data-module="workplace">🎓 职场学院</div>
     <div class="nav-item" data-module="manifest">🌟 显化成长台</div>
     <div class="nav-item" data-module="baichuan">📚 灵犀智库</div>
 
@@ -108,6 +109,7 @@
               <a data-module="career"><span class="q-em">💼</span>SCM Career</a>
 
               <a data-module="cet6"><span class="q-em">🌍</span>英语成长台</a>
+              <a data-module="workplace"><span class="q-em">🎓</span>职场学院</a>
 
               <a data-module="sop"><span class="q-em">🛠️</span>工作SOP</a>
 
@@ -3553,6 +3555,96 @@
       </section>
 
 
+
+      <!-- 🎓 职场学院 -->
+
+      <section id="module-workplace" class="view">
+
+        <div class="page-head">
+
+          <div class="page-title">🎓 职场学院</div>
+
+          <div class="page-sub">以岗定学 · 每日一学 · 沉淀成体系</div>
+
+        </div>
+
+        <!-- 子模块内容区 -->
+
+        <div class="wp-sub-content">
+
+          <!-- 每日一学 -->
+
+          <div class="wp-sub" id="wp-sub-daily">
+
+            <div class="wp-block">
+
+              <div class="card-head">📖 每日一学 <span class="muted">每天一点，攒成体系</span></div>
+
+              <div class="wp-summary" id="wpDailyStat"></div>
+
+              <div class="wp-ai-row">
+
+                <input id="wpDailyTopic" class="wp-topic-input" placeholder="想学什么？（可留空，让 AI 按你的目标岗位挑）">
+
+              </div>
+
+              <div class="wp-ai-row">
+
+                <button class="btn primary" onclick="wpGenDaily(false)">✨ 生成一条</button>
+
+                <button class="btn ghost" id="wpWebBtn" onclick="wpGenDaily(true)">🌐 联网生成</button>
+
+              </div>
+
+              <div class="wp-hint" id="wpDailyTip"></div>
+
+              <div class="wp-hint muted" id="wpWebHint"></div>
+
+              <div id="wpDailyBody"></div>
+
+            </div>
+
+          </div>
+
+          <!-- 知识卡库 -->
+
+          <div class="wp-sub" id="wp-sub-cards" style="display:none">
+
+            <div class="wp-block">
+
+              <div class="card-head">🗂️ 知识卡库 <span class="muted">按领域筛选 · 可搜索 · 可改分类</span></div>
+
+              <div id="wpCardListBar"></div>
+
+              <div class="wp-list" id="wpCardList"></div>
+
+            </div>
+
+          </div>
+
+          <!-- 学习记录 -->
+
+          <div class="wp-sub" id="wp-sub-record" style="display:none">
+
+            <div class="wp-block" id="wpRecordBody"></div>
+
+          </div>
+
+        </div>
+
+        <!-- 底栏子模块导航 -->
+
+        <div class="sub-tab-bar" id="wpTabBar">
+
+          <div class="sub-tab active" data-wpsub="daily">📖 每日一学</div>
+
+          <div class="sub-tab" data-wpsub="cards">🗂️ 知识卡库</div>
+
+          <div class="sub-tab" data-wpsub="record">📊 学习记录</div>
+
+        </div>
+
+      </section>
 
       <!-- 🛠️ 工作SOP -->
 

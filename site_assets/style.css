@@ -1189,7 +1189,8 @@ a{color:var(--pink-deep);text-decoration:none}
 body.career-active .sub-tab-bar,
 body.cet6-active .sub-tab-bar,
 body.baichuan-active .sub-tab-bar,
-body.sop-active .sub-tab-bar{display:flex}
+body.sop-active .sub-tab-bar,
+body.workplace-active .sub-tab-bar{display:flex}
 
 .sub-tab{
   display:flex;
@@ -2245,3 +2246,52 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
 .nav-group:first-of-type{margin-top:10px}
 /* 每日微复盘（2026-10-10 显化台子模块） */
 #microDid, #microFeel{ resize:vertical; line-height:1.5; font-family:inherit; }
+
+/* ===== 🎓 职场学院（2026-10-13）===== */
+/* 注意：本模块所有输入框/按钮都必须写全视觉样式，不能只写布局——
+   否则会回落成浏览器默认外观（英语台搜索框、.btn 已各踩过一次） */
+.wp-sub-content{padding-bottom:90px;min-height:calc(100vh - 200px)}
+.wp-block{border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.55);padding:14px 16px;margin-bottom:12px}
+.wp-summary{font-size:13px;color:var(--text);line-height:1.7;margin:6px 0 10px}
+.wp-sum-text b{color:var(--pink-deep)}
+.wp-ai-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 0 4px}
+.wp-topic-input{flex:1;min-width:200px;width:100%;padding:9px 13px;border:1px solid var(--line);border-radius:12px;font-size:13.5px;background:rgba(255,255,255,.72);color:var(--text);font-family:inherit;outline:none;transition:.15s}
+.wp-topic-input:focus{border-color:var(--pink-deep);background:#fff;box-shadow:0 0 0 3px rgba(224,85,138,.1)}
+.wp-topic-input::placeholder{color:var(--muted)}
+.wp-hint{font-size:12.5px;color:var(--pink-deep);min-height:17px;line-height:1.6;margin:4px 0}
+.wp-hint.muted{color:var(--muted);min-height:0}
+.wp-empty{font-size:13px;color:var(--muted);padding:16px 4px;line-height:1.8}
+.wp-daily-title{font-size:12.5px;color:var(--muted);margin:12px 0 8px}
+.wp-card{border:1px solid var(--line);border-left:3px solid var(--pink);border-radius:12px;background:rgba(255,255,255,.7);padding:12px 14px;margin-bottom:10px}
+.wp-card-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+.wp-term{font-size:14.5px;font-weight:700;color:var(--text)}
+.wp-field-tag{display:inline-block;font-size:11px;font-weight:600;padding:1px 8px;border-radius:10px;background:var(--pink-soft);color:var(--pink-deep);vertical-align:middle}
+.wp-card-line{font-size:13px;line-height:1.8;color:var(--text);margin-top:5px}
+.wp-lab{display:inline-block;font-size:11.5px;font-weight:700;color:var(--pink-deep);background:var(--pink-soft);border-radius:6px;padding:0 6px;margin-right:6px}
+.wp-ask{color:var(--muted)}
+.wp-card-src{font-size:11.5px;color:var(--muted);margin-top:9px}
+.wp-list-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin:6px 0 10px}
+.wp-filter-bar{display:flex;gap:6px;flex-wrap:wrap}
+.wp-list-search{flex:1;min-width:150px;padding:8px 13px;border:1px solid var(--line);border-radius:12px;font-size:13px;background:rgba(255,255,255,.55);color:var(--text);font-family:inherit;outline:none;transition:.15s}
+.wp-list-search:focus{border-color:var(--pink-deep);background:rgba(255,255,255,.92);box-shadow:0 0 0 3px rgba(224,85,138,.1)}
+.wp-list-search::placeholder{color:var(--muted)}
+.wp-list{display:flex;flex-direction:column;gap:6px}
+.wp-row{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.5);transition:background .15s,border-color .15s}
+.wp-row:hover{background:rgba(255,255,255,.8);border-color:var(--pink)}
+.wp-row-info{flex:1;min-width:0}
+.wp-row-term{font-weight:600;color:var(--text);line-height:1.6}
+.wp-row-sub{font-size:12.5px;color:var(--muted);margin-top:3px;line-height:1.6}
+.wp-row-ops{flex-shrink:0;display:flex;gap:6px;align-items:center}
+.wp-field-sel{padding:4px 8px;border:1px solid var(--line);border-radius:9px;font-size:12px;background:rgba(255,255,255,.75);color:var(--text);font-family:inherit;cursor:pointer;outline:none}
+.wp-field-sel:focus{border-color:var(--pink-deep)}
+.wp-more{align-self:flex-start;margin-top:6px;padding:6px 14px;border:1px solid var(--line);border-radius:20px;font-size:12.5px;font-weight:600;background:rgba(255,255,255,.6);color:var(--pink-deep);cursor:pointer;font-family:inherit;transition:.15s}
+.wp-more:hover{background:#fff;border-color:var(--pink)}
+.wp-bar-row{display:flex;align-items:center;gap:10px;margin:8px 0;font-size:12.5px;color:var(--text)}
+.wp-bar-lab{width:76px;flex-shrink:0}
+.wp-bar{flex:1;height:8px;border-radius:6px;background:var(--pink-soft);overflow:hidden}
+.wp-bar i{display:block;height:100%;background:linear-gradient(90deg,var(--pink),var(--pink-deep))}
+.wp-bar-num{width:28px;text-align:right;color:var(--muted)}
+.wp-hist-row{display:flex;justify-content:space-between;gap:10px;padding:8px 2px;border-bottom:1px dashed var(--line);font-size:12.5px;color:var(--text)}
+.wp-hist-day{color:var(--muted);flex-shrink:0}
+.wp-hist-meta{text-align:right}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
