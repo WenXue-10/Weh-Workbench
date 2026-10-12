@@ -9654,15 +9654,6 @@ function renderEngLong(){
     + '<button type="button" class="voice-btn" data-target="engLong_'+f.k+'" onclick="toggleVoice(\'engLong_'+f.k+'\')">🎤</button></div>'; }).join('')
     + '<button class="btn" onclick="engLongAdd()">保存</button></div>';
   var d = loadEngLong();
-  var arr = (d[engLongSub] || []).slice().reverse();
-  var mainFields = fields.filter(function(f){ return f.k !== 'note' && f.k !== 'reflection' && f.k !== 'source' && f.k !== 'excerpt'; });
-  var subField = (engLongSub === 'vocab') ? 'note' : (engLongSub === 'quotes') ? 'source' : (engLongSub === 'notes') ? 'reflection' : null;
-  var list = arr.length ? arr.map(function(it){
-    return '<div class="eng-long-item"><div class="eng-long-main">' + mainFields.map(function(f){ return '<div>'+esc(it[f.k]||'')+'</div>'; }).join('')
-      + (subField && it[subField] ? '<div class="muted">'+esc(it[subField])+'</div>' : '')
-      + (engLongSub === 'notes' && it.excerpt ? '<div class="muted">“'+esc(it.excerpt)+'”</div>' : '')
-      + '</div><button class="btn ghost sm" onclick="engLongDel(\''+engLongSub+'\',\''+it.id+'\')">🗑️</button></div>';
-  }).join('') : '<div class="muted">还没有记录，写下第一条吧。</div>';
   var aiBtn = (engLongSub === 'journals') ? '' : '<div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn ghost sm" onclick="engLongPhotoFill()">📷 拍图识别</button><button class="btn ghost sm" onclick="engLongAIFill()">🤖 AI 帮我找</button></div>';
   var _counts = '📘 生词 ' + (d.vocab||[]).length + ' · 💬 金句 ' + (d.quotes||[]).length + ' · 🎬 笔记 ' + (d.notes||[]).length + ' · ✍️ 随笔 ' + (d.journals||[]).length;
   body.innerHTML = '<div class="eng-summary"><div class="eng-sum-text">' + _counts + '</div>'
@@ -9670,11 +9661,14 @@ function renderEngLong(){
     + '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px">'
     + '<div class="muted">' + meta.title + '</div>' + aiBtn + '</div>'
     + '<div id="engLongAITip" class="muted" style="margin-bottom:6px"></div>'
-    + form + '<div class="eng-long-list">' + list + '</div>';
+    + form + '<div id="engLongListBar"></div><div class="eng-long-list" id="engLongList"></div>';
   initVoiceInput();
+  renderEngLongListBar(d);
+  renderEngLongList(d);
 }
 function engLongSwitch(sub){
   engLongSub = sub;
+  engLongQuery = ''; engLongExpanded = false; engLongFilter = 'all';
   var tabs = document.querySelectorAll('#engLongTabs .cet6-inner-tab');
   tabs.forEach(function(t){ t.classList.toggle('active', t.getAttribute('data-sub') === sub); });
   renderEngLong();
@@ -9696,6 +9690,78 @@ function engLongDel(sub, id){
   d[sub] = d[sub].filter(function(x){ return x.id !== id; });
   saveEngLong(d); renderEngLong();
 }
+/* ===== 长期积累 · 列表：类型筛选 / 搜索 / 折叠 ===== */
+var engLongQuery = '';
+var engLongExpanded = false;
+var engLongFilter = 'all';
+var ENG_LONG_SHOW_N = 10;
+var ENG_LONG_NOTE_TYPES = ['书','剧','播客'];
+var ENG_LONG_SEARCH_KEYS = ['word','phonetic','meaning','source','note','sentence','title','type','excerpt','reflection','content'];
+function _engLongNoteType(it){
+  var t = String((it && it.type) || '').trim();
+  if(!t) return '其他';
+  for(var i=0;i<ENG_LONG_NOTE_TYPES.length;i++){ if(t.indexOf(ENG_LONG_NOTE_TYPES[i]) >= 0) return ENG_LONG_NOTE_TYPES[i]; }
+  return '其他';
+}
+function _engLongHay(it){
+  var parts = [];
+  ENG_LONG_SEARCH_KEYS.forEach(function(k){ if(it[k]) parts.push(String(it[k])); });
+  return parts.join(' ').toLowerCase();
+}
+function engLongListItems(d){
+  d = d || loadEngLong();
+  var arr = (d[engLongSub] || []).slice();
+  if(engLongSub === 'notes' && engLongFilter !== 'all'){
+    arr = arr.filter(function(it){ return _engLongNoteType(it) === engLongFilter; });
+  }
+  var q = engLongQuery.trim().toLowerCase();
+  if(q){ arr = arr.filter(function(it){ return _engLongHay(it).indexOf(q) >= 0; }); }
+  return arr;
+}
+function renderEngLongListBar(d){
+  var bar = document.getElementById('engLongListBar'); if(!bar) return;
+  d = d || loadEngLong();
+  var chips = '';
+  if(engLongSub === 'notes'){
+    var pool = d.notes || [];
+    chips += '<button class="chip'+(engLongFilter==='all'?' active':'')+'" onclick="engLongSetCat(\'all\')">全部</button>';
+    ENG_LONG_NOTE_TYPES.concat(['其他']).forEach(function(t){
+      var n = pool.filter(function(x){ return _engLongNoteType(x)===t; }).length;
+      if(!n) return;
+      chips += '<button class="chip'+(engLongFilter===t?' active':'')+'" onclick="engLongSetCat(\''+t+'\')">'+t+(n?(' '+n):'')+'</button>';
+    });
+  }
+  var search = '<input id="engLongSearch" class="eng-list-search" placeholder="🔍 搜索…" value="'+esc(engLongQuery)+'" oninput="engLongSetQuery(this.value)">';
+  bar.innerHTML = '<div class="eng-list-bar"><div class="eng-filter-bar">'+chips+'</div>'+search+'</div>';
+}
+function renderEngLongList(d){
+  var list = document.getElementById('engLongList'); if(!list) return;
+  d = d || loadEngLong();
+  var metas = ENG_LONG_META[engLongSub];
+  var fields = metas.fields;
+  var mainFields = fields.filter(function(f){ return f.k !== 'note' && f.k !== 'reflection' && f.k !== 'source' && f.k !== 'excerpt' && f.k !== 'type'; });
+  var subField = (engLongSub === 'vocab') ? 'note' : (engLongSub === 'quotes') ? 'source' : (engLongSub === 'notes') ? 'reflection' : null;
+  var arr = engLongListItems(d);
+  var filtering = (engLongQuery.trim() !== '' || (engLongSub === 'notes' && engLongFilter !== 'all'));
+  if(!arr.length){ list.innerHTML = '<div class="muted">' + (filtering ? '没有匹配的记录。' : '还没有记录，写下第一条吧。') + '</div>'; return; }
+  var ordered = arr.slice().reverse();
+  var shown = engLongExpanded ? ordered : ordered.slice(0, ENG_LONG_SHOW_N);
+  var html = shown.map(function(it){
+    return '<div class="eng-long-item"><div class="eng-long-main">' + mainFields.map(function(f){ return '<div>'+esc(it[f.k]||'')+'</div>'; }).join('')
+      + (engLongSub === 'notes' && it.type ? '<div><span class="eng-cat-tag">'+esc(_engLongNoteType(it))+'</span></div>' : '')
+      + (subField && it[subField] ? '<div class="muted">'+esc(it[subField])+'</div>' : '')
+      + (engLongSub === 'notes' && it.excerpt ? '<div class="muted">“'+esc(it.excerpt)+'”</div>' : '')
+      + '</div><button class="btn ghost sm" onclick="engLongDel(\''+engLongSub+'\',\''+it.id+'\')">🗑️</button></div>';
+  }).join('');
+  if(ordered.length > ENG_LONG_SHOW_N){
+    html += engLongExpanded ? '<button class="btn ghost sm eng-more" onclick="engLongExpand(0)">收起</button>'
+      : '<button class="btn ghost sm eng-more" onclick="engLongExpand(1)">展开全部 '+ordered.length+' 条</button>';
+  }
+  list.innerHTML = html;
+}
+function engLongSetQuery(v){ engLongQuery = v || ''; renderEngLongList(); }
+function engLongExpand(on){ engLongExpanded = !!on; renderEngLongList(); }
+function engLongSetCat(c){ engLongFilter = c; engLongExpanded = false; renderEngLongListBar(); renderEngLongList(); }
 /* ===== 长期积累 · AI 辅助（找词句 / 识图） ===== */
 var AI_VISION_HINTS = ['glm-4v','glm-4.1v','qwen-vl','qwen2-vl','qwen2.5-vl','gpt-4o','gpt-4.1','gemini','claude-3','claude-4','internvl','deepseek-vl'];
 function aiSupportsVision(cfg){
