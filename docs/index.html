@@ -2183,7 +2183,10 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
 .eng-card-row.done .eng-card-info{ text-decoration:line-through; }
 .eng-list-bar{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; justify-content:space-between; margin:6px 0 8px; }
 .eng-filter-bar{ display:flex; gap:6px; flex-wrap:wrap; }
-.eng-list-search{ flex:1; min-width:150px; }
+/* 搜索框（场景实战 / 长期积累）：此前只有 flex 布局、无视觉样式，回落成浏览器默认灰框，与粉紫主题格格不入 */
+.eng-list-search{ flex:1; min-width:150px; padding:8px 13px; border:1px solid var(--line); border-radius:12px; font-size:13px; background:rgba(255,255,255,.55); color:var(--text); font-family:inherit; outline:none; transition:.15s; }
+.eng-list-search:focus{ border-color:var(--pink-deep); background:rgba(255,255,255,.92); box-shadow:0 0 0 3px rgba(224,85,138,.1); }
+.eng-list-search::placeholder{ color:var(--muted); }
 .eng-cat-tag{ display:inline-block; font-size:11px; font-weight:600; padding:1px 8px; border-radius:10px; background:var(--pink-soft); color:var(--pink-deep); vertical-align:middle; }
 .eng-card-info{ flex:1; min-width:0; }
 .eng-card-term-line{ font-weight:600; color:var(--text); }
@@ -7165,7 +7168,7 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
 
 <script>
 window.SITE_DATA = {
- "updated": "2026-10-12 18:02",
+ "updated": "2026-10-12 18:17",
  "stats": {
   "jobs": 57,
   "rec": 0,
