@@ -4196,6 +4196,7 @@ var AI_EFFORT_TEXT = { low: "省", high: "高", max: "最高" };
 var AI_OLD_MODELS = ["deepseek-chat", "deepseek-reasoner", "deepseek-v4-flash"];
 var _aiExtPendingId = null;
 var _aiFailCache = {};
+var _aiModelIds = [];   // 上次「拉取可用模型」拿到的模型名列表
 
 function loadAIConfig(){
   try{
@@ -4311,11 +4312,34 @@ function onAIProviderChange(){
 function renderModelOptions(provider){
   var pv = AI_PROVIDERS[provider];
   _applyModelList((pv && pv.models) ? pv.models : []);
+  _aiModelIds = [];
+  _renderModelChips();
 }
 function _applyModelList(ids){
   var dl = document.getElementById("aiModelOptions");
   if(!dl) return;
   dl.innerHTML = (ids || []).map(function(x){ return '<option value="' + esc(x) + '"></option>'; }).join("");
+}
+/* 把拉取到的模型名平铺成一排可点按钮，当前选中的高亮（datalist 会按输入框现值过滤，不易发现） */
+function _renderModelChips(){
+  var box = document.getElementById("aiModelChips");
+  if(!box) return;
+  box.innerHTML = "";
+  var cur = loadAIConfig().model || "";
+  _aiModelIds.forEach(function(name){
+    var b = document.createElement("button");
+    b.type = "button";
+    b.className = "chip" + (name === cur ? " active" : "");
+    b.textContent = name;
+    b.onclick = function(){ aiPickModel(name); };
+    box.appendChild(b);
+  });
+}
+function aiPickModel(name){
+  var m = document.getElementById("aiModel");
+  if(m) m.value = name;
+  saveAISettings(true);
+  _renderModelChips();
 }
 function updateAIModelHint(provider){
   var el = document.getElementById("aiModelHint");
@@ -4363,7 +4387,9 @@ function fetchModelList(){
       ids.sort();
       if(!ids.length) throw new Error("返回里没有模型列表");
       _applyModelList(ids);
-      toast("已拉取 " + ids.length + " 个模型，点「模型名」输入框就能选");
+      _aiModelIds = ids.slice();
+      _renderModelChips();
+      toast("已拉取 " + ids.length + " 个模型，点下方按钮选一个即可");
     });
   }).catch(function(e){
     toast("拉取失败：" + e.message + "（这家可能不允许浏览器直连，请用内置候选或手填）");
