@@ -771,6 +771,7 @@ a{color:var(--pink-deep);text-decoration:none}
 #module-career .page-head,
 #module-baichuan .page-head,
 #module-cet6 .page-head,
+#module-workplace .page-head,
 #module-sop .page-head{
   margin-bottom:28px;
   margin-top:8px;
@@ -779,6 +780,7 @@ a{color:var(--pink-deep);text-decoration:none}
 #module-career .page-title,
 #module-baichuan .page-title,
 #module-cet6 .page-title,
+#module-workplace .page-title,
 #module-sop .page-title{
   font-size:28px;
   font-weight:800;
@@ -790,6 +792,7 @@ a{color:var(--pink-deep);text-decoration:none}
 #module-career .page-title::after,
 #module-baichuan .page-title::after,
 #module-cet6 .page-title::after,
+#module-workplace .page-title::after,
 #module-sop .page-title::after{
   content:'';
   position:absolute;
@@ -803,6 +806,7 @@ a{color:var(--pink-deep);text-decoration:none}
 #module-career .page-sub,
 #module-baichuan .page-sub,
 #module-cet6 .page-sub,
+#module-workplace .page-sub,
 #module-sop .page-sub{
   font-size:14px;
   color:var(--muted);
