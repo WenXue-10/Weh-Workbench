@@ -7318,7 +7318,7 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
 
 <script>
 window.SITE_DATA = {
- "updated": "2026-10-13 16:51",
+ "updated": "2026-10-13 17:35",
  "stats": {
   "jobs": 57,
   "rec": 0,
@@ -26633,9 +26633,9 @@ var AI_PROVIDERS = {
   deepseek:    { name: "DeepSeek",        base: "https://api.deepseek.com/v1",                       model: "deepseek-flash",      thinking: true,
                  models: ["deepseek-flash", "deepseek-v4-pro", "deepseek-chat", "deepseek-reasoner"],
                  hint: "推荐 deepseek-flash（V4.1-Flash，便宜快）；deepseek-v4-pro 更强更贵；deepseek-chat / deepseek-reasoner 是将停用的旧名。这家的模型列表接口不允许浏览器跨域，请从内置候选里选或直接手填。" },
-  zhipu:       { name: "智谱 GLM",        base: "https://open.bigmodel.cn/api/paas/v4",               model: "glm-4-flash",
-                 models: ["glm-4-flash"],
-                 hint: "点「拉取可用模型」能拿到你账号可用的全部模型名。" },
+  zhipu:       { name: "智谱 GLM",        base: "https://open.bigmodel.cn/api/paas/v4",               model: "glm-5.3-flash", thinking: true,
+                 models: ["glm-5.3-flash", "glm-5.3-flashx", "glm-5.3", "glm-5.2", "glm-5.1", "glm-5", "glm-4.7", "glm-4.6", "glm-4.5"],
+                 hint: "点「拉取可用模型」能拿到你账号可用的全部模型名。推荐 glm-5.3-flash：原生多模态（能看图）+ 自带深度思考 + 最便宜。" },
   moonshot:    { name: "Kimi / Moonshot", base: "https://api.moonshot.cn/v1",                        model: "moonshot-v1-8k",
                  models: ["moonshot-v1-8k", "moonshot-v1-32k", "moonshot-v1-128k"],
                  hint: "点「拉取可用模型」能拿到你账号可用的全部模型名。" },
@@ -26732,12 +26732,14 @@ function renderAIStatus(){
   var pv = AI_PROVIDERS[c.provider];
   var txt = "已配置 · " + ((pv && pv.name) || "自定义") + " · " + c.model;
   if(c.thinking && pv && pv.thinking){ txt += " · 🧠 深度思考（" + (AI_EFFORT_TEXT[c.effort] || "标准") + "）"; }
+  var _warn = "";
   if(c.provider === "deepseek" && AI_OLD_MODELS.indexOf(c.model) >= 0){
-    txt += "　⚠️ 这个模型名即将停用，建议改成 deepseek-flash";
-    el.style.color = "#c62828";
-  }else{
-    el.style.color = "#2e7d32";
+    _warn = "　⚠️ 这个模型名即将停用，建议改成 deepseek-flash";
+  }else if(c.provider === "zhipu" && String(c.model).indexOf("glm-4-flash") === 0){
+    _warn = "　⚠️ 这个模型名可能已下线，建议点「拉取可用模型」改选 glm-5.3-flash";
   }
+  if(_warn){ txt += _warn; el.style.color = "#c62828"; }
+  else{ el.style.color = "#2e7d32"; }
   el.textContent = txt;
 }
 function saveAISettings(silent){
@@ -26867,6 +26869,22 @@ function _trimSlash(s){
   return s;
 }
 
+/* 思考模式的型号级差异（各家官方文档已核对）：
+   智谱 GLM-5.3 系的思考「强制常开」，发 thinking:{type:"disabled"} 会直接报错（400）；
+   智谱从 GLM-5.2 起才认 reasoning_effort（更早的型号只认 thinking 开关）。
+   未登记的服务商（DeepSeek 等）保持原行为，不受影响。 */
+var AI_THINK_LOCKED = { zhipu: ["glm-5.3"] };
+var AI_EFFORT_ONLY = { zhipu: ["glm-5.2", "glm-5.3"] };
+function _aiModelHas(model, list){
+  var m = String(model || "").toLowerCase();
+  for(var i = 0; i < (list || []).length; i++){ if(m.indexOf(list[i]) >= 0) return true; }
+  return false;
+}
+function _aiThinkLocked(provider, model){ return _aiModelHas(model, AI_THINK_LOCKED[provider]); }
+function _aiEffortOK(provider, model){
+  if(!AI_EFFORT_ONLY[provider]) return true;   // 没登记的服务商沿用原行为
+  return _aiModelHas(model, AI_EFFORT_ONLY[provider]);
+}
 /* 统一的对话调用：兼容 OpenAI 格式的 /chat/completions
    返回 { content, reasoning }；开启深度思考时自动放宽超时与输出额度 */
 function aiChat(cfg, messages, timeoutSec, options){
@@ -26874,7 +26892,10 @@ function aiChat(cfg, messages, timeoutSec, options){
   var pv = AI_PROVIDERS[cfg.provider] || {};
   var supportThink = !!pv.thinking;                  // 该服务商是否支持「参数切思考」
   var thinkOn = !!(supportThink && cfg.thinking);
-  var payload = { model: cfg.model, messages: messages, temperature: 0.85, max_tokens: thinkOn ? 4096 : 800 };
+  /* 该型号思考关不掉（如智谱 glm-5.3 系）：不勾选也不发 disabled（会报错），且按「思考仍开」放宽额度与超时 */
+  var forceThink = supportThink && !thinkOn && _aiThinkLocked(cfg.provider, cfg.model);
+  var thinkEff = thinkOn || forceThink;
+  var payload = { model: cfg.model, messages: messages, temperature: 0.85, max_tokens: thinkEff ? 4096 : 800 };
   /* 联网参数各厂商写法不同（已核对官方文档）：
      通义 enable_search / 智谱 tools.web_search / OpenRouter 模型名 :online 后缀
      DeepSeek、硅基流动无内置联网 —— 加了反而会报错，故不加 */
@@ -26885,12 +26906,13 @@ function aiChat(cfg, messages, timeoutSec, options){
     else if(_sp === "openrouter"){ if(!/:online$/.test(payload.model)){ payload.model = payload.model + ":online"; } }
   }
   if(supportThink){
-    /* 必须显式声明：DeepSeek 的思考模式默认开启，不写 disabled 就等于一直在思考 */
-    payload.thinking = { type: thinkOn ? "enabled" : "disabled" };
-    if(thinkOn) payload.reasoning_effort = (AI_EFFORTS.indexOf(cfg.effort) >= 0) ? cfg.effort : "high";
+    /* 必须显式声明：DeepSeek 的思考模式默认开启，不写 disabled 就等于一直在思考。
+       但思考关不掉的型号不能发 disabled —— 干脆不发，走服务端默认（开） */
+    if(!forceThink) payload.thinking = { type: thinkOn ? "enabled" : "disabled" };
+    if(thinkEff && _aiEffortOK(cfg.provider, cfg.model)){ payload.reasoning_effort = (AI_EFFORTS.indexOf(cfg.effort) >= 0) ? cfg.effort : "high"; }
   }
   var secs = timeoutSec || 45;
-  if(thinkOn) secs = Math.max(secs, 120);            // 思考模式慢很多，超时下限 120s
+  if(thinkEff) secs = Math.max(secs, 120);           // 思考模式慢很多，超时下限 120s
   var ctl = (typeof AbortController !== "undefined") ? new AbortController() : null;
   var timer = setTimeout(function(){ if(ctl){ try{ ctl.abort(); }catch(e){} } }, secs * 1000);
   function done(){ clearTimeout(timer); }
@@ -32373,7 +32395,7 @@ function engSceneAIFill(fromWork){
       }).catch(function(err){ tip(''); toast('AI 出错：' + ((err && err.message) || '')); });
     }
     if(photoId){
-      if(!aiSupportsVision(c)){ toast('当前模型不支持看图，请在设置页换成视觉模型（如 智谱 glm-4v）'); return; }
+      if(!aiSupportsVision(c)){ toast('当前模型不支持看图，请在设置页换成视觉模型（如 智谱 glm-5.3-flash）'); return; }
       getPhoto(photoId).then(function(data){ if(!data){ toast('没读到照片'); return; } doChat([{type:'text', text:prompt}, {type:'image_url', image_url:{url:data}}]); });
     } else {
       if(!q){ toast('至少给个主题或一张照片'); return; }
@@ -32615,7 +32637,7 @@ function engLongSetQuery(v){ engLongQuery = v || ''; renderEngLongList(); }
 function engLongExpand(on){ engLongExpanded = !!on; renderEngLongList(); }
 function engLongSetCat(c){ engLongFilter = c; engLongExpanded = false; renderEngLongListBar(); renderEngLongList(); }
 /* ===== 长期积累 · AI 辅助（找词句 / 识图） ===== */
-var AI_VISION_HINTS = ['glm-4v','glm-4.1v','qwen-vl','qwen2-vl','qwen2.5-vl','gpt-4o','gpt-4.1','gemini','claude-3','claude-4','internvl','deepseek-vl'];
+var AI_VISION_HINTS = ['glm-4v','glm-4.1v','glm-4.5v','glm-5.3-flash','qwen-vl','qwen2-vl','qwen2.5-vl','qwen3-vl','gpt-4o','gpt-4.1','gemini','claude-3','claude-4','internvl','deepseek-vl'];
 function aiSupportsVision(cfg){
   var m = String((cfg && cfg.model) || '').toLowerCase();
   for(var i=0;i<AI_VISION_HINTS.length;i++){ if(m.indexOf(AI_VISION_HINTS[i]) >= 0) return true; }
@@ -32678,7 +32700,7 @@ function engLongAIFill(){
       }).catch(function(err){ tip(''); toast('AI 出错：' + ((err && err.message) || '')); });
     }
     if(photoId){
-      if(!aiSupportsVision(c)){ toast('当前模型不支持看图，请在设置页换成视觉模型（如 智谱 glm-4v）'); return; }
+      if(!aiSupportsVision(c)){ toast('当前模型不支持看图，请在设置页换成视觉模型（如 智谱 glm-5.3-flash）'); return; }
       getPhoto(photoId).then(function(data){
         if(!data){ toast('没读到照片'); return; }
         doChat([{type:'text', text:prompt}, {type:'image_url', image_url:{url:data}}]);
@@ -32712,7 +32734,7 @@ function engLongPhotoFill(){
   if(!spec){ toast('随笔请自己写哦～'); return; }
   var c = loadAIConfig();
   if(!(c && c.key && c.base && c.model)){ toast('请先在设置页配置 AI'); return; }
-  if(!aiSupportsVision(c)){ toast('当前模型不支持看图，请在设置页换成视觉模型（如 智谱 glm-4v / 通义 qwen-vl）'); return; }
+  if(!aiSupportsVision(c)){ toast('当前模型不支持看图，请在设置页换成视觉模型（如 智谱 glm-5.3-flash / 通义 qwen-vl）'); return; }
   var tip = function(t){ var el = document.getElementById('engLongAITip'); if(el) el.textContent = t || ''; };
   tip('请选择或拍摄一张图片…');
   pickPhoto().then(function(photo){
