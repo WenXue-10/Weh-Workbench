@@ -4205,10 +4205,15 @@ function loadAIConfig(){
     c.thinking = !!c.thinking;
     if(AI_EFFORTS.indexOf(c.effort) < 0) c.effort = "high";   // 兼容早期写入的非法取值
     if(!c.persona) c.persona = AI_PERSONA_DEFAULT;
+    /* 每个服务商分别记住自己的 Key（keys 映射），切换服务商时不用重填 */
+    if(!c.keys || typeof c.keys !== "object" || Array.isArray(c.keys)) c.keys = {};
+    if(c.key && !c.keys[c.provider]) c.keys[c.provider] = c.key;   // 迁移旧配置：现有 Key 归到当前服务商
+    c.key = c.keys[c.provider] || "";
     return c;
   }catch(e){
     var d = JSON.parse(JSON.stringify(AI_CONFIG_DEFAULTS));
     d.persona = AI_PERSONA_DEFAULT;
+    d.keys = {};
     return d;
   }
 }
@@ -4229,6 +4234,8 @@ function readAIInputs(){
   if(pe) c.persona = pe.value.trim();
   if(cb) c.thinking = !!cb.checked;
   if(ef) c.effort = ef.value;
+  if(!c.keys || typeof c.keys !== "object" || Array.isArray(c.keys)) c.keys = {};
+  if(c.provider) c.keys[c.provider] = c.key;   // 当前 Key 记到它所属的服务商名下
   return c;
 }
 function aiInit(){
@@ -4280,6 +4287,14 @@ function saveAISettings(silent){
 function onAIProviderChange(){
   var p = document.getElementById("aiProvider");
   var key = p ? p.value : "custom";
+  var kEl = document.getElementById("aiKey");
+  var prev = loadAIConfig();
+  if(!prev.keys || typeof prev.keys !== "object" || Array.isArray(prev.keys)) prev.keys = {};
+  /* ① 切换前：把输入框里的 Key 记到「旧服务商」名下 */
+  if(kEl && prev.provider && prev.provider !== key){ prev.keys[prev.provider] = (kEl.value || "").trim(); }
+  saveAIConfig(prev);
+  /* ② 切换后：把「新服务商」记过的 Key 填回输入框（没记过就清空，避免串用别家的 Key） */
+  if(kEl){ kEl.value = (prev.keys[key] !== undefined) ? prev.keys[key] : ""; }
   var pv = AI_PROVIDERS[key];
   if(pv && key !== "custom"){
     var b = document.getElementById("aiBase"), m = document.getElementById("aiModel");
