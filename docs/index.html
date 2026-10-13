@@ -1199,7 +1199,8 @@ a{color:var(--pink-deep);text-decoration:none}
 body.career-active .sub-tab-bar,
 body.cet6-active .sub-tab-bar,
 body.baichuan-active .sub-tab-bar,
-body.sop-active .sub-tab-bar{display:flex}
+body.sop-active .sub-tab-bar,
+body.workplace-active .sub-tab-bar{display:flex}
 
 .sub-tab{
   display:flex;
@@ -2256,6 +2257,55 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
 /* 每日微复盘（2026-10-10 显化台子模块） */
 #microDid, #microFeel{ resize:vertical; line-height:1.5; font-family:inherit; }
 
+/* ===== 🎓 职场学院（2026-10-13）===== */
+/* 注意：本模块所有输入框/按钮都必须写全视觉样式，不能只写布局——
+   否则会回落成浏览器默认外观（英语台搜索框、.btn 已各踩过一次） */
+.wp-sub-content{padding-bottom:90px;min-height:calc(100vh - 200px)}
+.wp-block{border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.55);padding:14px 16px;margin-bottom:12px}
+.wp-summary{font-size:13px;color:var(--text);line-height:1.7;margin:6px 0 10px}
+.wp-sum-text b{color:var(--pink-deep)}
+.wp-ai-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 0 4px}
+.wp-topic-input{flex:1;min-width:200px;width:100%;padding:9px 13px;border:1px solid var(--line);border-radius:12px;font-size:13.5px;background:rgba(255,255,255,.72);color:var(--text);font-family:inherit;outline:none;transition:.15s}
+.wp-topic-input:focus{border-color:var(--pink-deep);background:#fff;box-shadow:0 0 0 3px rgba(224,85,138,.1)}
+.wp-topic-input::placeholder{color:var(--muted)}
+.wp-hint{font-size:12.5px;color:var(--pink-deep);min-height:17px;line-height:1.6;margin:4px 0}
+.wp-hint.muted{color:var(--muted);min-height:0}
+.wp-empty{font-size:13px;color:var(--muted);padding:16px 4px;line-height:1.8}
+.wp-daily-title{font-size:12.5px;color:var(--muted);margin:12px 0 8px}
+.wp-card{border:1px solid var(--line);border-left:3px solid var(--pink);border-radius:12px;background:rgba(255,255,255,.7);padding:12px 14px;margin-bottom:10px}
+.wp-card-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+.wp-term{font-size:14.5px;font-weight:700;color:var(--text)}
+.wp-field-tag{display:inline-block;font-size:11px;font-weight:600;padding:1px 8px;border-radius:10px;background:var(--pink-soft);color:var(--pink-deep);vertical-align:middle}
+.wp-card-line{font-size:13px;line-height:1.8;color:var(--text);margin-top:5px}
+.wp-lab{display:inline-block;font-size:11.5px;font-weight:700;color:var(--pink-deep);background:var(--pink-soft);border-radius:6px;padding:0 6px;margin-right:6px}
+.wp-ask{color:var(--muted)}
+.wp-card-src{font-size:11.5px;color:var(--muted);margin-top:9px}
+.wp-list-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin:6px 0 10px}
+.wp-filter-bar{display:flex;gap:6px;flex-wrap:wrap}
+.wp-list-search{flex:1;min-width:150px;padding:8px 13px;border:1px solid var(--line);border-radius:12px;font-size:13px;background:rgba(255,255,255,.55);color:var(--text);font-family:inherit;outline:none;transition:.15s}
+.wp-list-search:focus{border-color:var(--pink-deep);background:rgba(255,255,255,.92);box-shadow:0 0 0 3px rgba(224,85,138,.1)}
+.wp-list-search::placeholder{color:var(--muted)}
+.wp-list{display:flex;flex-direction:column;gap:6px}
+.wp-row{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.5);transition:background .15s,border-color .15s}
+.wp-row:hover{background:rgba(255,255,255,.8);border-color:var(--pink)}
+.wp-row-info{flex:1;min-width:0}
+.wp-row-term{font-weight:600;color:var(--text);line-height:1.6}
+.wp-row-sub{font-size:12.5px;color:var(--muted);margin-top:3px;line-height:1.6}
+.wp-row-ops{flex-shrink:0;display:flex;gap:6px;align-items:center}
+.wp-field-sel{padding:4px 8px;border:1px solid var(--line);border-radius:9px;font-size:12px;background:rgba(255,255,255,.75);color:var(--text);font-family:inherit;cursor:pointer;outline:none}
+.wp-field-sel:focus{border-color:var(--pink-deep)}
+.wp-more{align-self:flex-start;margin-top:6px;padding:6px 14px;border:1px solid var(--line);border-radius:20px;font-size:12.5px;font-weight:600;background:rgba(255,255,255,.6);color:var(--pink-deep);cursor:pointer;font-family:inherit;transition:.15s}
+.wp-more:hover{background:#fff;border-color:var(--pink)}
+.wp-bar-row{display:flex;align-items:center;gap:10px;margin:8px 0;font-size:12.5px;color:var(--text)}
+.wp-bar-lab{width:76px;flex-shrink:0}
+.wp-bar{flex:1;height:8px;border-radius:6px;background:var(--pink-soft);overflow:hidden}
+.wp-bar i{display:block;height:100%;background:linear-gradient(90deg,var(--pink),var(--pink-deep))}
+.wp-bar-num{width:28px;text-align:right;color:var(--muted)}
+.wp-hist-row{display:flex;justify-content:space-between;gap:10px;padding:8px 2px;border-bottom:1px dashed var(--line);font-size:12.5px;color:var(--text)}
+.wp-hist-day{color:var(--muted);flex-shrink:0}
+.wp-hist-meta{text-align:right}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
+
 </style>
 </head>
 <body>
@@ -2285,6 +2335,7 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
     <div class="nav-group">成长 · 学习</div>
     <div class="nav-item" data-module="library">📖 读书学习台</div>
     <div class="nav-item" data-module="cet6">🌍 英语成长台</div>
+    <div class="nav-item" data-module="workplace">🎓 职场学院</div>
     <div class="nav-item" data-module="manifest">🌟 显化成长台</div>
     <div class="nav-item" data-module="baichuan">📚 灵犀智库</div>
 
@@ -2368,6 +2419,7 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
               <a data-module="career"><span class="q-em">💼</span>SCM Career</a>
 
               <a data-module="cet6"><span class="q-em">🌍</span>英语成长台</a>
+              <a data-module="workplace"><span class="q-em">🎓</span>职场学院</a>
 
               <a data-module="sop"><span class="q-em">🛠️</span>工作SOP</a>
 
@@ -5814,6 +5866,96 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
 
 
 
+      <!-- 🎓 职场学院 -->
+
+      <section id="module-workplace" class="view">
+
+        <div class="page-head">
+
+          <div class="page-title">🎓 职场学院</div>
+
+          <div class="page-sub">以岗定学 · 每日一学 · 沉淀成体系</div>
+
+        </div>
+
+        <!-- 子模块内容区 -->
+
+        <div class="wp-sub-content">
+
+          <!-- 每日一学 -->
+
+          <div class="wp-sub" id="wp-sub-daily">
+
+            <div class="wp-block">
+
+              <div class="card-head">📖 每日一学 <span class="muted">每天一点，攒成体系</span></div>
+
+              <div class="wp-summary" id="wpDailyStat"></div>
+
+              <div class="wp-ai-row">
+
+                <input id="wpDailyTopic" class="wp-topic-input" placeholder="想学什么？（可留空，让 AI 按你的目标岗位挑）">
+
+              </div>
+
+              <div class="wp-ai-row">
+
+                <button class="btn primary" onclick="wpGenDaily(false)">✨ 生成一条</button>
+
+                <button class="btn ghost" id="wpWebBtn" onclick="wpGenDaily(true)">🌐 联网生成</button>
+
+              </div>
+
+              <div class="wp-hint" id="wpDailyTip"></div>
+
+              <div class="wp-hint muted" id="wpWebHint"></div>
+
+              <div id="wpDailyBody"></div>
+
+            </div>
+
+          </div>
+
+          <!-- 知识卡库 -->
+
+          <div class="wp-sub" id="wp-sub-cards" style="display:none">
+
+            <div class="wp-block">
+
+              <div class="card-head">🗂️ 知识卡库 <span class="muted">按领域筛选 · 可搜索 · 可改分类</span></div>
+
+              <div id="wpCardListBar"></div>
+
+              <div class="wp-list" id="wpCardList"></div>
+
+            </div>
+
+          </div>
+
+          <!-- 学习记录 -->
+
+          <div class="wp-sub" id="wp-sub-record" style="display:none">
+
+            <div class="wp-block" id="wpRecordBody"></div>
+
+          </div>
+
+        </div>
+
+        <!-- 底栏子模块导航 -->
+
+        <div class="sub-tab-bar" id="wpTabBar">
+
+          <div class="sub-tab active" data-wpsub="daily">📖 每日一学</div>
+
+          <div class="sub-tab" data-wpsub="cards">🗂️ 知识卡库</div>
+
+          <div class="sub-tab" data-wpsub="record">📊 学习记录</div>
+
+        </div>
+
+      </section>
+
       <!-- 🛠️ 工作SOP -->
 
       <section id="module-sop" class="view">
@@ -7168,7 +7310,7 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
 
 <script>
 window.SITE_DATA = {
- "updated": "2026-10-13 02:08",
+ "updated": "2026-10-13 12:39",
  "stats": {
   "jobs": 57,
   "rec": 0,
@@ -26380,7 +26522,8 @@ var DATA_KEYS = {
   manifest: "weh_manifest_data_v1",
   selflog: SELFLOG_KEY,
   engScene: ENG_SCENE_KEY,
-  engLong: ENG_LONG_KEY
+  engLong: ENG_LONG_KEY,
+  workplace: "weh_workplace_data_v1"
 };
 
 function loadSettings(){
@@ -26683,7 +26826,15 @@ function aiChat(cfg, messages, timeoutSec, options){
   var supportThink = !!pv.thinking;                  // 该服务商是否支持「参数切思考」
   var thinkOn = !!(supportThink && cfg.thinking);
   var payload = { model: cfg.model, messages: messages, temperature: 0.85, max_tokens: thinkOn ? 4096 : 800 };
-  if(options && options.search){ payload.enable_search = true; }
+  /* 联网参数各厂商写法不同（已核对官方文档）：
+     通义 enable_search / 智谱 tools.web_search / OpenRouter 模型名 :online 后缀
+     DeepSeek、硅基流动无内置联网 —— 加了反而会报错，故不加 */
+  if(options && options.search){
+    var _sp = (cfg && cfg.provider) || "";
+    if(_sp === "dashscope"){ payload.enable_search = true; }
+    else if(_sp === "zhipu"){ payload.tools = [{ type: "web_search", web_search: { enable: true } }]; }
+    else if(_sp === "openrouter"){ if(!/:online$/.test(payload.model)){ payload.model = payload.model + ":online"; } }
+  }
   if(supportThink){
     /* 必须显式声明：DeepSeek 的思考模式默认开启，不写 disabled 就等于一直在思考 */
     payload.thinking = { type: thinkOn ? "enabled" : "disabled" };
@@ -26895,7 +27046,9 @@ var SYNC_LIST_FIELDS = {
   manifest: ["goals", "script", "diary", "gratitude", "translator", "rehearsal", "evidence", "freqCustom"],
   selflog: ["entries", "recipes"],
   engScene: ["cards"],
-  engLong: ["vocab", "quotes", "notes", "journals"]
+  engLong: ["vocab", "quotes", "notes", "journals"],
+  /* 职场学院：全是按 id 合并的数组字段（daily 是对象，刻意不列进来，保持本机） */
+  workplace: ["cards", "plan", "streakDays", "history"]
 };
 /* 对象/映射型字段：按键级并集合并 */
 var SYNC_MAP_FIELDS = { manifest: ["freq", "freqDone"] };
@@ -27098,6 +27251,7 @@ function _refreshAfterSync(){
   try{ if(typeof renderJobs === "function") renderJobs(); }catch(e){}
   try{ if(typeof renderCompanies === "function") renderCompanies(); }catch(e){}
   try{ if(typeof renderBooks === "function") renderBooks(); }catch(e){}
+  try{ if(typeof renderWp === "function") renderWp(); }catch(e){}
 }
 
 function syncNow(action, silent){
@@ -27708,6 +27862,7 @@ var TITLES = {
   inspiration:"💡 灵感捕捉", decision:"🎯 决策顾问", report:"📝 工作汇报台",
   baichuan:"📚 灵犀智库", career:"💼 SCM Career", cet6:"📖 CET-6备战", sop:"🛠️ 工作SOP",
   daily:"📅 日计划台", todo:"✅ 待办清单", settings:"⚙️ 设置", library:"📖 读书学习台", manifest:"🌟 显化成长台",
+  workplace:"🎓 职场学院",
   jobs:"🐾 岗位看板", companies:"🐈 目标公司池", timeline:"😺 每日日报",
   resume:"📄 简历库", knowledge:"📚 知识库",
   selflog:"💗 身心小记"
@@ -27733,10 +27888,12 @@ function go(view){
   document.body.classList.toggle("cet6-active", view==="cet6");
   document.body.classList.toggle("baichuan-active", view==="baichuan");
   document.body.classList.toggle("sop-active", view==="sop");
+  document.body.classList.toggle("workplace-active", view==="workplace");
   updateBackBtn();
   window.scrollTo({top:0});
   if(view === "library"){ try{ renderBooks(); }catch(e){} }
   if(view === "selflog"){ try{ renderSelfLog(); }catch(e){} }
+  if(view === "workplace"){ try{ renderWp(); }catch(e){} }
 }
 function updateBackBtn(){
   var backBtn = document.getElementById("backBtn");
@@ -27781,6 +27938,336 @@ var FREQ_DEFAULTS = [
   {key:"gratitude", em:"📖", name:"读感恩日记", sub:"读出声音，让耳朵听见"},
   {key:"rehearsal", em:"🌙", name:"每日排练", sub:"5分钟 · 睡前过剧本"}
 ];
+/* ==================== 🎓 职场学院 ==================== */
+/* 定位：以岗定学 · 每日一学 · 沉淀成体系
+   注意：WP_KEY 的字面量必须与 DATA_KEYS.workplace 一致（两处分开写，改一处要改两处） */
+var WP_KEY = "weh_workplace_data_v1";
+var WP_FIELDS = ["专业技能", "工具软件", "行业认知", "职场软技能", "黑话术语"];
+var WP_SHOW_N = 10;
+var wpSub = "daily";
+var wpFilter = "all";
+var wpQuery = "";
+var wpExpanded = false;
+
+function wpDefaults(){
+  return { cards: [], daily: { day: "", ids: [], topic: "" }, plan: [], streakDays: [], history: [] };
+}
+function loadWp(){
+  var def = wpDefaults();
+  try{
+    var d = JSON.parse(localStorage.getItem(WP_KEY));
+    if(!d || typeof d !== "object") return def;
+    for(var k in def){ if(d[k] === undefined) d[k] = def[k]; }
+    ["cards", "plan", "streakDays", "history"].forEach(function(f){ if(!Array.isArray(d[f])) d[f] = []; });
+    if(!d.daily || typeof d.daily !== "object") d.daily = { day: "", ids: [], topic: "" };
+    if(!Array.isArray(d.daily.ids)) d.daily.ids = [];
+    return d;
+  }catch(e){ return def; }
+}
+function saveWp(d){
+  try{ localStorage.setItem(WP_KEY, JSON.stringify(d)); }catch(e){}
+  try{ markLocalChange(); }catch(e){}
+}
+function _wpPad(n){ return (n < 10 ? "0" : "") + n; }
+function wpToday(){
+  var t = new Date();
+  return t.getFullYear() + "-" + _wpPad(t.getMonth() + 1) + "-" + _wpPad(t.getDate());
+}
+function _wpUid(){ return "wp" + Date.now().toString(36) + Math.floor(Math.random() * 1e6).toString(36); }
+
+/* 领域归一：AI 给的中文/英文关键词 → 五个标准领域之一 */
+function _wpNormField(f){
+  f = _aiStr(f);
+  if(WP_FIELDS.indexOf(f) >= 0) return f;
+  if(/excel|ppt|word|power[\s-]*bi|tableau|sql|python|软件|工具|系统操作/i.test(f)) return "工具软件";
+  if(/黑话|行话|术语|缩写|简称/i.test(f)) return "黑话术语";
+  if(/沟通|汇报|表达|协作|向上|管理|情商|会议|同事|领导|职场|人际/i.test(f)) return "职场软技能";
+  if(/行业|市场|公司|商业模式|趋势|业务|赛道/i.test(f)) return "行业认知";
+  if(/sap|erp|mrp|wms|tms|供应链|计划|采购|物流|仓储|生产|库存|排产|需求/i.test(f)) return "专业技能";
+  return "专业技能";
+}
+
+/* ---- 联网支持度（依据各厂商官方文档确认，写法互不相同）----
+   通义 dashscope → 顶层 enable_search:true
+   智谱 zhipu     → tools:[{type:"web_search", web_search:{enable:true}}]
+   OpenRouter     → 模型名追加 ":online" 后缀
+   DeepSeek / 硅基流动 / 自定义 → 无内置联网，只能靠模型自身知识
+   （Kimi 的 $web_search 需要多轮 tool_calls 循环且官方已标记退役，暂不接入） */
+function aiWebSupport(cfg){
+  var p = (cfg && cfg.provider) || "";
+  return (p === "dashscope" || p === "zhipu" || p === "openrouter");
+}
+function aiWebHint(cfg){
+  var p = (cfg && cfg.provider) || "";
+  var nm = (AI_PROVIDERS[p] || {}).name || "当前模型";
+  return "「" + nm + "」没有内置联网，只能靠模型已有知识，可能不含最新信息。想联网请在设置页换成 通义千问 / 智谱 GLM / OpenRouter。";
+}
+
+/* ---------- 每日一学 ---------- */
+function wpCardFromAI(o){
+  if(!o || typeof o !== "object") return null;
+  var term = _stripAIMeta(_aiStr(o.term || o.title));
+  var point = _stripAIMeta(_aiStr(o.point || o.content || o.desc));
+  var howto = _stripAIMeta(_aiStr(o.howto || o.use || o.usage));
+  var ask = _stripAIMeta(_aiStr(o.ask || o.question));
+  var source = _stripAIMeta(_aiStr(o.source || o.from));
+  if(!term && !point) return null;
+  if(!term) term = point.slice(0, 14);
+  return {
+    id: _wpUid(),
+    term: term.slice(0, 40),
+    point: point,
+    howto: howto,
+    ask: ask,
+    source: source || "模型知识·未联网核实",
+    field: _wpNormField(o.field),
+    date: wpToday()
+  };
+}
+function wpDailyCardObjs(d){
+  d = d || loadWp();
+  var map = {};
+  (d.cards || []).forEach(function(c){ map[c.id] = c; });
+  var ids = (d.daily && Array.isArray(d.daily.ids)) ? d.daily.ids : [];
+  return ids.map(function(id){ return map[id]; }).filter(Boolean);
+}
+function wpGenDaily(useSearch){
+  var c = loadAIConfig();
+  if(!(c && c.key && c.base && c.model)){ toast("请先在设置页配置 AI"); return; }
+  var canWeb = aiWebSupport(c);
+  var wantWeb = !!useSearch && canWeb;
+  var topicEl = document.getElementById("wpDailyTopic");
+  var topic = topicEl ? String(topicEl.value || "").trim() : "";
+  var d = loadWp();
+  var today = wpToday();
+  var have = (d.cards || []).map(function(x){ return x.term; }).slice(-20);
+  var tipEl = document.getElementById("wpDailyTip");
+  function tip(t){ if(tipEl) tipEl.textContent = t || ""; }
+
+  var sys = "你是职场知识教练，服务一位 2027 届供应链管理专业、目标岗位为供应链计划/采购/物流/数据分析的学生。输出必须是合法 JSON。";
+  var user = "请给出「今天的一条职场知识」。"
+    + (topic ? ("主题：" + topic + "。") : "主题自由发挥，优先挑她目标岗位真正会用到的。")
+    + (have.length ? ("\n她已经学过的（不要重复）：" + have.join("、") + "。") : "")
+    + "\n要求：只挑一个具体可用的知识点，不要泛泛的鸡汤；结合实际工作场景来讲。"
+    + (wantWeb ? "优先采用你能联网查证到的行业事实或方法。" : "")
+    + "\n只输出 JSON，不要解释文字，不要复述本条要求，不要出现「字数」「JSON」「字段」等字样。"
+    + "\n格式：{\"field\":\"领域\",\"term\":\"知识点标题\",\"point\":\"它是什么\",\"howto\":\"实际工作里怎么用\",\"ask\":\"一个可以继续追问的问题\",\"source\":\"来源或出处，不确定就写 模型知识·未联网核实\"}"
+    + "\nfield 只能从这几个里选：" + WP_FIELDS.join("、") + "。";
+
+  tip(wantWeb ? "AI 联网生成中…（可能要十几秒）" : (useSearch ? "当前模型不支持联网，改为离线生成…" : "AI 生成中…"));
+  aiChat(c, [{ role: "system", content: sys }, { role: "user", content: user }], 90, wantWeb ? { search: true } : undefined)
+    .then(function(res){
+      var card = wpCardFromAI(parseAIJSON(res.content));
+      if(!card){ tip(""); toast("AI 没给出有效内容，再试一次"); return; }
+      if(d.daily.day !== today){ d.daily = { day: today, ids: [], topic: "" }; }
+      d.cards.push(card);
+      d.daily.ids.push(card.id);
+      d.daily.topic = topic;
+      var hasDay = false;
+      (d.streakDays || []).forEach(function(x){ if((x.day || x.id) === today) hasDay = true; });
+      if(!hasDay) d.streakDays.push({ id: today, day: today });
+      var h = null;
+      for(var i = 0; i < d.history.length; i++){ if(d.history[i].id === today){ h = d.history[i]; break; } }
+      if(!h){ h = { id: today, day: today, n: 0, fields: [] }; d.history.push(h); }
+      h.n = (h.n || 0) + 1;
+      if((h.fields || []).indexOf(card.field) < 0){ h.fields = h.fields || []; h.fields.push(card.field); }
+      saveWp(d);
+      tip("");
+      toast("✅ 已收进卡库");
+      renderWp();
+    })
+    .catch(function(err){ tip(""); toast("AI 出错：" + ((err && err.message) || "")); });
+}
+function wpCardHtml(c){
+  return '<div class="wp-card">'
+    + '<div class="wp-card-top"><span class="wp-term">' + esc(c.term) + '</span>'
+    + '<span class="wp-field-tag">' + esc(c.field) + '</span></div>'
+    + (c.point ? '<div class="wp-card-line"><span class="wp-lab">是什么</span>' + esc(c.point) + '</div>' : '')
+    + (c.howto ? '<div class="wp-card-line"><span class="wp-lab">怎么用</span>' + esc(c.howto) + '</div>' : '')
+    + (c.ask ? '<div class="wp-card-line wp-ask"><span class="wp-lab">想想</span>' + esc(c.ask) + '</div>' : '')
+    + '<div class="wp-card-src">' + esc(c.source) + '</div>'
+    + '</div>';
+}
+function renderWpDaily(d){
+  d = d || loadWp();
+  var st = wpStreak(d);
+  var stat = document.getElementById("wpDailyStat");
+  if(stat){
+    stat.innerHTML = '<span class="wp-sum-text">🔥 连续 <b>' + st.cur + '</b> 天 · 累计学习 <b>' + st.total
+      + '</b> 天 · 卡库 <b>' + (d.cards || []).length + '</b> 条</span>';
+  }
+  var c = loadAIConfig();
+  var canWeb = aiWebSupport(c);
+  var btn = document.getElementById("wpWebBtn");
+  if(btn){ btn.disabled = !canWeb; btn.title = canWeb ? "让 AI 先联网检索再生成" : aiWebHint(c); }
+  var hint = document.getElementById("wpWebHint");
+  if(hint){ hint.textContent = canWeb ? "" : aiWebHint(c); }
+  var body = document.getElementById("wpDailyBody");
+  if(!body) return;
+  var arr = wpDailyCardObjs(d);
+  if(!arr.length){
+    body.innerHTML = '<div class="wp-empty">今天还没学。点「✨ 生成一条」，或者在上面填个主题（比如「SAP 的 MRP 逻辑」）让 AI 定向讲。</div>';
+    return;
+  }
+  var label = (d.daily.day === wpToday()) ? "今天学到的" : ((d.daily.day || "") + " 学到的");
+  body.innerHTML = '<div class="wp-daily-title">' + esc(label) + ' · 共 ' + arr.length + ' 条</div>'
+    + arr.map(wpCardHtml).join("");
+}
+
+/* ---------- 知识卡库 ---------- */
+function wpListItems(d){
+  d = d || loadWp();
+  var q = (wpQuery || "").trim().toLowerCase();
+  return (d.cards || []).filter(function(c){
+    if(wpFilter !== "all" && c.field !== wpFilter) return false;
+    if(q){
+      var hay = ((c.term || "") + " " + (c.point || "") + " " + (c.howto || "") + " " + (c.ask || "") + " " + (c.source || "")).toLowerCase();
+      if(hay.indexOf(q) < 0) return false;
+    }
+    return true;
+  });
+}
+function renderWpCardListBar(d){
+  var bar = document.getElementById("wpCardListBar");
+  if(!bar) return;
+  d = d || loadWp();
+  var chips = '<button class="chip' + (wpFilter === "all" ? ' active' : '') + '" onclick="wpSetField(\'all\')">全部 ' + (d.cards || []).length + '</button>';
+  chips += WP_FIELDS.map(function(f){
+    var n = (d.cards || []).filter(function(x){ return x.field === f; }).length;
+    if(!n) return "";
+    return '<button class="chip' + (wpFilter === f ? ' active' : '') + '" onclick="wpSetField(\'' + f + '\')">' + f + ' ' + n + '</button>';
+  }).join("");
+  bar.innerHTML = '<div class="wp-list-bar"><div class="wp-filter-bar">' + chips + '</div>'
+    + '<input id="wpSearch" class="wp-list-search" placeholder="🔍 搜知识点…" value="' + esc(wpQuery) + '" oninput="wpSetQuery(this.value)"></div>';
+}
+function renderWpCardList(d){
+  var list = document.getElementById("wpCardList");
+  if(!list) return;
+  d = d || loadWp();
+  var arr = wpListItems(d);
+  if(!arr.length){
+    list.innerHTML = '<div class="wp-empty">' + ((d.cards || []).length ? "没有匹配的知识点。" : "卡库还是空的，去「📖 每日一学」生成第一条。") + '</div>';
+    return;
+  }
+  var ordered = arr.slice().reverse();
+  var shown = wpExpanded ? ordered : ordered.slice(0, WP_SHOW_N);
+  var html = shown.map(function(c){
+    var ops = '<select class="wp-field-sel" onchange="wpMoveField(\'' + c.id + '\', this.value)">'
+      + WP_FIELDS.map(function(f){ return '<option value="' + f + '"' + (f === c.field ? ' selected' : '') + '>' + f + '</option>'; }).join("")
+      + '</select>'
+      + '<button class="btn ghost sm" onclick="wpDeleteCard(\'' + c.id + '\')">🗑️</button>';
+    return '<div class="wp-row">'
+      + '<div class="wp-row-info"><div class="wp-row-term">' + esc(c.term) + ' <span class="wp-field-tag">' + esc(c.field) + '</span></div>'
+      + (c.point ? '<div class="wp-row-sub">' + esc(c.point) + '</div>' : '')
+      + '<div class="wp-row-sub">' + esc(c.date || "") + ' · ' + esc(c.source || "") + '</div></div>'
+      + '<div class="wp-row-ops">' + ops + '</div></div>';
+  }).join("");
+  if(ordered.length > WP_SHOW_N){
+    html += '<button class="wp-more" onclick="wpExpand()">' + (wpExpanded ? "收起 ↑" : ("展开全部 " + ordered.length + " 条 ↓")) + '</button>';
+  }
+  list.innerHTML = html;
+}
+function wpSetQuery(v){ wpQuery = v || ""; renderWpCardList(); }
+function wpSetField(f){ wpFilter = f || "all"; wpExpanded = false; renderWpCardListBar(); renderWpCardList(); }
+function wpExpand(){ wpExpanded = !wpExpanded; renderWpCardList(); }
+function wpDeleteCard(id){
+  var d = loadWp();
+  d.cards = (d.cards || []).filter(function(c){ return c.id !== id; });
+  saveWp(d);
+  renderWp();
+}
+function wpMoveField(id, f){
+  var d = loadWp();
+  (d.cards || []).forEach(function(c){ if(c.id === id) c.field = _wpNormField(f); });
+  saveWp(d);
+  renderWp();
+}
+
+/* ---------- 学习记录 ---------- */
+function wpStreak(d){
+  d = d || loadWp();
+  var days = (d.streakDays || []).map(function(x){ return x.day || x.id; }).filter(Boolean).sort();
+  var set = {};
+  days.forEach(function(x){ set[x] = 1; });
+  function ds(off){
+    var t = new Date();
+    t.setDate(t.getDate() + off);
+    return t.getFullYear() + "-" + _wpPad(t.getMonth() + 1) + "-" + _wpPad(t.getDate());
+  }
+  var cur = 0, i = 0;
+  if(set[ds(0)]){ while(set[ds(-i)]){ cur++; i++; } }
+  else if(set[ds(-1)]){ i = 1; while(set[ds(-i)]){ cur++; i++; } }
+  var best = 0, run = 0, prev = null;
+  days.forEach(function(x){
+    if(prev){
+      var a = new Date(prev + "T00:00:00"), b = new Date(x + "T00:00:00");
+      run = ((b - a) === 86400000) ? (run + 1) : 1;
+    } else { run = 1; }
+    if(run > best) best = run;
+    prev = x;
+  });
+  return { cur: cur, best: best, total: days.length };
+}
+function renderWpRecord(d){
+  var box = document.getElementById("wpRecordBody");
+  if(!box) return;
+  d = d || loadWp();
+  var st = wpStreak(d);
+  var cards = d.cards || [];
+  var byField = {};
+  cards.forEach(function(c){ byField[c.field] = (byField[c.field] || 0) + 1; });
+  var total = cards.length || 1;
+  var bars = WP_FIELDS.map(function(f){
+    var n = byField[f] || 0;
+    var pct = Math.round(n * 100 / total);
+    return '<div class="wp-bar-row"><span class="wp-bar-lab">' + f + '</span>'
+      + '<span class="wp-bar"><i style="width:' + pct + '%"></i></span>'
+      + '<span class="wp-bar-num">' + n + '</span></div>';
+  }).join("");
+  var hist = (d.history || []).slice().reverse();
+  box.innerHTML = '<div class="stat-grid">'
+    + '<div class="stat-card p1"><div class="em">🔥</div><div class="lab">连续天数</div><div class="num">' + st.cur + '</div></div>'
+    + '<div class="stat-card p2"><div class="em">🏅</div><div class="lab">最长连续</div><div class="num">' + st.best + '</div></div>'
+    + '<div class="stat-card p3"><div class="em">📚</div><div class="lab">知识点</div><div class="num">' + cards.length + '</div></div>'
+    + '<div class="stat-card p4"><div class="em">📅</div><div class="lab">学习天数</div><div class="num">' + st.total + '</div></div>'
+    + '</div>'
+    + '<div class="card-head" style="margin-top:14px">📊 领域分布</div>' + bars
+    + '<div class="card-head" style="margin-top:16px">🗓️ 学习历史</div>'
+    + (hist.length
+        ? hist.slice(0, 30).map(function(h){
+            return '<div class="wp-hist-row"><span class="wp-hist-day">' + esc(h.day || h.id) + '</span>'
+              + '<span class="wp-hist-meta">' + (h.n || 0) + ' 条 · ' + esc((h.fields || []).join(" / ")) + '</span></div>';
+          }).join("")
+        : '<div class="wp-empty">还没有学习记录。</div>');
+}
+
+/* ---------- 路由与总渲染 ---------- */
+function renderWp(){
+  var d = loadWp();
+  renderWpDaily(d);
+  renderWpCardListBar(d);
+  renderWpCardList(d);
+  renderWpRecord(d);
+}
+function switchWpSub(sub){
+  wpSub = sub || "daily";
+  document.querySelectorAll("#wpTabBar .sub-tab").forEach(function(t){
+    t.classList.toggle("active", t.getAttribute("data-wpsub") === wpSub);
+  });
+  document.querySelectorAll("#module-workplace .wp-sub").forEach(function(el){
+    el.style.display = (el.id === "wp-sub-" + wpSub) ? "" : "none";
+  });
+  renderWp();
+}
+function initWpSubTabs(){
+  var tabs = document.querySelectorAll("#wpTabBar .sub-tab");
+  if(!tabs.length) return;
+  tabs.forEach(function(t){
+    t.addEventListener("click", function(){ switchWpSub(this.getAttribute("data-wpsub")); });
+  });
+  switchWpSub(wpSub);
+}
+
 /* ---------- 初始化 ---------- */
 (function(){
   var upd = document.getElementById("syncText");
@@ -27805,6 +28292,9 @@ var FREQ_DEFAULTS = [
       flattenKb(); renderGenericKb("sopKbGrid", SOPKBS, {_total:"sopKbCount","工作流程":"sopFlowCount","岗位知识":"sopKnowCount","错题":"sopErrorCount"});
       // 初始化工作SOP底栏子模块
       initSopSubTabs();
+    }
+    if(document.getElementById("wpDailyBody")){
+      initWpSubTabs();
     }
     if(document.getElementById("moneyRemain")){
       renderMoney();
