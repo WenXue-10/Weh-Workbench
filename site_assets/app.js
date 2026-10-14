@@ -5468,7 +5468,7 @@ function setIcon(k){
 var TITLES = {
   home:"🏠 首页总览", money:"💰 存钱记账", health:"🍱 吃饭健康",
   inspiration:"💡 灵感捕捉", decision:"🎯 决策顾问", report:"📝 工作汇报台",
-  baichuan:"📚 灵犀智库", career:"💼 SCM Career", cet6:"📖 CET-6备战", sop:"🛠️ 工作SOP",
+  baichuan:"📚 灵犀智库", career:"💼 SCM Career", cet6:"🌍 英语成长台", sop:"🛠️ 工作SOP",
   daily:"📅 日计划台", todo:"✅ 待办清单", settings:"⚙️ 设置", library:"📖 读书学习台", manifest:"🌟 显化成长台",
   workplace:"🎓 职场学院",
   jobs:"🐾 岗位看板", companies:"🐈 目标公司池", timeline:"😺 每日日报",
