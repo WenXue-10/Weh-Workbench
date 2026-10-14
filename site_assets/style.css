@@ -590,7 +590,10 @@ a{color:var(--pink-deep);text-decoration:none}
 .todo-add-bar input[type="text"]{flex:1;min-width:200px;border:1px solid var(--line);border-radius:12px;padding:10px 14px;font-size:13px;background:rgba(255,255,255,.85);outline:none;transition:.15s}
 .todo-add-bar input[type="text"]:focus{border-color:var(--pink-deep);box-shadow:0 0 0 3px rgba(219,112,147,.12)}
 .todo-add-bar select{border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:13px;background:rgba(255,255,255,.85);outline:none;cursor:pointer;color:var(--text)}
-.todo-add-bar input[type="date"]{border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:13px;background:rgba(255,255,255,.85);outline:none;color:var(--text)}
+.todo-add-bar input[type="date"],.todo-add-bar input[type="datetime-local"]{border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:13px;background:rgba(255,255,255,.85);outline:none;color:var(--text);font-family:inherit;transition:.15s;cursor:pointer}
+.todo-add-bar input[type="date"]:focus,.todo-add-bar input[type="datetime-local"]:focus{border-color:var(--pink-deep);box-shadow:0 0 0 3px rgba(219,112,147,.12)}
+.todo-add-bar input[type="datetime-local"]::-webkit-calendar-picker-indicator{cursor:pointer;opacity:.45;transition:.15s}
+.todo-add-bar input[type="datetime-local"]:hover::-webkit-calendar-picker-indicator{opacity:.9}
 .todo-add-bar button{background:linear-gradient(135deg,var(--pink-deep),#b48ed9);color:#fff;border:none;border-radius:12px;padding:0 20px;font-size:13px;font-weight:700;cursor:pointer;transition:.15s;white-space:nowrap}
 .todo-add-bar button:hover{transform:translateY(-1px);box-shadow:var(--shadow-sm)}
 .todo-list{display:flex;flex-direction:column;gap:8px;max-height:520px;overflow-y:auto}
