@@ -932,6 +932,96 @@ def scan_wiki_resources():
         items.append({"icon": icon, "name": folder, "desc": desc, "cls": "", "groups": [{"title": "", "notes": notes}]})
     return items
 
+# ========== 灵犀智库-日常系统（99-系统与规则） ==========
+SYS_ROOT = os.path.join(BRAIN_ROOT, "99-系统与规则")
+_SYS_TRIM = 60000          # 单篇超过该字符数只显示开头
+_SYS_SKIP_BYTES = 300000   # 超过该字节数整篇跳过（如 40 万字的维护日志）
+
+def _md_note_sys(path):
+    """日常系统专用：md -> note，超长内容截断并提示去 Obsidian 看全文。"""
+    fn = os.path.basename(path)
+    try:
+        raw = read(path)
+    except Exception:
+        return None
+    fm = parse_fm(raw)
+    body = strip_fm(raw)
+    cut = len(body) > _SYS_TRIM
+    if cut:
+        body = body[:_SYS_TRIM]
+    html = md_to_html(body)
+    if cut:
+        rel = os.path.relpath(path, SYS_ROOT).replace("\\", "/")
+        html += ('<p style="color:var(--muted);font-size:13px;margin-top:16px">'
+                 '✂️ 篇幅较长，此处只显示开头部分。完整内容请在 Obsidian 打开：'
+                 '99-系统与规则/' + rel + '</p>')
+    return {"title": os.path.splitext(fn)[0], "icon": "📄", "html": html, "fm": fm}
+
+
+def _sys_order(name):
+    """排序键：带日期的文件优先（最新在前），模板/prompt/说明类排最后。"""
+    m = re.search(r"(\d{4})-W(\d{1,2})", name)          # 周复盘-2026-W39
+    if m:
+        return (0, -(int(m.group(1)) * 100 + int(m.group(2))), name)
+    m = re.search(r"(\d{4})-(\d{2})-(\d{2})", name)   # 日导读_2026-10-14
+    if m:
+        return (0, -(int(m.group(1)) * 10000 + int(m.group(2)) * 100 + int(m.group(3))), name)
+    return (1, 0, name)
+
+
+def _walk_sys_dir(path, limit=12):
+    """日常系统子目录：只取顶层 md，日期新的在前，非日期文件置后。"""
+    notes = []
+    if not os.path.isdir(path):
+        return notes
+    for name in sorted(os.listdir(path), key=_sys_order):
+        if name.startswith(".") or not name.endswith(".md"):
+            continue
+        p = os.path.join(path, name)
+        try:
+            if os.path.getsize(p) > _SYS_SKIP_BYTES:
+                continue
+        except OSError:
+            continue
+        n = _md_note_sys(p)
+        if n:
+            notes.append(n)
+        if len(notes) >= limit:
+            break
+    return notes
+
+
+_SYS_META = [
+    ("日导读", "📅", "每日读书导读：概念、金句、落地动作"),
+    ("周复盘", "📊", "每周复盘：进度、问题、下周计划"),
+    ("主题轮转复习", "🔄", "按主题轮转的复习卡与要点"),
+]
+
+def scan_daily_system():
+    items = []
+    for folder, icon, desc in _SYS_META:
+        notes = _walk_sys_dir(os.path.join(SYS_ROOT, folder), limit=12)
+        items.append({"icon": icon, "name": folder, "desc": desc, "cls": "",
+                      "groups": [{"title": "", "notes": notes}]})
+    rules = []
+    if os.path.isdir(SYS_ROOT):
+        for name in sorted(os.listdir(SYS_ROOT)):
+            if not name.endswith(".md"):
+                continue
+            fp = os.path.join(SYS_ROOT, name)
+            try:
+                if os.path.getsize(fp) > _SYS_SKIP_BYTES:
+                    continue
+            except OSError:
+                continue
+            n = _md_note_sys(fp)
+            if n:
+                rules.append(n)
+    items.append({"icon": "⚙️", "name": "规则与说明",
+                  "desc": "知识库说明、AI 提示词、交互偏好、交接与职责地图、各类记录",
+                  "cls": "", "groups": [{"title": "", "notes": rules}]})
+    return items
+
 # 取知识库最近一次改动时间（保证只有真的改过才更新时间，避免自动提交刷屏）
 _SKIP_DIRS = {".git", ".obsidian", ".trash", "Templates", ".agents", ".codex", "docs"}
 def latest_mtime():
@@ -1058,6 +1148,7 @@ def build():
     wikiAreasKb = scan_wiki_areas()
     wikiConceptsKb = scan_wiki_concepts()
     wikiResourcesKb = scan_wiki_resources()
+    dailySysKb = scan_daily_system()
     stats = {
         "jobs": len(jobs),
         "rec": sum(1 for j in jobs if j.get("status") == "rec"),
@@ -1080,6 +1171,7 @@ def build():
         "wikiAreasKb": wikiAreasKb,
         "wikiConceptsKb": wikiConceptsKb,
         "wikiResourcesKb": wikiResourcesKb,
+        "dailySysKb": dailySysKb,
         "images": {"bg": bg, "av": av, "theme": theme, "bgMobile": bgm},
     "appIcons": app_icons,
     }

@@ -1,7 +1,7 @@
 /* ===== 文雪求职小窝 · 前端逻辑（数据由生成器自动注入） ===== */
 var D = window.SITE_DATA || {};
 var JOBS = D.jobs || [], COMPS = D.companies || [], TL = D.timeline || [];
-var RESUMES = D.resumes || {general:[], custom:[]}, KBS = D.kb || [], BCKBS = D.baichuanKb || [], CET6KBS = D.cet6Kb || [], SOPKBS = D.sopKb || [], WIKI_AREAS = D.wikiAreasKb || [], WIKI_CONCEPTS = D.wikiConceptsKb || [], WIKI_RESOURCES = D.wikiResourcesKb || [];
+var RESUMES = D.resumes || {general:[], custom:[]}, KBS = D.kb || [], BCKBS = D.baichuanKb || [], CET6KBS = D.cet6Kb || [], SOPKBS = D.sopKb || [], WIKI_AREAS = D.wikiAreasKb || [], WIKI_CONCEPTS = D.wikiConceptsKb || [], WIKI_RESOURCES = D.wikiResourcesKb || [], DAILY_SYS = D.dailySysKb || [];
 var IMGS = D.images || {bg:{}, av:{}};
 /* 快捷操作中转站（Cloudflare Worker），接入后由助手填写 */
 var BRIDGE = { url: "https://1473705102-gh71l7a70a.ap-shanghai.tencentscf.com", key: "XNTbRx7spQJHDGWfKjchz8iSL2OIwoFY" };
@@ -510,7 +510,7 @@ function openResume(i){
 var KB_FLAT = [];
 function flattenKb(){
   KB_FLAT = [];
-  var allKbs = [].concat(KBS, BCKBS, CET6KBS, SOPKBS, WIKI_AREAS, WIKI_CONCEPTS, WIKI_RESOURCES);
+  var allKbs = [].concat(KBS, BCKBS, CET6KBS, SOPKBS, WIKI_AREAS, WIKI_CONCEPTS, WIKI_RESOURCES, DAILY_SYS);
   allKbs.forEach(function(k){
     (k.groups||[{title:"", notes:k.notes||[]}]).forEach(function(g){
       (function walk(ns){ ns.forEach(function(n){ if(n.children){ walk(n.children); } else { KB_FLAT.push(n); } }); })(g.notes||[]);
@@ -607,7 +607,7 @@ function renderWikiCategory(gridId, data, statIds){
   }
 }
 function openWikiKb(gridId, i){
-  var dataMap = {"wikiAreasGrid": WIKI_AREAS, "wikiConceptsGrid": WIKI_CONCEPTS, "wikiResourcesGrid": WIKI_RESOURCES};
+  var dataMap = {"wikiAreasGrid": WIKI_AREAS, "wikiConceptsGrid": WIKI_CONCEPTS, "wikiResourcesGrid": WIKI_RESOURCES, "dailySysGrid": DAILY_SYS};
   var data = dataMap[gridId] || [];
   var k = data[i];
   if(!k) return;
@@ -7580,6 +7580,7 @@ function initBaichuanSubTabs(){
   renderWikiCategory("wikiAreasGrid", WIKI_AREAS, ["wikiAreasCount","wikiAreasJobCount","wikiAreasCareerCount","wikiAreasEngCount"]);
   renderWikiCategory("wikiConceptsGrid", WIKI_CONCEPTS, ["wikiConceptsModelCount","wikiConceptsCodeCount"]);
   renderWikiCategory("wikiResourcesGrid", WIKI_RESOURCES, ["wikiResEcoCount","wikiResAiCount"]);
+  renderWikiCategory("dailySysGrid", DAILY_SYS, ["sysDailyCount","sysWeeklyCount","sysRotateCount","sysRulesCount"]);
 }
 
 function switchBaichuanSub(sub){
