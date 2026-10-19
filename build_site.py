@@ -1064,6 +1064,17 @@ def extract_theme_hue(img_path):
         print("   ⚠️ 主色调提取失败", os.path.basename(img_path), e)
         return None
 
+def _natkey(s):
+    """自然排序：img2 排在 img10 之前（纯字符串排序会让 img10 抢到默认背景）"""
+    return [int(x) if x.isdigit() else x for x in re.split(r"(\d+)", s)]
+
+# 个别背景图自动取色会被大面积暗部/黑瓷砖带偏成冷灰蓝，这里手动指定色相（H 主色, H2 辅助）
+BG_HUE_OVERRIDE = {
+    "img8":  (338.0, 16.0),   # 黑底 + 粉发 + 玫瑰金首饰 → 玫红
+    "img10": (352.0, 30.0),   # 黑瓷砖 + 泡沫 + 红漆盒 → 酒红
+    "img11": (326.0, 4.0),    # 黑瓷砖 + 泡沫 + 粉发 → 品粉
+}
+
 # ---------- 组装 ----------
 def build():
     # 先清空旧的生成目录，避免残留文件
@@ -1076,7 +1087,7 @@ def build():
     img_src = os.path.join(ASSETS, "img")
     bg, av, theme, bgm = {}, {}, {}, {}
     if os.path.isdir(img_src):
-        for fn in sorted(os.listdir(img_src)):
+        for fn in sorted(os.listdir(img_src), key=_natkey):
             full = os.path.join(img_src, fn)
             shutil.copy2(full, os.path.join(img_out, fn))
             low = fn.lower()
@@ -1088,7 +1099,7 @@ def build():
             if is_bg:
                 k = stem.replace("_bg", "")
                 bg[k] = url
-                th = extract_theme_hue(full)
+                th = BG_HUE_OVERRIDE.get(k) or extract_theme_hue(full)
                 if th:
                     theme[k] = {"h": th[0], "h2": th[1]}
                     print("   🎨", fn, "主色相", th[0], "辅助", th[1])
