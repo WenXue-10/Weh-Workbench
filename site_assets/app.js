@@ -4794,6 +4794,10 @@ function _mergeSettings(localS, remoteS, localWins){
   for(k in loser){ out[k] = loser[k]; }
   for(k in winner){ out[k] = winner[k]; }
   out.preferences = Object.assign({}, loser.preferences || {}, winner.preferences || {});
+  /* 显示类偏好只属于本机：云端合并时始终保留本地值，避免刷新后被云端旧值覆盖（滑块回退 bug） */
+  ["theme","glassOpacity","veilOpacity","blurRadius","fontSize"].forEach(function(f){
+    if(l[f] !== undefined) out[f] = l[f];
+  });
   return out;
 }
 /* 键级并集合并（如岗位状态覆盖层）：两边不同的键都保留，仅同键冲突时按赢家 */
@@ -5154,14 +5158,14 @@ function loadPreference(){
   if(document.getElementById("prefHealthBudget")) document.getElementById("prefHealthBudget").value = p.healthBudget || 100;
   if(document.getElementById("prefHealthGoal")) document.getElementById("prefHealthGoal").value = p.healthGoal || 7;
   if(document.getElementById("prefDailyStart")) document.getElementById("prefDailyStart").value = p.dailyStart || 9;
-  if(document.getElementById("glassOpacity")) document.getElementById("glassOpacity").value = s.glassOpacity || 75;
-  if(document.getElementById("glassOpacityValue")) document.getElementById("glassOpacityValue").textContent = (s.glassOpacity || 75) + "%";
-  if(document.getElementById("blurRadius")) document.getElementById("blurRadius").value = s.blurRadius || 18;
-  if(document.getElementById("blurRadiusValue")) document.getElementById("blurRadiusValue").textContent = (s.blurRadius || 18) + "px";
-  document.documentElement.style.setProperty("--blur-radius", (s.blurRadius || 18) + "px");
-  if(document.getElementById("veilOpacity")) document.getElementById("veilOpacity").value = s.veilOpacity || 50;
-  if(document.getElementById("veilOpacityValue")) document.getElementById("veilOpacityValue").textContent = (s.veilOpacity || 50) + "%";
-  var veilBase = (s.veilOpacity || 50) / 100;
+  if(document.getElementById("glassOpacity")) document.getElementById("glassOpacity").value = (s.glassOpacity==null?75:s.glassOpacity);
+  if(document.getElementById("glassOpacityValue")) document.getElementById("glassOpacityValue").textContent = (s.glassOpacity==null?75:s.glassOpacity) + "%";
+  if(document.getElementById("blurRadius")) document.getElementById("blurRadius").value = (s.blurRadius==null?18:s.blurRadius);
+  if(document.getElementById("blurRadiusValue")) document.getElementById("blurRadiusValue").textContent = (s.blurRadius==null?18:s.blurRadius) + "px";
+  document.documentElement.style.setProperty("--blur-radius", (s.blurRadius==null?18:s.blurRadius) + "px");
+  if(document.getElementById("veilOpacity")) document.getElementById("veilOpacity").value = (s.veilOpacity==null?50:s.veilOpacity);
+  if(document.getElementById("veilOpacityValue")) document.getElementById("veilOpacityValue").textContent = (s.veilOpacity==null?50:s.veilOpacity) + "%";
+  var veilBase = (s.veilOpacity==null?50:s.veilOpacity) / 100;
   document.documentElement.style.setProperty("--veil-alpha", veilBase);
   // 如果applyThemeByHue已经运行过（currentHueH有值），直接设置遮罩
   if(currentHueH > 0){
@@ -5171,10 +5175,10 @@ function loadPreference(){
   if(document.getElementById("fontSize")) document.getElementById("fontSize").value = s.fontSize || "medium";
   // 应用已保存的设置
   if(s.theme && s.theme !== "pink") setTheme(s.theme);
-  if(s.glassOpacity) document.documentElement.style.setProperty("--glass-opacity", s.glassOpacity/100);
+  if(s.glassOpacity!=null) document.documentElement.style.setProperty("--glass-opacity", s.glassOpacity/100);
   if(s.fontSize && s.fontSize !== "medium"){
     var sizes = {small:"13px", medium:"14px", large:"15px"};
-    document.documentElement.fontSize = sizes[s.fontSize] || "14px";
+    document.documentElement.style.fontSize = sizes[s.fontSize] || "14px";
   }
   if(document.getElementById("prefWaterReminder")) document.getElementById("prefWaterReminder").checked = !!(p && p.waterReminder);
   if(document.getElementById("prefWaterInterval")) document.getElementById("prefWaterInterval").value = (p && p.waterInterval) || 120;
