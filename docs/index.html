@@ -6567,9 +6567,15 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
 
                       <div class="theme-dot theme-blue" style="background:linear-gradient(135deg,#74b9ff,#a29bfe)" onclick="setTheme('blue')" title="蓝紫"></div>
 
-                      <div class="theme-dot theme-green" style="background:linear-gradient(135deg,#55efc4,#81ecec)" onclick="setTheme('green')" title="青绿"></div>
+                      <div class="theme-dot theme-green" style="background:linear-gradient(135deg,#00b894,#81ecec)" onclick="setTheme('green')" title="青绿"></div>
 
                       <div class="theme-dot theme-orange" style="background:linear-gradient(135deg,#ffa502,#ff6348)" onclick="setTheme('orange')" title="暖橙"></div>
+
+                      <div class="theme-dot theme-rose" style="background:linear-gradient(135deg,#c9835f,#e3b7a8)" onclick="setTheme('rose')" title="玫瑰金"></div>
+
+                      <div class="theme-dot theme-crimson" style="background:linear-gradient(135deg,#a8203f,#d8567a)" onclick="setTheme('crimson')" title="酒红"></div>
+
+                      <div class="theme-dot theme-ink" style="background:linear-gradient(135deg,#3a3a44,#8d8798)" onclick="setTheme('ink')" title="墨黑"></div>
 
                     </div>
 
@@ -7353,7 +7359,7 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
 
 <script>
 window.SITE_DATA = {
- "updated": "2026-10-19 16:40",
+ "updated": "2026-10-19 17:11",
  "stats": {
   "jobs": 64,
   "rec": 0,
@@ -28895,7 +28901,10 @@ function setTheme(theme){
     pink: {primary:"#db7093", secondary:"#b48ed9"},
     blue: {primary:"#74b9ff", secondary:"#a29bfe"},
     green: {primary:"#00b894", secondary:"#81ecec"},
-    orange: {primary:"#ffa502", secondary:"#ff6348"}
+    orange: {primary:"#ffa502", secondary:"#ff6348"},
+    rose: {primary:"#c9835f", secondary:"#e3b7a8"},
+    crimson: {primary:"#a8203f", secondary:"#d8567a"},
+    ink: {primary:"#3a3a44", secondary:"#8d8798"}
   };
   var c = colors[theme] || colors.pink;
   document.documentElement.style.setProperty("--pink-deep", c.primary);
