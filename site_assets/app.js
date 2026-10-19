@@ -4110,7 +4110,10 @@ function setTheme(theme){
     pink: {primary:"#db7093", secondary:"#b48ed9"},
     blue: {primary:"#74b9ff", secondary:"#a29bfe"},
     green: {primary:"#00b894", secondary:"#81ecec"},
-    orange: {primary:"#ffa502", secondary:"#ff6348"}
+    orange: {primary:"#ffa502", secondary:"#ff6348"},
+    rose: {primary:"#c9835f", secondary:"#e3b7a8"},
+    crimson: {primary:"#a8203f", secondary:"#d8567a"},
+    ink: {primary:"#3a3a44", secondary:"#8d8798"}
   };
   var c = colors[theme] || colors.pink;
   document.documentElement.style.setProperty("--pink-deep", c.primary);
