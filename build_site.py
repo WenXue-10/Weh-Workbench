@@ -1125,7 +1125,7 @@ def build():
             for fn in os.listdir(app_dir):
                 shutil.copy2(os.path.join(app_dir, fn), os.path.join(app_out, fn))
             meta_map = {k: (e, n) for k, e, n in ICON_META}
-            for fn in sorted(os.listdir(app_out)):
+            for fn in sorted(os.listdir(app_out), key=_natkey):
                 # 只看192，key取 icon- 与 -192 之间
                 if not fn.endswith("-192.png") or not fn.startswith("icon-"):
                     continue
