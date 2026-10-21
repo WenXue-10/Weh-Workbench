@@ -138,7 +138,11 @@ def md_to_pdf(md_text, out_path, title=""):
                     rows.append([Paragraph(_esc_pdf(c), st["cell"]) for c in cells])
                 j += 1
             if rows:
-                t = Table(rows)
+                ncol = max(len(r) for r in rows)
+                avail_w = A4[0] - 36*mm
+                colw = [avail_w / ncol] * ncol
+                rows = [r + [Paragraph("", st["cell"])] * (ncol - len(r)) for r in rows]
+                t = Table(rows, colWidths=colw)
                 t.setStyle(TableStyle([
                     ("GRID", (0,0), (-1,-1), 0.4, "#e2e8f0"),
                     ("BACKGROUND", (0,0), (-1,0), "#fdf2f8"),
@@ -167,7 +171,11 @@ def md_to_pdf(md_text, out_path, title=""):
         else:
             flow.append(Paragraph(_esc_pdf(line), st["body"]))
         i += 1
-    doc.build(flow)
+    try:
+        doc.build(flow)
+    except Exception as e:
+        print("  [warn] PDF 生成失败已跳过:", os.path.basename(out_path), e)
+        return False
     return True
 
 _pdf_cache = {}

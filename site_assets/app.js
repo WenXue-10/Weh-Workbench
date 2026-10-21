@@ -5344,6 +5344,7 @@ function applyThemeByHue(H,H2){
   root.setProperty("--pink-deep",hsl(H,0.62,0.55));
   root.setProperty("--pink-soft",hsl(H,0.62,0.93));
   root.setProperty("--lav",hsl(H2,0.6,0.7));
+  root.setProperty("--purple",hsl(H2,0.6,0.7));
   root.setProperty("--lav-soft",hsl(H2,0.55,0.94));
   root.setProperty("--grad-from",hsl(H,0.72,0.7));
   root.setProperty("--grad-to",hsl(H2,0.68,0.72));
