@@ -10,6 +10,9 @@ __pycache__/
 *.bak
 *.log
 
+# 本地调试残留（CDP 截图脚本、无头 Chrome profile、验收截图等）
+wb_*
+
 # 系统文件
 .DS_Store
 Thumbs.db
