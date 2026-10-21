@@ -12,7 +12,7 @@
 :root{
   --bg:#fff6f9; --card:rgba(255,255,255,.84); --line:#ffdcea;
   --text:#6b4a5e; --muted:#b48ea3;
-  --pink:#ff7fb0; --pink-deep:#e0558a; --pink-soft:#ffe3ee;
+  --pink:#ff7fb0; --pink-deep:#e0558a; --pink-soft:#ffe3ee; --purple:#b48ed9;
   --lav:#a78bfa; --lav-soft:#efe8ff;
   --mint:#34c98e; --mint-soft:#d9f7e9;
   --peach:#ff9e6d; --peach-soft:#ffe9dc;
@@ -7359,7 +7359,7 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
 
 <script>
 window.SITE_DATA = {
- "updated": "2026-10-20 21:10",
+ "updated": "2026-10-21 12:55",
  "stats": {
   "jobs": 70,
   "rec": 0,
@@ -31805,6 +31805,7 @@ function applyThemeByHue(H,H2){
   root.setProperty("--pink-deep",hsl(H,0.62,0.55));
   root.setProperty("--pink-soft",hsl(H,0.62,0.93));
   root.setProperty("--lav",hsl(H2,0.6,0.7));
+  root.setProperty("--purple",hsl(H2,0.6,0.7));
   root.setProperty("--lav-soft",hsl(H2,0.55,0.94));
   root.setProperty("--grad-from",hsl(H,0.72,0.7));
   root.setProperty("--grad-to",hsl(H2,0.68,0.72));
