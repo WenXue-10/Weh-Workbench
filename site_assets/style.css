@@ -2306,3 +2306,23 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
 .wp-hist-day{color:var(--muted);flex-shrink:0}
 .wp-hist-meta{text-align:right}
 .btn:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
+
+/* ===== 往期账单 ===== */
+.mh-sum{font-size:12px;color:var(--muted);margin:2px 0 14px}
+.mh-list{display:flex;flex-direction:column;gap:8px;max-height:50vh;overflow-y:auto;padding-right:2px}
+.mh-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.62);border:1px solid rgba(255,255,255,.78);cursor:pointer;transition:.15s}
+.mh-row:hover{transform:translateY(-1px);border-color:#ffc4da;box-shadow:var(--shadow-sm)}
+.mh-left{min-width:0}
+.mh-range{font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.mh-sub{font-size:11.5px;color:var(--muted);margin-top:4px;display:flex;gap:10px;flex-wrap:wrap}
+.mh-amt{font-size:16px;font-weight:700;color:var(--pink-deep);white-space:nowrap;display:flex;align-items:center;gap:6px}
+.mh-arrow{font-size:16px;color:var(--muted);font-weight:400}
+.mh-badge{font-size:10px;padding:1px 7px;border-radius:8px;background:rgba(255,182,214,.55);color:#c2185b;font-weight:600}
+.mh-over{font-size:10px;padding:1px 7px;border-radius:8px;background:rgba(255,107,107,.18);color:#e03131;font-weight:600;white-space:nowrap}
+.mh-empty{text-align:center;color:var(--muted);padding:28px;font-size:13px}
+.mh-tip{font-size:11.5px;color:var(--muted);margin-top:14px;text-align:center}
+.mh-detail-bar{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);margin-bottom:6px;align-items:center}
+.mh-detail-bar b{color:var(--pink-deep);font-size:14px}
+.mh-sec{font-size:13px;font-weight:600;margin:18px 0 8px}
+.mh-back{margin-top:16px;width:100%;padding:10px;border-radius:12px;border:1px solid rgba(255,255,255,.8);background:rgba(255,255,255,.6);color:inherit;font-size:13px;cursor:pointer;transition:.15s}
+.mh-back:hover{background:rgba(255,255,255,.9)}

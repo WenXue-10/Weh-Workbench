@@ -722,6 +722,137 @@ function daysLeftInCycle(cycleStart){
   return Math.max(diff, 1);
 }
 
+/* ===== 往期账单 ===== */
+function _moneyParseYMD(s){
+  var m = String(s||"").match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if(!m) return null;
+  var d = new Date(+m[1], +m[2]-1, +m[3]);
+  return isNaN(d.getTime()) ? null : d;
+}
+function _moneyFmtD(d){
+  return d.getFullYear()+"."+("0"+(d.getMonth()+1)).slice(-2)+"."+("0"+d.getDate()).slice(-2);
+}
+function _moneyEndLabel(c){
+  var d = new Date(c.end.getTime()); d.setDate(d.getDate()-1);
+  return _moneyFmtD(d);
+}
+function moneyCycleRangeOf(d, cs){
+  var y = d.getFullYear(), m = d.getMonth();
+  var start = new Date(y, m, cs);
+  if(d.getDate() < cs) start = new Date(y, m-1, cs);
+  var end = new Date(start); end.setMonth(end.getMonth()+1);
+  return {start:start, end:end};
+}
+function moneyCycles(data){
+  var cs = Number(data.cycleStart) || 20;
+  var map = {}, keys = [];
+  (data.records||[]).forEach(function(r){
+    var d = _moneyParseYMD(r.date);
+    if(!d) return;
+    var rg = moneyCycleRangeOf(d, cs);
+    var k = _moneyFmtD(rg.start);
+    if(!map[k]){ map[k] = {key:k, start:rg.start, end:rg.end, records:[]}; keys.push(k); }
+    map[k].records.push(r);
+  });
+  keys.sort(function(a,b){ return a<b ? 1 : -1; });
+  return keys.map(function(k){
+    var c = map[k];
+    c.spent = c.records.reduce(function(s,r){ return s + (Number(r.amount)||0); }, 0);
+    c.imp = c.records.filter(function(r){ return r.impulse; }).reduce(function(s,r){ return s + (Number(r.amount)||0); }, 0);
+    c.n = c.records.length;
+    return c;
+  });
+}
+function openMoneyHistory(){
+  var data = loadMoney();
+  var cs = Number(data.cycleStart) || 20;
+  var usable = (Number(data.budget)||0) - (Number(data.fixedSave)||0);
+  var cycles = moneyCycles(data);
+  var curKey = _moneyFmtD(getCycleRange(cs).start);
+  var total = 0, totalImp = 0, totalN = 0;
+  var rows = cycles.map(function(c){
+    total += c.spent; totalImp += c.imp; totalN += c.n;
+    var isCur = c.key === curKey;
+    var over = usable > 0 && c.spent > usable;
+    return '<div class="mh-row" onclick="openMoneyCycle(\''+c.key+'\')">'
+      + '<div class="mh-left">'
+      +   '<div class="mh-range">'+c.key+' – '+_moneyEndLabel(c)
+      +     (isCur ? '<span class="mh-badge">本期</span>' : '')
+      +     (over ? '<span class="mh-over">超预算</span>' : '')
+      +   '</div>'
+      +   '<div class="mh-sub"><span>'+c.n+' 笔</span>'+(c.imp>0?'<span>冲动 ¥'+c.imp.toFixed(0)+'</span>':'')+'</div>'
+      + '</div>'
+      + '<div class="mh-amt">¥'+c.spent.toFixed(0)+'<span class="mh-arrow">›</span></div>'
+      + '</div>';
+  }).join("");
+  if(!cycles.length) rows = '<div class="mh-empty">还没有任何消费记录，先记一笔吧～</div>';
+  setModal('<h2>📅 往期账单</h2>'
+    + '<div class="mh-sum">共 '+cycles.length+' 个账期 · '+totalN+' 笔 · 累计 ¥'+total.toFixed(0)
+    + (totalImp>0 ? ' · 冲动 ¥'+totalImp.toFixed(0) : '') + '</div>'
+    + '<div class="mh-list">'+rows+'</div>'
+    + '<div class="mh-tip">按账单日（每月 '+cs+' 号）划分 · 点任意账期看明细</div>');
+}
+function openMoneyCycle(key){
+  var data = loadMoney();
+  var cycles = moneyCycles(data);
+  var c = null;
+  cycles.forEach(function(x){ if(x.key === key) c = x; });
+  if(!c){ openMoneyHistory(); return; }
+  var usable = (Number(data.budget)||0) - (Number(data.fixedSave)||0);
+  var catTotals = {};
+  c.records.forEach(function(r){ catTotals[r.category] = (catTotals[r.category]||0) + (Number(r.amount)||0); });
+  var catArr = Object.keys(catTotals).map(function(k){ return {name:k, amount:catTotals[k]}; })
+    .sort(function(a,b){ return b.amount - a.amount; });
+  var catHtml = catArr.map(function(x){
+    var pct = c.spent > 0 ? (x.amount/c.spent*100) : 0;
+    var cat = QUICK_CATEGORIES.find(function(q){ return q.name===x.name; }) || {icon:"💰"};
+    var cls = IMPULSE_CATS[x.name] ? " impulse-cat" : "";
+    return '<div class="cat-bar-row"><div class="cat-bar-name">'+cat.icon+' '+esc(x.name)+'</div>'
+      + '<div class="cat-bar-track"><div class="cat-bar-fill'+cls+'" style="width:'+pct.toFixed(1)+'%"></div></div>'
+      + '<div class="cat-bar-amt">¥'+x.amount.toFixed(0)+' ('+pct.toFixed(0)+'%)</div></div>';
+  }).join("");
+  var listHtml = c.records.slice().sort(sortByDateTime).map(function(r){
+    var cat = QUICK_CATEGORIES.find(function(q){ return q.name===r.category; }) || {icon:"💰"};
+    var impCls = r.impulse ? "" : " off";
+    var impTxt = r.impulse ? "⚠️冲动" : "普通";
+    return '<div class="exp-item">'
+      + '<div class="exp-icon">'+cat.icon+'</div>'
+      + '<div class="exp-info"><div class="exp-cat">'+esc(r.category)+(r.note?' · '+esc(r.note):'')+(r.photoId?' 📷':'')+'</div><div class="exp-date">'+r.date+' '+(r.time||"")+'</div></div>'
+      + '<div class="exp-amount">¥'+r.amount+'</div>'
+      + '<div class="exp-impulse'+impCls+'">'+impTxt+'</div>'
+      + '<div class="exp-del" onclick="moneyHistoryDel('+r.id+',\''+key+'\')">✕</div>'
+      + '</div>';
+  }).join("");
+  var over = usable > 0 && c.spent > usable;
+  setModal('<h2>📅 '+key+' – '+_moneyEndLabel(c)+'</h2>'
+    + '<div class="mh-detail-bar"><span>共 <b>'+c.n+'</b> 笔</span><span>花 <b>¥'+c.spent.toFixed(0)+'</b></span>'
+    + (c.imp>0 ? '<span>冲动 <b>¥'+c.imp.toFixed(0)+'</b></span>' : '')
+    + (over ? '<span class="mh-over">超预算</span>' : '')
+    + '</div>'
+    + (catHtml ? '<div class="mh-sec">📊 钱去哪了</div><div class="category-bars">'+catHtml+'</div>' : '')
+    + '<div class="mh-sec">📝 明细</div>'
+    + '<div class="expense-list">'+listHtml+'</div>'
+    + '<button class="mh-back" onclick="openMoneyHistory()">← 返回全部账期</button>');
+}
+function moneyHistoryDel(id, key){
+  showConfirm("确定删除这笔记录？（饮食台的对应记录也会同步删除）").then(function(ok){
+    if(!ok) return;
+    var data = loadMoney();
+    var r = data.records.find(function(x){ return x.id===id; });
+    data.records = data.records.filter(function(x){ return x.id!==id; });
+    saveMoney(data);
+    renderMoney();
+    if(r && isHealthCategory(r.category)){
+      try{
+        var health = loadHealth();
+        health.records = health.records.filter(function(x){ return x.id!==id; });
+        saveHealth(health);
+      }catch(e){ console.log("同步删除饮食台失败:", e.message); }
+    }
+    var still = moneyCycles(loadMoney()).filter(function(c){ return c.key===key; }).length > 0;
+    if(still) openMoneyCycle(key); else openMoneyHistory();
+  });
+}
 function renderMoney(){
   var data = loadMoney();
   // 顶部设置
