@@ -215,6 +215,11 @@ def status_key(t):
     UNKNOWN_STATUS.append(t)
     return "unknown"
 
+def _clean_inline(s):
+    """清掉行内 markdown 标记，避免 **27** 这类符号直接显示在页面上"""
+    s = re.sub(r"[*`~]+", "", s or "")
+    return s.strip()
+
 def parse_detail_table(text):
     m = re.search(r"##\s*匹配度评分明细\s*\n(.*?)(?=\n##|\Z)", text, re.DOTALL)
     rows = []
@@ -223,16 +228,30 @@ def parse_detail_table(text):
             line = line.strip()
             if line.startswith("|"):
                 cells = [c.strip() for c in line.strip("|").split("|")]
-                if len(cells) >= 3 and cells[0] not in ("维度", "---", "") and "总分" not in cells[0]:
-                    rows.append([re.sub(r"[*`]", "", cells[0]), cells[1], cells[2]])
+                # 跳过 markdown 表格分隔行（|:---|:---:|---|）
+                if any(c and re.fullmatch(r"[-:\s]+", c) for c in cells):
+                    continue
+                if len(cells) >= 3 and cells[0] not in ("维度", "") and "总分" not in cells[0]:
+                    rows.append([_clean_inline(cells[0]), _clean_inline(cells[1]), _clean_inline(cells[2])])
     return rows
 
 def parse_summary(text):
     m = re.search(r"##\s*岗位 JD 摘要\s*\n(.*?)(?=\n##|\Z)", text, re.DOTALL)
     if not m:
         return ""
-    lines = [l.strip() for l in m.group(1).splitlines() if l.strip() and not l.startswith("|")]
-    return " ".join(lines)[:300]
+    out = []
+    for l in m.group(1).splitlines():
+        l = l.strip()
+        if not l or l.startswith("|"):
+            continue
+        if re.fullmatch(r"[-*_=\s]{3,}", l):
+            continue
+        l = re.sub(r"^#{1,6}\s*", "", l)
+        l = re.sub(r"^[>\-•]\s*", "", l)
+        l = re.sub(r"[*`~]+", "", l).strip()
+        if l:
+            out.append(l)
+    return " ".join(out)[:300]
 
 def parse_note(text):
     m = re.search(r"##\s*备注\s*\n(.*?)(?=\n##|\Z)", text, re.DOTALL)
