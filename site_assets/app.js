@@ -355,26 +355,28 @@ function renderHome(){
 }
 
 /* ---------- 岗位看板 ---------- */
-function fileLinks(j, i){
-  var out = "";
+function fileLinks(j){
+  var out = "", k = jobAttr(j);
+  // 统一形态：主入口一律「查看」（弹窗读正文），PDF 只作附加下载，不再有的走 PDF 有的走弹窗
   if(j.report){
-    if(j.report.pdf) out += '<a href="'+j.report.pdf+'" target="_blank">📄 背调报告 PDF</a>';
-    else if(j.report.html) out += '<a onclick="openJobNote('+i+',\'report\')">📄 查看背调报告</a>';
+    if(j.report.html) out += '<a onclick="openJobNote(\''+k+'\',\'report\')">📄 查看背调报告</a>';
+    if(j.report.pdf)  out += '<a href="'+j.report.pdf+'" target="_blank">⬇️ 背调报告 PDF</a>';
   }
   if(j.resume){
     if(j.resume.pdf) out += '<a href="'+j.resume.pdf+'" target="_blank">📄 定制简历 PDF</a>';
     if(j.resume.doc) out += '<a href="'+j.resume.doc+'">📄 定制简历 Word</a>';
   }
   if(j.jd){
-    if(j.jd.pdf) out += '<a href="'+j.jd.pdf+'" target="_blank">🗃️ JD 原文 PDF</a>';
-    else if(j.jd.pdfs) j.jd.pdfs.forEach(function(u,k){ out += '<a href="'+u+'" target="_blank">🗃️ JD PDF '+(k+1)+'</a>'; });
-    else if(j.jd.html) out += '<a onclick="openJobNote('+i+',\'jd\')">🗃️ 查看 JD 原文</a>';
+    if(j.jd.html) out += '<a onclick="openJobNote(\''+k+'\',\'jd\')">🗃️ 查看 JD 原文</a>';
+    if(j.jd.pdf)  out += '<a href="'+j.jd.pdf+'" target="_blank">⬇️ JD PDF</a>';
+    if(j.jd.pdfs) j.jd.pdfs.forEach(function(u,n){ out += '<a href="'+u+'" target="_blank">⬇️ JD PDF '+(n+1)+'</a>'; });
   }
   return out || '<span style="color:var(--muted)">暂无关联文件</span>';
 }
-function openJob(i){
-  var allJobs = getMergedJobs();
-  var j = allJobs[i] || JOBS[i];
+function openJob(key){
+  var j = (typeof key === "number") ? (getMergedJobs()[key] || JOBS[key]) : jobByIdKey(key);
+  if(!j){ toast("岗位数据未找到，请刷新页面"); return; }
+  var kAttr = jobAttr(j);
   var rows = (j.detail||[]).map(function(d){ return "<tr><td>"+esc(d[0])+"</td><td>"+esc(d[2])+" / "+esc(d[1])+"</td></tr>"; }).join("");
   setModal(
     '<h2>'+esc(j.company)+' · '+esc(j.pos)+'</h2>'
@@ -394,21 +396,22 @@ function openJob(i){
     + '<div class="m-sec">📄 JD 摘要</div><p style="font-size:13.5px;color:var(--muted)">'+esc(j.summary)+'</p>'
     + '<div class="m-sec">📊 匹配度评分明细</div>'
     + '<table class="m-table"><tbody>'+rows+'<tr style="background:var(--pink-soft)"><td><b>总分</b></td><td><b>'+esc(j.score)+' / 100</b></td></tr></tbody></table>'
-    + '<div class="m-sec">🧩 关联资料</div><div class="m-links">'+fileLinks(j, i)
+    + '<div class="m-sec">🧩 关联资料</div><div class="m-links">'+fileLinks(j)
     + (j.link?'<a href="'+j.link+'" target="_blank">🔗 投递/原始链接</a>':'')
     + '</div>'
     + '<div class="m-sec">⚡ 快捷操作</div>'
     + '<div class="m-links" style="margin-bottom:4px">'
-    + '<a onclick="quickAction('+i+',\'ready\')">📮 待投递</a>'
-    + '<a onclick="quickAction('+i+',\'sent\')">✉️ 已投递</a>'
-    + '<a onclick="quickAction('+i+',\'interview\')">📞 面试中</a>'
-    + '<a onclick="quickAction('+i+',\'dead\')">❌ 已挂</a>'
+    + '<a onclick="quickAction(\''+kAttr+'\',\'ready\')">📮 待投递</a>'
+    + '<a onclick="quickAction(\''+kAttr+'\',\'sent\')">✉️ 已投递</a>'
+    + '<a onclick="quickAction(\''+kAttr+'\',\'interview\')">📞 面试中</a>'
+    + '<a onclick="quickAction(\''+kAttr+'\',\'dead\')">❌ 已挂</a>'
     + '</div>'
     + '<p style="font-size:11.5px;color:var(--muted)">点一下即可更新知识库状态，自动同步到电脑和网站</p>'
     + (j.note?'<div class="m-sec">📝 备注</div><p style="font-size:13px;color:var(--muted)">'+esc(j.note)+'</p>':''));
 }
-function quickAction(i, status){
-  var j = JOBS[i];
+function quickAction(key, status){
+  var j = (typeof key === "number") ? JOBS[key] : jobByIdKey(key);
+  if(!j){ toast("岗位数据未找到，请刷新页面"); return; }
   if(!j.file){ toast("这个岗位暂不支持快捷操作"); return; }
   var label = STATUS_LABEL[status] || "";
   function okUpdate(){
@@ -435,8 +438,9 @@ function quickAction(i, status){
     if(res.ok){ okUpdate(); } else { toast("❌ 更新失败：" + (res.error || "未知错误")); }
   }).catch(function(){ fallback(); });
 }
-function openJobNote(i, which){
-  var j = JOBS[i];
+function openJobNote(key, which){
+  var j = (typeof key === "number") ? JOBS[key] : jobByIdKey(key);
+  if(!j){ toast("岗位数据未找到，请刷新页面"); return; }
   var h = (which==="report") ? (j.report?j.report.html:"") : (j.jd?j.jd.html:"");
   var t = (which==="report") ? "背调报告" : "JD 原文";
   setModal('<h2>'+esc(j.company)+' · '+esc(t)+'</h2><div class="note-body" style="margin-top:12px">'+(h||'<p>暂无内容</p>')+'</div>');
@@ -2774,6 +2778,17 @@ function loadJobOverrides(){
 }
 function saveJobOverrides(o){ markLocalChange(); localStorage.setItem(JOB_OVERRIDE_KEY, JSON.stringify(o)); }
 function jobKey(j){ return (j.company||"") + "||" + (j.pos||j.position||""); }
+// 岗位唯一键：合并数组用 _key 定位，彻底避免"列表/弹窗/附件各用不同数组"导致的索引错位
+function jobAttr(j){ return encodeURIComponent(j._key || jobKey(j) || ("local_" + j.id)); }
+function jobByIdKey(k){
+  if(k === undefined || k === null || k === "") return null;
+  var s = String(k);
+  try { s = decodeURIComponent(s); } catch(e){}
+  var all = getMergedJobs();
+  for(var i=0;i<all.length;i++){ if(all[i]._key === s) return all[i]; }
+  for(var n=0;n<all.length;n++){ if(jobKey(all[n]) === s) return all[n]; }
+  return null;
+}
 var KB_STATUS_MAP = {ready:"pending", sent:"applied", interview:"interview", offer:"offer", dead:"rejected", backup:"backup", done:"done", warn:"warn", new:"new", expired:"expired", closed:"closed", abandoned:"abandoned", redline:"redline", invalid:"invalid"};
 function getMergedJobs(){
   var overrides = loadJobOverrides();
@@ -2822,10 +2837,9 @@ function updateJobStatus(id, status){
   var job = data.jobs.find(function(j){ return j.id===id; });
   if(job){ job.status = status; saveJobs(data); renderJobs(); renderCareerOverview(); }
 }
-function updateJobStatusByIdx(idx, status){
-  var jobs = getMergedJobs();
-  var j = jobs[idx];
-  if(!j) return;
+function updateJobStatusByKey(key, status){
+  var j = (typeof key === "number") ? getMergedJobs()[key] : jobByIdKey(key);
+  if(!j){ toast("岗位数据未找到，请刷新页面"); return; }
   if(j._source === "kb"){
     var overrides = loadJobOverrides();
     overrides[j._key] = status;
@@ -2839,6 +2853,8 @@ function updateJobStatusByIdx(idx, status){
   renderCareerOverview();
   toast("状态已更新");
 }
+// 兼容老调用
+function updateJobStatusByIdx(idx, status){ updateJobStatusByKey(idx, status); }
 function deleteJob(id){
   showConfirm("确定删除这个岗位？").then(function(ok){
     if(!ok) return;
@@ -2931,14 +2947,15 @@ function renderJobs(){
   var wentuo = jobs.filter(function(j){ return typeof j.score === "number" && j.score >= 70 && j.score < 80; });
   var baodi = jobs.filter(function(j){ return typeof j.score === "number" && j.score < 70; });
   var manual = jobs.filter(function(j){ return typeof j.score !== "number"; });
-  function renderJobItem(j, idx){
+  function renderJobItem(j){
+    var kAttr = jobAttr(j);
     var color = JOB_STATUS_COLOR[j.status] || "#6b7280";
     var posName = j.pos || j.position || "";
     var scoreBadge = (typeof j.score === "number") ? '<span style="background:rgba(255,208,226,.3);color:var(--pink-deep);padding:1px 6px;border-radius:4px;font-size:11px;font-weight:600">'+j.score+'分</span>' : '';
     var delBtn = (j._source === "local") ? '<span onclick="deleteJob('+j.id+')" style="font-size:14px;cursor:pointer;color:var(--muted)">🗑️</span>' : '';
     var linkBtn = j.link ? '<a href="'+esc(j.link)+'" target="_blank" style="font-size:11px;color:var(--pink-deep);text-decoration:none">🔗</a>' : (j._source === "local" ? '<span onclick="editJobLink('+j.id+')" style="font-size:11px;color:var(--muted);cursor:pointer">🔗</span>' : '');
     var deadline = j.deadline && j.deadline !== "未披露" && j.deadline !== "未确定" ? '<span>⏰ '+esc(j.deadline)+'</span>' : '';
-    return '<div class="job-item" style="cursor:pointer" onclick="openJob('+idx+')">'
+    return '<div class="job-item" style="cursor:pointer" onclick="openJob(\''+kAttr+'\')">'
       +'<div class="job-item-main">'
         +'<div class="job-item-title">'+esc(j.company)+' · '+esc(posName)+' '+scoreBadge+'</div>'
         +'<div class="job-item-meta">'
@@ -2950,7 +2967,7 @@ function renderJobs(){
         +'</div>'
       +'</div>'
       +'<div class="job-item-actions" onclick="event.stopPropagation()">'
-        +'<select onchange="updateJobStatusByIdx('+idx+', this.value)" style="font-size:11px;padding:3px 6px;border-radius:6px;border:1px solid var(--line)">'
+        +'<select onchange="updateJobStatusByKey(\''+kAttr+'\', this.value)" style="font-size:11px;padding:3px 6px;border-radius:6px;border:1px solid var(--line)">'
           +Object.keys(JOB_STATUS_TEXT).map(function(k){ return '<option value="'+k+'"'+(k===j.status?' selected':'')+'>'+JOB_STATUS_TEXT[k]+'</option>'; }).join('')
         +'</select>'
         +linkBtn
@@ -2966,7 +2983,7 @@ function renderJobs(){
         +'<span style="font-size:13px;font-weight:600;color:var(--text)">'+title+'</span>'
         +'<span style="font-size:11px;color:var(--muted)">'+items.length+'个</span>'
       +'</div>'
-      +items.map(function(j){ return renderJobItem(j, jobs.indexOf(j)); }).join("")
+      +items.map(function(j){ return renderJobItem(j); }).join("")
     +'</div>';
   }
   var html = '';
@@ -3214,7 +3231,7 @@ function renderCareerOverview(){
   set("careerTotalCount", jobs.length + " 个岗位");
   // 求职日志：知识库日报 + 快速记录
   renderKbTimeline();
-  var logs = (data.logs || []).slice(0, 5);
+  var logs = (loadJobs().logs || []).slice(0, 5);
   var el = document.getElementById("careerTimeline");
   if(el){
     if(!logs.length){ el.innerHTML = '<div style="text-align:center;color:var(--muted);padding:15px;font-size:12px">暂无快速记录，点右上角➕ 添加</div>'; }
@@ -5204,7 +5221,7 @@ function buildSearchIndex(){
   JOBS.forEach(function(j){
     idx.push({type:"求职", icon:"🐾", title: j.company+" · "+j.pos, sub: (j.city+" ｜ "+j.statusTxt+" ｜ 评分"+j.score),
       keys: (j.company+j.pos+j.city).toLowerCase(),
-      open: function(){ closeModal(); go("jobs"); openJob(JOBS.indexOf(j)); }});
+      open: function(){ closeModal(); go("jobs"); openJob(encodeURIComponent(jobKey(j))); }});
   });
   // 简历
   var allRes = (RESUMES.general||[]).slice();
@@ -6037,16 +6054,17 @@ function renderCareerJobs(){
   var listEl = document.getElementById('careerJobsList');
   var countEl = document.getElementById('careerJobsCount');
   if(!listEl) return;
-  if(!JOBS || !JOBS.length){
+  var mergedJobs = getMergedJobs();
+  if(!mergedJobs.length){
     listEl.innerHTML = '<div class="career-list-empty">🐾 还没有搜集岗位，去知识库添加吧～</div>';
     if(countEl) countEl.textContent = '';
     return;
   }
-  if(countEl) countEl.textContent = JOBS.length + ' 个';
-  var html = JOBS.map(function(j, i){
-    var badge = j.score + '分';
+  if(countEl) countEl.textContent = mergedJobs.length + ' 个';
+  var html = mergedJobs.map(function(j){
+    var badge = (typeof j.score === "number" ? j.score : '—') + '分';
     var sub = '📍 ' + (j.city||'') + ' · 💰 ' + (j.salary||'') + ' · ' + (j.statusTxt||'');
-    return careerListItem('🐾', j.company + ' · ' + j.pos, sub, badge, 'openJob('+i+')');
+    return careerListItem('🐾', j.company + ' · ' + j.pos, sub, badge, 'openJob(\''+jobAttr(j)+'\')');
   }).join('');
   listEl.innerHTML = html;
 }
