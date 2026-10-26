@@ -4585,6 +4585,9 @@ function _aiEffortOK(provider, model){
    返回 { content, reasoning }；开启深度思考时自动放宽超时与输出额度 */
 function aiChat(cfg, messages, timeoutSec, options){
   var url = _trimSlash(cfg.base) + "/chat/completions";
+  /* 智谱网关的 WAF 对「不带尾斜杠」的 /chat/completions 不返回跨域预检头（2026-10 实测），
+     浏览器会直接 Failed to fetch；换成带尾斜杠的 /chat/completions/ 就正常。仅智谱需要 */
+  if(/bigmodel\.cn|api\.z\.ai/.test(url)) url += "/";
   var pv = AI_PROVIDERS[cfg.provider] || {};
   var supportThink = !!pv.thinking;                  // 该服务商是否支持「参数切思考」
   var thinkOn = !!(supportThink && cfg.thinking);
@@ -4638,7 +4641,7 @@ function aiChat(cfg, messages, timeoutSec, options){
   }).then(function(v){ done(); return v; }, function(e){
     done();
     if(e && (e.name === "AbortError" || String(e.message).indexOf("abort") >= 0)){ throw new Error("超时未响应"); }
-    if(e && e.message === "Failed to fetch"){ throw new Error("网络不通或接口地址写错"); }
+    if(e && e.message === "Failed to fetch"){ throw new Error("请求发不出去：跨域被拦或网络不通（该服务商可能不支持浏览器直连）"); }
     throw e;
   });
 }
