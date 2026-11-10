@@ -9577,6 +9577,17 @@ function _slPlain(x){
 function _slEntryText(x){
   return x.date+"\n"+_slPlain(x)+"\n\n"+((x.note||"").trim()||"（无文字）");
 }
+/* 编辑/删除/补记/存灵感后：只刷新派生视图，不重建今日表单。
+   否则会把用户正在填、还没保存的今日草稿一起冲掉（2026-11-11 复盘修）。
+   只有当改动正好落在「今天」时，才走完整 renderSelfLog() 让今日表单同步。 */
+function _slRefreshAfterMutation(dateAffected){
+  if(dateAffected === slToday()){ renderSelfLog(); return; }
+  renderSelfLogList();
+  renderSelfCharts();
+  renderTodayInsight();
+  renderSelfStreak();
+  checkSelfLogAlerts();
+}
 function renderSelfLogList(){
   var list = document.getElementById("selflogList"); if(!list) return;
   var data = loadSelfLog();
@@ -9639,7 +9650,7 @@ function openSelfLogEntryModal(id){
     return '<option value="'+o[0]+'"'+((d.period||"none")===o[0]?' selected':'')+'>'+o[1]+'</option>'; }).join("");
   var html = '<div class="sl-modal"><h3>'+(isNew?'📅 补记往日':'✏️ 编辑记录')+'</h3>'
     + '<div class="sl-modal-grid">'
-    + '<label>日期<input type="date" id="sleDate" class="sl-input" value="'+esc(d.date)+'"'+(isNew?'':' readonly')+'></label>'
+    + '<label>日期<input type="date" id="sleDate" class="sl-input" value="'+esc(d.date)+'" max="'+slToday()+'"></label>'
     + '<label>睡眠评分<select id="sleSleep" class="sl-input">'+scoreOpts(d.sleep)+'</select></label>'
     + '<label>睡眠时长（h）<input type="number" id="sleHours" class="sl-input" step="0.5" min="0" value="'+esc(d.sleepHours==null?'':d.sleepHours)+'"></label>'
     + '<label>睡眠质量<select id="sleQuality" class="sl-input">'+scoreOpts(d.sleepQuality)+'</select></label>'
@@ -9657,6 +9668,7 @@ function openSelfLogEntryModal(id){
 function submitSelfLogEntryModal(id){
   var date = (document.getElementById("sleDate").value||"").trim();
   if(!date){ toast("选个日期吧"); return; }
+  if(date > slToday()){ toast("还不能记录未来的日期哦"); return; }
   var sh = (document.getElementById("sleHours").value||"").trim();
   var em = (document.getElementById("sleExMin").value||"").trim();
   var patch = { date:date,
@@ -9670,11 +9682,16 @@ function submitSelfLogEntryModal(id){
     exerciseMinutes: em===""?null:parseInt(em,10),
     note:(document.getElementById("sleNote").value||"").trim() };
   var data = loadSelfLog(); data.entries = data.entries||[];
+  /* 目标日期已被别的记录占用：不静默覆盖、不产生同日两条，引导去编辑 */
+  var clash = data.entries.find(function(x){ return x.date===date && _slEntryKey(x)!==id; });
+  if(clash){
+    toast(id ? ("该日期已有另一条记录，请换个日期或先删除那条") : (date+" 已有记录，请在近况里点 ✏️ 编辑那条"));
+    return;
+  }
   var idx = -1;
   for(var i=0;i<data.entries.length;i++){
     if(id ? (_slEntryKey(data.entries[i])===id) : (data.entries[i].date===date)){ idx=i; break; }
   }
-  var overwritten = (!id && idx>=0);
   if(idx>=0){
     var old = data.entries[idx];
     patch.id = old.id || ("sl_"+date);
@@ -9686,15 +9703,17 @@ function submitSelfLogEntryModal(id){
   }
   saveSelfLog(data);
   closeModal();
-  renderSelfLog();
-  toast(overwritten ? ("该日期已有记录，已覆盖 "+date+" 📅") : (id?"已更新这条记录 ✏️":"已补记 "+date+" 📅"));
+  _slRefreshAfterMutation(date);
+  toast(id?"已更新这条记录 ✏️":"已补记 "+date+" 📅");
 }
 function deleteSelfLogEntry(id){
+  var target = (loadSelfLog().entries||[]).find(function(x){ return _slEntryKey(x)===id; });
+  var dateAffected = target ? target.date : "";
   showConfirm("确定删除这条身心小记？删了就找不回来了。", {okText:"删除"}).then(function(ok){
     if(!ok) return;
     var data = loadSelfLog();
     data.entries = (data.entries||[]).filter(function(x){ return _slEntryKey(x)!==id; });
-    saveSelfLog(data); renderSelfLog(); toast("已删除 🗑️");
+    saveSelfLog(data); _slRefreshAfterMutation(dateAffected); toast("已删除 🗑️");
   });
 }
 function copySelfLogEntry(id){
@@ -9824,7 +9843,7 @@ function saveSelfLogToInspire(id){
   saveInspire(insp);
   entry.savedInspire = true;
   saveSelfLog(data);
-  renderSelfLog();
+  _slRefreshAfterMutation(entry.date);
   toast("已存为灵感并标记入库，同步到云端后可在电脑端「拉取灵感」归档到 00-灵感库");
   kbPushToCloud();
 }
