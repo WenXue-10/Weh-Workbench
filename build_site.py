@@ -1225,6 +1225,10 @@ def build():
                 vendor_js += read(os.path.join(vendor_dir, fn))
 
     data_json = json.dumps(data, ensure_ascii=False, indent=1)
+    # 知识库笔记里可能含 </script>（如 Vue SFC 代码片段），原样注入会提前闭合
+    # 内联 <script> 标签，浏览器报 SITE_DATA is not defined、整页 JS 崩溃。
+    # 转成 <\/script>：HTML 解析器不再当作结束标签，JS 字符串里 \/ 仍等于 /。
+    data_json = re.sub(r"</script", lambda m: "<\\/script", data_json, flags=re.I)
 
     # 读取同步状态并注入页脚
     sync_status = "⏳ 等待首次同步"

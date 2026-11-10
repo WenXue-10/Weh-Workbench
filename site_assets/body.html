@@ -4066,7 +4066,7 @@
         <div class="money-layout">
           <div class="money-left">
             <div class="card">
-              <div class="card-head">📝 今日记录 <small>每天一条，想写啥写啥</small><span class="sl-streak" id="selfStreak"></span></div>
+              <div class="card-head">📝 今日记录 <small>每天一条，想写啥写啥</small><span class="sl-streak" id="selfStreak"></span><button type="button" class="sl-mini-btn" onclick="openSelfLogEntryModal(null)">📅 补记往日</button></div>
               <form id="selflogForm" onsubmit="return false">
                 <div class="sl-row"><label>睡眠</label><div class="sl-score" id="slSleep"></div></div>
                 <div class="sl-row"><label>精力</label><div class="sl-score" id="slEnergy"></div></div>
@@ -4095,7 +4095,12 @@
               <div class="sl-insight" id="todayInsight">配置 AI Key 后，保存今日记录会自动生成一句话洞察。</div>
             </div>
             <div class="card">
-              <div class="card-head">📜 近况 <span class="m-count" id="selflogCount"></span></div>
+              <div class="card-head sl-list-head">📜 近况 <span class="m-count" id="selflogCount"></span>
+                <div class="sl-tools">
+                  <select id="selflogFilter" class="sl-tool-sel" onchange="renderSelfLogList()"><option value="all">全部</option><option value="note">有文字</option><option value="exercise">有运动</option></select>
+                  <input id="selflogSearch" class="sl-tool-inp" type="search" placeholder="搜近况…" oninput="renderSelfLogList()">
+                </div>
+              </div>
               <div class="expense-list" id="selflogList"></div>
             </div>
           </div>
