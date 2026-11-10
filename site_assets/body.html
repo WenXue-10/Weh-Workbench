@@ -4076,7 +4076,7 @@
                 <div class="sl-row"><label>睡眠质量</label><div class="sl-score" id="slSleepQuality"></div></div>
                 <div class="sl-row"><label>运动类型</label><input type="text" id="slExerciseType" class="sl-input" placeholder="如：跑步 / 瑜伽 / 无（可空）"></div>
                 <div class="sl-row"><label>运动时长</label><input type="number" id="slExerciseMinutes" class="sl-input" placeholder="分钟，如 30（可空）" min="0"></div>
-                <div class="sl-row sl-row-col"><label>今天想说的</label><textarea id="slNote" class="sl-textarea" rows="4" placeholder="今天发生了什么、什么感受，可长可短，不想写就留空"></textarea></div>
+                <div class="sl-row sl-row-col"><label>今天想说的</label><div class="sl-note-row"><textarea id="slNote" class="sl-textarea" rows="4" placeholder="今天发生了什么、什么感受，可长可短，不想写就留空"></textarea><button type="button" class="voice-btn" data-target="slNote" onclick="toggleVoice('slNote')">🎤</button></div></div>
                 <button class="ai-truth-btn" onclick="saveSelfLogEntry()">💾 保存今日</button>
               </form>
             </div>
@@ -4097,8 +4097,9 @@
             <div class="card">
               <div class="card-head sl-list-head">📜 近况 <span class="m-count" id="selflogCount"></span>
                 <div class="sl-tools">
-                  <select id="selflogFilter" class="sl-tool-sel" onchange="renderSelfLogList()"><option value="all">全部</option><option value="note">有文字</option><option value="exercise">有运动</option></select>
-                  <input id="selflogSearch" class="sl-tool-inp" type="search" placeholder="搜近况…" oninput="renderSelfLogList()">
+                  <select id="selflogFilter" class="sl-tool-sel" onchange="slResetPage()"><option value="all">全部</option><option value="note">有文字</option><option value="exercise">有运动</option></select>
+                  <input id="selflogSearch" class="sl-tool-inp" type="search" placeholder="搜近况…" oninput="slResetPage()">
+                  <button type="button" class="sl-mini-btn" title="把当前筛选结果导出为一份 Markdown" onclick="exportAllSelfLog()">📥 全部导出</button>
                 </div>
               </div>
               <div class="expense-list" id="selflogList"></div>

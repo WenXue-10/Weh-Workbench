@@ -9542,6 +9542,9 @@ function renderSelfLog(){
 }
 
 /* ===== 近况：结构化渲染 + 编辑 / 删除 / 复制 / 导出 / 补记（2026-11-11） ===== */
+var _slPage = 1;            /* 当前页码，每页 30 条，点「加载更多」递增 */
+var _slExpanded = {};       /* 已展开全文的记录 key，列表重绘后保持展开状态 */
+var _slUndo = null;         /* 删除撤销：{entry, bar, timer} */
 function _slEntryKey(x){ return x.id || ("sl_" + x.date); }
 function _slScore(v){ return (v==null||v===""||v===0||v==="-") ? "—" : String(v); }
 function _slBadge(label, val, cls){
@@ -9610,8 +9613,10 @@ function renderSelfLogList(){
     list.innerHTML = '<div class="sl-empty">'+(total?"没有符合条件的记录":"还没有记录，写下今天第一条吧～")+'</div>';
     return;
   }
-  var html = shown.slice(0,30).map(function(x){
+  var pageSize = 30, limit = _slPage * pageSize;
+  var html = shown.slice(0, limit).map(function(x){
     var id = esc(JSON.stringify(_slEntryKey(x)));
+    var expanded = !!_slExpanded[_slEntryKey(x)];
     var note = (x.note||"").trim();
     var long = note.length>80 || note.indexOf("\n")>=0;
     var noteHtml = note ? esc(note) : '<span class="sl-note-empty">（无文字）</span>';
@@ -9626,18 +9631,50 @@ function renderSelfLogList(){
         + '<button type="button" class="sl-act danger" title="删除这条" onclick="deleteSelfLogEntry('+id+')">🗑️</button>'
       + '</div></div>'
       + '<div class="sl-badges">'+_slBadges(x)+'</div>'
-      + '<div class="sl-note'+(long?' clamped':'')+'">'+noteHtml+'</div>'
-      + (long?'<button type="button" class="sl-more" onclick="toggleSelfLogNote(this)">展开全文 ↓</button>':'')
+      + '<div class="sl-note'+(long&&!expanded?' clamped':'')+'">'+noteHtml+'</div>'
+      + (long?'<button type="button" class="sl-more" onclick="toggleSelfLogNote(this,'+id+')">'+(expanded?'收起 ↑':'展开全文 ↓')+'</button>':'')
       + '</div>';
   }).join("");
-  if(shown.length>30) html += '<div class="sl-more-hint">仅显示最近 30 条，共 '+shown.length+' 条</div>';
+  if(shown.length>limit) html += '<button type="button" class="sl-loadmore" onclick="slLoadMore()">加载更多 ↓（还有 '+(shown.length-limit)+' 条，共 '+shown.length+' 条）</button>';
+  else if(shown.length>pageSize) html += '<div class="sl-more-hint">已显示全部 '+shown.length+' 条</div>';
   list.innerHTML = html;
 }
-function toggleSelfLogNote(btn){
+function toggleSelfLogNote(btn, key){
   var item = btn.closest(".sl-item"); if(!item) return;
   var note = item.querySelector(".sl-note"); if(!note) return;
   var clamped = note.classList.toggle("clamped");
+  if(key){ if(clamped) delete _slExpanded[key]; else _slExpanded[key] = true; }
   btn.textContent = clamped ? "展开全文 ↓" : "收起 ↑";
+}
+function slLoadMore(){ _slPage++; renderSelfLogList(); }
+function slResetPage(){ _slPage = 1; renderSelfLogList(); }
+/* 删除后给 6 秒撤销窗口：数据已经落盘（云同步照常），撤销只是把这条加回去 */
+function _slClearUndo(){
+  if(!_slUndo) return;
+  clearTimeout(_slUndo.timer);
+  if(_slUndo.bar && _slUndo.bar.parentNode) _slUndo.bar.parentNode.removeChild(_slUndo.bar);
+  _slUndo = null;
+}
+function _slShowUndo(entry){
+  if(!entry) return;
+  _slClearUndo();
+  var bar = document.createElement("div");
+  bar.className = "sl-undo";
+  bar.innerHTML = '已删除 '+esc(entry.date)+' 的记录 <button type="button" onclick="undoSelfLogDelete()">↩ 撤销</button>';
+  document.body.appendChild(bar);
+  var rec = { entry:entry, bar:bar };
+  rec.timer = setTimeout(_slClearUndo, 6000);
+  _slUndo = rec;
+}
+function undoSelfLogDelete(){
+  if(!_slUndo) return;
+  var e = _slUndo.entry, clash = false;
+  var data = loadSelfLog(); data.entries = data.entries||[];
+  if(data.entries.some(function(x){ return x.date===e.date; })) clash = true;
+  else { data.entries.push(e); saveSelfLog(data); }
+  _slClearUndo();
+  _slRefreshAfterMutation(e.date);
+  toast(clash ? ("该日期已有新记录，未恢复（可手动补记）") : ("已恢复 "+e.date+" 的记录 ↩"));
 }
 function openSelfLogEntryModal(id){
   var data = loadSelfLog(), entry = null;
@@ -9660,11 +9697,15 @@ function openSelfLogEntryModal(id){
     + '<label>运动内容<input type="text" id="sleExType" class="sl-input" value="'+esc(d.exerciseType||d.exercise||"")+'" placeholder="如 芭杆运动+拉伸"></label>'
     + '<label>运动分钟<input type="number" id="sleExMin" class="sl-input" min="0" value="'+esc(d.exerciseMinutes==null?'':d.exerciseMinutes)+'"></label>'
     + '</div>'
-    + '<label class="sl-modal-note">想说的话<textarea id="sleNote" class="sl-textarea" rows="5">'+esc(d.note||"")+'</textarea></label>'
+    + '<label class="sl-modal-note">想说的话<div class="sl-note-row"><textarea id="sleNote" class="sl-textarea" rows="5">'+esc(d.note||"")+'</textarea>'
+    + '<button type="button" class="voice-btn" data-target="sleNote" onclick="toggleVoice(\'sleNote\')">🎤</button></div></label>'
     + '<div class="sl-modal-btns"><button type="button" class="sl-modal-ok" onclick="submitSelfLogEntryModal('+esc(JSON.stringify(id||""))+')">💾 保存</button>'
+    + (isNew?'':'<button type="button" class="sl-modal-del" onclick="deleteSelfLogFromModal('+esc(JSON.stringify(id||""))+')">🗑️ 删除这条</button>')
     + '<button type="button" class="sl-modal-cancel" onclick="closeModal()">取消</button></div></div>';
   setModal(html);
+  initVoiceInput();
 }
+function deleteSelfLogFromModal(id){ closeModal(); deleteSelfLogEntry(id); }
 function submitSelfLogEntryModal(id){
   var date = (document.getElementById("sleDate").value||"").trim();
   if(!date){ toast("选个日期吧"); return; }
@@ -9697,6 +9738,21 @@ function submitSelfLogEntryModal(id){
     patch.id = old.id || ("sl_"+date);
     if(old.savedInspire) patch.savedInspire = true;
     data.entries[idx] = patch;
+    /* 已存灵感的记录改了日期：同步灵感库的 date 与待归档 md，避免两边对不上。
+       注意「存原话」的 content 保持冻结（那是当时的原话），只改日期元数据。 */
+    if(old.savedInspire && old.date !== date){
+      try{
+        var insp = loadInspire();
+        var hit = (insp.records||[]).find(function(r){ return r.id==="selflog_"+id || r.id==="sl_"+id; });
+        if(hit){
+          hit.date = date;
+          if(hit.kb && hit.kb.md && typeof inspireToMarkdown==="function"){
+            hit.kb = { at:Date.now(), variant:hit.kb.variant||"none", md: inspireToMarkdown(hit,{withExt:false}) };
+          }
+          saveInspire(insp);
+        }
+      }catch(e){}
+    }
   } else {
     patch.id = "sl_"+date;
     data.entries.push(patch);
@@ -9713,7 +9769,8 @@ function deleteSelfLogEntry(id){
     if(!ok) return;
     var data = loadSelfLog();
     data.entries = (data.entries||[]).filter(function(x){ return _slEntryKey(x)!==id; });
-    saveSelfLog(data); _slRefreshAfterMutation(dateAffected); toast("已删除 🗑️");
+    saveSelfLog(data); _slRefreshAfterMutation(dateAffected);
+    _slShowUndo(target);
   });
 }
 function copySelfLogEntry(id){
@@ -9735,15 +9792,51 @@ function _slFallbackCopy(text){
 function exportSelfLogEntry(id){
   var x = (loadSelfLog().entries||[]).find(function(e){ return _slEntryKey(e)===id; });
   if(!x) return;
-  var md = "# 身心小记 "+x.date+"\n\n- "+_slPlain(x).replace(/ · /g,"\n- ")+"\n\n## 想说的话\n\n"+((x.note||"").trim()||"（无文字）")+"\n";
+  _slDownloadMD(_slEntryMarkdown(x), "身心小记-"+x.date+".md");
+  toast("已导出 MD 📥");
+}
+/* 单条结构化 Markdown：字段逐项成行，不依赖分隔符拆分（运动内容里含空格/· 都不会被切断） */
+function _slEntryMarkdown(x){
+  var L = ["# 身心小记 "+x.date, ""];
+  L.push("- 睡眠："+_slScore(x.sleep));
+  if(x.sleepHours!=null&&x.sleepHours!=="") L.push("- 睡眠时长："+x.sleepHours+"h");
+  L.push("- 睡眠质量："+_slScore(x.sleepQuality));
+  L.push("- 精力："+_slScore(x.energy));
+  L.push("- 情绪："+_slScore(x.mood));
+  var exT = x.exerciseType||x.exercise||"";
+  if(exT) L.push("- 运动："+exT+((x.exerciseMinutes!=null&&x.exerciseMinutes!=="")?(" · "+x.exerciseMinutes+"分钟"):""));
+  var pm = {"premen":"经前","men":"经期","postmen":"经后"}[x.period];
+  if(pm) L.push("- 生理期："+pm);
+  if(x.savedInspire) L.push("- 已存灵感：是");
+  L.push("", "## 想说的话", "", ((x.note||"").trim()||"（无文字）"));
+  return L.join("\n")+"\n";
+}
+function _slDownloadMD(md, filename){
   try{
     var blob = new Blob([md], {type:"text/markdown;charset=utf-8"});
     var url = URL.createObjectURL(blob), a = document.createElement("a");
-    a.href = url; a.download = "身心小记-"+x.date+".md";
+    a.href = url; a.download = filename;
     document.body.appendChild(a); a.click();
     setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(url); }, 200);
-    toast("已导出 MD 📥");
-  }catch(e){ toast("导出失败："+e.message); }
+    return true;
+  }catch(e){ toast("导出失败："+e.message); return false; }
+}
+/* 全部导出（遵循当前筛选/搜索结果，按日期倒序） */
+function exportAllSelfLog(){
+  var data = loadSelfLog();
+  var arr = (data.entries||[]).slice().sort(function(a,b){ return String(b.date).localeCompare(String(a.date)); });
+  var fEl = document.getElementById("selflogFilter"), sEl = document.getElementById("selflogSearch");
+  var f = fEl ? fEl.value : "all", q = sEl ? (sEl.value||"").trim().toLowerCase() : "";
+  arr = arr.filter(function(x){
+    if(f==="note" && !(x.note||"").trim()) return false;
+    if(f==="exercise" && !(x.exerciseType||x.exercise||"")) return false;
+    if(q){ var hay=(String(x.date)+" "+(x.note||"")+" "+(x.exerciseType||x.exercise||"")).toLowerCase(); if(hay.indexOf(q)<0) return false; }
+    return true;
+  });
+  if(!arr.length){ toast("当前没有可导出的记录"); return; }
+  var md = "# 身心小记 · 全部记录\n\n> 共 "+arr.length+" 条 · 导出于 "+slToday()+" · 按日期倒序\n\n"
+    + arr.map(function(x){ return _slEntryMarkdown(x); }).join("\n---\n\n");
+  if(_slDownloadMD(md, "身心小记-全部-"+slToday()+".md")) toast("已导出 "+arr.length+" 条记录 📥");
 }
 
 function renderRecipes(){
@@ -9833,8 +9926,10 @@ function saveSelfLogToInspire(id){
   if(!text){ toast("这条没有写文字，没法存原话"); return; }
   if(entry.savedInspire){ toast("这条已经存过灵感啦"); return; }
   var insp = loadInspire();
-  if(insp.records.some(function(r){ return r.id==="sl_"+id; })){ toast("这条已经存过灵感啦"); return; }
-  var rec = { id:"sl_"+id, content:text, date:entry.date, time:"", status:"recorded",
+  var rid = "selflog_"+id;
+  /* 兼容历史数据：早期生成的是 "sl_"+id（如 sl_sl_2026-11-05 双前缀） */
+  if(insp.records.some(function(r){ return r.id===rid || r.id==="sl_"+id; })){ toast("这条已经存过灵感啦"); return; }
+  var rec = { id:rid, content:text, date:entry.date, time:"", status:"recorded",
     tags:["身心小记"], fromSelfLog:true,
     aiExtension:{source:"none", questions:[], directions:[], judgment:"", related:""} };
   insp.records.push(rec);
