@@ -2337,6 +2337,46 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
 .mh-back{margin-top:16px;width:100%;padding:10px;border-radius:12px;border:1px solid rgba(255,255,255,.8);background:rgba(255,255,255,.6);color:inherit;font-size:13px;cursor:pointer;transition:.15s}
 .mh-back:hover{background:rgba(255,255,255,.9)}
 
+/* ===== 身心小记 · 近况列表（2026-11-11） ===== */
+#module-selflog .card-head{flex-wrap:wrap}
+#module-selflog .sl-tools{margin-left:auto;display:flex;gap:6px;align-items:center}
+#module-selflog .sl-tool-sel,#module-selflog .sl-tool-inp{border:1px solid rgba(255,255,255,.75);background:rgba(255,255,255,.6);border-radius:8px;padding:4px 8px;font-size:11.5px;font-family:inherit;color:var(--text);outline:none}
+#module-selflog .sl-tool-sel{width:84px}
+#module-selflog .sl-tool-inp{width:110px}
+#module-selflog .sl-tool-inp:focus,#module-selflog .sl-tool-sel:focus{border-color:#c9a9d6;background:rgba(255,255,255,.9)}
+#module-selflog .sl-mini-btn{border:1px solid rgba(255,255,255,.8);background:rgba(255,255,255,.65);border-radius:8px;padding:4px 10px;font-size:11.5px;font-family:inherit;color:var(--text);cursor:pointer;white-space:nowrap}
+#module-selflog .sl-mini-btn:hover{background:rgba(255,255,255,.95);border-color:#c9a9d6}
+#module-selflog .expense-list{max-height:460px;overflow-y:auto;padding-right:2px}
+#module-selflog .sl-item{padding:12px 12px 11px;margin-bottom:10px;border-radius:12px;background:rgba(255,255,255,.55);border:1px solid rgba(180,142,217,.22)}
+#module-selflog .sl-item:hover{background:rgba(255,255,255,.6)}
+#module-selflog .sl-item-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+#module-selflog .sl-date{font-size:12px;font-weight:700;color:var(--text);letter-spacing:.3px}
+#module-selflog .sl-saved{font-size:10.5px;color:#1D9E75;background:rgba(29,158,117,.12);border-radius:6px;padding:2px 6px}
+#module-selflog .sl-acts{margin-left:auto;display:flex;gap:2px}
+#module-selflog .sl-act{border:none;background:transparent;cursor:pointer;font-size:13px;line-height:1;padding:5px;border-radius:7px;transition:.15s}
+#module-selflog .sl-act:hover{background:rgba(255,255,255,.9)}
+#module-selflog .sl-act.danger:hover{background:rgba(255,220,220,.9)}
+#module-selflog .sl-badges{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
+#module-selflog .sl-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(244,166,192,.14);border:1px solid rgba(180,142,217,.3);border-radius:8px;padding:3px 8px;font-size:11.5px;white-space:normal;word-break:break-word}
+#module-selflog .sl-badge i{font-style:normal;color:var(--muted)}
+#module-selflog .sl-badge b{font-weight:700;color:var(--text)}
+#module-selflog .sl-badge.is-wide{max-width:100%}
+#module-selflog .sl-note{font-size:12.5px;line-height:1.75;color:var(--text);margin-top:9px;white-space:pre-wrap;word-break:break-word}
+#module-selflog .sl-note.clamped{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+#module-selflog .sl-note-empty{color:var(--muted)}
+#module-selflog .sl-more{margin-top:6px;border:none;background:transparent;color:var(--pink-deep);font-size:11.5px;font-family:inherit;cursor:pointer;padding:2px 0}
+#module-selflog .sl-more:hover{text-decoration:underline}
+#module-selflog .sl-empty,#module-selflog .sl-more-hint{text-align:center;color:var(--muted);font-size:12px;padding:16px 8px}
+.sl-modal h3{font-size:15px;font-weight:700;margin-bottom:14px}
+.sl-modal-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.sl-modal label{display:flex;flex-direction:column;gap:5px;font-size:11.5px;color:var(--muted)}
+.sl-modal-note{margin-top:12px}
+.sl-modal-btns{display:flex;gap:8px;margin-top:16px}
+.sl-modal-ok,.sl-modal-cancel{border:none;border-radius:9px;padding:9px 18px;font-size:13px;font-family:inherit;cursor:pointer}
+.sl-modal-ok{background:linear-gradient(135deg,#f4a6c0,#b48ed9);color:#fff}
+.sl-modal-cancel{background:rgba(0,0,0,.06);color:var(--text)}
+@media(max-width:640px){.sl-modal-grid{grid-template-columns:1fr}#module-selflog .sl-tool-inp{width:90px}}
+
 </style>
 </head>
 <body>
@@ -6407,7 +6447,7 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
         <div class="money-layout">
           <div class="money-left">
             <div class="card">
-              <div class="card-head">📝 今日记录 <small>每天一条，想写啥写啥</small><span class="sl-streak" id="selfStreak"></span></div>
+              <div class="card-head">📝 今日记录 <small>每天一条，想写啥写啥</small><span class="sl-streak" id="selfStreak"></span><button type="button" class="sl-mini-btn" onclick="openSelfLogEntryModal(null)">📅 补记往日</button></div>
               <form id="selflogForm" onsubmit="return false">
                 <div class="sl-row"><label>睡眠</label><div class="sl-score" id="slSleep"></div></div>
                 <div class="sl-row"><label>精力</label><div class="sl-score" id="slEnergy"></div></div>
@@ -6436,7 +6476,12 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
               <div class="sl-insight" id="todayInsight">配置 AI Key 后，保存今日记录会自动生成一句话洞察。</div>
             </div>
             <div class="card">
-              <div class="card-head">📜 近况 <span class="m-count" id="selflogCount"></span></div>
+              <div class="card-head sl-list-head">📜 近况 <span class="m-count" id="selflogCount"></span>
+                <div class="sl-tools">
+                  <select id="selflogFilter" class="sl-tool-sel" onchange="renderSelfLogList()"><option value="all">全部</option><option value="note">有文字</option><option value="exercise">有运动</option></select>
+                  <input id="selflogSearch" class="sl-tool-inp" type="search" placeholder="搜近况…" oninput="renderSelfLogList()">
+                </div>
+              </div>
               <div class="expense-list" id="selflogList"></div>
             </div>
           </div>
@@ -7387,7 +7432,7 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
 
 <script>
 window.SITE_DATA = {
- "updated": "2026-11-10 22:43",
+ "updated": "2026-11-11 00:36",
  "stats": {
   "jobs": 44,
   "rec": 0,
@@ -39359,27 +39404,198 @@ function renderSelfLog(){
   document.getElementById("slExerciseType").value = _slDraft.exerciseType;
   document.getElementById("slExerciseMinutes").value = _slDraft.exerciseMinutes;
   document.getElementById("slNote").value = e ? (e.note||"") : "";
-  var list = document.getElementById("selflogList");
-  var c = document.getElementById("selflogCount");
-  var arr = (data.entries||[]).slice().sort(function(a,b){ return String(b.date).localeCompare(String(a.date)); });
-  if(c) c.textContent = arr.length ? arr.length+"条" : "";
-  if(!arr.length){ list.innerHTML = '<div class="ev-empty">还没有记录，写下今天第一条吧～</div>'; renderRecipes(); return; }
-  list.innerHTML = arr.slice(0,30).map(function(x){
-    var sc = "睡"+(x.sleep||"-")+((x.sleepHours!=null&&x.sleepHours!=="")?("("+x.sleepHours+"h)"):"")+" 精"+(x.energy||"-")+" 绪"+(x.mood||"-")+((x.sleepQuality)?(" 睡质"+x.sleepQuality):"");
-    var pc = x.period && x.period!=="none" ? (" · "+({"none":"","premen":"经前","men":"经期","postmen":"经后"}[x.period]||"")) : "";
-    var exT = x.exerciseType||x.exercise||"";
-    var ex = exT ? (" · 动:"+esc(exT)+((x.exerciseMinutes!=null&&x.exerciseMinutes!=="")?(" "+x.exerciseMinutes+"分"):"")) : "";
-    var note = x.note ? esc(x.note) : '<span style="color:var(--muted)">（无文字）</span>';
-    var saved = x.savedInspire ? ' · <span style="color:#1D9E75">已存灵感</span>' : '';
-    return '<div class="ev-item"><span class="ev-date">'+esc(x.date)+'</span>'
-      + '<div class="ev-body"><div class="ev-t">'+sc+pc+ex+saved+'</div><div class="ev-s">'+note+'</div></div>'
-      + '<button class="ev-x" title="存原话到灵感库" onclick="saveSelfLogToInspire('+x.id+')">📚</button></div>';
-  }).join("");
+  renderSelfLogList();
   renderRecipes();
   renderSelfCharts();
   renderTodayInsight();
   renderSelfStreak();
   checkSelfLogAlerts();
+}
+
+/* ===== 近况：结构化渲染 + 编辑 / 删除 / 复制 / 导出 / 补记（2026-11-11） ===== */
+function _slEntryKey(x){ return x.id || ("sl_" + x.date); }
+function _slScore(v){ return (v==null||v===""||v===0||v==="-") ? "—" : String(v); }
+function _slBadge(label, val, cls){
+  if(val==null||val==="") return "";
+  return '<span class="sl-badge'+(cls?(" "+cls):"")+'"><i>'+esc(label)+'</i><b>'+esc(String(val))+'</b></span>';
+}
+function _slBadges(x){
+  var out = "";
+  out += _slBadge("睡眠", _slScore(x.sleep));
+  if(x.sleepHours!=null && x.sleepHours!=="") out += _slBadge("睡眠时长", x.sleepHours+"h");
+  out += _slBadge("睡眠质量", _slScore(x.sleepQuality));
+  out += _slBadge("精力", _slScore(x.energy));
+  out += _slBadge("情绪", _slScore(x.mood));
+  var exT = x.exerciseType||x.exercise||"";
+  if(exT) out += _slBadge("运动", exT + ((x.exerciseMinutes!=null&&x.exerciseMinutes!=="")?(" · "+x.exerciseMinutes+"分钟"):""), "is-wide");
+  var pm = {"premen":"经前","men":"经期","postmen":"经后"}[x.period];
+  if(pm) out += _slBadge("生理期", pm);
+  return out;
+}
+function _slPlain(x){
+  var parts = [];
+  parts.push("睡眠 "+_slScore(x.sleep));
+  if(x.sleepHours!=null&&x.sleepHours!=="") parts.push("睡眠时长 "+x.sleepHours+"h");
+  parts.push("睡眠质量 "+_slScore(x.sleepQuality));
+  parts.push("精力 "+_slScore(x.energy));
+  parts.push("情绪 "+_slScore(x.mood));
+  var exT = x.exerciseType||x.exercise||"";
+  if(exT) parts.push("运动 "+exT+((x.exerciseMinutes!=null&&x.exerciseMinutes!=="")?(" "+x.exerciseMinutes+"分钟"):""));
+  var pm = {"premen":"经前","men":"经期","postmen":"经后"}[x.period];
+  if(pm) parts.push("生理期 "+pm);
+  return parts.join(" · ");
+}
+function _slEntryText(x){
+  return x.date+"\n"+_slPlain(x)+"\n\n"+((x.note||"").trim()||"（无文字）");
+}
+function renderSelfLogList(){
+  var list = document.getElementById("selflogList"); if(!list) return;
+  var data = loadSelfLog();
+  var arr = (data.entries||[]).slice().sort(function(a,b){ return String(b.date).localeCompare(String(a.date)); });
+  var total = arr.length;
+  var fEl = document.getElementById("selflogFilter"), sEl = document.getElementById("selflogSearch");
+  var f = fEl ? fEl.value : "all", q = sEl ? (sEl.value||"").trim().toLowerCase() : "";
+  var shown = arr.filter(function(x){
+    if(f==="note" && !(x.note||"").trim()) return false;
+    if(f==="exercise" && !(x.exerciseType||x.exercise||"")) return false;
+    if(q){
+      var hay = (String(x.date)+" "+(x.note||"")+" "+(x.exerciseType||x.exercise||"")).toLowerCase();
+      if(hay.indexOf(q)<0) return false;
+    }
+    return true;
+  });
+  var c = document.getElementById("selflogCount");
+  if(c) c.textContent = total ? ((shown.length!==total) ? (shown.length+"/"+total+"条") : (total+"条")) : "";
+  if(!shown.length){
+    list.innerHTML = '<div class="sl-empty">'+(total?"没有符合条件的记录":"还没有记录，写下今天第一条吧～")+'</div>';
+    return;
+  }
+  var html = shown.slice(0,30).map(function(x){
+    var id = esc(JSON.stringify(_slEntryKey(x)));
+    var note = (x.note||"").trim();
+    var long = note.length>80 || note.indexOf("\n")>=0;
+    var noteHtml = note ? esc(note) : '<span class="sl-note-empty">（无文字）</span>';
+    var saved = x.savedInspire ? '<span class="sl-saved">已存灵感</span>' : '';
+    return '<div class="sl-item">'
+      + '<div class="sl-item-top"><span class="sl-date">'+esc(x.date)+'</span>'+saved
+      + '<div class="sl-acts">'
+        + '<button type="button" class="sl-act" title="编辑这条" onclick="openSelfLogEntryModal('+id+')">✏️</button>'
+        + '<button type="button" class="sl-act" title="复制为文本" onclick="copySelfLogEntry('+id+')">📋</button>'
+        + '<button type="button" class="sl-act" title="导出这条 MD" onclick="exportSelfLogEntry('+id+')">📥</button>'
+        + '<button type="button" class="sl-act" title="存原话到灵感库" onclick="saveSelfLogToInspire('+id+')">📚</button>'
+        + '<button type="button" class="sl-act danger" title="删除这条" onclick="deleteSelfLogEntry('+id+')">🗑️</button>'
+      + '</div></div>'
+      + '<div class="sl-badges">'+_slBadges(x)+'</div>'
+      + '<div class="sl-note'+(long?' clamped':'')+'">'+noteHtml+'</div>'
+      + (long?'<button type="button" class="sl-more" onclick="toggleSelfLogNote(this)">展开全文 ↓</button>':'')
+      + '</div>';
+  }).join("");
+  if(shown.length>30) html += '<div class="sl-more-hint">仅显示最近 30 条，共 '+shown.length+' 条</div>';
+  list.innerHTML = html;
+}
+function toggleSelfLogNote(btn){
+  var item = btn.closest(".sl-item"); if(!item) return;
+  var note = item.querySelector(".sl-note"); if(!note) return;
+  var clamped = note.classList.toggle("clamped");
+  btn.textContent = clamped ? "展开全文 ↓" : "收起 ↑";
+}
+function openSelfLogEntryModal(id){
+  var data = loadSelfLog(), entry = null;
+  if(id) entry = (data.entries||[]).find(function(x){ return _slEntryKey(x)===id; });
+  if(id && !entry){ toast("找不到这条记录"); return; }
+  var isNew = !entry;
+  var d = entry || {date:slToday(),sleep:0,energy:0,mood:0,sleepQuality:0,sleepHours:"",period:"none",exerciseType:"",exerciseMinutes:"",note:""};
+  var scoreOpts = function(v){ var s=""; for(var n=0;n<=5;n++){ s += '<option value="'+n+'"'+(String(v||0)===String(n)?' selected':'')+'>'+(n===0?'未填':n)+'</option>'; } return s; };
+  var periodOpts = [["none","无"],["premen","经前"],["men","经期"],["postmen","经后"]].map(function(o){
+    return '<option value="'+o[0]+'"'+((d.period||"none")===o[0]?' selected':'')+'>'+o[1]+'</option>'; }).join("");
+  var html = '<div class="sl-modal"><h3>'+(isNew?'📅 补记往日':'✏️ 编辑记录')+'</h3>'
+    + '<div class="sl-modal-grid">'
+    + '<label>日期<input type="date" id="sleDate" class="sl-input" value="'+esc(d.date)+'"'+(isNew?'':' readonly')+'></label>'
+    + '<label>睡眠评分<select id="sleSleep" class="sl-input">'+scoreOpts(d.sleep)+'</select></label>'
+    + '<label>睡眠时长（h）<input type="number" id="sleHours" class="sl-input" step="0.5" min="0" value="'+esc(d.sleepHours==null?'':d.sleepHours)+'"></label>'
+    + '<label>睡眠质量<select id="sleQuality" class="sl-input">'+scoreOpts(d.sleepQuality)+'</select></label>'
+    + '<label>精力<select id="sleEnergy" class="sl-input">'+scoreOpts(d.energy)+'</select></label>'
+    + '<label>情绪<select id="sleMood" class="sl-input">'+scoreOpts(d.mood)+'</select></label>'
+    + '<label>生理期<select id="slePeriod" class="sl-input">'+periodOpts+'</select></label>'
+    + '<label>运动内容<input type="text" id="sleExType" class="sl-input" value="'+esc(d.exerciseType||d.exercise||"")+'" placeholder="如 芭杆运动+拉伸"></label>'
+    + '<label>运动分钟<input type="number" id="sleExMin" class="sl-input" min="0" value="'+esc(d.exerciseMinutes==null?'':d.exerciseMinutes)+'"></label>'
+    + '</div>'
+    + '<label class="sl-modal-note">想说的话<textarea id="sleNote" class="sl-textarea" rows="5">'+esc(d.note||"")+'</textarea></label>'
+    + '<div class="sl-modal-btns"><button type="button" class="sl-modal-ok" onclick="submitSelfLogEntryModal('+esc(JSON.stringify(id||""))+')">💾 保存</button>'
+    + '<button type="button" class="sl-modal-cancel" onclick="closeModal()">取消</button></div></div>';
+  setModal(html);
+}
+function submitSelfLogEntryModal(id){
+  var date = (document.getElementById("sleDate").value||"").trim();
+  if(!date){ toast("选个日期吧"); return; }
+  var sh = (document.getElementById("sleHours").value||"").trim();
+  var em = (document.getElementById("sleExMin").value||"").trim();
+  var patch = { date:date,
+    sleep:parseInt(document.getElementById("sleSleep").value,10)||0,
+    sleepQuality:parseInt(document.getElementById("sleQuality").value,10)||0,
+    energy:parseInt(document.getElementById("sleEnergy").value,10)||0,
+    mood:parseInt(document.getElementById("sleMood").value,10)||0,
+    period:document.getElementById("slePeriod").value||"none",
+    sleepHours: sh===""?null:parseFloat(sh),
+    exerciseType:(document.getElementById("sleExType").value||"").trim(),
+    exerciseMinutes: em===""?null:parseInt(em,10),
+    note:(document.getElementById("sleNote").value||"").trim() };
+  var data = loadSelfLog(); data.entries = data.entries||[];
+  var idx = -1;
+  for(var i=0;i<data.entries.length;i++){
+    if(id ? (_slEntryKey(data.entries[i])===id) : (data.entries[i].date===date)){ idx=i; break; }
+  }
+  var overwritten = (!id && idx>=0);
+  if(idx>=0){
+    var old = data.entries[idx];
+    patch.id = old.id || ("sl_"+date);
+    if(old.savedInspire) patch.savedInspire = true;
+    data.entries[idx] = patch;
+  } else {
+    patch.id = "sl_"+date;
+    data.entries.push(patch);
+  }
+  saveSelfLog(data);
+  closeModal();
+  renderSelfLog();
+  toast(overwritten ? ("该日期已有记录，已覆盖 "+date+" 📅") : (id?"已更新这条记录 ✏️":"已补记 "+date+" 📅"));
+}
+function deleteSelfLogEntry(id){
+  showConfirm("确定删除这条身心小记？删了就找不回来了。", {okText:"删除"}).then(function(ok){
+    if(!ok) return;
+    var data = loadSelfLog();
+    data.entries = (data.entries||[]).filter(function(x){ return _slEntryKey(x)!==id; });
+    saveSelfLog(data); renderSelfLog(); toast("已删除 🗑️");
+  });
+}
+function copySelfLogEntry(id){
+  var x = (loadSelfLog().entries||[]).find(function(e){ return _slEntryKey(e)===id; });
+  if(!x) return;
+  var text = _slEntryText(x);
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(function(){ toast("已复制为文本 📋"); }, function(){ _slFallbackCopy(text); });
+  } else _slFallbackCopy(text);
+}
+function _slFallbackCopy(text){
+  try{
+    var ta = document.createElement("textarea"); ta.value = text;
+    ta.style.position = "fixed"; ta.style.opacity = "0";
+    document.body.appendChild(ta); ta.select(); document.execCommand("copy");
+    document.body.removeChild(ta); toast("已复制为文本 📋");
+  }catch(e){ toast("复制失败，请手动选择文字"); }
+}
+function exportSelfLogEntry(id){
+  var x = (loadSelfLog().entries||[]).find(function(e){ return _slEntryKey(e)===id; });
+  if(!x) return;
+  var md = "# 身心小记 "+x.date+"\n\n- "+_slPlain(x).replace(/ · /g,"\n- ")+"\n\n## 想说的话\n\n"+((x.note||"").trim()||"（无文字）")+"\n";
+  try{
+    var blob = new Blob([md], {type:"text/markdown;charset=utf-8"});
+    var url = URL.createObjectURL(blob), a = document.createElement("a");
+    a.href = url; a.download = "身心小记-"+x.date+".md";
+    document.body.appendChild(a); a.click();
+    setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(url); }, 200);
+    toast("已导出 MD 📥");
+  }catch(e){ toast("导出失败："+e.message); }
 }
 
 function renderRecipes(){
@@ -39393,7 +39609,7 @@ function renderRecipes(){
       + '<div class="ev-body"><div class="ev-t">'+esc(r.name||"未命名")+(r.ingredients?(" · "+esc(r.ingredients)):"")+'</div>'
       + (r.steps?('<div class="ev-s">'+esc(r.steps)+'</div>'):'')
       + (r.note?('<div class="ev-s" style="color:var(--muted)">备注：'+esc(r.note)+'</div>'):'')
-      + '</div><button class="ev-x" title="删除" onclick="deleteRecipe('+JSON.stringify(r.id)+')">✕</button></div>';
+      + '</div><button class="ev-x" title="删除" onclick="deleteRecipe('+esc(JSON.stringify(r.id))+')">✕</button></div>';
   }).join("");
 }
 
