@@ -2377,6 +2377,21 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
 .sl-modal-cancel{background:rgba(0,0,0,.06);color:var(--text)}
 @media(max-width:640px){.sl-modal-grid{grid-template-columns:1fr}#module-selflog .sl-tool-inp{width:90px}}
 
+/* ===== 身心小记 · 分页 / 撤销 / 弹窗增强（2026-11-11 复盘） ===== */
+.sl-note-row{display:flex;gap:8px;align-items:flex-start;width:100%}
+.sl-note-row .sl-textarea{flex:1;min-width:0}
+.sl-note-row .voice-btn{width:38px;height:38px;flex-shrink:0}
+#module-selflog .sl-loadmore{display:block;width:100%;margin:12px 0 2px;border:1px dashed rgba(180,142,217,.55);background:rgba(244,166,192,.1);border-radius:10px;padding:10px;font-size:12.5px;font-family:inherit;color:var(--pink-deep);cursor:pointer;transition:.15s}
+#module-selflog .sl-loadmore:hover{background:rgba(244,166,192,.22);border-style:solid}
+#module-selflog .sl-tools{flex-wrap:wrap}
+.sl-modal-del{border:none;border-radius:9px;padding:9px 16px;font-size:13px;font-family:inherit;cursor:pointer;background:rgba(255,90,90,.12);color:#c0392b}
+.sl-modal-del:hover{background:rgba(255,90,90,.22)}
+.sl-modal-btns{flex-wrap:wrap}
+.sl-undo{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);z-index:9999;display:flex;align-items:center;gap:14px;background:rgba(48,42,56,.94);color:#fff;border-radius:12px;padding:11px 16px;font-size:13px;box-shadow:0 8px 28px rgba(0,0,0,.28);animation:slUndoIn .2s ease-out}
+.sl-undo button{border:1px solid rgba(255,255,255,.5);background:transparent;color:#fff;border-radius:8px;padding:5px 12px;font-size:12.5px;font-family:inherit;cursor:pointer}
+.sl-undo button:hover{background:rgba(255,255,255,.18)}
+@keyframes slUndoIn{from{opacity:0;transform:translate(-50%,10px)}to{opacity:1;transform:translate(-50%,0)}}
+
 </style>
 </head>
 <body>
@@ -6457,7 +6472,7 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
                 <div class="sl-row"><label>睡眠质量</label><div class="sl-score" id="slSleepQuality"></div></div>
                 <div class="sl-row"><label>运动类型</label><input type="text" id="slExerciseType" class="sl-input" placeholder="如：跑步 / 瑜伽 / 无（可空）"></div>
                 <div class="sl-row"><label>运动时长</label><input type="number" id="slExerciseMinutes" class="sl-input" placeholder="分钟，如 30（可空）" min="0"></div>
-                <div class="sl-row sl-row-col"><label>今天想说的</label><textarea id="slNote" class="sl-textarea" rows="4" placeholder="今天发生了什么、什么感受，可长可短，不想写就留空"></textarea></div>
+                <div class="sl-row sl-row-col"><label>今天想说的</label><div class="sl-note-row"><textarea id="slNote" class="sl-textarea" rows="4" placeholder="今天发生了什么、什么感受，可长可短，不想写就留空"></textarea><button type="button" class="voice-btn" data-target="slNote" onclick="toggleVoice('slNote')">🎤</button></div></div>
                 <button class="ai-truth-btn" onclick="saveSelfLogEntry()">💾 保存今日</button>
               </form>
             </div>
@@ -6478,8 +6493,9 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
             <div class="card">
               <div class="card-head sl-list-head">📜 近况 <span class="m-count" id="selflogCount"></span>
                 <div class="sl-tools">
-                  <select id="selflogFilter" class="sl-tool-sel" onchange="renderSelfLogList()"><option value="all">全部</option><option value="note">有文字</option><option value="exercise">有运动</option></select>
-                  <input id="selflogSearch" class="sl-tool-inp" type="search" placeholder="搜近况…" oninput="renderSelfLogList()">
+                  <select id="selflogFilter" class="sl-tool-sel" onchange="slResetPage()"><option value="all">全部</option><option value="note">有文字</option><option value="exercise">有运动</option></select>
+                  <input id="selflogSearch" class="sl-tool-inp" type="search" placeholder="搜近况…" oninput="slResetPage()">
+                  <button type="button" class="sl-mini-btn" title="把当前筛选结果导出为一份 Markdown" onclick="exportAllSelfLog()">📥 全部导出</button>
                 </div>
               </div>
               <div class="expense-list" id="selflogList"></div>
@@ -7432,7 +7448,7 @@ textarea.ai-input{width:320px;resize:vertical;line-height:1.6}
 
 <script>
 window.SITE_DATA = {
- "updated": "2026-11-11 00:51",
+ "updated": "2026-11-11 01:42",
  "stats": {
   "jobs": 44,
   "rec": 0,
@@ -39413,6 +39429,9 @@ function renderSelfLog(){
 }
 
 /* ===== 近况：结构化渲染 + 编辑 / 删除 / 复制 / 导出 / 补记（2026-11-11） ===== */
+var _slPage = 1;            /* 当前页码，每页 30 条，点「加载更多」递增 */
+var _slExpanded = {};       /* 已展开全文的记录 key，列表重绘后保持展开状态 */
+var _slUndo = null;         /* 删除撤销：{entry, bar, timer} */
 function _slEntryKey(x){ return x.id || ("sl_" + x.date); }
 function _slScore(v){ return (v==null||v===""||v===0||v==="-") ? "—" : String(v); }
 function _slBadge(label, val, cls){
@@ -39448,6 +39467,17 @@ function _slPlain(x){
 function _slEntryText(x){
   return x.date+"\n"+_slPlain(x)+"\n\n"+((x.note||"").trim()||"（无文字）");
 }
+/* 编辑/删除/补记/存灵感后：只刷新派生视图，不重建今日表单。
+   否则会把用户正在填、还没保存的今日草稿一起冲掉（2026-11-11 复盘修）。
+   只有当改动正好落在「今天」时，才走完整 renderSelfLog() 让今日表单同步。 */
+function _slRefreshAfterMutation(dateAffected){
+  if(dateAffected === slToday()){ renderSelfLog(); return; }
+  renderSelfLogList();
+  renderSelfCharts();
+  renderTodayInsight();
+  renderSelfStreak();
+  checkSelfLogAlerts();
+}
 function renderSelfLogList(){
   var list = document.getElementById("selflogList"); if(!list) return;
   var data = loadSelfLog();
@@ -39470,8 +39500,10 @@ function renderSelfLogList(){
     list.innerHTML = '<div class="sl-empty">'+(total?"没有符合条件的记录":"还没有记录，写下今天第一条吧～")+'</div>';
     return;
   }
-  var html = shown.slice(0,30).map(function(x){
+  var pageSize = 30, limit = _slPage * pageSize;
+  var html = shown.slice(0, limit).map(function(x){
     var id = esc(JSON.stringify(_slEntryKey(x)));
+    var expanded = !!_slExpanded[_slEntryKey(x)];
     var note = (x.note||"").trim();
     var long = note.length>80 || note.indexOf("\n")>=0;
     var noteHtml = note ? esc(note) : '<span class="sl-note-empty">（无文字）</span>';
@@ -39486,18 +39518,50 @@ function renderSelfLogList(){
         + '<button type="button" class="sl-act danger" title="删除这条" onclick="deleteSelfLogEntry('+id+')">🗑️</button>'
       + '</div></div>'
       + '<div class="sl-badges">'+_slBadges(x)+'</div>'
-      + '<div class="sl-note'+(long?' clamped':'')+'">'+noteHtml+'</div>'
-      + (long?'<button type="button" class="sl-more" onclick="toggleSelfLogNote(this)">展开全文 ↓</button>':'')
+      + '<div class="sl-note'+(long&&!expanded?' clamped':'')+'">'+noteHtml+'</div>'
+      + (long?'<button type="button" class="sl-more" onclick="toggleSelfLogNote(this,'+id+')">'+(expanded?'收起 ↑':'展开全文 ↓')+'</button>':'')
       + '</div>';
   }).join("");
-  if(shown.length>30) html += '<div class="sl-more-hint">仅显示最近 30 条，共 '+shown.length+' 条</div>';
+  if(shown.length>limit) html += '<button type="button" class="sl-loadmore" onclick="slLoadMore()">加载更多 ↓（还有 '+(shown.length-limit)+' 条，共 '+shown.length+' 条）</button>';
+  else if(shown.length>pageSize) html += '<div class="sl-more-hint">已显示全部 '+shown.length+' 条</div>';
   list.innerHTML = html;
 }
-function toggleSelfLogNote(btn){
+function toggleSelfLogNote(btn, key){
   var item = btn.closest(".sl-item"); if(!item) return;
   var note = item.querySelector(".sl-note"); if(!note) return;
   var clamped = note.classList.toggle("clamped");
+  if(key){ if(clamped) delete _slExpanded[key]; else _slExpanded[key] = true; }
   btn.textContent = clamped ? "展开全文 ↓" : "收起 ↑";
+}
+function slLoadMore(){ _slPage++; renderSelfLogList(); }
+function slResetPage(){ _slPage = 1; renderSelfLogList(); }
+/* 删除后给 6 秒撤销窗口：数据已经落盘（云同步照常），撤销只是把这条加回去 */
+function _slClearUndo(){
+  if(!_slUndo) return;
+  clearTimeout(_slUndo.timer);
+  if(_slUndo.bar && _slUndo.bar.parentNode) _slUndo.bar.parentNode.removeChild(_slUndo.bar);
+  _slUndo = null;
+}
+function _slShowUndo(entry){
+  if(!entry) return;
+  _slClearUndo();
+  var bar = document.createElement("div");
+  bar.className = "sl-undo";
+  bar.innerHTML = '已删除 '+esc(entry.date)+' 的记录 <button type="button" onclick="undoSelfLogDelete()">↩ 撤销</button>';
+  document.body.appendChild(bar);
+  var rec = { entry:entry, bar:bar };
+  rec.timer = setTimeout(_slClearUndo, 6000);
+  _slUndo = rec;
+}
+function undoSelfLogDelete(){
+  if(!_slUndo) return;
+  var e = _slUndo.entry, clash = false;
+  var data = loadSelfLog(); data.entries = data.entries||[];
+  if(data.entries.some(function(x){ return x.date===e.date; })) clash = true;
+  else { data.entries.push(e); saveSelfLog(data); }
+  _slClearUndo();
+  _slRefreshAfterMutation(e.date);
+  toast(clash ? ("该日期已有新记录，未恢复（可手动补记）") : ("已恢复 "+e.date+" 的记录 ↩"));
 }
 function openSelfLogEntryModal(id){
   var data = loadSelfLog(), entry = null;
@@ -39510,7 +39574,7 @@ function openSelfLogEntryModal(id){
     return '<option value="'+o[0]+'"'+((d.period||"none")===o[0]?' selected':'')+'>'+o[1]+'</option>'; }).join("");
   var html = '<div class="sl-modal"><h3>'+(isNew?'📅 补记往日':'✏️ 编辑记录')+'</h3>'
     + '<div class="sl-modal-grid">'
-    + '<label>日期<input type="date" id="sleDate" class="sl-input" value="'+esc(d.date)+'"'+(isNew?'':' readonly')+'></label>'
+    + '<label>日期<input type="date" id="sleDate" class="sl-input" value="'+esc(d.date)+'" max="'+slToday()+'"></label>'
     + '<label>睡眠评分<select id="sleSleep" class="sl-input">'+scoreOpts(d.sleep)+'</select></label>'
     + '<label>睡眠时长（h）<input type="number" id="sleHours" class="sl-input" step="0.5" min="0" value="'+esc(d.sleepHours==null?'':d.sleepHours)+'"></label>'
     + '<label>睡眠质量<select id="sleQuality" class="sl-input">'+scoreOpts(d.sleepQuality)+'</select></label>'
@@ -39520,14 +39584,19 @@ function openSelfLogEntryModal(id){
     + '<label>运动内容<input type="text" id="sleExType" class="sl-input" value="'+esc(d.exerciseType||d.exercise||"")+'" placeholder="如 芭杆运动+拉伸"></label>'
     + '<label>运动分钟<input type="number" id="sleExMin" class="sl-input" min="0" value="'+esc(d.exerciseMinutes==null?'':d.exerciseMinutes)+'"></label>'
     + '</div>'
-    + '<label class="sl-modal-note">想说的话<textarea id="sleNote" class="sl-textarea" rows="5">'+esc(d.note||"")+'</textarea></label>'
+    + '<label class="sl-modal-note">想说的话<div class="sl-note-row"><textarea id="sleNote" class="sl-textarea" rows="5">'+esc(d.note||"")+'</textarea>'
+    + '<button type="button" class="voice-btn" data-target="sleNote" onclick="toggleVoice(\'sleNote\')">🎤</button></div></label>'
     + '<div class="sl-modal-btns"><button type="button" class="sl-modal-ok" onclick="submitSelfLogEntryModal('+esc(JSON.stringify(id||""))+')">💾 保存</button>'
+    + (isNew?'':'<button type="button" class="sl-modal-del" onclick="deleteSelfLogFromModal('+esc(JSON.stringify(id||""))+')">🗑️ 删除这条</button>')
     + '<button type="button" class="sl-modal-cancel" onclick="closeModal()">取消</button></div></div>';
   setModal(html);
+  initVoiceInput();
 }
+function deleteSelfLogFromModal(id){ closeModal(); deleteSelfLogEntry(id); }
 function submitSelfLogEntryModal(id){
   var date = (document.getElementById("sleDate").value||"").trim();
   if(!date){ toast("选个日期吧"); return; }
+  if(date > slToday()){ toast("还不能记录未来的日期哦"); return; }
   var sh = (document.getElementById("sleHours").value||"").trim();
   var em = (document.getElementById("sleExMin").value||"").trim();
   var patch = { date:date,
@@ -39541,31 +39610,54 @@ function submitSelfLogEntryModal(id){
     exerciseMinutes: em===""?null:parseInt(em,10),
     note:(document.getElementById("sleNote").value||"").trim() };
   var data = loadSelfLog(); data.entries = data.entries||[];
+  /* 目标日期已被别的记录占用：不静默覆盖、不产生同日两条，引导去编辑 */
+  var clash = data.entries.find(function(x){ return x.date===date && _slEntryKey(x)!==id; });
+  if(clash){
+    toast(id ? ("该日期已有另一条记录，请换个日期或先删除那条") : (date+" 已有记录，请在近况里点 ✏️ 编辑那条"));
+    return;
+  }
   var idx = -1;
   for(var i=0;i<data.entries.length;i++){
     if(id ? (_slEntryKey(data.entries[i])===id) : (data.entries[i].date===date)){ idx=i; break; }
   }
-  var overwritten = (!id && idx>=0);
   if(idx>=0){
     var old = data.entries[idx];
     patch.id = old.id || ("sl_"+date);
     if(old.savedInspire) patch.savedInspire = true;
     data.entries[idx] = patch;
+    /* 已存灵感的记录改了日期：同步灵感库的 date 与待归档 md，避免两边对不上。
+       注意「存原话」的 content 保持冻结（那是当时的原话），只改日期元数据。 */
+    if(old.savedInspire && old.date !== date){
+      try{
+        var insp = loadInspire();
+        var hit = (insp.records||[]).find(function(r){ return r.id==="selflog_"+id || r.id==="sl_"+id; });
+        if(hit){
+          hit.date = date;
+          if(hit.kb && hit.kb.md && typeof inspireToMarkdown==="function"){
+            hit.kb = { at:Date.now(), variant:hit.kb.variant||"none", md: inspireToMarkdown(hit,{withExt:false}) };
+          }
+          saveInspire(insp);
+        }
+      }catch(e){}
+    }
   } else {
     patch.id = "sl_"+date;
     data.entries.push(patch);
   }
   saveSelfLog(data);
   closeModal();
-  renderSelfLog();
-  toast(overwritten ? ("该日期已有记录，已覆盖 "+date+" 📅") : (id?"已更新这条记录 ✏️":"已补记 "+date+" 📅"));
+  _slRefreshAfterMutation(date);
+  toast(id?"已更新这条记录 ✏️":"已补记 "+date+" 📅");
 }
 function deleteSelfLogEntry(id){
+  var target = (loadSelfLog().entries||[]).find(function(x){ return _slEntryKey(x)===id; });
+  var dateAffected = target ? target.date : "";
   showConfirm("确定删除这条身心小记？删了就找不回来了。", {okText:"删除"}).then(function(ok){
     if(!ok) return;
     var data = loadSelfLog();
     data.entries = (data.entries||[]).filter(function(x){ return _slEntryKey(x)!==id; });
-    saveSelfLog(data); renderSelfLog(); toast("已删除 🗑️");
+    saveSelfLog(data); _slRefreshAfterMutation(dateAffected);
+    _slShowUndo(target);
   });
 }
 function copySelfLogEntry(id){
@@ -39587,15 +39679,51 @@ function _slFallbackCopy(text){
 function exportSelfLogEntry(id){
   var x = (loadSelfLog().entries||[]).find(function(e){ return _slEntryKey(e)===id; });
   if(!x) return;
-  var md = "# 身心小记 "+x.date+"\n\n- "+_slPlain(x).replace(/ · /g,"\n- ")+"\n\n## 想说的话\n\n"+((x.note||"").trim()||"（无文字）")+"\n";
+  _slDownloadMD(_slEntryMarkdown(x), "身心小记-"+x.date+".md");
+  toast("已导出 MD 📥");
+}
+/* 单条结构化 Markdown：字段逐项成行，不依赖分隔符拆分（运动内容里含空格/· 都不会被切断） */
+function _slEntryMarkdown(x){
+  var L = ["# 身心小记 "+x.date, ""];
+  L.push("- 睡眠："+_slScore(x.sleep));
+  if(x.sleepHours!=null&&x.sleepHours!=="") L.push("- 睡眠时长："+x.sleepHours+"h");
+  L.push("- 睡眠质量："+_slScore(x.sleepQuality));
+  L.push("- 精力："+_slScore(x.energy));
+  L.push("- 情绪："+_slScore(x.mood));
+  var exT = x.exerciseType||x.exercise||"";
+  if(exT) L.push("- 运动："+exT+((x.exerciseMinutes!=null&&x.exerciseMinutes!=="")?(" · "+x.exerciseMinutes+"分钟"):""));
+  var pm = {"premen":"经前","men":"经期","postmen":"经后"}[x.period];
+  if(pm) L.push("- 生理期："+pm);
+  if(x.savedInspire) L.push("- 已存灵感：是");
+  L.push("", "## 想说的话", "", ((x.note||"").trim()||"（无文字）"));
+  return L.join("\n")+"\n";
+}
+function _slDownloadMD(md, filename){
   try{
     var blob = new Blob([md], {type:"text/markdown;charset=utf-8"});
     var url = URL.createObjectURL(blob), a = document.createElement("a");
-    a.href = url; a.download = "身心小记-"+x.date+".md";
+    a.href = url; a.download = filename;
     document.body.appendChild(a); a.click();
     setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(url); }, 200);
-    toast("已导出 MD 📥");
-  }catch(e){ toast("导出失败："+e.message); }
+    return true;
+  }catch(e){ toast("导出失败："+e.message); return false; }
+}
+/* 全部导出（遵循当前筛选/搜索结果，按日期倒序） */
+function exportAllSelfLog(){
+  var data = loadSelfLog();
+  var arr = (data.entries||[]).slice().sort(function(a,b){ return String(b.date).localeCompare(String(a.date)); });
+  var fEl = document.getElementById("selflogFilter"), sEl = document.getElementById("selflogSearch");
+  var f = fEl ? fEl.value : "all", q = sEl ? (sEl.value||"").trim().toLowerCase() : "";
+  arr = arr.filter(function(x){
+    if(f==="note" && !(x.note||"").trim()) return false;
+    if(f==="exercise" && !(x.exerciseType||x.exercise||"")) return false;
+    if(q){ var hay=(String(x.date)+" "+(x.note||"")+" "+(x.exerciseType||x.exercise||"")).toLowerCase(); if(hay.indexOf(q)<0) return false; }
+    return true;
+  });
+  if(!arr.length){ toast("当前没有可导出的记录"); return; }
+  var md = "# 身心小记 · 全部记录\n\n> 共 "+arr.length+" 条 · 导出于 "+slToday()+" · 按日期倒序\n\n"
+    + arr.map(function(x){ return _slEntryMarkdown(x); }).join("\n---\n\n");
+  if(_slDownloadMD(md, "身心小记-全部-"+slToday()+".md")) toast("已导出 "+arr.length+" 条记录 📥");
 }
 
 function renderRecipes(){
@@ -39685,8 +39813,10 @@ function saveSelfLogToInspire(id){
   if(!text){ toast("这条没有写文字，没法存原话"); return; }
   if(entry.savedInspire){ toast("这条已经存过灵感啦"); return; }
   var insp = loadInspire();
-  if(insp.records.some(function(r){ return r.id==="sl_"+id; })){ toast("这条已经存过灵感啦"); return; }
-  var rec = { id:"sl_"+id, content:text, date:entry.date, time:"", status:"recorded",
+  var rid = "selflog_"+id;
+  /* 兼容历史数据：早期生成的是 "sl_"+id（如 sl_sl_2026-11-05 双前缀） */
+  if(insp.records.some(function(r){ return r.id===rid || r.id==="sl_"+id; })){ toast("这条已经存过灵感啦"); return; }
+  var rec = { id:rid, content:text, date:entry.date, time:"", status:"recorded",
     tags:["身心小记"], fromSelfLog:true,
     aiExtension:{source:"none", questions:[], directions:[], judgment:"", related:""} };
   insp.records.push(rec);
@@ -39695,7 +39825,7 @@ function saveSelfLogToInspire(id){
   saveInspire(insp);
   entry.savedInspire = true;
   saveSelfLog(data);
-  renderSelfLog();
+  _slRefreshAfterMutation(entry.date);
   toast("已存为灵感并标记入库，同步到云端后可在电脑端「拉取灵感」归档到 00-灵感库");
   kbPushToCloud();
 }
